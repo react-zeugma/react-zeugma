@@ -123,11 +123,17 @@ Releases are automated via Changesets + GitHub Actions:
 1. Changesets on `master` trigger a "Version Packages" PR
 2. Merging that PR automatically publishes to npm
 
-For a manual publish, use an [npm automation token](https://www.npmjs.com/settings/~your-username/tokens) (type **Automation**, not Publish):
+For a manual publish, create a token at [npm Access Tokens](https://www.npmjs.com/settings/yusufarsln98/tokens):
+
+- **Granular Access Token:** Permissions → **Read and write packages** → enable **Bypass two-factor authentication (2FA)**
+- Or **Classic token** → type **Automation** (if still offered)
+
+A token that only passes `npm whoami` but fails publish with `EOTP` is missing bypass-2FA / Automation.
 
 ```bash
 cp .env.example .env   # add NPM_TOKEN=
 npm run publish:npm
+# If prompted for OTP: add NPM_OTP=123456 to .env or run with your authenticator app
 ```
 
 Add the same token as the **NPM_TOKEN** repository secret for GitHub Actions.

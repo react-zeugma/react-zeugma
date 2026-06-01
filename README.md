@@ -119,24 +119,12 @@ export default function Dashboard() {
 
 ## Documentation
 
-📖 **[Interactive Docs & Examples →](https://yusufarsln98.github.io/react-zeugma/)**
+Run the interactive demo or Storybook locally:
 
-### Hosting the live demo
-
-You do **not** need a personal site at `https://yusufarsln98.github.io/`. That URL only exists if you create a repo literally named `yusufarsln98.github.io`.
-
-This project uses a **project site** (one repo → one subpath):
-
-**https://yusufarsln98.github.io/react-zeugma/**
-
-CI pushes the built demo to the `gh-pages` branch. GitHub will not serve it until Pages is turned on once:
-
-1. Open [Settings → Pages](https://github.com/yusufarsln98/react-zeugma/settings/pages)
-2. **Build and deployment → Source:** **Deploy from a branch**
-3. **Branch:** `gh-pages` / **`/ (root)`** → **Save**
-4. Wait 1–2 minutes, then open the URL above
-
-If the workflow is green but the site is 404, Pages is almost always still disabled or pointed at the wrong branch.
+```bash
+npm run demo        # Vite demo app
+npm run storybook   # component docs & examples
+```
 
 ---
 

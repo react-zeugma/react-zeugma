@@ -116,33 +116,21 @@ react-zeugma/
 
 ---
 
-## npm registry (Nexus)
-
-Local installs use the Nexus group proxy via `.npmrc` (`http://localhost:8081/repository/npm-all/`). Publishing always targets the public npm registry through `publishConfig` in `package.json`, so `npm publish` and CI releases are not sent to the Nexus group repository.
-
-Set `NPM_TOKEN` to an [npm automation token](https://www.npmjs.com/settings/~your-username/tokens) for releases:
-
-```bash
-cp .env.example .env   # edit .env and paste your token
-npm run publish:npm    # loads .env, publishes to registry.npmjs.org
-```
-
-GitHub Actions needs the same value in the repository secret **NPM_TOKEN** (Settings → Secrets and variables → Actions).
-
-`package-lock.json` uses `registry.npmjs.org` tarball URLs so CI on GitHub can install without reaching your local Nexus instance. After changing dependencies locally, run `npm install` through Nexus as usual; if the lockfile picks up `localhost` URLs again, normalize before pushing:
-
-```bash
-sed -i 's|http://localhost:8081/repository/npm-all/|https://registry.npmjs.org/|g' package-lock.json
-```
-
----
-
 ## Releasing (Maintainers Only)
 
 Releases are automated via Changesets + GitHub Actions:
 
 1. Changesets on `master` trigger a "Version Packages" PR
 2. Merging that PR automatically publishes to npm
+
+For a manual publish, use an [npm automation token](https://www.npmjs.com/settings/~your-username/tokens) (type **Automation**, not Publish):
+
+```bash
+cp .env.example .env   # add NPM_TOKEN=
+npm run publish:npm
+```
+
+Add the same token as the **NPM_TOKEN** repository secret for GitHub Actions.
 
 ---
 

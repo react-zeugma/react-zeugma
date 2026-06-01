@@ -23,7 +23,6 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
-          # GitHub runners cannot reach local Nexus; use the public registry in CI.
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies

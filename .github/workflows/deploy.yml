@@ -5,18 +5,17 @@ on:
     branches: [master]
   workflow_dispatch:
 
+# Pushes built demo to the gh-pages branch (no "GitHub Actions" Pages source required).
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
   group: pages
   cancel-in-progress: true
 
 jobs:
-  build:
-    name: Build Demo
+  deploy:
+    name: Build and deploy demo
     runs-on: ubuntu-latest
     env:
       HUSKY: 0
@@ -39,22 +38,9 @@ jobs:
           GITHUB_PAGES: true
         run: npm run build --workspace=demo
 
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Deploy to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: demo/dist
-
-  deploy:
-    name: Deploy to GitHub Pages
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./demo/dist
+          force_orphan: true

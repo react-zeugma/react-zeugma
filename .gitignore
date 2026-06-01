@@ -15,9 +15,10 @@ dist/
 .DS_Store
 Thumbs.db
 
-# env
+# env (keep .env.example committed)
 .env
 .env.*
+!.env.example
 
 # logs
 *.log

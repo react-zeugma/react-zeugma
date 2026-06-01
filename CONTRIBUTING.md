@@ -120,7 +120,14 @@ react-zeugma/
 
 Local installs use the Nexus group proxy via `.npmrc` (`http://localhost:8081/repository/npm-all/`). Publishing always targets the public npm registry through `publishConfig` in `package.json`, so `npm publish` and CI releases are not sent to the Nexus group repository.
 
-Set `NPM_TOKEN` to an [npm automation token](https://www.npmjs.com/settings/~your-username/tokens) for releases. GitHub Actions needs the same token in the `NPM_TOKEN` repository secret.
+Set `NPM_TOKEN` to an [npm automation token](https://www.npmjs.com/settings/~your-username/tokens) for releases:
+
+```bash
+cp .env.example .env   # edit .env and paste your token
+npm run publish:npm    # loads .env, publishes to registry.npmjs.org
+```
+
+GitHub Actions needs the same value in the repository secret **NPM_TOKEN** (Settings → Secrets and variables → Actions).
 
 `package-lock.json` uses `registry.npmjs.org` tarball URLs so CI on GitHub can install without reaching your local Nexus instance. After changing dependencies locally, run `npm install` through Nexus as usual; if the lockfile picks up `localhost` URLs again, normalize before pushing:
 

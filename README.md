@@ -30,7 +30,7 @@ Combines the tree-based, arbitrary splitting of [react-mosaic](https://github.co
 ## Installation
 
 ```bash
-npm install react-zeugma @dnd-kit/core @dnd-kit/utilities @dnd-kit/sortable
+npm install react-zeugma
 ```
 
 > **Peer dependencies:** React 18+ or 19+

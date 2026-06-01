@@ -1,29 +1,66 @@
 {
   "name": "react-zeugma",
   "version": "0.1.0",
-  "description": "Recursive drag-and-drop dashboard layout engine for React",
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
+  "description": "Recursive drag-and-drop dashboard layout engine for React — combining the tree-based splitting of react-mosaic with the declarative API of react-grid-layout.",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md"
+  ],
+  "author": "yusufarsln98",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yusufarsln98/react-zeugma.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yusufarsln98/react-zeugma/issues"
+  },
+  "homepage": "https://github.com/yusufarsln98/react-zeugma#readme",
+  "keywords": [
+    "react",
+    "drag-and-drop",
+    "dashboard",
+    "grid",
+    "mosaic",
+    "zeugma",
+    "dnd-kit",
+    "layout",
+    "split-pane",
+    "recursive",
+    "tree",
+    "panel",
+    "resizable",
+    "widget"
   ],
   "scripts": {
-    "build": "tsup && tsc --emitDeclarationOnly --declaration --noEmit false --outDir dist --rootDir src",
+    "build": "tsup",
     "dev": "tsup --watch",
     "lint": "eslint src --ext ts,tsx",
-    "demo": "npm run dev --workspace=demo"
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\" \"docs/**/*.{ts,tsx,mdx}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx}\" \"docs/**/*.{ts,tsx,mdx}\"",
+    "demo": "npm run dev --workspace=demo",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build -o storybook-static",
+    "prepare": "husky",
+    "release": "changeset publish"
   },
   "peerDependencies": {
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
   },
   "workspaces": [
     "demo"
@@ -34,14 +71,27 @@
     "@dnd-kit/utilities": "^3.2.2"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.31.0",
+    "@storybook/addon-docs": "^10.4.1",
+    "@storybook/react-vite": "^10.4.1",
     "@types/node": "^25.9.1",
     "@types/react": "^19.2.15",
     "@types/react-dom": "^19.2.3",
     "eslint": "^10.4.1",
+    "eslint-plugin-storybook": "^10.4.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "prettier": "^3.8.3",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
+    "storybook": "^10.4.1",
     "tsup": "^8.5.1",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.60.0"
+  },
+  "eslintConfig": {
+    "extends": [
+      "plugin:storybook/recommended"
+    ]
   }
 }

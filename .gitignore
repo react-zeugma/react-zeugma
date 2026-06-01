@@ -28,3 +28,7 @@ npm-debug.log*
 
 # demo build
 demo/dist/
+
+# storybook
+storybook-static/
+*storybook.log

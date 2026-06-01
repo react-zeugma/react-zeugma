@@ -121,7 +121,7 @@ react-zeugma/
 CI only runs lint, typecheck, and build. Releases are done locally.
 
 ```bash
-npx changeset              # optional: note the change (patch/minor/major)
+npx changeset                # optional: note the change (patch/minor/major)
 npm run version              # bumps package.json + CHANGELOG.md
 cp .env.example .env         # NPM_TOKEN= npm token with bypass 2FA
 npm run release              # build + publish to npm

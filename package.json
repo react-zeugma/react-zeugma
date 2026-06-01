@@ -60,8 +60,8 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build -o storybook-static",
     "prepare": "husky",
-    "release": "changeset publish",
-    "publish:npm": "sh -c 'set -a && [ -f .env ] && . ./.env; set +a; if [ -z \"${NPM_TOKEN:-}\" ]; then echo \"Error: NPM_TOKEN is not set. Add it to .env (see .env.example).\"; exit 1; fi; OTP_ARG=\"\"; [ -n \"${NPM_OTP:-}\" ] && OTP_ARG=\"--otp=${NPM_OTP}\"; npm publish --registry https://registry.npmjs.org/ --auth-type=legacy $OTP_ARG'"
+    "version": "changeset version",
+    "release": "npm run build && changeset publish"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",

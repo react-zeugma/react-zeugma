@@ -1,6 +1,6 @@
 {
   "name": "react-zeugma",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Recursive drag-and-drop dashboard layout engine for React — combining the tree-based splitting of react-mosaic with the declarative API of react-grid-layout.",
   "type": "module",
   "sideEffects": false,
@@ -28,7 +28,11 @@
   "bugs": {
     "url": "https://github.com/yusufarsln98/react-zeugma/issues"
   },
-  "homepage": "https://github.com/yusufarsln98/react-zeugma#readme",
+  "homepage": "https://yusufarsln98.github.io/react-zeugma/",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "keywords": [
     "react",
     "drag-and-drop",
@@ -63,6 +67,7 @@
     "react-dom": "^18.0.0 || ^19.0.0"
   },
   "workspaces": [
+    ".",
     "demo"
   ],
   "dependencies": {

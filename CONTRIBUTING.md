@@ -81,7 +81,7 @@ git push origin feat/my-feature
 
 ### 5. Open a Pull Request
 
-- Open a PR against the `main` branch
+- Open a PR against the `master` branch
 - CI will automatically run lint, type-check, and build checks
 - Fill out the PR template and link any relevant issues
 
@@ -133,4 +133,4 @@ npm run release              # build + publish to npm
 
 Open an [issue](https://github.com/yusufarsln98/react-zeugma/issues) or start a [discussion](https://github.com/yusufarsln98/react-zeugma/discussions).
 
-Thank you for helping make `react-zeugma` better! 🎉
+Thank you for helping make `react-zeugma` better.

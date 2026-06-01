@@ -10,6 +10,8 @@ jobs:
   ci:
     name: Lint, Type-check & Build
     runs-on: ubuntu-latest
+    env:
+      HUSKY: 0
     strategy:
       matrix:
         node-version: [22]

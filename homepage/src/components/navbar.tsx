@@ -1,11 +1,11 @@
 import { Sun, Moon } from 'lucide-react';
-import { Link, usePath } from '../router';
+import { Link, useLocation } from '@tanstack/react-router';
 import { BrandIcon } from './brand-icon';
 
 const BASE_PATH = import.meta.env.BASE_URL;
 const LOGO_URL = `${BASE_PATH}logo.png`;
 
-const NAV_ITEMS: { label: string; to: string }[] = [
+const NAV_ITEMS: { label: string; to: '/' | '/demo' | '/docs' }[] = [
   { label: 'Home', to: '/' },
   { label: 'Demo', to: '/demo' },
   { label: 'Docs', to: '/docs' },
@@ -17,7 +17,7 @@ interface NavbarProps {
 }
 
 export function Navbar({ theme, onToggleTheme }: NavbarProps) {
-  const currentPath = usePath();
+  const location = useLocation();
 
   return (
     <nav className="sticky top-0 z-50 bg-bg-app/80 backdrop-blur-md border-b border-border-primary px-6 flex items-center justify-between h-14 transition-colors duration-200 select-none">
@@ -31,7 +31,7 @@ export function Navbar({ theme, onToggleTheme }: NavbarProps) {
       <div className="flex items-center gap-4 sm:gap-6">
         <div className="flex items-center gap-4 sm:gap-6">
           {NAV_ITEMS.map((item) => {
-            const isActive = currentPath === item.to;
+            const isActive = location.pathname === item.to;
             return (
               <Link
                 key={item.to}

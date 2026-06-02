@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Boxes, MousePointer2, Focus, Layout, ArrowRight, Copy } from 'lucide-react';
-import { useNavigate } from '../router';
+import { useNavigate } from '@tanstack/react-router';
 import { CodeBlock } from '../components/code-block';
 import { Footer } from '../components/footer';
 
@@ -153,7 +153,7 @@ export function Home() {
 
         <div className="flex flex-col sm:flex-row items-center gap-4 relative">
           <button
-            onClick={() => navigate('/demo')}
+            onClick={() => navigate({ to: '/demo' })}
             className="w-full sm:w-auto px-8 py-3.5 bg-text-primary hover:bg-text-primary/90 text-bg-app rounded-lg font-bold flex items-center justify-center gap-2 transition-transform hover:scale-105 cursor-pointer"
           >
             Open Live Demo <ArrowRight className="w-4 h-4" />

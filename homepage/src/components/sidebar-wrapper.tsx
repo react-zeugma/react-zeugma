@@ -143,7 +143,7 @@ export function SidebarWrapper({ children, autoSave, onToggleAutoSave }: Sidebar
                   onClick={handleAddRandomWidget}
                   className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold border border-indigo-700 hover:border-indigo-600 transition-all cursor-pointer shadow-sm hover:shadow"
                 >
-                  <Plus className="w-3.5 h-3.5" /> Add Random Widget
+                  <Plus className="w-3.5 h-3.5" /> Add Widget
                 </button>
                 <button
                   onClick={handleReset}

@@ -56,7 +56,7 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier --write \"src/**/*.{ts,tsx}\" \"docs/**/*.{ts,tsx,mdx}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx}\" \"docs/**/*.{ts,tsx,mdx}\"",
-    "demo": "npm run dev --workspace=demo",
+    "demo": "npm run dev --workspace=homepage",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build -o storybook-static",
     "prepare": "husky",
@@ -69,7 +69,7 @@
   },
   "workspaces": [
     ".",
-    "demo"
+    "homepage"
   ],
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

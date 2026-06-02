@@ -1,13 +1,15 @@
-name: CI
+name: Deploy Homepage
 
 on:
   push:
     branches: [master]
-  pull_request:
-    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
-  ci:
+  deploy:
     runs-on: ubuntu-latest
     env:
       HUSKY: 0
@@ -18,8 +20,11 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run lint
-      - run: npm run typecheck
       - run: npm run build
       - name: Build Homepage
         run: npm run build --workspace=homepage -- --base=/react-zeugma/
+      - name: Deploy Homepage to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./homepage/dist

@@ -59,7 +59,7 @@
     "demo": "npm run dev --workspace=homepage",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build -o storybook-static",
-    "prepare": "husky",
+    "prepare": "husky || true",
     "version": "changeset version",
     "release": "npm run build && changeset publish"
   },

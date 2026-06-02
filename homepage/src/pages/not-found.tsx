@@ -1,9 +1,10 @@
 import { ArrowLeft } from 'lucide-react';
-import { Link, usePath } from '../router';
+import { Link, useLocation } from '@tanstack/react-router';
 import { Footer } from '../components/footer';
 
 export function NotFound() {
-  const path = usePath();
+  const location = useLocation();
+  const path = location.pathname;
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-3.5rem)] bg-bg-app transition-colors duration-200">

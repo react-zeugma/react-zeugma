@@ -21,9 +21,16 @@ interface RouterContextValue {
 
 const RouterContext = createContext<RouterContextValue | null>(null);
 
+const BASE_PATH = import.meta.env.BASE_URL;
+
 function getCurrentPath(): string {
   if (typeof window === 'undefined') return '/';
-  return window.location.pathname || '/';
+  const pathname = window.location.pathname || '/';
+  // Strip base path from pathname to get relative route
+  if (pathname.startsWith(BASE_PATH)) {
+    return '/' + pathname.slice(BASE_PATH.length).replace(/^\/+/, '');
+  }
+  return pathname;
 }
 
 export function Router({ children }: { children: ReactNode }) {

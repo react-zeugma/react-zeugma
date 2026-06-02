@@ -206,7 +206,11 @@ export default function App() {
       <header className="app-header">
         <div className="app-header-left">
           <div className="app-title-group" onClick={() => setTab('home')}>
-            <img src="/logo.png" alt="react-zeugma" className="app-logo" />
+            <img
+              src={`${import.meta.env.BASE_URL}logo.png`}
+              alt="react-zeugma"
+              className="app-logo"
+            />
             <div>
               <h1>react-zeugma</h1>
               <p className="app-subtitle-tag">Recursive Mosaic Layouts</p>

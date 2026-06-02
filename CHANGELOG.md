@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 0.1.3
+
+### Patch Changes
+
+- Recursively add new panes to the tree instead of add the half side.
+
 ## 0.1.2
 
 ### Patch Changes

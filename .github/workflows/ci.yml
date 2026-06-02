@@ -9,6 +9,8 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     env:
       HUSKY: 0
     steps:
@@ -21,3 +23,11 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run build
+      - name: Build Demo
+        run: npm run build --workspace=demo -- --base=/react-zeugma/
+      - name: Deploy Demo to GitHub Pages
+        if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./demo/dist

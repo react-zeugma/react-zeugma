@@ -8,7 +8,11 @@ interface PaneTreeProps {
   resizerSize?: number;
 }
 
-function updateSplitPercentage(tree: TreeNode | null, target: SplitNode, newPercentage: number): TreeNode | null {
+function updateSplitPercentage(
+  tree: TreeNode | null,
+  target: SplitNode,
+  newPercentage: number,
+): TreeNode | null {
   if (tree === null) return null;
   if (tree === target) {
     return { ...tree, splitPercentage: newPercentage } as SplitNode;
@@ -56,6 +60,8 @@ export const PaneTree: React.FC<PaneTreeProps> = ({ tree, resizerSize = 4 }) => 
     const container = containerRef.current;
     if (!container) return;
 
+    document.body.classList.add('zeugma-resizing');
+
     const rect = container.getBoundingClientRect();
     const startX = e.clientX;
     const startY = e.clientY;
@@ -71,6 +77,7 @@ export const PaneTree: React.FC<PaneTreeProps> = ({ tree, resizerSize = 4 }) => 
     };
 
     const handlePointerUp = () => {
+      document.body.classList.remove('zeugma-resizing');
       document.removeEventListener('pointermove', handlePointerMove);
       document.removeEventListener('pointerup', handlePointerUp);
     };
@@ -82,7 +89,13 @@ export const PaneTree: React.FC<PaneTreeProps> = ({ tree, resizerSize = 4 }) => 
   return (
     <div
       ref={containerRef}
-      style={{ display: 'flex', flexDirection: isRow ? 'row' : 'column', width: '100%', height: '100%', overflow: 'hidden' }}
+      style={{
+        display: 'flex',
+        flexDirection: isRow ? 'row' : 'column',
+        width: '100%',
+        height: '100%',
+        overflow: 'hidden',
+      }}
     >
       <div style={{ flex: `${splitPercentage} 1 0%`, overflow: 'hidden' }}>
         <PaneTree tree={first} resizerSize={resizerSize} />

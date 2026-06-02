@@ -21,10 +21,10 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
-      - name: Build Demo
-        run: npm run build --workspace=demo -- --base=/react-zeugma/
-      - name: Deploy Demo to GitHub Pages
+      - name: Build Homepage
+        run: npm run build --workspace=homepage -- --base=/react-zeugma/
+      - name: Deploy Homepage to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./demo/dist
+          publish_dir: ./homepage/dist

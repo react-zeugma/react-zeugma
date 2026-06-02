@@ -14,7 +14,8 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "paths": {
-      "react-zeugma": ["../src"]
+      "react-zeugma": ["../src"],
+      "@/*": ["./src/*"]
     },
     "noUncheckedSideEffectImports": false,
 

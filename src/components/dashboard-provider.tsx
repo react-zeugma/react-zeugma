@@ -58,7 +58,7 @@ export function splitPane(
   targetId: string,
   direction: SplitDirection,
   splitType: 'left' | 'right' | 'top' | 'bottom',
-  paneToAdd: string
+  paneToAdd: string,
 ): TreeNode | null {
   if (tree === null) return { type: 'pane', paneId: paneToAdd };
   if (tree.type === 'pane') {
@@ -98,12 +98,39 @@ export function swapPanes(tree: TreeNode | null, idA: string, idB: string): Tree
   };
 }
 
+// Tree Helper: Add a pane by recursively splitting the rightmost/bottommost pane in the tree
+export function addPane(tree: TreeNode | null, paneToAdd: string): TreeNode {
+  if (tree === null) {
+    return { type: 'pane', paneId: paneToAdd };
+  }
+
+  function insert(node: TreeNode, parentDirection: SplitDirection | null): TreeNode {
+    if (node.type === 'pane') {
+      const direction: SplitDirection = parentDirection === 'row' ? 'column' : 'row';
+      return {
+        type: 'split',
+        direction,
+        splitPercentage: 50,
+        first: node,
+        second: { type: 'pane', paneId: paneToAdd },
+      };
+    }
+
+    return {
+      ...node,
+      second: insert(node.second, node.direction),
+    };
+  }
+
+  return insert(tree, null);
+}
+
 /** Cursor-following overlay rendered via portal */
-const CursorOverlay: React.FC<{ activeId: string; render: (id: string) => ReactNode; className?: string }> = ({
-  activeId,
-  render,
-  className,
-}) => {
+const CursorOverlay: React.FC<{
+  activeId: string;
+  render: (id: string) => ReactNode;
+  className?: string;
+}> = ({ activeId, render, className }) => {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -161,7 +188,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 8 },
-    })
+    }),
   );
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -193,7 +220,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
     const [, dropZone, targetId] = match;
     if (draggingId === targetId) return;
 
-    const direction: SplitDirection = (dropZone === 'left' || dropZone === 'right') ? 'row' : 'column';
+    const direction: SplitDirection =
+      dropZone === 'left' || dropZone === 'right' ? 'row' : 'column';
     const treeWithoutDragging = removePane(layout, draggingId);
 
     const newLayout = splitPane(
@@ -201,7 +229,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
       targetId,
       direction,
       dropZone as 'left' | 'right' | 'top' | 'bottom',
-      draggingId
+      draggingId,
     );
     onChange(newLayout);
   };
@@ -219,11 +247,20 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
         onFullscreenChange,
       }}
     >
-      <DndContext sensors={sensors} collisionDetection={pointerWithin} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={pointerWithin}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      >
         {children}
       </DndContext>
       {activeId && renderDragOverlay && (
-        <CursorOverlay activeId={activeId} render={renderDragOverlay} className={classNames.dragOverlay} />
+        <CursorOverlay
+          activeId={activeId}
+          render={renderDragOverlay}
+          className={classNames.dragOverlay}
+        />
       )}
     </DashboardContext.Provider>
   );

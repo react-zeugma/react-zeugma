@@ -1,5 +1,14 @@
 import { useState } from 'react';
-import { DashboardProvider, PaneTree, Pane, DragHandle, TreeNode, ZeugmaClassNames, removePane } from 'react-zeugma';
+import {
+  DashboardProvider,
+  PaneTree,
+  Pane,
+  DragHandle,
+  TreeNode,
+  ZeugmaClassNames,
+  removePane,
+  addPane,
+} from 'react-zeugma';
 
 const initialLayout: TreeNode = {
   type: 'split',
@@ -43,7 +52,9 @@ function DemoPane({ id, label }: { id: string; label: string }) {
               <button className="demo-btn" onClick={toggleFullscreen}>
                 {isFullscreen ? 'Exit' : 'Full'}
               </button>
-              <button className="demo-btn demo-btn-close" onClick={remove}>×</button>
+              <button className="demo-btn demo-btn-close" onClick={remove}>
+                ×
+              </button>
             </div>
           </DragHandle>
           <div className="demo-pane-body">
@@ -76,7 +87,11 @@ export default function App() {
   const handleLayoutChange = (newLayout: TreeNode | null) => {
     setLayout(newLayout);
     if (persist) {
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(newLayout)); } catch { /* ignore */ }
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(newLayout));
+      } catch {
+        /* ignore */
+      }
     }
   };
 
@@ -85,7 +100,11 @@ export default function App() {
     setPersist(next);
     localStorage.setItem(PERSIST_KEY, String(next));
     if (next) {
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(layout)); } catch { /* ignore */ }
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(layout));
+      } catch {
+        /* ignore */
+      }
     }
   };
 
@@ -102,21 +121,10 @@ export default function App() {
     setFullscreenId(null);
   };
 
-  const addPane = () => {
+  const handleAdd = () => {
     const id = `pane-${Date.now().toString().slice(-4)}`;
-    const newNode: TreeNode = { type: 'pane', paneId: id };
-
-    if (!layout) {
-      handleLayoutChange(newNode);
-    } else {
-      handleLayoutChange({
-        type: 'split',
-        direction: 'row',
-        splitPercentage: 50,
-        first: layout,
-        second: newNode,
-      });
-    }
+    const newLayout = addPane(layout, id);
+    handleLayoutChange(newLayout);
   };
 
   const handleRemove = (paneId: string) => {
@@ -140,9 +148,17 @@ export default function App() {
             <input type="checkbox" checked={persist} onChange={togglePersist} />
             Persist
           </label>
-          {persist && <button className="btn" onClick={clearStorage}>Clear Storage</button>}
-          <button className="btn" onClick={resetLayout}>Reset</button>
-          <button className="btn btn-primary" onClick={addPane}>Add Pane</button>
+          {persist && (
+            <button className="btn" onClick={clearStorage}>
+              Clear Storage
+            </button>
+          )}
+          <button className="btn" onClick={resetLayout}>
+            Reset
+          </button>
+          <button className="btn btn-primary" onClick={handleAdd}>
+            Add Pane
+          </button>
         </div>
       </header>
 

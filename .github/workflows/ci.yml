@@ -1,10 +1,16 @@
-name: CI
+name: CI and Deploy
 
 on:
-  push:
-    branches: [master]
+  # 1. Triggers when a PR is opened or updated (Runs CI only)
   pull_request:
     branches: [master]
+  # 2. Triggers ONLY when a PR is successfully merged (Runs CI + Deploy)
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   ci:
@@ -23,3 +29,30 @@ jobs:
       - run: npm run build
       - name: Build Homepage
         run: npm run build --workspace=homepage -- --base=/react-zeugma/
+
+      # Save the built homepage for the deploy job
+      - name: Upload Homepage Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: homepage-dist
+          path: ./homepage/dist
+          retention-days: 1
+
+  deploy:
+    # Requires the 'ci' job to pass first
+    needs: ci
+    # Crucial step: Only run this job if the event was a push (aka a PR merge) to master
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Homepage Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: homepage-dist
+          path: ./homepage/dist
+
+      - name: Deploy Homepage to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./homepage/dist

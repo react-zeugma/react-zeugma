@@ -1,6 +1,9 @@
 import { HelpCircle, FileText, Heart } from 'lucide-react';
 import { BrandIcon } from './brand-icon';
 
+const BASE_PATH = import.meta.env.BASE_URL;
+const LOGO_URL = `${BASE_PATH}logo.png`;
+
 export function Footer() {
   return (
     <footer className="bg-bg-sidebar border-t border-border-primary py-12 px-6 mt-auto transition-colors duration-200">
@@ -8,7 +11,7 @@ export function Footer() {
         {/* Brand Info */}
         <div className="md:col-span-2 flex items-start gap-5">
           <img
-            src="/logo.png"
+            src={LOGO_URL}
             alt="react-zeugma logo"
             className="w-20 h-20 md:w-24 md:h-24 object-contain shrink-0"
           />

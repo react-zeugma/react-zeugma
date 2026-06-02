@@ -2,6 +2,9 @@ import { Sun, Moon } from 'lucide-react';
 import { Link, usePath } from '../router';
 import { BrandIcon } from './brand-icon';
 
+const BASE_PATH = import.meta.env.BASE_URL;
+const LOGO_URL = `${BASE_PATH}logo.png`;
+
 const NAV_ITEMS: { label: string; to: string }[] = [
   { label: 'Home', to: '/' },
   { label: 'Demo', to: '/demo' },
@@ -19,7 +22,7 @@ export function Navbar({ theme, onToggleTheme }: NavbarProps) {
   return (
     <nav className="sticky top-0 z-50 bg-bg-app/80 backdrop-blur-md border-b border-border-primary px-6 flex items-center justify-between h-14 transition-colors duration-200 select-none">
       <Link to="/" className="flex items-center gap-2 group">
-        <img src="/logo.png" alt="react-zeugma logo" className="w-6 h-6 object-contain" />
+        <img src={LOGO_URL} alt="react-zeugma logo" className="w-6 h-6 object-contain" />
         <span className="font-extrabold text-lg tracking-tight text-text-primary">
           react-zeugma
         </span>

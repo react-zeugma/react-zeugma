@@ -5,6 +5,7 @@ import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: '/react-zeugma/',
   plugins: [react(), tailwindcss()],
   server: {
     host: '127.0.0.1',

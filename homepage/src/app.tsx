@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Route, Router, Routes } from './router';
+import { Outlet } from '@tanstack/react-router';
 import { Navbar } from './components/navbar';
-import { Home } from './pages/home';
-import { Demo } from './pages/demo';
-import { Docs } from './pages/docs';
-import { NotFound } from './pages/not-found';
 
 export default function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
@@ -59,18 +55,11 @@ export default function App() {
   };
 
   return (
-    <Router>
-      <div className="min-h-screen flex flex-col bg-bg-app text-text-primary transition-colors duration-200">
-        <Navbar theme={theme} onToggleTheme={toggleTheme} />
-        <main className="flex-1">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/demo" element={<Demo />} />
-            <Route path="/docs" element={<Docs />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </main>
-      </div>
-    </Router>
+    <div className="min-h-screen flex flex-col bg-bg-app text-text-primary transition-colors duration-200">
+      <Navbar theme={theme} onToggleTheme={toggleTheme} />
+      <main className="flex-1">
+        <Outlet />
+      </main>
+    </div>
   );
 }

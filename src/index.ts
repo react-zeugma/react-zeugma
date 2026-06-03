@@ -1,5 +1,9 @@
 export { DashboardProvider } from './entities/dashboard'
-export type { ZeugmaClassNames } from './entities/dashboard'
+export type {
+  ZeugmaClassNames,
+  ResizerRenderProps,
+  DashboardContextValue,
+} from './entities/dashboard'
 export { useDashboard } from './entities/dashboard'
 export { useResizer } from './features/resize-pane'
 export { PaneTree } from './widgets/pane-tree'

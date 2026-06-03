@@ -51,6 +51,7 @@ Import the core components and configure the layout state inside your React appl
 ```tsx
 import { useState } from 'react'
 import { DashboardProvider, PaneTree, Pane, DragHandle, TreeNode } from 'react-zeugma'
+import './Dashboard.css' // Import your custom styles here
 
 const initialLayout: TreeNode = {
   type: 'split',
@@ -70,16 +71,16 @@ function MyPane({ id }: { id: string }) {
   return (
     <Pane id={id}>
       {({ isDragging, remove }) => (
-        <div className={`h-full flex flex-col bg-[#18181b] ${isDragging ? 'opacity-30' : ''}`}>
+        <div className={`zeugma-pane-container ${isDragging ? 'is-dragging' : ''}`}>
           <DragHandle>
-            <div className="px-3 py-2 bg-[#27272a] border-b border-[#3f3f46] flex items-center justify-between cursor-grab">
-              <span className="text-xs uppercase text-zinc-300 font-bold">{id}</span>
-              <button onClick={remove} className="text-zinc-500 hover:text-rose-400 text-xs">
+            <div className="zeugma-pane-header">
+              <span className="zeugma-pane-title">{id}</span>
+              <button onClick={remove} className="zeugma-pane-close">
                 ×
               </button>
             </div>
           </DragHandle>
-          <div className="flex-1 p-4 text-sm text-zinc-400">Content for {id}</div>
+          <div className="zeugma-pane-content">Content for {id}</div>
         </div>
       )}
     </Pane>
@@ -91,7 +92,7 @@ export default function Dashboard() {
 
   return (
     <DashboardProvider layout={layout} onChange={setLayout} renderPane={(id) => <MyPane id={id} />}>
-      <div className="w-screen h-screen">
+      <div className="zeugma-dashboard-wrapper">
         <PaneTree />
       </div>
     </DashboardProvider>
@@ -191,12 +192,11 @@ Use custom CSS or styling rules to style resizers, dragging states, drop preview
   renderPane={renderPane}
   classNames={{
     // resizer handles
-    resizer:
-      'bg-transparent hover:bg-indigo-500/50 active:bg-indigo-500 transition-colors duration-150',
+    resizer: 'zeugma-resizer',
     // split previews
-    dropPreview: 'bg-indigo-500/10 border-2 border-dashed border-indigo-500/50 backdrop-blur-xs',
+    dropPreview: 'zeugma-drop-preview',
     // swap previews
-    swapPreview: 'bg-amber-500/10 border-2 border-dashed border-amber-500/50 backdrop-blur-xs',
+    swapPreview: 'zeugma-swap-preview',
   }}
 >
   <PaneTree />
@@ -255,7 +255,7 @@ A comprehensive developer skill configuration is published alongside the docs fo
 
 ```bash
 # Clone & install
-git clone https://github.com/yusufarsln98/react-zeugma.git
+git clone [https://github.com/yusufarsln98/react-zeugma.git](https://github.com/yusufarsln98/react-zeugma.git)
 cd react-zeugma
 npm install
 

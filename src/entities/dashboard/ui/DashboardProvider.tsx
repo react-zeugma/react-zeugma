@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, ReactNode, useMemo } from 'react'
+import React, { useState, useEffect, useRef, ReactNode, useMemo, useCallback } from 'react'
 import {
   DndContext,
   useSensor,
@@ -8,10 +8,16 @@ import {
   DragEndEvent,
   pointerWithin,
 } from '@dnd-kit/core'
-import { TreeNode, SplitDirection } from '../../../shared/model'
-import { removePane, splitPane, swapPanes } from '../../../shared/lib/tree'
+import { TreeNode, SplitDirection, SplitNode } from '../../../shared/model'
+import {
+  removePane,
+  splitPane,
+  swapPanes,
+  addPane,
+  updateSplitPercentage,
+} from '../../../shared/lib/tree'
 import { DEFAULT_DRAG_ACTIVATION_DISTANCE, DEFAULT_SNAP_THRESHOLD } from '../../../shared/config'
-import { DashboardContext, ZeugmaClassNames } from '../model/context'
+import { DashboardContext, ZeugmaClassNames, ResizerRenderProps } from '../model/context'
 
 /** Cursor-following overlay rendered via portal */
 const CursorOverlay: React.FC<{
@@ -59,6 +65,22 @@ interface DashboardProviderProps {
   onRemove?: (paneId: string) => void
   dragActivationDistance?: number
   snapThreshold?: number
+  onDragStart?: (activeId: string) => void
+  onDragEnd?: (
+    activeId: string,
+    overId: string | null,
+    dropAction: {
+      type: 'split' | 'swap'
+      direction?: SplitDirection
+      position?: 'top' | 'bottom' | 'left' | 'right' | 'center'
+    } | null,
+  ) => void
+  onResizeStart?: (currentNode: SplitNode) => void
+  onResize?: (currentNode: SplitNode, percentage: number) => void
+  onResizeEnd?: (currentNode: SplitNode, percentage: number) => void
+  renderResizer?: (props: ResizerRenderProps) => ReactNode
+  minSplitPercentage?: number
+  maxSplitPercentage?: number
   children: ReactNode
 }
 
@@ -73,6 +95,14 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
   onRemove,
   dragActivationDistance = DEFAULT_DRAG_ACTIVATION_DISTANCE,
   snapThreshold = DEFAULT_SNAP_THRESHOLD,
+  onDragStart,
+  onDragEnd,
+  onResizeStart,
+  onResize,
+  onResizeEnd,
+  renderResizer,
+  minSplitPercentage = 5,
+  maxSplitPercentage = 95,
   children,
 }) => {
   const [activeId, setActiveId] = useState<string | null>(null)
@@ -84,15 +114,25 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
   )
 
   const handleDragStart = (event: DragStartEvent) => {
-    setActiveId(event.active.id.toString())
+    const draggingId = event.active.id.toString()
+    setActiveId(draggingId)
+    if (onDragStart) {
+      onDragStart(draggingId)
+    }
   }
 
   const handleDragEnd = (event: DragEndEvent) => {
     setActiveId(null)
     const { active, over } = event
-    if (!over) return
-
     const draggingId = active.id.toString()
+
+    if (!over) {
+      if (onDragEnd) {
+        onDragEnd(draggingId, null, null)
+      }
+      return
+    }
+
     const overIdStr = over.id.toString()
 
     // Check for center (swap) drop
@@ -102,15 +142,28 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
       if (draggingId !== targetId) {
         onChange(swapPanes(layout, draggingId, targetId))
       }
+      if (onDragEnd) {
+        onDragEnd(draggingId, targetId, { type: 'swap', position: 'center' })
+      }
       return
     }
 
     // Check for edge (split) drop
     const match = overIdStr.match(/^drop-(left|right|top|bottom)-(.+)$/)
-    if (!match) return
+    if (!match) {
+      if (onDragEnd) {
+        onDragEnd(draggingId, null, null)
+      }
+      return
+    }
 
     const [, dropZone, targetId] = match
-    if (draggingId === targetId) return
+    if (draggingId === targetId) {
+      if (onDragEnd) {
+        onDragEnd(draggingId, null, null)
+      }
+      return
+    }
 
     const direction: SplitDirection = dropZone === 'left' || dropZone === 'right' ? 'row' : 'column'
     const treeWithoutDragging = removePane(layout, draggingId)
@@ -123,7 +176,59 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
       draggingId,
     )
     onChange(newLayout)
+    if (onDragEnd) {
+      onDragEnd(draggingId, targetId, {
+        type: 'split',
+        direction,
+        position: dropZone as 'left' | 'right' | 'top' | 'bottom',
+      })
+    }
   }
+
+  const handleRemovePane = useCallback(
+    (paneId: string) => {
+      const newLayout = removePane(layout, paneId)
+      onChange(newLayout)
+    },
+    [layout, onChange],
+  )
+
+  const handleAddPane = useCallback(
+    (paneId: string) => {
+      const newLayout = addPane(layout, paneId)
+      onChange(newLayout)
+    },
+    [layout, onChange],
+  )
+
+  const handleSwapPanes = useCallback(
+    (paneIdA: string, paneIdB: string) => {
+      const newLayout = swapPanes(layout, paneIdA, paneIdB)
+      onChange(newLayout)
+    },
+    [layout, onChange],
+  )
+
+  const handleSplitPane = useCallback(
+    (
+      targetId: string,
+      direction: SplitDirection,
+      splitType: 'left' | 'right' | 'top' | 'bottom',
+      paneToAdd: string,
+    ) => {
+      const newLayout = splitPane(layout, targetId, direction, splitType, paneToAdd)
+      onChange(newLayout)
+    },
+    [layout, onChange],
+  )
+
+  const handleUpdateSplitPercentage = useCallback(
+    (currentNode: SplitNode, percentage: number) => {
+      const newLayout = updateSplitPercentage(layout, currentNode, percentage)
+      onChange(newLayout)
+    },
+    [layout, onChange],
+  )
 
   // Best practice: Memoize context value to prevent unnecessary re-renders of context consumers.
   const contextValue = useMemo(
@@ -137,6 +242,17 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
       onRemove,
       onFullscreenChange,
       snapThreshold,
+      onResizeStart,
+      onResize,
+      onResizeEnd,
+      renderResizer,
+      minSplitPercentage,
+      maxSplitPercentage,
+      removePane: handleRemovePane,
+      addPane: handleAddPane,
+      swapPanes: handleSwapPanes,
+      splitPane: handleSplitPane,
+      updateSplitPercentage: handleUpdateSplitPercentage,
     }),
     [
       layout,
@@ -148,6 +264,17 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
       onRemove,
       onFullscreenChange,
       snapThreshold,
+      onResizeStart,
+      onResize,
+      onResizeEnd,
+      renderResizer,
+      minSplitPercentage,
+      maxSplitPercentage,
+      handleRemovePane,
+      handleAddPane,
+      handleSwapPanes,
+      handleSplitPane,
+      handleUpdateSplitPercentage,
     ],
   )
 

@@ -1,5 +1,5 @@
-import React, { useRef } from 'react'
-import { useDashboard } from '../../../entities/dashboard'
+import React, { useRef, useState } from 'react'
+import { useDashboard, ResizerRenderProps } from '../../../entities/dashboard'
 import { useResizer } from '../../../features/resize-pane'
 import { TreeNode, SplitNode } from '../../../shared/model'
 
@@ -9,16 +9,27 @@ export interface PaneTreeProps {
   resizerSize?: number
   /** Threshold in pixels to snap to adjacent resizer edges (default 8) */
   snapThreshold?: number
+  /** Custom resizer renderer to override context-level renderResizer */
+  renderResizer?: (props: ResizerRenderProps) => React.ReactNode
 }
 
 interface PaneSplitProps {
   currentNode: SplitNode
   resizerSize: number
   snapThreshold?: number
+  renderResizer?: (props: ResizerRenderProps) => React.ReactNode
 }
 
-const PaneSplit: React.FC<PaneSplitProps> = ({ currentNode, resizerSize, snapThreshold }) => {
-  const { layout, onLayoutChange, classNames } = useDashboard()
+const PaneSplit: React.FC<PaneSplitProps> = ({
+  currentNode,
+  resizerSize,
+  snapThreshold,
+  renderResizer: propRenderResizer,
+}) => {
+  const { layout, onLayoutChange, classNames, renderResizer: contextRenderResizer } = useDashboard()
+  const [isResizing, setIsResizing] = useState(false)
+
+  const renderResizer = propRenderResizer || contextRenderResizer
 
   const containerRef = useRef<HTMLDivElement>(null)
   const { direction, first, second, splitPercentage } = currentNode
@@ -34,6 +45,8 @@ const PaneSplit: React.FC<PaneSplitProps> = ({ currentNode, resizerSize, snapThr
     layout,
     currentNode,
     onLayoutChange,
+    onResizeStart: () => setIsResizing(true),
+    onResizeEnd: () => setIsResizing(false),
   })
 
   return (
@@ -48,29 +61,49 @@ const PaneSplit: React.FC<PaneSplitProps> = ({ currentNode, resizerSize, snapThr
       }}
     >
       <div style={{ flex: `${splitPercentage} 1 0%`, overflow: 'hidden' }}>
-        <PaneTree tree={first} resizerSize={resizerSize} snapThreshold={snapThreshold} />
+        <PaneTree
+          tree={first}
+          resizerSize={resizerSize}
+          snapThreshold={snapThreshold}
+          renderResizer={propRenderResizer}
+        />
       </div>
-      <div
-        className={classNames.resizer}
-        data-direction={direction}
-        style={{
-          width: isRow ? `${resizerSize}px` : '100%',
-          height: isRow ? '100%' : `${resizerSize}px`,
-          cursor: isRow ? 'col-resize' : 'row-resize',
-          position: 'relative',
-          zIndex: 10,
-          userSelect: 'none',
-          boxSizing: 'border-box',
-          flexShrink: 0,
-        }}
-        onPointerDown={handlePointerDown}
-        role="separator"
-        aria-valuenow={splitPercentage}
-        aria-valuemin={5}
-        aria-valuemax={95}
-      />
+      {renderResizer ? (
+        renderResizer({
+          direction,
+          splitPercentage,
+          resizerSize,
+          isResizing,
+          onPointerDown: handlePointerDown,
+        })
+      ) : (
+        <div
+          className={classNames.resizer}
+          data-direction={direction}
+          style={{
+            width: isRow ? `${resizerSize}px` : '100%',
+            height: isRow ? '100%' : `${resizerSize}px`,
+            cursor: isRow ? 'col-resize' : 'row-resize',
+            position: 'relative',
+            zIndex: 10,
+            userSelect: 'none',
+            boxSizing: 'border-box',
+            flexShrink: 0,
+          }}
+          onPointerDown={handlePointerDown}
+          role="separator"
+          aria-valuenow={splitPercentage}
+          aria-valuemin={5}
+          aria-valuemax={95}
+        />
+      )}
       <div style={{ flex: `${100 - splitPercentage} 1 0%`, overflow: 'hidden' }}>
-        <PaneTree tree={second} resizerSize={resizerSize} snapThreshold={snapThreshold} />
+        <PaneTree
+          tree={second}
+          resizerSize={resizerSize}
+          snapThreshold={snapThreshold}
+          renderResizer={propRenderResizer}
+        />
       </div>
     </div>
   )
@@ -80,6 +113,7 @@ export const PaneTree: React.FC<PaneTreeProps> = ({
   tree,
   resizerSize = 4,
   snapThreshold: propSnapThreshold,
+  renderResizer,
 }) => {
   const {
     layout,
@@ -112,6 +146,11 @@ export const PaneTree: React.FC<PaneTreeProps> = ({
   }
 
   return (
-    <PaneSplit currentNode={currentNode} resizerSize={resizerSize} snapThreshold={snapThreshold} />
+    <PaneSplit
+      currentNode={currentNode}
+      resizerSize={resizerSize}
+      snapThreshold={snapThreshold}
+      renderResizer={renderResizer}
+    />
   )
 }

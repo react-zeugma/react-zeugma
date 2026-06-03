@@ -1,28 +1,41 @@
-import React, { useState, useEffect } from 'react'
-import { Outlet } from '@tanstack/react-router'
-import { Navbar } from './components/navbar'
-import { Analytics } from '@vercel/analytics/react'
-import { SpeedInsights } from '@vercel/speed-insights/react'
+'use client'
 
-export default function App() {
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('zeugma-theme')
-      return saved === 'dark' ? 'dark' : 'light'
-    }
-    return 'light'
-  })
+import { useState, useEffect, useCallback, createContext, useContext } from 'react'
+
+interface ThemeContextValue {
+  theme: 'light' | 'dark'
+  toggleTheme: (event?: React.MouseEvent<HTMLButtonElement>) => void
+}
+
+const ThemeContext = createContext<ThemeContextValue>({
+  theme: 'light',
+  toggleTheme: () => {},
+})
+
+export const useTheme = () => useContext(ThemeContext)
+
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const [theme, setTheme] = useState<'light' | 'dark'>('light')
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    const saved = localStorage.getItem('zeugma-theme')
+    const initial = saved === 'dark' ? 'dark' : 'light'
+    setTheme(initial)
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!mounted) return
     if (theme === 'dark') {
       document.documentElement.classList.add('dark')
     } else {
       document.documentElement.classList.remove('dark')
     }
     localStorage.setItem('zeugma-theme', theme)
-  }, [theme])
+  }, [theme, mounted])
 
-  const toggleTheme = (event?: React.MouseEvent<HTMLButtonElement>) => {
+  const toggleTheme = useCallback((event?: React.MouseEvent<HTMLButtonElement>) => {
     const doc = document as Document & {
       startViewTransition?: (cb: () => void) => { ready: Promise<void> }
     }
@@ -54,16 +67,11 @@ export default function App() {
         },
       )
     })
+  }, [])
+
+  if (!mounted) {
+    return <>{children}</>
   }
 
-  return (
-    <div className="min-h-screen flex flex-col bg-bg-app text-text-primary transition-colors duration-200">
-      <Navbar theme={theme} onToggleTheme={toggleTheme} />
-      <main className="flex-1">
-        <Outlet />
-      </main>
-      <Analytics />
-      <SpeedInsights />
-    </div>
-  )
+  return <ThemeContext.Provider value={{ theme, toggleTheme }}>{children}</ThemeContext.Provider>
 }

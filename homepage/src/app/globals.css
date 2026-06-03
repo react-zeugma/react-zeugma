@@ -33,7 +33,6 @@
     'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
     'Courier New', monospace;
 
-  /* Theme color aliases mapped to CSS variables */
   --color-bg-app: var(--bg-app);
   --color-bg-sidebar: var(--bg-sidebar);
   --color-bg-pane: var(--bg-pane);
@@ -76,8 +75,7 @@
 }
 
 html,
-body,
-#root {
+body {
   height: 100%;
   background-color: var(--bg-app);
   color: var(--text-primary);
@@ -98,12 +96,10 @@ body,
   color: inherit;
 }
 
-/* Resizing edge border-radius behavior */
 .zeugma-resizing .zeugma-pane-container {
   border-radius: 0px !important;
 }
 
-/* Homepage mosaic interactive demo */
 .mosaic-demo {
   container-type: inline-size;
 }
@@ -130,7 +126,6 @@ body,
   cursor: grabbing;
 }
 
-/* Circular Theme Switching view transition overrides */
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;

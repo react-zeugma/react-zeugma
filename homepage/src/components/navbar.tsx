@@ -1,6 +1,11 @@
+'use client'
+
 import { Sun, Moon } from 'lucide-react'
-import { Link, useLocation } from '@tanstack/react-router'
+import Link from 'next/link'
+import { usePathname, useRouter } from 'next/navigation'
+import { useCallback, useRef } from 'react'
 import { BrandIcon } from './brand-icon'
+import { useTheme } from './theme-provider'
 
 const LOGO_URL = '/logo.png'
 
@@ -10,17 +15,24 @@ const NAV_ITEMS: { label: string; to: '/' | '/demo' | '/docs' }[] = [
   { label: 'Docs', to: '/docs' },
 ]
 
-interface NavbarProps {
-  theme: 'light' | 'dark'
-  onToggleTheme: () => void
-}
+export function Navbar() {
+  const { theme, toggleTheme } = useTheme()
+  const pathname = usePathname()
+  const router = useRouter()
+  const prefetched = useRef<Set<string>>(new Set())
 
-export function Navbar({ theme, onToggleTheme }: NavbarProps) {
-  const location = useLocation()
+  const prefetch = useCallback(
+    (href: string) => {
+      if (prefetched.current.has(href)) return
+      prefetched.current.add(href)
+      router.prefetch(href)
+    },
+    [router],
+  )
 
   return (
     <nav className="sticky top-0 z-50 bg-bg-app/80 backdrop-blur-md border-b border-border-primary px-6 flex items-center justify-between h-14 transition-colors duration-200 select-none">
-      <Link to="/" className="flex items-center gap-2 group">
+      <Link href="/" className="flex items-center gap-2 group">
         <img src={LOGO_URL} alt="react-zeugma logo" className="w-6 h-6 object-contain" />
         <span className="font-extrabold text-lg tracking-tight text-text-primary">
           react-zeugma
@@ -30,11 +42,12 @@ export function Navbar({ theme, onToggleTheme }: NavbarProps) {
       <div className="flex items-center gap-4 sm:gap-6">
         <div className="flex items-center gap-4 sm:gap-6">
           {NAV_ITEMS.map((item) => {
-            const isActive = location.pathname === item.to
+            const isActive = pathname === item.to
             return (
               <Link
                 key={item.to}
-                to={item.to}
+                href={item.to}
+                onMouseEnter={() => prefetch(item.to)}
                 className={`text-sm font-medium transition-colors hover:text-text-primary ${
                   isActive ? 'text-text-primary' : 'text-text-secondary'
                 }`}
@@ -46,16 +59,14 @@ export function Navbar({ theme, onToggleTheme }: NavbarProps) {
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Theme Toggle Button */}
           <button
-            onClick={onToggleTheme}
+            onClick={toggleTheme}
             className="p-1.5 rounded-md hover:bg-bg-sidebar border border-transparent hover:border-border-primary text-text-secondary hover:text-text-primary transition-all cursor-pointer"
             title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
           >
             {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
           </button>
 
-          {/* Social Links */}
           <a
             href="https://www.npmjs.com/package/react-zeugma"
             target="_blank"

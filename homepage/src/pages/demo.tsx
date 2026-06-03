@@ -128,6 +128,33 @@ const register: Record<string, React.ComponentType<WidgetProps>> = {
   preview: PreviewWidget,
 }
 
+const getWidgetDetails = (id: string) => {
+  if (id === 'explorer') {
+    return {
+      title: 'Explorer',
+      icon: <FolderTree className="w-3.5 h-3.5 text-amber-500" />,
+    }
+  }
+  if (id === 'editor') {
+    return {
+      title: 'App.tsx',
+      icon: <Code2 className="w-3.5 h-3.5 text-pink-500" />,
+    }
+  }
+  if (id === 'preview') {
+    return {
+      title: 'Preview',
+      icon: <Globe className="w-3.5 h-3.5 text-blue-500" />,
+    }
+  }
+  const isRandom = id.startsWith('random-')
+  const title = isRandom ? `Widget #${id.substring(7)}` : `Pane: ${id}`
+  return {
+    title,
+    icon: <Box className="w-3.5 h-3.5 text-indigo-500" />,
+  }
+}
+
 export function Demo() {
   const defaultIDELayout: TreeNode = {
     type: 'split',
@@ -228,12 +255,25 @@ export function Demo() {
     )
   }
 
+  const renderDragOverlay = (id: string) => {
+    const { title, icon } = getWidgetDetails(id)
+    return (
+      <div className="px-3.5 py-2 bg-bg-sidebar border border-border-secondary rounded-lg shadow-2xl flex items-center gap-2.5 opacity-95 backdrop-blur-md pointer-events-none select-none">
+        {icon}
+        <span className="text-[11px] uppercase tracking-wider text-text-primary font-bold">
+          {title}
+        </span>
+      </div>
+    )
+  }
+
   return (
     <div className="h-[calc(100vh-3.5rem)] bg-bg-app overflow-hidden transition-colors duration-200">
       <DashboardProvider
         layout={layout}
         onChange={handleLayoutChange}
         renderPane={renderPane}
+        renderDragOverlay={renderDragOverlay}
         fullscreenPaneId={fullscreenPaneId}
         onFullscreenChange={setFullscreenPaneId}
         onRemove={handleRemove}

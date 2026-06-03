@@ -103,7 +103,8 @@ export function Home() {
         <div className="relative inline-flex items-center gap-2 bg-bg-sidebar border border-border-primary backdrop-blur-sm rounded-full px-3 py-1 mb-8">
           <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
           <span className="text-[10px] font-semibold tracking-wide text-text-secondary uppercase">
-            v{process.env.NEXT_PUBLIC_APP_VERSION} &bull; React 18 & 19 Ready
+            v{process.env.NEXT_PUBLIC_APP_VERSION}
+            {' \u2022 '}React 18 & 19 Ready
           </span>
         </div>
 

@@ -1,0 +1,58 @@
+# react-zeugma
+
+> Recursive drag-and-drop dashboard layout engine for React. Combines the tree-based, arbitrary splitting of react-mosaic with the declarative, state-driven API of react-grid-layout, built on top of @dnd-kit/core. Compatible with React 18+ and 19+.
+
+## Navigation
+
+- [Home](https://react-zeugma.com/): Official website and interactive drag-and-drop layout showcase.
+- [Interactive Demo](https://react-zeugma.com/demo): Playground to test recursive pane splitting, resizing, swapping, and fullscreen zoom.
+- [Documentation](https://react-zeugma.com/docs): Full API, custom styling guidelines, and TypeScript type reference.
+
+## Core Documentation
+
+- [README](https://github.com/yusufarsln98/react-zeugma/blob/main/README.md): Quick start recipe, component specifications, and local development setup instructions.
+- [Contributing Guidelines](https://github.com/yusufarsln98/react-zeugma/blob/main/CONTRIBUTING.md): Workflow for reporting issues, developing features, styling, and publishing changes.
+- [LICENSE](https://github.com/yusufarsln98/react-zeugma/blob/main/LICENSE): MIT License details.
+
+## Technical Details
+
+### Recursive Layout Tree
+
+The entire dashboard layout is represented as a serializable recursive tree structure using TypeScript types:
+
+```ts
+export type SplitDirection = 'row' | 'column'
+
+export interface SplitNode {
+  type: 'split'
+  direction: SplitDirection
+  first: TreeNode
+  second: TreeNode
+  splitPercentage: number // 0 to 100
+}
+
+export interface PaneNode {
+  type: 'pane'
+  paneId: string
+}
+
+export type TreeNode = SplitNode | PaneNode
+```
+
+- **PaneNode (Leaf):** Represents a single content pane with a unique `paneId`.
+- **SplitNode (Branch):** Recursively splits its area horizontally (`column`) or vertically (`row`) into two child `TreeNode` nodes (`first` and `second`) according to `splitPercentage`.
+
+### Key Components
+
+- `<DashboardProvider>`: The root context provider that coordinates the drag-and-drop event loop, monitors active drags, and registers layout mutations.
+- `<PaneTree>`: Recursively renders the split nodes and pane nodes. Must be inside `<DashboardProvider>`.
+- `<Pane id>`: Wraps the individual pane components, utilizing a render prop structure to pass attributes like `isDragging`, `isFullscreen`, `toggleFullscreen`, and `remove`.
+- `<DragHandle>`: Defines the interactive drag region inside a `<Pane>`.
+
+### Tree Mutation Utilities
+
+Import these helpers from `react-zeugma` to manipulate the layout tree programmatically in state handlers:
+
+- `removePane(tree, paneId)`: Removes a pane and collapses the leftover sibling split node.
+- `splitPane(tree, targetId, direction, splitType, paneToAdd)`: Splits a specific target pane by nesting it under a new `SplitNode` along with a new pane.
+- `swapPanes(tree, idA, idB)`: Swaps the positions of two panes in the tree.

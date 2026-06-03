@@ -4,6 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 import { dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import packageJson from '../package.json'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -14,5 +15,8 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
+  },
+  define: {
+    __APP_VERSION__: JSON.stringify(packageJson.version),
   },
 })

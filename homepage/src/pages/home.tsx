@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
-import { Boxes, MousePointer2, Focus, Layout, ArrowRight, Copy } from 'lucide-react';
-import { useNavigate } from '@tanstack/react-router';
-import { CodeBlock } from '../components/code-block';
-import { Footer } from '../components/footer';
+import { useEffect, useRef, useState } from 'react'
+import { Boxes, MousePointer2, Focus, Layout, ArrowRight, Copy } from 'lucide-react'
+import { useNavigate } from '@tanstack/react-router'
+import { CodeBlock } from '../components/code-block'
+import { Footer } from '../components/footer'
 
 const FEATURES = [
   {
@@ -25,7 +25,7 @@ const FEATURES = [
     title: 'Headless Design',
     desc: 'We handle the complex math, drop zones, and tree states. You bring your own CSS and components.',
   },
-];
+]
 
 const CODE = `import { useState } from 'react';
 import { DashboardProvider, PaneTree, Pane, DragHandle } from 'react-zeugma';
@@ -68,9 +68,9 @@ export default function App() {
       <PaneTree />
     </DashboardProvider>
   );
-}`;
+}`
 
-const MOSAIC_LETTERS = ['Z', 'E', 'U', 'G', 'M', 'A'];
+const MOSAIC_LETTERS = ['Z', 'E', 'U', 'G', 'M', 'A']
 const TILE_COLORS = [
   '#2A4259', // Euphrates Blue
   '#C29B47', // Ancient Gold
@@ -78,17 +78,17 @@ const TILE_COLORS = [
   '#B5543C', // Terracotta
   '#596643', // Olive Green
   '#D8BA8E', // Sandstone
-];
+]
 
 interface MosaicTileProps {
-  letter: string;
-  index: number;
-  animate: boolean;
+  letter: string
+  index: number
+  animate: boolean
 }
 
 function MosaicTile({ letter, index, animate }: MosaicTileProps) {
-  const color = TILE_COLORS[index % TILE_COLORS.length];
-  const isLight = ['#D8BA8E', '#C29B47'].includes(color);
+  const color = TILE_COLORS[index % TILE_COLORS.length]
+  const isLight = ['#D8BA8E', '#C29B47'].includes(color)
   return (
     <div
       className={`w-full aspect-square flex items-center justify-center font-bold text-3xl md:text-4xl rounded shadow-[inset_0_-3px_5px_rgba(0,0,0,0.4),0_3px_5px_rgba(0,0,0,0.5)] border border-black/40 select-none transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${
@@ -104,24 +104,24 @@ function MosaicTile({ letter, index, animate }: MosaicTileProps) {
     >
       {letter}
     </div>
-  );
+  )
 }
 
 export function Home() {
-  const navigate = useNavigate();
-  const [mosaicVisible, setMosaicVisible] = useState(false);
-  const mosaicRef = useRef<HTMLDivElement | null>(null);
+  const navigate = useNavigate()
+  const [mosaicVisible, setMosaicVisible] = useState(false)
+  const mosaicRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) setMosaicVisible(true);
+        if (entry.isIntersecting) setMosaicVisible(true)
       },
       { threshold: 0.3 },
-    );
-    if (mosaicRef.current) observer.observe(mosaicRef.current);
-    return () => observer.disconnect();
-  }, []);
+    )
+    if (mosaicRef.current) observer.observe(mosaicRef.current)
+    return () => observer.disconnect()
+  }, [])
 
   return (
     <div className="flex flex-col min-h-screen bg-bg-app">
@@ -241,5 +241,5 @@ export function Home() {
 
       <Footer />
     </div>
-  );
+  )
 }

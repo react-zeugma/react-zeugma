@@ -1,8 +1,7 @@
-import { HelpCircle, FileText, Heart } from 'lucide-react';
-import { BrandIcon } from './brand-icon';
+import { HelpCircle, FileText, Heart } from 'lucide-react'
+import { BrandIcon } from './brand-icon'
 
-const BASE_PATH = import.meta.env.BASE_URL;
-const LOGO_URL = `${BASE_PATH}logo.png`;
+const LOGO_URL = '/logo.png'
 
 export function Footer() {
   return (
@@ -120,5 +119,5 @@ export function Footer() {
         </div>
       </div>
     </footer>
-  );
+  )
 }

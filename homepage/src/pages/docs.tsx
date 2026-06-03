@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'
 import {
   BookOpen,
   Copy,
@@ -10,12 +10,12 @@ import {
   Menu,
   X,
   Download,
-} from 'lucide-react';
-import { Footer } from '../components/footer';
+} from 'lucide-react'
+import { Footer } from '../components/footer'
 
 interface DocSection {
-  id: string;
-  title: string;
+  id: string
+  title: string
 }
 
 const DOC_SECTIONS: DocSection[] = [
@@ -28,7 +28,7 @@ const DOC_SECTIONS: DocSection[] = [
   { id: 'typescript-types', title: 'Types Reference' },
   { id: 'skill-md', title: 'SKILL.md' },
   { id: 'zeugma-mosaics', title: 'The Story of Zeugma' },
-];
+]
 
 const SKILL_MD_CONTENT = `---
 name: use-react-zeugma
@@ -243,16 +243,16 @@ interface ZeugmaClassNames {
   border: 2px solid #10b981;
 }
 \`\`\`
-`;
+`
 
 function DocCodeBlock({ code, language = 'tsx' }: { code: string; language?: string }) {
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState(false)
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
+    navigator.clipboard.writeText(code)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   return (
     <div className="relative group rounded-lg overflow-hidden border border-border-primary bg-bg-pane-inner my-4 font-mono text-[13px] transition-colors duration-200">
@@ -279,7 +279,7 @@ function DocCodeBlock({ code, language = 'tsx' }: { code: string; language?: str
         {code}
       </pre>
     </div>
-  );
+  )
 }
 
 function Callout({
@@ -287,21 +287,21 @@ function Callout({
   title,
   children,
 }: {
-  type: 'note' | 'tip' | 'warning';
-  title: string;
-  children: React.ReactNode;
+  type: 'note' | 'tip' | 'warning'
+  title: string
+  children: React.ReactNode
 }) {
   const styles = {
     note: 'bg-indigo-500/5 border-indigo-500/20 text-text-secondary',
     tip: 'bg-emerald-500/5 border-emerald-500/20 text-text-secondary',
     warning: 'bg-rose-500/5 border-rose-500/20 text-text-secondary',
-  };
+  }
 
   const icons = {
     note: <Info className="w-4 h-4 text-indigo-500 shrink-0" />,
     tip: <Sparkles className="w-4 h-4 text-emerald-500 shrink-0" />,
     warning: <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0" />,
-  };
+  }
 
   return (
     <div
@@ -313,94 +313,94 @@ function Callout({
         {children}
       </div>
     </div>
-  );
+  )
 }
 
 export function Docs() {
-  const [activeSection, setActiveSection] = useState('introduction');
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState('introduction')
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     const handleScroll = () => {
-      const scrollPosition = window.scrollY + 100;
+      const scrollPosition = window.scrollY + 100
 
       // Bulletproof check for scroll position near the bottom of the page
       const isAtBottom =
-        window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 100;
+        window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 100
       if (isAtBottom && DOC_SECTIONS.length > 0) {
-        setActiveSection(DOC_SECTIONS[DOC_SECTIONS.length - 1].id);
-        return;
+        setActiveSection(DOC_SECTIONS[DOC_SECTIONS.length - 1].id)
+        return
       }
 
       for (const section of DOC_SECTIONS) {
-        const el = document.getElementById(section.id);
+        const el = document.getElementById(section.id)
         if (el) {
-          const top = el.offsetTop;
-          const height = el.offsetHeight;
+          const top = el.offsetTop
+          const height = el.offsetHeight
           if (scrollPosition >= top && scrollPosition < top + height) {
-            setActiveSection(section.id);
-            break;
+            setActiveSection(section.id)
+            break
           }
         }
       }
-    };
+    }
 
     const handleHashChange = () => {
-      const hash = window.location.hash;
+      const hash = window.location.hash
       if (hash) {
-        const id = hash.replace('#', '');
-        const el = document.getElementById(id);
+        const id = hash.replace('#', '')
+        const el = document.getElementById(id)
         if (el) {
           // Add small delay to ensure rendering and DOM structure are loaded
           setTimeout(() => {
             window.scrollTo({
               top: el.offsetTop - 80,
               behavior: 'smooth',
-            });
-            setActiveSection(id);
-          }, 100);
+            })
+            setActiveSection(id)
+          }, 100)
         }
       }
-    };
+    }
 
-    window.addEventListener('scroll', handleScroll);
-    window.addEventListener('hashchange', handleHashChange);
+    window.addEventListener('scroll', handleScroll)
+    window.addEventListener('hashchange', handleHashChange)
 
     // Check initial hash route on mount
-    handleHashChange();
+    handleHashChange()
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('hashchange', handleHashChange);
-    };
-  }, []);
+      window.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('hashchange', handleHashChange)
+    }
+  }, [])
 
   const scrollToSection = (id: string) => {
-    const el = document.getElementById(id);
+    const el = document.getElementById(id)
     if (el) {
       // Temporarily remove id to prevent browser jumping, then restore
-      el.removeAttribute('id');
-      window.location.hash = id;
-      el.setAttribute('id', id);
+      el.removeAttribute('id')
+      window.location.hash = id
+      el.setAttribute('id', id)
 
       window.scrollTo({
         top: el.offsetTop - 80,
         behavior: 'smooth',
-      });
-      setActiveSection(id);
-      setMobileMenuOpen(false);
+      })
+      setActiveSection(id)
+      setMobileMenuOpen(false)
     }
-  };
+  }
 
   const handleDownloadSkill = () => {
-    const element = document.createElement('a');
-    const file = new Blob([SKILL_MD_CONTENT], { type: 'text/markdown' });
-    element.href = URL.createObjectURL(file);
-    element.download = 'SKILL.md';
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
-  };
+    const element = document.createElement('a')
+    const file = new Blob([SKILL_MD_CONTENT], { type: 'text/markdown' })
+    element.href = URL.createObjectURL(file)
+    element.download = 'SKILL.md'
+    document.body.appendChild(element)
+    element.click()
+    document.body.removeChild(element)
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-bg-app transition-colors duration-200">
@@ -463,8 +463,8 @@ export function Docs() {
               <a
                 href="#introduction"
                 onClick={(e) => {
-                  e.preventDefault();
-                  scrollToSection('introduction');
+                  e.preventDefault()
+                  scrollToSection('introduction')
                 }}
                 className="text-text-muted hover:text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity font-mono text-xl select-none"
               >
@@ -524,8 +524,8 @@ export function Docs() {
               <a
                 href="#installation"
                 onClick={(e) => {
-                  e.preventDefault();
-                  scrollToSection('installation');
+                  e.preventDefault()
+                  scrollToSection('installation')
                 }}
                 className="text-text-muted hover:text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity font-mono text-xl select-none"
               >
@@ -550,8 +550,8 @@ export function Docs() {
               <a
                 href="#quick-start"
                 onClick={(e) => {
-                  e.preventDefault();
-                  scrollToSection('quick-start');
+                  e.preventDefault()
+                  scrollToSection('quick-start')
                 }}
                 className="text-text-muted hover:text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity font-mono text-xl select-none"
               >
@@ -624,8 +624,8 @@ export default function Dashboard() {
               <a
                 href="#api-reference"
                 onClick={(e) => {
-                  e.preventDefault();
-                  scrollToSection('api-reference');
+                  e.preventDefault()
+                  scrollToSection('api-reference')
                 }}
                 className="text-text-muted hover:text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity font-mono text-xl select-none"
               >
@@ -785,8 +785,8 @@ export default function Dashboard() {
               <a
                 href="#tree-utilities"
                 onClick={(e) => {
-                  e.preventDefault();
-                  scrollToSection('tree-utilities');
+                  e.preventDefault()
+                  scrollToSection('tree-utilities')
                 }}
                 className="text-text-muted hover:text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity font-mono text-xl select-none"
               >
@@ -849,8 +849,8 @@ export default function Dashboard() {
               <a
                 href="#custom-styling"
                 onClick={(e) => {
-                  e.preventDefault();
-                  scrollToSection('custom-styling');
+                  e.preventDefault()
+                  scrollToSection('custom-styling')
                 }}
                 className="text-text-muted hover:text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity font-mono text-xl select-none"
               >
@@ -888,8 +888,8 @@ export default function Dashboard() {
               <a
                 href="#typescript-types"
                 onClick={(e) => {
-                  e.preventDefault();
-                  scrollToSection('typescript-types');
+                  e.preventDefault()
+                  scrollToSection('typescript-types')
                 }}
                 className="text-text-muted hover:text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity font-mono text-xl select-none"
               >
@@ -943,8 +943,8 @@ export interface PaneRenderProps {
                 <a
                   href="#skill-md"
                   onClick={(e) => {
-                    e.preventDefault();
-                    scrollToSection('skill-md');
+                    e.preventDefault()
+                    scrollToSection('skill-md')
                   }}
                   className="text-text-muted hover:text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity font-mono text-xl select-none"
                 >
@@ -973,8 +973,8 @@ export interface PaneRenderProps {
               <a
                 href="#zeugma-mosaics"
                 onClick={(e) => {
-                  e.preventDefault();
-                  scrollToSection('zeugma-mosaics');
+                  e.preventDefault()
+                  scrollToSection('zeugma-mosaics')
                 }}
                 className="text-[#D8BA8E]/50 hover:text-[#D8BA8E] opacity-0 group-hover:opacity-100 transition-opacity font-mono text-xl select-none"
               >
@@ -1007,5 +1007,5 @@ export interface PaneRenderProps {
 
       <Footer />
     </div>
-  );
+  )
 }

@@ -5,7 +5,8 @@ node_modules/
 dist/
 
 # editor
-.vscode/
+.vscode/*
+!.vscode/settings.json
 .idea/
 *.swp
 *.swo
@@ -28,7 +29,7 @@ npm-debug.log*
 *.tsbuildinfo
 
 # demo build
-demo/dist/
+homepage/dist/
 
 # storybook
 storybook-static/

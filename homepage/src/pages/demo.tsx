@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
-import { DashboardProvider, PaneTree, Pane, DragHandle, removePane } from 'react-zeugma';
-import type { TreeNode, PaneRenderProps } from 'react-zeugma';
-import { Code2, Box, FolderTree, Globe } from 'lucide-react';
-import { SidebarWrapper } from '../components/sidebar-wrapper';
+import React, { useState } from 'react'
+import { DashboardProvider, PaneTree, Pane, DragHandle, removePane } from 'react-zeugma'
+import type { TreeNode, PaneRenderProps } from 'react-zeugma'
+import { Code2, Box, FolderTree, Globe } from 'lucide-react'
+import { SidebarWrapper } from '../components/sidebar-wrapper'
 
 interface UIPlaceholderProps {
-  title: string;
-  children: React.ReactNode;
-  icon: React.ReactNode;
-  isFullscreen: boolean;
-  toggleFullscreen: () => void;
-  remove: () => void;
+  title: string
+  children: React.ReactNode
+  icon: React.ReactNode
+  isFullscreen: boolean
+  toggleFullscreen: () => void
+  remove: () => void
 }
 
 const UIPlaceholder = ({
@@ -59,12 +59,12 @@ const UIPlaceholder = ({
       {children}
     </div>
   </div>
-);
+)
 
 interface WidgetProps {
-  isFullscreen: boolean;
-  toggleFullscreen: () => void;
-  remove: () => void;
+  isFullscreen: boolean
+  toggleFullscreen: () => void
+  remove: () => void
 }
 
 const ExplorerWidget = (props: WidgetProps) => (
@@ -81,7 +81,7 @@ const ExplorerWidget = (props: WidgetProps) => (
       </p>
     </div>
   </UIPlaceholder>
-);
+)
 
 const EditorWidget = (props: WidgetProps) => (
   <UIPlaceholder title="App.tsx" icon={<Code2 className="w-3.5 h-3.5 text-pink-500" />} {...props}>
@@ -93,7 +93,7 @@ const EditorWidget = (props: WidgetProps) => (
       </p>
     </div>
   </UIPlaceholder>
-);
+)
 
 const PreviewWidget = (props: WidgetProps) => (
   <UIPlaceholder title="Preview" icon={<Globe className="w-3.5 h-3.5 text-blue-500" />} {...props}>
@@ -104,7 +104,7 @@ const PreviewWidget = (props: WidgetProps) => (
       </p>
     </div>
   </UIPlaceholder>
-);
+)
 
 const GenericWidget = ({ title, ...props }: WidgetProps & { title?: string }) => (
   <UIPlaceholder
@@ -120,13 +120,13 @@ const GenericWidget = ({ title, ...props }: WidgetProps & { title?: string }) =>
       </p>
     </div>
   </UIPlaceholder>
-);
+)
 
 const register: Record<string, React.ComponentType<WidgetProps>> = {
   explorer: ExplorerWidget,
   editor: EditorWidget,
   preview: PreviewWidget,
-};
+}
 
 export function Demo() {
   const defaultIDELayout: TreeNode = {
@@ -141,53 +141,53 @@ export function Demo() {
       first: { type: 'pane', paneId: 'editor' },
       second: { type: 'pane', paneId: 'preview' },
     },
-  };
+  }
 
   const [layout, setLayout] = useState<TreeNode | null>(() => {
-    const saved = localStorage.getItem('zeugma-demo-layout');
+    const saved = localStorage.getItem('zeugma-demo-layout')
     if (saved) {
       try {
-        return JSON.parse(saved);
+        return JSON.parse(saved)
       } catch {
         // ignore
       }
     }
-    return defaultIDELayout;
-  });
+    return defaultIDELayout
+  })
 
   const [autoSave, setAutoSave] = useState<boolean>(() => {
-    const savedToggle = localStorage.getItem('zeugma-demo-autosave');
-    return savedToggle !== 'false';
-  });
+    const savedToggle = localStorage.getItem('zeugma-demo-autosave')
+    return savedToggle !== 'false'
+  })
 
-  const [fullscreenPaneId, setFullscreenPaneId] = useState<string | null>(null);
+  const [fullscreenPaneId, setFullscreenPaneId] = useState<string | null>(null)
 
   const handleLayoutChange = (newLayout: TreeNode | null) => {
-    setLayout(newLayout);
+    setLayout(newLayout)
     if (autoSave) {
       if (newLayout) {
-        localStorage.setItem('zeugma-demo-layout', JSON.stringify(newLayout));
+        localStorage.setItem('zeugma-demo-layout', JSON.stringify(newLayout))
       } else {
-        localStorage.removeItem('zeugma-demo-layout');
+        localStorage.removeItem('zeugma-demo-layout')
       }
     }
-  };
+  }
 
   const handleToggleAutoSave = () => {
-    const newVal = !autoSave;
-    setAutoSave(newVal);
-    localStorage.setItem('zeugma-demo-autosave', String(newVal));
+    const newVal = !autoSave
+    setAutoSave(newVal)
+    localStorage.setItem('zeugma-demo-autosave', String(newVal))
     if (!newVal) {
-      localStorage.removeItem('zeugma-demo-layout');
+      localStorage.removeItem('zeugma-demo-layout')
     } else if (layout) {
-      localStorage.setItem('zeugma-demo-layout', JSON.stringify(layout));
+      localStorage.setItem('zeugma-demo-layout', JSON.stringify(layout))
     }
-  };
+  }
 
   const handleRemove = (paneId: string) => {
-    const newLayout = removePane(layout, paneId);
-    handleLayoutChange(newLayout);
-  };
+    const newLayout = removePane(layout, paneId)
+    handleLayoutChange(newLayout)
+  }
 
   const renderPane = (id: string) => {
     return (
@@ -196,10 +196,10 @@ export function Demo() {
           const WidgetComponent =
             register[id] ||
             ((props: WidgetProps) => {
-              const isRandom = id.startsWith('random-');
-              const title = isRandom ? `Widget #${id.substring(7)}` : `Pane: ${id}`;
-              return <GenericWidget title={title} {...props} />;
-            });
+              const isRandom = id.startsWith('random-')
+              const title = isRandom ? `Widget #${id.substring(7)}` : `Pane: ${id}`
+              return <GenericWidget title={title} {...props} />
+            })
 
           return (
             <div
@@ -222,11 +222,11 @@ export function Demo() {
                 </div>
               )}
             </div>
-          );
+          )
         }}
       </Pane>
-    );
-  };
+    )
+  }
 
   return (
     <div className="h-[calc(100vh-3.5rem)] bg-bg-app overflow-hidden transition-colors duration-200">
@@ -265,5 +265,5 @@ export function Demo() {
         </SidebarWrapper>
       </DashboardProvider>
     </div>
-  );
+  )
 }

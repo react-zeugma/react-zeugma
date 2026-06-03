@@ -57,8 +57,9 @@
     "format": "prettier --write \"src/**/*.{ts,tsx}\" \"docs/**/*.{ts,tsx,mdx}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx}\" \"docs/**/*.{ts,tsx,mdx}\"",
     "demo": "npm run dev --workspace=homepage",
+    "build:demo": "npm run build && npm run build --workspace=homepage",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build -o storybook-static",
+    "build:storybook": "storybook build -o storybook-static",
     "prepare": "husky",
     "version": "changeset version",
     "release": "npm run build && changeset publish"

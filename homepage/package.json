@@ -20,7 +20,7 @@
     "radix-ui": "^1.4.3",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
-    "react-zeugma": "^0.2.0",
+    "react-zeugma": "^0.4.0",
     "shadcn": "^4.10.0",
     "tailwind-merge": "^3.6.0",
     "tailwindcss": "^4.3.0",

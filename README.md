@@ -107,16 +107,17 @@ export default function Dashboard() {
 
 The context provider that sets up the drag-and-drop state machine, monitors active drags, and registers layout change notifications.
 
-| Prop                 | Type                                 | Required | Description                                                             |
-| -------------------- | ------------------------------------ | -------- | ----------------------------------------------------------------------- |
-| `layout`             | `TreeNode \| null`                   | Yes      | The serializable tree layout schema.                                    |
-| `onChange`           | `(layout: TreeNode \| null) => void` | Yes      | Fires when resizes, splits, swaps, or removes modify the tree.          |
-| `renderPane`         | `(paneId: string) => ReactNode`      | Yes      | Renderer function lookup that returns a `<Pane>` structure.             |
-| `renderDragOverlay`  | `(activeId: string) => ReactNode`    | No       | Renders a custom cursor-following drag preview.                         |
-| `classNames`         | `ZeugmaClassNames`                   | No       | Custom classes for overriding pane, resizer, and drop preview overlays. |
-| `fullscreenPaneId`   | `string \| null`                     | No       | Active ID of the pane taking full viewport coverage.                    |
-| `onFullscreenChange` | `(paneId: string \| null) => void`   | No       | Callback triggered when a pane enters/leaves fullscreen.                |
-| `onRemove`           | `(paneId: string) => void`           | No       | Callback triggered when a pane is closed/removed.                       |
+| Prop                     | Type                                 | Required | Description                                                                               |
+| ------------------------ | ------------------------------------ | -------- | ----------------------------------------------------------------------------------------- |
+| `layout`                 | `TreeNode \| null`                   | Yes      | The serializable tree layout schema.                                                      |
+| `onChange`               | `(layout: TreeNode \| null) => void` | Yes      | Fires when resizes, splits, swaps, or removes modify the tree.                            |
+| `renderPane`             | `(paneId: string) => ReactNode`      | Yes      | Renderer function lookup that returns a `<Pane>` structure.                               |
+| `renderDragOverlay`      | `(activeId: string) => ReactNode`    | No       | Renders a custom cursor-following drag preview.                                           |
+| `classNames`             | `ZeugmaClassNames`                   | No       | Custom classes for overriding pane, resizer, and drop preview overlays.                   |
+| `fullscreenPaneId`       | `string \| null`                     | No       | Active ID of the pane taking full viewport coverage.                                      |
+| `onFullscreenChange`     | `(paneId: string \| null) => void`   | No       | Callback triggered when a pane enters/leaves fullscreen.                                  |
+| `onRemove`               | `(paneId: string) => void`           | No       | Callback triggered when a pane is closed/removed.                                         |
+| `dragActivationDistance` | `number`                             | No       | Minimum pointer drag distance (in pixels) required to activate dragging. Defaults to `8`. |
 
 ### `<PaneTree>`
 

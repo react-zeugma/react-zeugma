@@ -3,7 +3,19 @@
 import React, { useState } from 'react'
 import { useDashboard, addPane, removePane } from 'react-zeugma'
 import type { TreeNode } from 'react-zeugma'
-import { FolderTree, Code2, Globe, Plus, Trash2, RotateCcw, Sparkles } from 'lucide-react'
+import {
+  FolderTree,
+  Code2,
+  Globe,
+  Plus,
+  Trash2,
+  RotateCcw,
+  Sparkles,
+  ChevronDown,
+  ChevronRight,
+  Copy,
+  Check,
+} from 'lucide-react'
 
 interface SidebarWrapperProps {
   children: React.ReactNode
@@ -88,6 +100,14 @@ function hasPane(tree: TreeNode | null, id: string): boolean {
 export function SidebarWrapper({ children, autoSave, onToggleAutoSave }: SidebarWrapperProps) {
   const { layout, onLayoutChange } = useDashboard()
   const [activePreset, setActivePreset] = useState<string>('default')
+  const [isJsonExpanded, setIsJsonExpanded] = useState(true)
+  const [copied, setCopied] = useState(false)
+
+  const handleCopyJson = () => {
+    navigator.clipboard.writeText(JSON.stringify(layout, null, 2))
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   const toggleWidget = (id: string, active: boolean) => {
     if (active) {
@@ -244,6 +264,51 @@ export function SidebarWrapper({ children, autoSave, onToggleAutoSave }: Sidebar
                 </div>
               )
             })}
+          </div>
+
+          {/* Active Layout JSON Viewer */}
+          <div className="border-t border-border-primary/80 my-3 pt-3 px-1">
+            <button
+              onClick={() => setIsJsonExpanded(!isJsonExpanded)}
+              className="w-full flex items-center justify-between text-text-secondary hover:text-text-primary text-[10px] font-bold uppercase tracking-wider select-none cursor-pointer group transition-colors focus:outline-none"
+            >
+              <div className="flex items-center gap-1.5">
+                <Code2 className="w-3 h-3 text-indigo-500" />
+                <span>Active Layout JSON</span>
+              </div>
+              {isJsonExpanded ? (
+                <ChevronDown className="w-3.5 h-3.5 text-text-muted group-hover:text-text-primary transition-colors" />
+              ) : (
+                <ChevronRight className="w-3.5 h-3.5 text-text-muted group-hover:text-text-primary transition-colors" />
+              )}
+            </button>
+
+            {isJsonExpanded && (
+              <div className="relative mt-2 rounded-lg border border-border-primary bg-bg-pane-inner font-mono text-[10px] overflow-hidden group/json">
+                <div className="flex items-center justify-between px-2.5 py-1 border-b border-border-primary bg-bg-sidebar/50 text-text-secondary text-[9px] select-none">
+                  <span>json</span>
+                  <button
+                    onClick={handleCopyJson}
+                    className="flex items-center gap-1 hover:text-text-primary transition-colors cursor-pointer"
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="w-3 h-3 text-emerald-500" />
+                        <span className="text-emerald-500 font-medium">Copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3 h-3" />
+                        <span>Copy</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+                <pre className="p-2 overflow-x-auto text-text-primary select-all whitespace-pre max-h-48 scrollbar-thin scrollbar-thumb-border-primary scrollbar-track-transparent">
+                  {JSON.stringify(layout, null, 2)}
+                </pre>
+              </div>
+            )}
           </div>
         </div>
       </div>

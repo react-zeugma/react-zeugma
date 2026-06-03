@@ -89,6 +89,7 @@ The root context provider. It handles the drag-and-drop event loop and coordinat
 - \`fullscreenPaneId?: string | null\` — (Optional) ID of the pane currently in fullscreen mode.
 - \`onFullscreenChange?: (paneId: string | null) => void\` — (Optional) Callback triggered when a pane enters/leaves fullscreen.
 - \`onRemove?: (paneId: string) => void\` — (Optional) Callback triggered when a pane is closed/removed.
+- \`dragActivationDistance?: number\` — (Optional) Minimum pointer drag distance (in pixels) required to activate dragging. Defaults to \`8\`.
 
 ### \`<PaneTree>\`
 
@@ -710,6 +711,94 @@ export default function Dashboard() {
                         Active ID of the pane taking full viewport coverage.
                       </td>
                     </tr>
+                    <tr className="bg-bg-pane/30 transition-colors duration-200">
+                      <td className="px-4 py-3 font-mono text-indigo-600 dark:text-indigo-400">
+                        renderDragOverlay
+                      </td>
+                      <td className="px-4 py-3 font-mono">(activeId: string) =&gt; ReactNode</td>
+                      <td className="px-4 py-3 text-text-secondary">No</td>
+                      <td className="px-4 py-3">
+                        Renders a custom cursor-following drag preview overlay.
+                      </td>
+                    </tr>
+                    <tr className="bg-bg-pane/30 transition-colors duration-200">
+                      <td className="px-4 py-3 font-mono text-indigo-600 dark:text-indigo-400">
+                        onFullscreenChange
+                      </td>
+                      <td className="px-4 py-3 font-mono">(paneId: string | null) =&gt; void</td>
+                      <td className="px-4 py-3 text-text-secondary">No</td>
+                      <td className="px-4 py-3">
+                        Callback triggered when a pane enters or leaves fullscreen.
+                      </td>
+                    </tr>
+                    <tr className="bg-bg-pane/30 transition-colors duration-200">
+                      <td className="px-4 py-3 font-mono text-indigo-600 dark:text-indigo-400">
+                        onRemove
+                      </td>
+                      <td className="px-4 py-3 font-mono">(paneId: string) =&gt; void</td>
+                      <td className="px-4 py-3 text-text-secondary">No</td>
+                      <td className="px-4 py-3">
+                        Callback triggered when a pane is closed/removed from the layout tree.
+                      </td>
+                    </tr>
+                    <tr className="bg-bg-pane/30 transition-colors duration-200">
+                      <td className="px-4 py-3 font-mono text-indigo-600 dark:text-indigo-400">
+                        dragActivationDistance
+                      </td>
+                      <td className="px-4 py-3 font-mono">number</td>
+                      <td className="px-4 py-3 text-text-secondary">No</td>
+                      <td className="px-4 py-3">
+                        Minimum pointer drag distance (in pixels) required to activate dragging.
+                        Defaults to <code>8</code>.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* PaneTree */}
+            <div className="space-y-3 pt-4">
+              <h3 className="text-base font-bold text-text-primary">
+                <code>&lt;PaneTree&gt;</code>
+              </h3>
+              <p className="text-text-secondary text-sm leading-relaxed">
+                Recursively renders the split nodes and pane nodes. Must be placed inside{' '}
+                <code>&lt;DashboardProvider&gt;</code>.
+              </p>
+
+              <div className="overflow-x-auto border border-border-primary rounded-lg transition-colors duration-200">
+                <table className="min-w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="border-b border-border-primary bg-bg-sidebar text-text-secondary uppercase tracking-wider transition-colors duration-200">
+                      <th className="px-4 py-2 font-semibold">Prop</th>
+                      <th className="px-4 py-2 font-semibold">Type</th>
+                      <th className="px-4 py-2 font-semibold">Required</th>
+                      <th className="px-4 py-2 font-semibold">Description</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border-primary/60 text-text-primary">
+                    <tr className="bg-bg-pane/30 transition-colors duration-200">
+                      <td className="px-4 py-3 font-mono text-indigo-600 dark:text-indigo-400">
+                        tree
+                      </td>
+                      <td className="px-4 py-3 font-mono">TreeNode | null</td>
+                      <td className="px-4 py-3 text-text-secondary">No</td>
+                      <td className="px-4 py-3">
+                        Custom subtree to render. Defaults to the provider's root{' '}
+                        <code>layout</code>.
+                      </td>
+                    </tr>
+                    <tr className="bg-bg-pane/30 transition-colors duration-200">
+                      <td className="px-4 py-3 font-mono text-indigo-600 dark:text-indigo-400">
+                        resizerSize
+                      </td>
+                      <td className="px-4 py-3 font-mono">number</td>
+                      <td className="px-4 py-3 text-text-secondary">No</td>
+                      <td className="px-4 py-3">
+                        Thickness of the split resizer bars in pixels. Defaults to <code>4</code>.
+                      </td>
+                    </tr>
                   </tbody>
                 </table>
               </div>
@@ -725,7 +814,47 @@ export default function Dashboard() {
                 passing active layout attributes.
               </p>
 
-              <h4 className="text-xs uppercase font-bold tracking-wider text-text-secondary">
+              <div className="overflow-x-auto border border-border-primary rounded-lg transition-colors duration-200">
+                <table className="min-w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="border-b border-border-primary bg-bg-sidebar text-text-secondary uppercase tracking-wider transition-colors duration-200">
+                      <th className="px-4 py-2 font-semibold">Prop</th>
+                      <th className="px-4 py-2 font-semibold">Type</th>
+                      <th className="px-4 py-2 font-semibold">Required</th>
+                      <th className="px-4 py-2 font-semibold">Description</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border-primary/60 text-text-primary">
+                    <tr className="bg-bg-pane/30 transition-colors duration-200">
+                      <td className="px-4 py-3 font-mono text-indigo-600 dark:text-indigo-400">
+                        id
+                      </td>
+                      <td className="px-4 py-3 font-mono">string</td>
+                      <td className="px-4 py-3 font-medium text-emerald-600 dark:text-emerald-400">
+                        Yes
+                      </td>
+                      <td className="px-4 py-3">
+                        The unique ID corresponding to a <code>PaneNode</code>'s <code>paneId</code>
+                        .
+                      </td>
+                    </tr>
+                    <tr className="bg-bg-pane/30 transition-colors duration-200">
+                      <td className="px-4 py-3 font-mono text-indigo-600 dark:text-indigo-400">
+                        children
+                      </td>
+                      <td className="px-4 py-3 font-mono">
+                        (props: PaneRenderProps) =&gt; ReactNode
+                      </td>
+                      <td className="px-4 py-3 font-medium text-emerald-600 dark:text-emerald-400">
+                        Yes
+                      </td>
+                      <td className="px-4 py-3">Render prop function.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <h4 className="text-xs uppercase font-bold tracking-wider text-text-secondary pt-2">
                 Render Props: <code>PaneRenderProps</code>
               </h4>
               <div className="overflow-x-auto border border-border-primary rounded-lg transition-colors duration-200">
@@ -773,6 +902,62 @@ export default function Dashboard() {
                       <td className="px-4 py-3">
                         Triggers removal of this pane from the layout tree.
                       </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* DragHandle */}
+            <div className="space-y-3 pt-4">
+              <h3 className="text-base font-bold text-text-primary">
+                <code>&lt;DragHandle&gt;</code>
+              </h3>
+              <p className="text-text-secondary text-sm leading-relaxed">
+                Defines the interactive drag region inside a <code>&lt;Pane&gt;</code>.{' '}
+                <strong>
+                  Must be placed inside a <code>&lt;Pane&gt;</code> component.
+                </strong>
+              </p>
+
+              <div className="overflow-x-auto border border-border-primary rounded-lg transition-colors duration-200">
+                <table className="min-w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="border-b border-border-primary bg-bg-sidebar text-text-secondary uppercase tracking-wider transition-colors duration-200">
+                      <th className="px-4 py-2 font-semibold">Prop</th>
+                      <th className="px-4 py-2 font-semibold">Type</th>
+                      <th className="px-4 py-2 font-semibold">Required</th>
+                      <th className="px-4 py-2 font-semibold">Description</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border-primary/60 text-text-primary">
+                    <tr className="bg-bg-pane/30 transition-colors duration-200">
+                      <td className="px-4 py-3 font-mono text-indigo-600 dark:text-indigo-400">
+                        children
+                      </td>
+                      <td className="px-4 py-3 font-mono">ReactNode</td>
+                      <td className="px-4 py-3 font-medium text-emerald-600 dark:text-emerald-400">
+                        Yes
+                      </td>
+                      <td className="px-4 py-3">
+                        Element(s) that function as the drag handle (e.g., pane header).
+                      </td>
+                    </tr>
+                    <tr className="bg-bg-pane/30 transition-colors duration-200">
+                      <td className="px-4 py-3 font-mono text-indigo-600 dark:text-indigo-400">
+                        className
+                      </td>
+                      <td className="px-4 py-3 font-mono">string</td>
+                      <td className="px-4 py-3 text-text-secondary">No</td>
+                      <td className="px-4 py-3">Custom CSS class for the drag handle wrapper.</td>
+                    </tr>
+                    <tr className="bg-bg-pane/30 transition-colors duration-200">
+                      <td className="px-4 py-3 font-mono text-indigo-600 dark:text-indigo-400">
+                        style
+                      </td>
+                      <td className="px-4 py-3 font-mono">React.CSSProperties</td>
+                      <td className="px-4 py-3 text-text-secondary">No</td>
+                      <td className="px-4 py-3">Inline styles for the drag handle wrapper.</td>
                     </tr>
                   </tbody>
                 </table>

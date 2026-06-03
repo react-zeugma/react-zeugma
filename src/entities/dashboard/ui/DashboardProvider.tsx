@@ -281,6 +281,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
   return (
     <DashboardContext.Provider value={contextValue}>
       <DndContext
+        id="zeugma-dnd-context"
         sensors={sensors}
         collisionDetection={pointerWithin}
         onDragStart={handleDragStart}

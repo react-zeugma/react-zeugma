@@ -457,6 +457,8 @@ function CompleteDemoApplication() {
       const isRow = direction === 'row'
       return (
         <div
+          role="separator"
+          data-direction={direction}
           onPointerDown={onPointerDown}
           className={`transition-all duration-200 z-50 flex items-center justify-center select-none ${
             isRow ? 'w-2 h-full cursor-col-resize' : 'h-2 w-full cursor-row-resize'

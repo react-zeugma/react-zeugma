@@ -2,9 +2,9 @@
 
 import React, { useState } from 'react'
 import { DashboardProvider, PaneTree, Pane, DragHandle, removePane } from 'react-zeugma'
-import type { TreeNode, PaneRenderProps } from 'react-zeugma'
-import { Code2, Box, FolderTree, Globe } from 'lucide-react'
-import { SidebarWrapper } from '../components/sidebar-wrapper'
+import type { TreeNode, PaneRenderProps, ResizerRenderProps, SplitNode } from 'react-zeugma'
+import { Box } from 'lucide-react'
+import { SidebarWrapper, type LogEntry } from '../components/sidebar-wrapper'
 
 interface UIPlaceholderProps {
   title: string
@@ -63,45 +63,6 @@ interface WidgetProps {
   remove: () => void
 }
 
-const ExplorerWidget = (props: WidgetProps) => (
-  <UIPlaceholder
-    title="Explorer"
-    icon={<FolderTree className="w-3.5 h-3.5 text-amber-500" />}
-    {...props}
-  >
-    <div className="flex flex-col items-center justify-center gap-3">
-      <FolderTree className="w-8 h-8 text-amber-500 opacity-80" />
-      <p className="text-text-secondary text-sm leading-relaxed max-w-sm px-4">
-        File Explorer: Browse and manage your workspace file structure. Drag this pane to split and
-        rearrange views.
-      </p>
-    </div>
-  </UIPlaceholder>
-)
-
-const EditorWidget = (props: WidgetProps) => (
-  <UIPlaceholder title="App.tsx" icon={<Code2 className="w-3.5 h-3.5 text-pink-500" />} {...props}>
-    <div className="flex flex-col items-center justify-center gap-3">
-      <Code2 className="w-8 h-8 text-pink-500 opacity-80" />
-      <p className="text-text-secondary text-sm leading-relaxed max-w-sm px-4">
-        Code Editor: Write, edit, and refactor source code files with auto-completions and
-        formatting.
-      </p>
-    </div>
-  </UIPlaceholder>
-)
-
-const PreviewWidget = (props: WidgetProps) => (
-  <UIPlaceholder title="Preview" icon={<Globe className="w-3.5 h-3.5 text-blue-500" />} {...props}>
-    <div className="flex flex-col items-center justify-center gap-3">
-      <Globe className="w-8 h-8 text-blue-500 opacity-80" />
-      <p className="text-text-secondary text-sm leading-relaxed max-w-sm px-4">
-        Live Preview: View your changes rendered in real-time as you modify files in the editor.
-      </p>
-    </div>
-  </UIPlaceholder>
-)
-
 const GenericWidget = ({ title, ...props }: WidgetProps & { title?: string }) => (
   <UIPlaceholder
     title={title || 'Workspace Pane'}
@@ -118,33 +79,19 @@ const GenericWidget = ({ title, ...props }: WidgetProps & { title?: string }) =>
   </UIPlaceholder>
 )
 
-const register: Record<string, React.ComponentType<WidgetProps>> = {
-  explorer: ExplorerWidget,
-  editor: EditorWidget,
-  preview: PreviewWidget,
-}
-
 const getWidgetDetails = (id: string) => {
-  if (id === 'explorer') {
-    return {
-      title: 'Explorer',
-      icon: <FolderTree className="w-3.5 h-3.5 text-amber-500" />,
-    }
+  let title = id
+  if (id.startsWith('random-')) {
+    title = `Widget #${id.substring(7)}`
+  } else if (id.startsWith('widget-')) {
+    title = `Widget #${id.substring(7)}`
+  } else if (id === 'explorer') {
+    title = 'Widget #1'
+  } else if (id === 'editor') {
+    title = 'Widget #2'
+  } else if (id === 'preview') {
+    title = 'Widget #3'
   }
-  if (id === 'editor') {
-    return {
-      title: 'App.tsx',
-      icon: <Code2 className="w-3.5 h-3.5 text-pink-500" />,
-    }
-  }
-  if (id === 'preview') {
-    return {
-      title: 'Preview',
-      icon: <Globe className="w-3.5 h-3.5 text-blue-500" />,
-    }
-  }
-  const isRandom = id.startsWith('random-')
-  const title = isRandom ? `Widget #${id.substring(7)}` : `Pane: ${id}`
   return {
     title,
     icon: <Box className="w-3.5 h-3.5 text-indigo-500" />,
@@ -166,47 +113,89 @@ export function Demo() {
     },
   }
 
-  const [layout, setLayout] = useState<TreeNode | null>(() => {
-    if (typeof window === 'undefined') return defaultIDELayout
-    const saved = localStorage.getItem('zeugma-demo-layout')
-    if (saved) {
-      try {
-        return JSON.parse(saved)
-      } catch {
-        // ignore
-      }
-    }
-    return defaultIDELayout
-  })
-
-  const [autoSave, setAutoSave] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return true
-    const savedToggle = localStorage.getItem('zeugma-demo-autosave')
-    return savedToggle !== 'false'
-  })
-
+  const [layout, setLayout] = useState<TreeNode | null>(defaultIDELayout)
+  const [useCustomResizer, setUseCustomResizer] = useState<boolean>(true)
   const [fullscreenPaneId, setFullscreenPaneId] = useState<string | null>(null)
+  const [snapThreshold, setSnapThreshold] = useState(12)
+  const [minSplit, setMinSplit] = useState(10)
+  const [maxSplit, setMaxSplit] = useState(90)
+  const [logs, setLogs] = useState<LogEntry[]>([])
+
+  React.useEffect(() => {
+    const savedResizer = localStorage.getItem('zeugma-demo-custom-resizer')
+    if (savedResizer !== null) {
+      setUseCustomResizer(savedResizer === 'true')
+    }
+  }, [])
+
+  const handleUseCustomResizerChange = (val: boolean) => {
+    setUseCustomResizer(val)
+    localStorage.setItem('zeugma-demo-custom-resizer', String(val))
+  }
+
+  const addLog = React.useCallback((type: 'drag' | 'resize', message: string) => {
+    const timeStr = new Date().toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    })
+    const entry = {
+      id: Math.random().toString(),
+      time: timeStr,
+      type,
+      message,
+    }
+    setLogs((prev) => [entry, ...prev].slice(0, 10))
+  }, [])
+
+  const handleDragStart = React.useCallback(
+    (activeId: string) => {
+      addLog('drag', `Started dragging "${activeId}"`)
+    },
+    [addLog],
+  )
+
+  const handleDragEnd = React.useCallback(
+    (
+      activeId: string,
+      overId: string | null,
+      dropAction: {
+        type: 'split' | 'swap'
+        direction?: 'row' | 'column'
+        position?: 'top' | 'bottom' | 'left' | 'right' | 'center'
+      } | null,
+    ) => {
+      if (!overId) {
+        addLog('drag', `Released "${activeId}" without drop target`)
+      } else if (dropAction) {
+        const detail =
+          dropAction.type === 'split'
+            ? `split-${dropAction.position} onto "${overId}"`
+            : `swapped with "${overId}"`
+        addLog('drag', `Dropped "${activeId}": ${detail}`)
+      }
+    },
+    [addLog],
+  )
+
+  const handleResizeStart = React.useCallback(
+    (node: SplitNode) => {
+      const directionLabel = node.direction === 'row' ? 'Horizontal' : 'Vertical'
+      addLog('resize', `Start resizing ${directionLabel} split`)
+    },
+    [addLog],
+  )
+
+  const handleResizeEnd = React.useCallback(
+    (node: SplitNode, percentage: number) => {
+      const directionLabel = node.direction === 'row' ? 'Horizontal' : 'Vertical'
+      addLog('resize', `Resized ${directionLabel} split to ${percentage.toFixed(1)}%`)
+    },
+    [addLog],
+  )
 
   const handleLayoutChange = (newLayout: TreeNode | null) => {
     setLayout(newLayout)
-    if (autoSave) {
-      if (newLayout) {
-        localStorage.setItem('zeugma-demo-layout', JSON.stringify(newLayout))
-      } else {
-        localStorage.removeItem('zeugma-demo-layout')
-      }
-    }
-  }
-
-  const handleToggleAutoSave = () => {
-    const newVal = !autoSave
-    setAutoSave(newVal)
-    localStorage.setItem('zeugma-demo-autosave', String(newVal))
-    if (!newVal) {
-      localStorage.removeItem('zeugma-demo-layout')
-    } else if (layout) {
-      localStorage.setItem('zeugma-demo-layout', JSON.stringify(layout))
-    }
   }
 
   const handleRemove = (paneId: string) => {
@@ -218,13 +207,7 @@ export function Demo() {
     return (
       <Pane id={id}>
         {(paneProps: PaneRenderProps) => {
-          const WidgetComponent =
-            register[id] ||
-            ((props: WidgetProps) => {
-              const isRandom = id.startsWith('random-')
-              const title = isRandom ? `Widget #${id.substring(7)}` : `Pane: ${id}`
-              return <GenericWidget title={title} {...props} />
-            })
+          const { title } = getWidgetDetails(id)
 
           return (
             <div
@@ -234,7 +217,8 @@ export function Demo() {
                   : ''
               }`}
             >
-              <WidgetComponent
+              <GenericWidget
+                title={title}
                 isFullscreen={paneProps.isFullscreen}
                 toggleFullscreen={paneProps.toggleFullscreen}
                 remove={paneProps.remove}
@@ -276,6 +260,36 @@ export function Demo() {
         fullscreenPaneId={fullscreenPaneId}
         onFullscreenChange={setFullscreenPaneId}
         onRemove={handleRemove}
+        snapThreshold={snapThreshold}
+        minSplitPercentage={minSplit}
+        maxSplitPercentage={maxSplit}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onResizeStart={handleResizeStart}
+        onResizeEnd={handleResizeEnd}
+        renderResizer={
+          useCustomResizer
+            ? ({ direction, isResizing, onPointerDown }: ResizerRenderProps) => {
+                const isRow = direction === 'row'
+                return (
+                  <div
+                    role="separator"
+                    data-direction={direction}
+                    onPointerDown={onPointerDown}
+                    className={`transition-all duration-150 z-50 flex items-center justify-center select-none ${
+                      isRow ? 'w-1 h-full cursor-col-resize' : 'h-1 w-full cursor-row-resize'
+                    } ${isResizing ? 'bg-indigo-500' : 'bg-transparent hover:bg-indigo-500/20'}`}
+                  >
+                    <div
+                      className={`rounded-full bg-zinc-600 transition-all duration-150 ${
+                        isResizing ? 'bg-indigo-500 opacity-0' : 'opacity-100'
+                      } ${isRow ? 'w-[1.5px] h-3.5' : 'w-3.5 h-[1.5px]'}`}
+                    />
+                  </div>
+                )
+              }
+            : undefined
+        }
         classNames={{
           dropPreview:
             'bg-indigo-500/10 backdrop-blur-[2px] border-2 border-dashed border-indigo-400/50 shadow-[0_0_15px_rgba(99,102,241,0.2)] rounded-lg transition-all duration-200',
@@ -285,7 +299,17 @@ export function Demo() {
             'bg-transparent hover:bg-indigo-500/50 active:bg-indigo-500 transition-colors duration-150 z-50',
         }}
       >
-        <SidebarWrapper autoSave={autoSave} onToggleAutoSave={handleToggleAutoSave}>
+        <SidebarWrapper
+          snapThreshold={snapThreshold}
+          onSnapThresholdChange={setSnapThreshold}
+          minSplitPercentage={minSplit}
+          onMinSplitPercentageChange={setMinSplit}
+          maxSplitPercentage={maxSplit}
+          onMaxSplitPercentageChange={setMaxSplit}
+          logs={logs}
+          useCustomResizer={useCustomResizer}
+          onUseCustomResizerChange={handleUseCustomResizerChange}
+        >
           <div className="h-full w-full p-2 overflow-hidden bg-bg-app">
             {layout ? (
               <PaneTree />

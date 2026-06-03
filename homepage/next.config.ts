@@ -1,8 +1,27 @@
 import type { NextConfig } from 'next'
 import path from 'node:path'
-import { readFileSync } from 'node:fs'
+import { readFileSync, existsSync } from 'node:fs'
 
-const packageJson = JSON.parse(readFileSync(path.resolve(__dirname, './package.json'), 'utf-8'))
+let appVersion = '0.0.0'
+const reactZeugmaPkgPath = path.resolve(__dirname, 'node_modules/react-zeugma/package.json')
+if (existsSync(reactZeugmaPkgPath)) {
+  try {
+    const pkg = JSON.parse(readFileSync(reactZeugmaPkgPath, 'utf-8'))
+    appVersion = pkg.version
+  } catch {
+    // ignore
+  }
+} else {
+  const localPkgPath = path.resolve(__dirname, './package.json')
+  if (existsSync(localPkgPath)) {
+    try {
+      const pkg = JSON.parse(readFileSync(localPkgPath, 'utf-8'))
+      appVersion = pkg.version
+    } catch {
+      // ignore
+    }
+  }
+}
 
 const nextConfig: NextConfig = {
   output: 'standalone',
@@ -11,7 +30,7 @@ const nextConfig: NextConfig = {
     root: __dirname,
   },
   env: {
-    NEXT_PUBLIC_APP_VERSION: packageJson.version,
+    NEXT_PUBLIC_APP_VERSION: appVersion,
   },
 }
 

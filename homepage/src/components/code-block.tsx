@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import { Check, Copy, FileCode2 } from 'lucide-react';
+import { useState } from 'react'
+import { Check, Copy, FileCode2 } from 'lucide-react'
 
 interface CodeBlockProps {
-  code: string;
-  language?: string;
-  filename?: string;
+  code: string
+  language?: string
+  filename?: string
 }
 
 const TOKEN_REGEX = [
@@ -18,82 +18,79 @@ const TOKEN_REGEX = [
   { type: 'component', pattern: /\b(DashboardProvider|PaneTree|Pane|DragHandle|TreeNode)\b/g },
   { type: 'number', pattern: /\b(\d+)\b/g },
   { type: 'tag', pattern: /(&lt;\/?)([a-zA-Z][\w-]*)/g },
-];
+]
 
 function escapeHtml(input: string): string {
-  return input.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return input.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
 function indexToLetters(num: number): string {
-  let str = '';
-  let n = num;
+  let str = ''
+  let n = num
   do {
-    str = String.fromCharCode(97 + (n % 26)) + str;
-    n = Math.floor(n / 26) - 1;
-  } while (n >= 0);
-  return str;
+    str = String.fromCharCode(97 + (n % 26)) + str
+    n = Math.floor(n / 26) - 1
+  } while (n >= 0)
+  return str
 }
 
 function lettersToIndex(str: string): number {
-  let num = 0;
+  let num = 0
   for (let i = 0; i < str.length; i++) {
-    num = num * 26 + (str.charCodeAt(i) - 97 + 1);
+    num = num * 26 + (str.charCodeAt(i) - 97 + 1)
   }
-  return num - 1;
+  return num - 1
 }
 
 function highlight(code: string): string {
-  const escaped = escapeHtml(code);
-  const placeholders: string[] = [];
+  const escaped = escapeHtml(code)
+  const placeholders: string[] = []
 
   const stash = (raw: string, cls: string) => {
-    const token = `___TOKEN_${indexToLetters(placeholders.length)}___`;
-    placeholders.push(`<span class="${cls}">${raw}</span>`);
-    return token;
-  };
+    const token = `___TOKEN_${indexToLetters(placeholders.length)}___`
+    placeholders.push(`<span class="${cls}">${raw}</span>`)
+    return token
+  }
 
-  let working = escaped;
+  let working = escaped
 
   for (const { type, pattern } of TOKEN_REGEX) {
     working = working.replace(pattern, (match) => {
       if (type === 'tag') {
-        return stash(match, 'text-[#e06c75]');
+        return stash(match, 'text-[#e06c75]')
       }
       if (type === 'string' || type === 'comment') {
-        return stash(match, type === 'comment' ? 'text-[#5c6370] italic' : 'text-[#98c379]');
+        return stash(match, type === 'comment' ? 'text-[#5c6370] italic' : 'text-[#98c379]')
       }
       if (type === 'keyword') {
-        return stash(match, 'text-[#c678dd]');
+        return stash(match, 'text-[#c678dd]')
       }
       if (type === 'builtin') {
-        return stash(match, 'text-[#61afef]');
+        return stash(match, 'text-[#61afef]')
       }
       if (type === 'component') {
-        return stash(match, 'text-[#e06c75]');
+        return stash(match, 'text-[#e06c75]')
       }
       if (type === 'number') {
-        return stash(match, 'text-[#d19a66]');
+        return stash(match, 'text-[#d19a66]')
       }
-      return match;
-    });
+      return match
+    })
   }
 
-  return working.replace(
-    /___TOKEN_([a-z]+)___/g,
-    (_, chars) => placeholders[lettersToIndex(chars)],
-  );
+  return working.replace(/___TOKEN_([a-z]+)___/g, (_, chars) => placeholders[lettersToIndex(chars)])
 }
 
 export function CodeBlock({ code, language = 'tsx', filename = 'App.tsx' }: CodeBlockProps) {
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState(false)
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(code).catch(() => {});
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 2000);
-  };
+    navigator.clipboard.writeText(code).catch(() => {})
+    setCopied(true)
+    window.setTimeout(() => setCopied(false), 2000)
+  }
 
-  const html = highlight(code);
+  const html = highlight(code)
 
   return (
     <div className="bg-[#18181b] border border-[#27272a] rounded-xl overflow-hidden flex flex-col w-full text-left shadow-xl">
@@ -120,5 +117,5 @@ export function CodeBlock({ code, language = 'tsx', filename = 'App.tsx' }: Code
         />
       </div>
     </div>
-  );
+  )
 }

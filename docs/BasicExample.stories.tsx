@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { useState } from 'react';
+import type { Meta, StoryObj } from '@storybook/react-vite'
+import { useState } from 'react'
 import {
   DashboardProvider,
   PaneTree,
@@ -7,7 +7,7 @@ import {
   DragHandle,
   type TreeNode,
   type ZeugmaClassNames,
-} from '../src';
+} from '../src'
 
 /**
  * A basic 2×2 grid layout demonstrating the core `react-zeugma` components.
@@ -24,14 +24,14 @@ const PANE_COLORS: Record<string, string> = {
   'top-right': '#1e2030',
   'bottom-left': '#181825',
   'bottom-right': '#11111b',
-};
+}
 
 const PANE_LABELS: Record<string, string> = {
   'top-left': 'Dashboard',
   'top-right': 'Editor',
   'bottom-left': 'Explorer',
   'bottom-right': 'Terminal',
-};
+}
 
 const initialLayout: TreeNode = {
   type: 'split',
@@ -51,7 +51,7 @@ const initialLayout: TreeNode = {
     first: { type: 'pane', paneId: 'top-right' },
     second: { type: 'pane', paneId: 'bottom-right' },
   },
-};
+}
 
 const storyStyles = `
   .story-pane {
@@ -110,18 +110,18 @@ const storyStyles = `
     border: 2px dashed #a6e3a1;
     border-radius: 6px;
   }
-`;
+`
 
 const classNames: ZeugmaClassNames = {
   pane: 'story-pane-wrapper',
   resizer: 'story-resizer',
   dropPreview: 'story-drop-preview',
   swapPreview: 'story-swap-preview',
-};
+}
 
 function StoryPane({ id }: { id: string }) {
-  const bg = PANE_COLORS[id] || '#1e1e2e';
-  const label = PANE_LABELS[id] || id;
+  const bg = PANE_COLORS[id] || '#1e1e2e'
+  const label = PANE_LABELS[id] || id
 
   return (
     <Pane id={id}>
@@ -139,11 +139,11 @@ function StoryPane({ id }: { id: string }) {
         </div>
       )}
     </Pane>
-  );
+  )
 }
 
 function BasicGrid() {
-  const [layout, setLayout] = useState<TreeNode | null>(initialLayout);
+  const [layout, setLayout] = useState<TreeNode | null>(initialLayout)
 
   return (
     <>
@@ -167,7 +167,7 @@ function BasicGrid() {
         </DashboardProvider>
       </div>
     </>
-  );
+  )
 }
 
 const meta: Meta = {
@@ -181,11 +181,11 @@ const meta: Meta = {
       },
     },
   },
-};
+}
 
-export default meta;
+export default meta
 
-type Story = StoryObj;
+type Story = StoryObj
 
 /**
  * The default 2×2 grid layout with four labeled panes.
@@ -194,4 +194,4 @@ type Story = StoryObj;
  */
 export const Default: Story = {
   render: () => <BasicGrid />,
-};
+}

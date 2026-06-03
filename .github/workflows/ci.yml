@@ -20,5 +20,3 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run build
-      - name: Build Homepage
-        run: npm run build --workspace=homepage -- --base=/react-zeugma/

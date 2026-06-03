@@ -1,11 +1,11 @@
-import React, { useRef } from 'react';
-import { useDashboard } from './dashboard-provider';
-import { TreeNode, SplitNode } from '../types';
+import React, { useRef } from 'react'
+import { useDashboard } from './dashboard-provider'
+import { TreeNode, SplitNode } from '../types'
 
 interface PaneTreeProps {
-  tree?: TreeNode | null;
+  tree?: TreeNode | null
   /** Size of the resizer in pixels (default 4) */
-  resizerSize?: number;
+  resizerSize?: number
 }
 
 function updateSplitPercentage(
@@ -13,23 +13,23 @@ function updateSplitPercentage(
   target: SplitNode,
   newPercentage: number,
 ): TreeNode | null {
-  if (tree === null) return null;
+  if (tree === null) return null
   if (tree === target) {
-    return { ...tree, splitPercentage: newPercentage } as SplitNode;
+    return { ...tree, splitPercentage: newPercentage } as SplitNode
   }
   if (tree.type === 'split') {
     return {
       ...tree,
       first: updateSplitPercentage(tree.first, target, newPercentage) || tree.first,
       second: updateSplitPercentage(tree.second, target, newPercentage) || tree.second,
-    };
+    }
   }
-  return tree;
+  return tree
 }
 
 export const PaneTree: React.FC<PaneTreeProps> = ({ tree, resizerSize = 4 }) => {
-  const { layout, onLayoutChange, renderPane, fullscreenPaneId, classNames } = useDashboard();
-  const containerRef = useRef<HTMLDivElement>(null);
+  const { layout, onLayoutChange, renderPane, fullscreenPaneId, classNames } = useDashboard()
+  const containerRef = useRef<HTMLDivElement>(null)
 
   // Fullscreen bypass
   if (fullscreenPaneId && !tree) {
@@ -37,54 +37,54 @@ export const PaneTree: React.FC<PaneTreeProps> = ({ tree, resizerSize = 4 }) => 
       <div style={{ width: '100%', height: '100%', position: 'relative' }}>
         {renderPane(fullscreenPaneId)}
       </div>
-    );
+    )
   }
 
-  const currentNode = tree !== undefined ? tree : layout;
+  const currentNode = tree !== undefined ? tree : layout
 
-  if (!currentNode) return null;
+  if (!currentNode) return null
 
   if (currentNode.type === 'pane') {
     return (
       <div style={{ width: '100%', height: '100%', position: 'relative' }}>
         {renderPane(currentNode.paneId)}
       </div>
-    );
+    )
   }
 
-  const { direction, first, second, splitPercentage } = currentNode;
-  const isRow = direction === 'row';
+  const { direction, first, second, splitPercentage } = currentNode
+  const isRow = direction === 'row'
 
   const handlePointerDown = (e: React.PointerEvent) => {
-    e.preventDefault();
-    const container = containerRef.current;
-    if (!container) return;
+    e.preventDefault()
+    const container = containerRef.current
+    if (!container) return
 
-    document.body.classList.add('zeugma-resizing');
+    document.body.classList.add('zeugma-resizing')
 
-    const rect = container.getBoundingClientRect();
-    const startX = e.clientX;
-    const startY = e.clientY;
-    const startPercentage = splitPercentage;
+    const rect = container.getBoundingClientRect()
+    const startX = e.clientX
+    const startY = e.clientY
+    const startPercentage = splitPercentage
 
     const handlePointerMove = (moveEvent: PointerEvent) => {
       const delta = isRow
         ? ((moveEvent.clientX - startX) / rect.width) * 100
-        : ((moveEvent.clientY - startY) / rect.height) * 100;
-      const newPercentage = Math.max(5, Math.min(95, startPercentage + delta));
-      const newLayout = updateSplitPercentage(layout, currentNode, newPercentage);
-      onLayoutChange(newLayout);
-    };
+        : ((moveEvent.clientY - startY) / rect.height) * 100
+      const newPercentage = Math.max(5, Math.min(95, startPercentage + delta))
+      const newLayout = updateSplitPercentage(layout, currentNode, newPercentage)
+      onLayoutChange(newLayout)
+    }
 
     const handlePointerUp = () => {
-      document.body.classList.remove('zeugma-resizing');
-      document.removeEventListener('pointermove', handlePointerMove);
-      document.removeEventListener('pointerup', handlePointerUp);
-    };
+      document.body.classList.remove('zeugma-resizing')
+      document.removeEventListener('pointermove', handlePointerMove)
+      document.removeEventListener('pointerup', handlePointerUp)
+    }
 
-    document.addEventListener('pointermove', handlePointerMove);
-    document.addEventListener('pointerup', handlePointerUp);
-  };
+    document.addEventListener('pointermove', handlePointerMove)
+    document.addEventListener('pointerup', handlePointerUp)
+  }
 
   return (
     <div
@@ -122,5 +122,5 @@ export const PaneTree: React.FC<PaneTreeProps> = ({ tree, resizerSize = 4 }) => 
         <PaneTree tree={second} resizerSize={resizerSize} />
       </div>
     </div>
-  );
-};
+  )
+}

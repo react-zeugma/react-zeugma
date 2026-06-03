@@ -5,7 +5,8 @@ node_modules/
 dist/
 
 # editor
-.vscode/
+.vscode/*
+!.vscode/settings.json
 .idea/
 *.swp
 *.swo

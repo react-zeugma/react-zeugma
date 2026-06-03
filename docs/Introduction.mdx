@@ -21,8 +21,8 @@ npm install react-zeugma
 ## Quick Start
 
 ```tsx
-import { useState } from 'react';
-import { DashboardProvider, PaneTree, Pane, DragHandle, TreeNode } from 'react-zeugma';
+import { useState } from 'react'
+import { DashboardProvider, PaneTree, Pane, DragHandle, TreeNode } from 'react-zeugma'
 
 const initialLayout: TreeNode = {
   type: 'split',
@@ -30,10 +30,10 @@ const initialLayout: TreeNode = {
   splitPercentage: 50,
   first: { type: 'pane', paneId: 'left' },
   second: { type: 'pane', paneId: 'right' },
-};
+}
 
 export default function App() {
-  const [layout, setLayout] = useState<TreeNode | null>(initialLayout);
+  const [layout, setLayout] = useState<TreeNode | null>(initialLayout)
 
   return (
     <DashboardProvider
@@ -56,7 +56,7 @@ export default function App() {
         <PaneTree />
       </div>
     </DashboardProvider>
-  );
+  )
 }
 ```
 
@@ -69,19 +69,19 @@ export default function App() {
 The layout is represented as a recursive tree data structure. Each node is either a **PaneNode** (a leaf containing content) or a **SplitNode** (an internal node splitting its children horizontally or vertically).
 
 ```ts
-type TreeNode = PaneNode | SplitNode;
+type TreeNode = PaneNode | SplitNode
 
 interface PaneNode {
-  type: 'pane';
-  paneId: string;
+  type: 'pane'
+  paneId: string
 }
 
 interface SplitNode {
-  type: 'split';
-  direction: 'row' | 'column';
-  splitPercentage: number; // 0–100
-  first: TreeNode;
-  second: TreeNode;
+  type: 'split'
+  direction: 'row' | 'column'
+  splitPercentage: number // 0–100
+  first: TreeNode
+  second: TreeNode
 }
 ```
 

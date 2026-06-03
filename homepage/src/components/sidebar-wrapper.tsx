@@ -1,20 +1,20 @@
-import React, { useState } from 'react';
-import { useDashboard, addPane, removePane } from 'react-zeugma';
-import type { TreeNode } from 'react-zeugma';
-import { FolderTree, Code2, Globe, Plus, Trash2, RotateCcw, Sparkles } from 'lucide-react';
+import React, { useState } from 'react'
+import { useDashboard, addPane, removePane } from 'react-zeugma'
+import type { TreeNode } from 'react-zeugma'
+import { FolderTree, Code2, Globe, Plus, Trash2, RotateCcw, Sparkles } from 'lucide-react'
 
 interface SidebarWrapperProps {
-  children: React.ReactNode;
-  autoSave: boolean;
-  onToggleAutoSave: () => void;
+  children: React.ReactNode
+  autoSave: boolean
+  onToggleAutoSave: () => void
 }
 
 interface WidgetMetadata {
-  id: string;
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-  color: string;
+  id: string
+  title: string
+  description: string
+  icon: React.ReactNode
+  color: string
 }
 
 const AVAILABLE_WIDGETS: WidgetMetadata[] = [
@@ -39,7 +39,7 @@ const AVAILABLE_WIDGETS: WidgetMetadata[] = [
     icon: <Globe className="w-4 h-4" />,
     color: 'text-blue-500',
   },
-];
+]
 
 const PRESETS: Record<string, { label: string; layout: TreeNode }> = {
   default: {
@@ -72,46 +72,46 @@ const PRESETS: Record<string, { label: string; layout: TreeNode }> = {
     label: 'Editor Focus',
     layout: { type: 'pane', paneId: 'editor' },
   },
-};
+}
 
 // Helper to check if a pane is present in the tree layout
 function hasPane(tree: TreeNode | null, id: string): boolean {
-  if (!tree) return false;
+  if (!tree) return false
   if (tree.type === 'pane') {
-    return tree.paneId === id;
+    return tree.paneId === id
   }
-  return hasPane(tree.first, id) || hasPane(tree.second, id);
+  return hasPane(tree.first, id) || hasPane(tree.second, id)
 }
 
 export function SidebarWrapper({ children, autoSave, onToggleAutoSave }: SidebarWrapperProps) {
-  const { layout, onLayoutChange } = useDashboard();
-  const [activePreset, setActivePreset] = useState<string>('default');
+  const { layout, onLayoutChange } = useDashboard()
+  const [activePreset, setActivePreset] = useState<string>('default')
 
   const toggleWidget = (id: string, active: boolean) => {
     if (active) {
-      const newLayout = removePane(layout, id);
-      onLayoutChange(newLayout);
+      const newLayout = removePane(layout, id)
+      onLayoutChange(newLayout)
     } else {
-      const newLayout = addPane(layout, id);
-      onLayoutChange(newLayout);
+      const newLayout = addPane(layout, id)
+      onLayoutChange(newLayout)
     }
-  };
+  }
 
   const handleApplyPreset = (presetKey: string) => {
-    setActivePreset(presetKey);
-    onLayoutChange(PRESETS[presetKey].layout);
-  };
+    setActivePreset(presetKey)
+    onLayoutChange(PRESETS[presetKey].layout)
+  }
 
   const handleReset = () => {
-    setActivePreset('default');
-    onLayoutChange(PRESETS.default.layout);
-  };
+    setActivePreset('default')
+    onLayoutChange(PRESETS.default.layout)
+  }
 
   const handleAddRandomWidget = () => {
-    const randomId = `random-${Math.floor(100 + Math.random() * 900)}`;
-    const newLayout = addPane(layout, randomId);
-    onLayoutChange(newLayout);
-  };
+    const randomId = `random-${Math.floor(100 + Math.random() * 900)}`
+    const newLayout = addPane(layout, randomId)
+    onLayoutChange(newLayout)
+  }
 
   return (
     <div className="flex h-full w-full overflow-hidden bg-bg-app transition-colors duration-200">
@@ -182,7 +182,7 @@ export function SidebarWrapper({ children, autoSave, onToggleAutoSave }: Sidebar
           {/* Widgets List */}
           <div className="space-y-2">
             {AVAILABLE_WIDGETS.map((widget) => {
-              const isActive = hasPane(layout, widget.id);
+              const isActive = hasPane(layout, widget.id)
               return (
                 <div
                   key={widget.id}
@@ -240,7 +240,7 @@ export function SidebarWrapper({ children, autoSave, onToggleAutoSave }: Sidebar
                     {widget.description}
                   </p>
                 </div>
-              );
+              )
             })}
           </div>
         </div>
@@ -249,5 +249,5 @@ export function SidebarWrapper({ children, autoSave, onToggleAutoSave }: Sidebar
       {/* Main Content Area */}
       <div className="flex-1 min-w-0 h-full relative overflow-hidden bg-bg-app">{children}</div>
     </div>
-  );
+  )
 }

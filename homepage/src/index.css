@@ -103,6 +103,33 @@ body,
   border-radius: 0px !important;
 }
 
+/* Homepage mosaic interactive demo */
+.mosaic-demo {
+  container-type: inline-size;
+}
+
+.mosaic-tile {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: clamp(1.25rem, 8cqi, 3rem);
+  font-family: serif;
+  user-select: none;
+  cursor: grab;
+  border-radius: 0.5rem;
+  box-shadow:
+    inset 0 -3px 5px rgba(0, 0, 0, 0.4),
+    0 3px 5px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(0, 0, 0, 0.4);
+}
+
+.mosaic-tile:active {
+  cursor: grabbing;
+}
+
 /* Circular Theme Switching view transition overrides */
 ::view-transition-old(root),
 ::view-transition-new(root) {

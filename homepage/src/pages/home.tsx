@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
 import { Boxes, MousePointer2, Focus, Layout, ArrowRight, Copy } from 'lucide-react'
 import { useNavigate } from '@tanstack/react-router'
+import { MosaicDemo } from '../components/mosaic'
 import { CodeBlock } from '../components/code-block'
 import { Footer } from '../components/footer'
 
@@ -70,58 +70,8 @@ export default function App() {
   );
 }`
 
-const MOSAIC_LETTERS = ['Z', 'E', 'U', 'G', 'M', 'A']
-const TILE_COLORS = [
-  '#2A4259', // Euphrates Blue
-  '#C29B47', // Ancient Gold
-  '#8B5A44', // Brown Clay
-  '#B5543C', // Terracotta
-  '#596643', // Olive Green
-  '#D8BA8E', // Sandstone
-]
-
-interface MosaicTileProps {
-  letter: string
-  index: number
-  animate: boolean
-}
-
-function MosaicTile({ letter, index, animate }: MosaicTileProps) {
-  const color = TILE_COLORS[index % TILE_COLORS.length]
-  const isLight = ['#D8BA8E', '#C29B47'].includes(color)
-  return (
-    <div
-      className={`w-full aspect-square flex items-center justify-center font-bold text-3xl md:text-4xl rounded shadow-[inset_0_-3px_5px_rgba(0,0,0,0.4),0_3px_5px_rgba(0,0,0,0.5)] border border-black/40 select-none transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${
-        animate
-          ? 'opacity-100 translate-y-0 scale-100 rotate-0'
-          : 'opacity-0 translate-y-8 scale-90 rotate-[-8deg]'
-      }`}
-      style={{
-        background: color,
-        color: isLight ? '#1A2A3A' : '#E6D3A7',
-        transitionDelay: `${index * 120}ms`,
-      }}
-    >
-      {letter}
-    </div>
-  )
-}
-
 export function Home() {
   const navigate = useNavigate()
-  const [mosaicVisible, setMosaicVisible] = useState(false)
-  const mosaicRef = useRef<HTMLDivElement | null>(null)
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) setMosaicVisible(true)
-      },
-      { threshold: 0.3 },
-    )
-    if (mosaicRef.current) observer.observe(mosaicRef.current)
-    return () => observer.disconnect()
-  }, [])
 
   return (
     <div className="flex flex-col min-h-screen bg-bg-app">
@@ -205,7 +155,7 @@ export function Home() {
         </div>
       </section>
 
-      {/* Mosaic/Story */}
+      {/* Mosaic/Story — Interactive react-zeugma Demo */}
       <section className="py-16 px-6 border-t border-border-primary bg-bg-sidebar overflow-hidden relative">
         <div className="absolute inset-0 opacity-[0.02] bg-[url('https://www.transparenttextures.com/patterns/concrete-wall.png')] pointer-events-none" />
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center relative z-10">
@@ -220,22 +170,20 @@ export function Home() {
               <p>
                 Named after the ancient Greco-Roman city in{' '}
                 <strong className="text-text-primary">Gaziantep, Turkey</strong>, world-renowned for
-                its breathtaking mosaics. Just as Zeugma's ancient artisans assembled countless
+                its breathtaking mosaics. Just as Zeugma&apos;s ancient artisans assembled countless
                 tesserae into grand masterpieces,{' '}
                 <strong className="text-text-primary">react-zeugma</strong> lets you assemble
                 distinct panes into one seamless workspace.
               </p>
             </div>
+
+            <p className="text-text-muted text-[11px] mt-5 flex items-center gap-1.5 italic">
+              <MousePointer2 className="w-3 h-3 shrink-0" />
+              Drag tiles to rearrange · Split by dragging to edges
+            </p>
           </div>
 
-          <div
-            ref={mosaicRef}
-            className="grid grid-cols-3 gap-2 w-full max-w-[240px] md:max-w-[280px] ml-auto select-none items-center justify-center h-fit"
-          >
-            {MOSAIC_LETTERS.map((letter, i) => (
-              <MosaicTile key={letter} letter={letter} index={i} animate={mosaicVisible} />
-            ))}
-          </div>
+          <MosaicDemo />
         </div>
       </section>
 

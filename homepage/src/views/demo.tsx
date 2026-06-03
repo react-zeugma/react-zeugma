@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useState } from 'react'
 import { DashboardProvider, PaneTree, Pane, DragHandle, removePane } from 'react-zeugma'
 import type { TreeNode, PaneRenderProps } from 'react-zeugma'
@@ -22,10 +24,8 @@ const UIPlaceholder = ({
   remove,
 }: UIPlaceholderProps) => (
   <div className="h-full w-full bg-bg-pane flex flex-col relative overflow-hidden group transition-colors duration-200">
-    {/* Drag Handle Top Bar */}
     <DragHandle>
       <div className="px-3 py-2 bg-bg-sidebar border-b border-border-primary flex items-center justify-between cursor-grab active:cursor-grabbing hover:bg-bg-sidebar/95 transition-colors relative select-none">
-        {/* Left side: Icon and Title */}
         <div className="flex items-center gap-2 z-10 pointer-events-none">
           {icon}
           <span className="text-[11px] uppercase tracking-wider text-text-primary font-bold">
@@ -33,18 +33,15 @@ const UIPlaceholder = ({
           </span>
         </div>
 
-        {/* Right side: macOS style action dots (Close and Fullscreen only) */}
         <div
           className="flex gap-1.5 items-center z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
           onPointerDown={(e) => e.stopPropagation()}
         >
-          {/* Zoom/Fullscreen - Green on hover, neutral grey by default */}
           <button
             onClick={toggleFullscreen}
             className="w-2.5 h-2.5 rounded-full bg-text-muted hover:bg-[#27c93f] transition-colors cursor-pointer"
             title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
           />
-          {/* Close - Red on hover, neutral grey by default */}
           <button
             onClick={remove}
             className="w-2.5 h-2.5 rounded-full bg-text-muted hover:bg-[#ff5f56] transition-colors cursor-pointer"
@@ -54,7 +51,6 @@ const UIPlaceholder = ({
       </div>
     </DragHandle>
 
-    {/* Content Area */}
     <div className="flex-1 overflow-auto bg-bg-pane-inner text-sm flex flex-col justify-center items-center text-center p-4 transition-colors duration-200">
       {children}
     </div>
@@ -171,6 +167,7 @@ export function Demo() {
   }
 
   const [layout, setLayout] = useState<TreeNode | null>(() => {
+    if (typeof window === 'undefined') return defaultIDELayout
     const saved = localStorage.getItem('zeugma-demo-layout')
     if (saved) {
       try {
@@ -183,6 +180,7 @@ export function Demo() {
   })
 
   const [autoSave, setAutoSave] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return true
     const savedToggle = localStorage.getItem('zeugma-demo-autosave')
     return savedToggle !== 'false'
   })
@@ -269,6 +267,7 @@ export function Demo() {
 
   return (
     <div className="h-[calc(100vh-3.5rem)] bg-bg-app overflow-hidden transition-colors duration-200">
+      <h1 className="sr-only">react-zeugma Live Workspace Demo</h1>
       <DashboardProvider
         layout={layout}
         onChange={handleLayoutChange}

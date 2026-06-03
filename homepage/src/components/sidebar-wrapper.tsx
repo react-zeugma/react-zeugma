@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useState } from 'react'
 import { useDashboard, addPane, removePane } from 'react-zeugma'
 import type { TreeNode } from 'react-zeugma'

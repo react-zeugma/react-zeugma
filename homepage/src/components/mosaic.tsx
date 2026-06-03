@@ -1,3 +1,5 @@
+'use client'
+
 import { useEffect, useRef, useState } from 'react'
 import { DashboardProvider, PaneTree, Pane, DragHandle } from 'react-zeugma'
 import type { TreeNode } from 'react-zeugma'

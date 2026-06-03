@@ -1,6 +1,20 @@
+'use client'
+
+import { Suspense } from 'react'
+import Link from 'next/link'
 import { Boxes, MousePointer2, Focus, Layout, ArrowRight, Copy } from 'lucide-react'
-import { useNavigate } from '@tanstack/react-router'
-import { MosaicDemo } from '../components/mosaic'
+import dynamic from 'next/dynamic'
+
+const MosaicDemo = dynamic(
+  () => import('../components/mosaic').then((mod) => ({ default: mod.MosaicDemo })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="mosaic-demo w-[280px] h-[280px] md:w-[320px] md:h-[320px] ml-auto bg-bg-pane border border-border-primary rounded-xl animate-pulse" />
+    ),
+  },
+)
+
 import { CodeBlock } from '../components/code-block'
 import { Footer } from '../components/footer'
 
@@ -71,20 +85,17 @@ export default function App() {
 }`
 
 export function Home() {
-  const navigate = useNavigate()
-
   return (
     <div className="flex flex-col min-h-screen bg-bg-app">
       {/* Hero Section */}
       <section className="relative flex-1 flex flex-col items-center justify-center text-center px-6 py-24 overflow-hidden min-h-[80vh]">
-        {/* Abstract Background Elements */}
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none" />
         <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-emerald-500/5 blur-[100px] rounded-full pointer-events-none" />
 
         <div className="relative inline-flex items-center gap-2 bg-bg-sidebar border border-border-primary backdrop-blur-sm rounded-full px-3 py-1 mb-8">
           <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
           <span className="text-[10px] font-semibold tracking-wide text-text-secondary uppercase">
-            v{__APP_VERSION__} • React 18 & 19 Ready
+            v{process.env.NEXT_PUBLIC_APP_VERSION} &bull; React 18 & 19 Ready
           </span>
         </div>
 
@@ -102,12 +113,12 @@ export function Home() {
         </p>
 
         <div className="flex flex-col sm:flex-row items-center gap-4 relative">
-          <button
-            onClick={() => navigate({ to: '/demo' })}
+          <Link
+            href="/demo"
             className="w-full sm:w-auto px-8 py-3.5 bg-text-primary hover:bg-text-primary/90 text-bg-app rounded-lg font-bold flex items-center justify-center gap-2 transition-transform hover:scale-105 cursor-pointer"
           >
             Open Live Demo <ArrowRight className="w-4 h-4" />
-          </button>
+          </Link>
 
           <code
             className="w-full sm:w-auto px-6 py-3.5 bg-bg-pane border border-border-primary hover:border-border-secondary rounded-lg text-sm font-mono text-text-primary flex items-center gap-3 transition-colors cursor-pointer group"
@@ -179,11 +190,17 @@ export function Home() {
 
             <p className="text-text-muted text-[11px] mt-5 flex items-center gap-1.5 italic">
               <MousePointer2 className="w-3 h-3 shrink-0" />
-              Drag tiles to rearrange · Split by dragging to edges
+              Drag tiles to rearrange &middot; Split by dragging to edges
             </p>
           </div>
 
-          <MosaicDemo />
+          <Suspense
+            fallback={
+              <div className="mosaic-demo w-[280px] h-[280px] md:w-[320px] md:h-[320px] ml-auto bg-bg-pane border border-border-primary rounded-xl animate-pulse" />
+            }
+          >
+            <MosaicDemo />
+          </Suspense>
         </div>
       </section>
 

@@ -19,7 +19,6 @@ import {
 } from '../../../shared/lib/tree'
 import { DEFAULT_DRAG_ACTIVATION_DISTANCE, DEFAULT_SNAP_THRESHOLD } from '../../../shared/config'
 import { DashboardContext, ZeugmaClassNames, ResizerRenderProps } from '../model/context'
-import { RootDropZones } from './RootDropZone'
 
 /** Cursor-following overlay rendered via portal */
 const CursorOverlay: React.FC<{
@@ -303,11 +302,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
     ],
   )
 
-  const hasOtherPanes = useMemo(() => {
-    if (!activeId) return false
-    return removePane(layout, activeId) !== null
-  }, [layout, activeId])
-
   return (
     <DashboardContext.Provider value={contextValue}>
       <DndContext
@@ -317,21 +311,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div
-          className="zeugma-dashboard-root"
-          style={{
-            position: 'relative',
-            width: '100%',
-            height: '100%',
-          }}
-        >
-          {children}
-          <RootDropZones
-            activeId={activeId}
-            hasOtherPanes={hasOtherPanes}
-            dropPreviewClassName={classNames.dropPreview}
-          />
-        </div>
+        {children}
       </DndContext>
       {activeId && renderDragOverlay && (
         <CursorOverlay

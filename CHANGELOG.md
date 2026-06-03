@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 0.5.1
+
+### Patch Changes
+
+- Fixed root-level drop zones to be bounded by the panels container (PaneTree) instead of occupying the entire browser viewport (which was covering sidebars and controls).
+
 ## 0.5.0
 
 ### Minor Changes

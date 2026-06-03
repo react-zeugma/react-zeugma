@@ -1,5 +1,7 @@
 ---
-'react-zeugma': patch
+'react-zeugma': minor
 ---
 
-Refactored react-zeugma to Feature Sliced Design (FSD) architecture, applied frontend performance optimizations, and incorporated the resizer edge snapping feature.
+- **Feature**: Added resizer edge snapping (magnet snapping). Resizing edges will now snap to adjacent pane edges when they come within a configurable threshold.
+- **Refactor**: Re-architected the folder structure into Feature Sliced Design (FSD) layers (`shared`, `entities`, `features`, `widgets`), establishing clean and unidirectional dependencies.
+- **Performance**: Optimized rendering by memoizing context values in `DashboardProvider` and `Pane` to prevent unnecessary component re-renders during dragging and resizing.

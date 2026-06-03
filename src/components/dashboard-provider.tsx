@@ -169,6 +169,7 @@ interface DashboardProviderProps {
   fullscreenPaneId?: string | null
   onFullscreenChange?: (paneId: string | null) => void
   onRemove?: (paneId: string) => void
+  dragActivationDistance?: number
   children: ReactNode
 }
 
@@ -181,13 +182,14 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
   fullscreenPaneId = null,
   onFullscreenChange,
   onRemove,
+  dragActivationDistance = 8,
   children,
 }) => {
   const [activeId, setActiveId] = useState<string | null>(null)
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
-      activationConstraint: { distance: 8 },
+      activationConstraint: { distance: dragActivationDistance },
     }),
   )
 

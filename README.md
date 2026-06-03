@@ -49,8 +49,8 @@ npm install react-zeugma
 Import the core components and configure the layout state inside your React application.
 
 ```tsx
-import { useState } from 'react';
-import { DashboardProvider, PaneTree, Pane, DragHandle, TreeNode } from 'react-zeugma';
+import { useState } from 'react'
+import { DashboardProvider, PaneTree, Pane, DragHandle, TreeNode } from 'react-zeugma'
 
 const initialLayout: TreeNode = {
   type: 'split',
@@ -64,7 +64,7 @@ const initialLayout: TreeNode = {
     first: { type: 'pane', paneId: 'editor' },
     second: { type: 'pane', paneId: 'preview' },
   },
-};
+}
 
 function MyPane({ id }: { id: string }) {
   return (
@@ -83,11 +83,11 @@ function MyPane({ id }: { id: string }) {
         </div>
       )}
     </Pane>
-  );
+  )
 }
 
 export default function Dashboard() {
-  const [layout, setLayout] = useState<TreeNode | null>(initialLayout);
+  const [layout, setLayout] = useState<TreeNode | null>(initialLayout)
 
   return (
     <DashboardProvider layout={layout} onChange={setLayout} renderPane={(id) => <MyPane id={id} />}>
@@ -95,7 +95,7 @@ export default function Dashboard() {
         <PaneTree />
       </div>
     </DashboardProvider>
-  );
+  )
 }
 ```
 
@@ -209,36 +209,36 @@ Use custom CSS or styling rules to style resizers, dragging states, drop preview
 Full TypeScript type definitions utilized in the dashboard layout configuration.
 
 ```ts
-export type SplitDirection = 'row' | 'column';
+export type SplitDirection = 'row' | 'column'
 
 export interface SplitNode {
-  type: 'split';
-  direction: SplitDirection;
-  first: TreeNode;
-  second: TreeNode;
-  splitPercentage: number;
+  type: 'split'
+  direction: SplitDirection
+  first: TreeNode
+  second: TreeNode
+  splitPercentage: number
 }
 
 export interface PaneNode {
-  type: 'pane';
-  paneId: string;
+  type: 'pane'
+  paneId: string
 }
 
-export type TreeNode = SplitNode | PaneNode;
+export type TreeNode = SplitNode | PaneNode
 
 export interface ZeugmaClassNames {
-  pane?: string;
-  dropPreview?: string;
-  swapPreview?: string;
-  dragOverlay?: string;
-  resizer?: string;
+  pane?: string
+  dropPreview?: string
+  swapPreview?: string
+  dragOverlay?: string
+  resizer?: string
 }
 
 export interface PaneRenderProps {
-  isDragging: boolean;
-  isFullscreen: boolean;
-  toggleFullscreen: () => void;
-  remove: () => void;
+  isDragging: boolean
+  isFullscreen: boolean
+  toggleFullscreen: () => void
+  remove: () => void
 }
 ```
 

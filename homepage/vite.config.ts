@@ -12,7 +12,6 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
-      'react-zeugma': path.resolve(__dirname, '../src'),
       '@': path.resolve(__dirname, './src'),
     },
   },

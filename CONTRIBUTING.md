@@ -105,11 +105,11 @@ react-zeugma/
 │   ├── components/       # React components
 │   ├── types.ts          # Core TypeScript types
 │   └── index.ts          # Public API entry point
-├── demo/                 # Interactive Vite demo app
+├── homepage/             # Interactive Vite demo app
 ├── docs/                 # Storybook stories & MDX documentation
 ├── .storybook/           # Storybook configuration
 ├── .changeset/           # Changeset configuration
-├── .github/workflows/    # CI (lint, build)
+├── .github/workflows/    # CI and release workflows
 ├── dist/                 # Build output (gitignored)
 └── package.json
 ```
@@ -118,14 +118,11 @@ react-zeugma/
 
 ## Releasing
 
-CI only runs lint, typecheck, and build. Releases are done locally.
+Versioning and releasing to NPM are fully automated via GitHub Actions using Changesets:
 
-```bash
-npx changeset                # optional: note the change (patch/minor/major)
-npm run version              # bumps package.json + CHANGELOG.md
-cp .env.example .env         # NPM_TOKEN= npm token with bypass 2FA
-npm run release              # build + publish to npm
-```
+1. **Add a changeset**: Before committing your code, run `npx changeset` to create a changeset description. Commit the generated file with your PR.
+2. **Merge PR**: When a PR is merged into `master`, the workflow runs. If new changesets are present, it will automatically open or update a **"Version Packages"** Pull Request.
+3. **Publish to NPM**: Merging the **"Version Packages"** Pull Request into `master` triggers the release workflow to build the library, publish it to NPM, and create the corresponding Git tag and GitHub Release.
 
 ---
 

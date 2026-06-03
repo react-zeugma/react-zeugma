@@ -1,9 +1,8 @@
-import React, { createContext, useContext } from 'react'
+import React, { useMemo } from 'react'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
-import { useDashboard } from './dashboard-provider'
-
-// Internal context for drag listeners
-const DragListenersCtx = createContext<Record<string, unknown> | null>(null)
+import { useDashboard } from '../../dashboard'
+import { DragListenersCtx } from '../model/context'
+import { PaneRenderProps } from '../model/types'
 
 interface DropZoneProps {
   id: string
@@ -124,13 +123,6 @@ const DropZone: React.FC<DropZoneProps> = ({ id, position, activeClassName }) =>
   )
 }
 
-export interface PaneRenderProps {
-  isDragging: boolean
-  isFullscreen: boolean
-  toggleFullscreen: () => void
-  remove: () => void
-}
-
 interface PaneProps {
   id: string
   children: (props: PaneRenderProps) => React.ReactNode
@@ -157,8 +149,17 @@ export const Pane: React.FC<PaneProps> = ({ id, children, style }) => {
     },
   }
 
+  // Best practice: Memoize drag context value to prevent unnecessary re-renders of the drag handle.
+  const contextValue = useMemo(
+    () => ({
+      ...listeners,
+      ...attributes,
+    }),
+    [listeners, attributes],
+  )
+
   return (
-    <DragListenersCtx.Provider value={{ ...listeners, ...attributes }}>
+    <DragListenersCtx.Provider value={contextValue}>
       <div
         ref={setNodeRef}
         className={classNames.pane}
@@ -195,30 +196,5 @@ export const Pane: React.FC<PaneProps> = ({ id, children, style }) => {
         )}
       </div>
     </DragListenersCtx.Provider>
-  )
-}
-
-/**
- * Place inside a Pane to make an element the drag handle.
- */
-interface DragHandleProps {
-  children: React.ReactNode
-  className?: string
-  style?: React.CSSProperties
-}
-
-export const DragHandle: React.FC<DragHandleProps> = ({ children, className, style }) => {
-  const dragProps = useContext(DragListenersCtx)
-  if (!dragProps) {
-    throw new Error('<DragHandle> must be used inside a <Pane>')
-  }
-  return (
-    <div
-      className={className}
-      style={{ cursor: 'grab', userSelect: 'none', ...style }}
-      {...dragProps}
-    >
-      {children}
-    </div>
   )
 }

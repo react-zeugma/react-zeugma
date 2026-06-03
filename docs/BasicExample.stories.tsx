@@ -95,7 +95,8 @@ const storyStyles = `
     transition: background 0.15s ease;
   }
 
-  .story-resizer:hover {
+  .story-resizer:hover,
+  .story-resizer[data-resizing="true"] {
     background: #89b4fa;
   }
 

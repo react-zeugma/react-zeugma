@@ -1,13 +1,8 @@
-export {
-  DashboardProvider,
-  useDashboard,
-  removePane,
-  splitPane,
-  swapPanes,
-  addPane,
-} from './components/dashboard-provider'
-export type { ZeugmaClassNames } from './components/dashboard-provider'
-export { PaneTree } from './components/pane-tree'
-export { Pane, DragHandle } from './components/pane'
-export type { PaneRenderProps } from './components/pane'
-export * from './types'
+export { DashboardProvider } from './entities/dashboard'
+export type { ZeugmaClassNames } from './entities/dashboard'
+export { useDashboard } from './entities/dashboard'
+export { useResizer } from './features/resize-pane'
+export { PaneTree } from './widgets/pane-tree'
+export { Pane, DragHandle } from './entities/pane'
+export type { PaneRenderProps } from './entities/pane'
+export * from './shared'

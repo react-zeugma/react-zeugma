@@ -91,7 +91,7 @@ The root context provider. It handles the drag-and-drop event loop and coordinat
 - \`onRemove?: (paneId: string) => void\` — (Optional) Callback triggered when a pane is closed/removed.
 - \`dragActivationDistance?: number\` — (Optional) Minimum pointer drag distance (in pixels) required to activate dragging. Defaults to \`8\`.
 - \`onDragStart?: (activeId: string) => void\` — (Optional) Callback triggered when dragging starts on a pane.
-- \`onDragEnd?: (activeId: string, overId: string | null, dropAction: any) => void\` — (Optional) Callback triggered when dragging ends.
+- \`onDragEnd?: (activeId: string, overId: string | null, dropAction: any) => void\` — (Optional) Callback triggered when dragging ends. The \`overId\` will be \`'root'\` if the pane was dropped onto the outer dashboard boundaries to split the root layout.
 - \`onResizeStart?: (currentNode: SplitNode) => void\` — (Optional) Callback triggered when resizing starts.
 - \`onResize?: (currentNode: SplitNode, percentage: number) => void\` — (Optional) Callback triggered during resizing.
 - \`onResizeEnd?: (currentNode: SplitNode, percentage: number) => void\` — (Optional) Callback triggered when resizing ends.
@@ -148,6 +148,8 @@ Import these helpers from \`react-zeugma\` to manipulate the tree layout program
   Removes a pane from the tree and collapses the leftover sibling split node.
 - **\`splitPane(tree: TreeNode | null, targetId: string, direction: SplitDirection, splitType: 'left' | 'right' | 'top' | 'bottom', paneToAdd: string): TreeNode | null\`**
   Splits a specific target pane by nesting it under a new \`SplitNode\` along with a new pane.
+- **\`splitRoot(tree: TreeNode | null, draggingId: string, splitType: 'left' | 'right' | 'top' | 'bottom'): TreeNode | null\`**
+  Splits the entire dashboard tree at the root, placing the dragged pane on one half and the remaining layout tree on the other.
 - **\`swapPanes(tree: TreeNode | null, idA: string, idB: string): TreeNode | null\`**
   Swaps the positions of two panes in the tree.
 
@@ -787,7 +789,9 @@ export default function Dashboard() {
                       </td>
                       <td className="px-4 py-3 text-text-secondary">No</td>
                       <td className="px-4 py-3">
-                        Callback triggered when dragging ends, providing swap or split details.
+                        Callback triggered when dragging ends, providing swap or split details. The{' '}
+                        <code>overId</code> is set to <code>'root'</code> if dropped onto outer
+                        boundaries to split the entire dashboard root.
                       </td>
                     </tr>
                     <tr className="bg-bg-pane/30 transition-colors duration-200">
@@ -1128,6 +1132,17 @@ export default function Dashboard() {
                   Splits the targeted <code>targetId</code> pane inside the tree with{' '}
                   <code>direction</code> (<em>row</em> / <em>column</em>) and type (<em>left</em>,{' '}
                   <em>right</em>, <em>top</em>, <em>bottom</em>) to insert <code>paneToAdd</code>.
+                </p>
+              </div>
+
+              <div className="space-y-1.5">
+                <h4 className="font-mono text-sm text-indigo-600 dark:text-indigo-400 font-bold">
+                  splitRoot(tree, draggingId, splitType)
+                </h4>
+                <p className="text-text-secondary text-xs pl-4 leading-relaxed">
+                  Splits the entire dashboard tree at the root, placing the dragged{' '}
+                  <code>draggingId</code> pane on one half and the rest of the layout tree on the
+                  other.
                 </p>
               </div>
             </div>

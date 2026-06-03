@@ -179,6 +179,10 @@ Swaps the positions of `idA` and `idB` nodes directly inside the tree structure.
 
 Splits the targeted `targetId` pane inside the tree with `direction` (_row_ / _column_) and type (_left_, _right_, _top_, _bottom_) to insert `paneToAdd`.
 
+#### `splitRoot(tree: TreeNode | null, draggingId: string, splitType: 'left' | 'right' | 'top' | 'bottom'): TreeNode | null`
+
+Splits the entire dashboard tree at the root, placing the dragged `draggingId` pane on one half and the rest of the layout tree on the other.
+
 ---
 
 ## Custom Styling

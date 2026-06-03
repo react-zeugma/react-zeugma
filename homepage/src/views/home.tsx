@@ -1,8 +1,8 @@
 'use client'
 
-import { Suspense } from 'react'
+import { Suspense, useState } from 'react'
 import Link from 'next/link'
-import { Boxes, MousePointer2, Focus, Layout, ArrowRight, Copy } from 'lucide-react'
+import { Boxes, MousePointer2, Focus, Layout, ArrowRight, Copy, Check } from 'lucide-react'
 import dynamic from 'next/dynamic'
 
 const MosaicDemo = dynamic(
@@ -85,6 +85,14 @@ export default function App() {
 }`
 
 export function Home() {
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText('npm i react-zeugma')
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-bg-app">
       {/* Hero Section */}
@@ -122,10 +130,14 @@ export function Home() {
 
           <code
             className="w-full sm:w-auto px-6 py-3.5 bg-bg-pane border border-border-primary hover:border-border-secondary rounded-lg text-sm font-mono text-text-primary flex items-center gap-3 transition-colors cursor-pointer group"
-            onClick={() => navigator.clipboard.writeText('npm i react-zeugma')}
+            onClick={handleCopy}
           >
             <span className="text-emerald-500">$</span> npm i react-zeugma
-            <Copy className="w-3.5 h-3.5 text-text-muted group-hover:text-text-primary transition-colors" />
+            {copied ? (
+              <Check className="w-3.5 h-3.5 text-emerald-500 transition-colors" />
+            ) : (
+              <Copy className="w-3.5 h-3.5 text-text-muted group-hover:text-text-primary transition-colors" />
+            )}
           </code>
         </div>
       </section>

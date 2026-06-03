@@ -28,7 +28,7 @@
   "bugs": {
     "url": "https://github.com/yusufarsln98/react-zeugma/issues"
   },
-  "homepage": "https://github.com/yusufarsln98/react-zeugma#readme",
+  "homepage": "https://react-zeugma.vercel.app",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"

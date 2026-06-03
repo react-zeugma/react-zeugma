@@ -90,6 +90,14 @@ The root context provider. It handles the drag-and-drop event loop and coordinat
 - \`onFullscreenChange?: (paneId: string | null) => void\` — (Optional) Callback triggered when a pane enters/leaves fullscreen.
 - \`onRemove?: (paneId: string) => void\` — (Optional) Callback triggered when a pane is closed/removed.
 - \`dragActivationDistance?: number\` — (Optional) Minimum pointer drag distance (in pixels) required to activate dragging. Defaults to \`8\`.
+- \`onDragStart?: (activeId: string) => void\` — (Optional) Callback triggered when dragging starts on a pane.
+- \`onDragEnd?: (activeId: string, overId: string | null, dropAction: any) => void\` — (Optional) Callback triggered when dragging ends.
+- \`onResizeStart?: (currentNode: SplitNode) => void\` — (Optional) Callback triggered when resizing starts.
+- \`onResize?: (currentNode: SplitNode, percentage: number) => void\` — (Optional) Callback triggered during resizing.
+- \`onResizeEnd?: (currentNode: SplitNode, percentage: number) => void\` — (Optional) Callback triggered when resizing ends.
+- \`renderResizer?: (props: ResizerRenderProps) => ReactNode\` — (Optional) Custom resizer bar component renderer.
+- \`minSplitPercentage?: number\` — (Optional) Minimum resizing limit percentage (defaults to \`5\`).
+- \`maxSplitPercentage?: number\` — (Optional) Maximum resizing limit percentage (defaults to \`95\`).
 
 ### \`<PaneTree>\`
 
@@ -142,6 +150,14 @@ Import these helpers from \`react-zeugma\` to manipulate the tree layout program
   Splits a specific target pane by nesting it under a new \`SplitNode\` along with a new pane.
 - **\`swapPanes(tree: TreeNode | null, idA: string, idB: string): TreeNode | null\`**
   Swaps the positions of two panes in the tree.
+
+Alternatively, you can consume the convenient mutation helpers directly from the **\`useDashboard()\`** context hook inside pane components without importing utilities:
+
+- **\`removePane(paneId: string) => void\`**
+- **\`addPane(paneId: string) => void\`**
+- **\`swapPanes(paneIdA: string, paneIdB: string) => void\`**
+- **\`splitPane(targetId: string, direction: SplitDirection, splitType: string, paneToAdd: string) => void\`**
+- **\`updateSplitPercentage(currentNode: SplitNode, percentage: number) => void\`**
 
 ---
 
@@ -752,6 +768,94 @@ export default function Dashboard() {
                         Defaults to <code>8</code>.
                       </td>
                     </tr>
+                    <tr className="bg-bg-pane/30 transition-colors duration-200">
+                      <td className="px-4 py-3 font-mono text-indigo-600 dark:text-indigo-400">
+                        onDragStart
+                      </td>
+                      <td className="px-4 py-3 font-mono">(activeId: string) =&gt; void</td>
+                      <td className="px-4 py-3 text-text-secondary">No</td>
+                      <td className="px-4 py-3">
+                        Callback triggered when dragging starts on a pane.
+                      </td>
+                    </tr>
+                    <tr className="bg-bg-pane/30 transition-colors duration-200">
+                      <td className="px-4 py-3 font-mono text-indigo-600 dark:text-indigo-400">
+                        onDragEnd
+                      </td>
+                      <td className="px-4 py-3 font-mono">
+                        (activeId: string, overId: string | null, dropAction: any) =&gt; void
+                      </td>
+                      <td className="px-4 py-3 text-text-secondary">No</td>
+                      <td className="px-4 py-3">
+                        Callback triggered when dragging ends, providing swap or split details.
+                      </td>
+                    </tr>
+                    <tr className="bg-bg-pane/30 transition-colors duration-200">
+                      <td className="px-4 py-3 font-mono text-indigo-600 dark:text-indigo-400">
+                        onResizeStart
+                      </td>
+                      <td className="px-4 py-3 font-mono">(currentNode: SplitNode) =&gt; void</td>
+                      <td className="px-4 py-3 text-text-secondary">No</td>
+                      <td className="px-4 py-3">
+                        Callback triggered when resizing starts on a split node.
+                      </td>
+                    </tr>
+                    <tr className="bg-bg-pane/30 transition-colors duration-200">
+                      <td className="px-4 py-3 font-mono text-indigo-600 dark:text-indigo-400">
+                        onResize
+                      </td>
+                      <td className="px-4 py-3 font-mono">
+                        (currentNode: SplitNode, percentage: number) =&gt; void
+                      </td>
+                      <td className="px-4 py-3 text-text-secondary">No</td>
+                      <td className="px-4 py-3">
+                        Callback triggered continuously while resizing a split node.
+                      </td>
+                    </tr>
+                    <tr className="bg-bg-pane/30 transition-colors duration-200">
+                      <td className="px-4 py-3 font-mono text-indigo-600 dark:text-indigo-400">
+                        onResizeEnd
+                      </td>
+                      <td className="px-4 py-3 font-mono">
+                        (currentNode: SplitNode, percentage: number) =&gt; void
+                      </td>
+                      <td className="px-4 py-3 text-text-secondary">No</td>
+                      <td className="px-4 py-3">
+                        Callback triggered when resizing ends on a split node.
+                      </td>
+                    </tr>
+                    <tr className="bg-bg-pane/30 transition-colors duration-200">
+                      <td className="px-4 py-3 font-mono text-indigo-600 dark:text-indigo-400">
+                        renderResizer
+                      </td>
+                      <td className="px-4 py-3 font-mono">
+                        (props: ResizerRenderProps) =&gt; ReactNode
+                      </td>
+                      <td className="px-4 py-3 text-text-secondary">No</td>
+                      <td className="px-4 py-3">
+                        Custom renderer function for rendering custom-styled resizer bars.
+                      </td>
+                    </tr>
+                    <tr className="bg-bg-pane/30 transition-colors duration-200">
+                      <td className="px-4 py-3 font-mono text-indigo-600 dark:text-indigo-400">
+                        minSplitPercentage
+                      </td>
+                      <td className="px-4 py-3 font-mono">number</td>
+                      <td className="px-4 py-3 text-text-secondary">No</td>
+                      <td className="px-4 py-3">
+                        Minimum resizing limit percentage. Defaults to <code>5</code>.
+                      </td>
+                    </tr>
+                    <tr className="bg-bg-pane/30 transition-colors duration-200">
+                      <td className="px-4 py-3 font-mono text-indigo-600 dark:text-indigo-400">
+                        maxSplitPercentage
+                      </td>
+                      <td className="px-4 py-3 font-mono">number</td>
+                      <td className="px-4 py-3 text-text-secondary">No</td>
+                      <td className="px-4 py-3">
+                        Maximum resizing limit percentage. Defaults to <code>95</code>.
+                      </td>
+                    </tr>
                   </tbody>
                 </table>
               </div>
@@ -1117,7 +1221,44 @@ export interface PaneRenderProps {
   isFullscreen: boolean;
   toggleFullscreen: () => void;
   remove: () => void;
-}`}
+}
+
+export interface ResizerRenderProps {
+  direction: SplitDirection;
+  splitPercentage: number;
+  resizerSize: number;
+  isResizing: boolean;
+  onPointerDown: (e: React.PointerEvent<HTMLDivElement>) => void;
+}
+
+export interface DashboardContextValue {
+  layout: TreeNode | null;
+  onLayoutChange: (newLayout: TreeNode | null) => void;
+  renderPane: (paneId: string) => ReactNode;
+  activeId: string | null;
+  fullscreenPaneId: string | null;
+  classNames: ZeugmaClassNames;
+  onRemove?: (paneId: string) => void;
+  onFullscreenChange?: (paneId: string | null) => void;
+  snapThreshold?: number;
+  onResizeStart?: (currentNode: SplitNode) => void;
+  onResize?: (currentNode: SplitNode, percentage: number) => void;
+  onResizeEnd?: (currentNode: SplitNode, percentage: number) => void;
+  renderResizer?: (props: ResizerRenderProps) => ReactNode;
+  minSplitPercentage?: number;
+  maxSplitPercentage?: number;
+  removePane: (paneId: string) => void;
+  addPane: (paneId: string) => void;
+  swapPanes: (paneIdA: string, paneIdB: string) => void;
+  splitPane: (
+    targetId: string,
+    direction: SplitDirection,
+    splitType: 'left' | 'right' | 'top' | 'bottom',
+    paneToAdd: string,
+  ) => void;
+  updateSplitPercentage: (currentNode: SplitNode, percentage: number) => void;
+}
+`}
               language="ts"
             />
           </section>

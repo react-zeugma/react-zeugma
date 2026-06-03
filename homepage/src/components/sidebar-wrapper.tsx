@@ -1,14 +1,11 @@
 'use client'
 
 import React, { useState } from 'react'
-import { useDashboard, addPane, removePane } from 'react-zeugma'
+import { useDashboard, addPane } from 'react-zeugma'
 import type { TreeNode } from 'react-zeugma'
 import {
-  FolderTree,
   Code2,
-  Globe,
   Plus,
-  Trash2,
   RotateCcw,
   Sparkles,
   ChevronDown,
@@ -17,43 +14,25 @@ import {
   Check,
 } from 'lucide-react'
 
+export interface LogEntry {
+  id: string
+  time: string
+  type: 'drag' | 'resize'
+  message: string
+}
+
 interface SidebarWrapperProps {
   children: React.ReactNode
-  autoSave: boolean
-  onToggleAutoSave: () => void
+  snapThreshold: number
+  onSnapThresholdChange: (val: number) => void
+  minSplitPercentage: number
+  onMinSplitPercentageChange: (val: number) => void
+  maxSplitPercentage: number
+  onMaxSplitPercentageChange: (val: number) => void
+  logs: LogEntry[]
+  useCustomResizer: boolean
+  onUseCustomResizerChange: (val: boolean) => void
 }
-
-interface WidgetMetadata {
-  id: string
-  title: string
-  description: string
-  icon: React.ReactNode
-  color: string
-}
-
-const AVAILABLE_WIDGETS: WidgetMetadata[] = [
-  {
-    id: 'explorer',
-    title: 'Explorer',
-    description: 'Browse and manage files in the project.',
-    icon: <FolderTree className="w-4 h-4" />,
-    color: 'text-amber-500',
-  },
-  {
-    id: 'editor',
-    title: 'Code Editor',
-    description: 'Write, format, and edit code.',
-    icon: <Code2 className="w-4 h-4" />,
-    color: 'text-pink-500',
-  },
-  {
-    id: 'preview',
-    title: 'Live Preview',
-    description: 'Real-time browser preview.',
-    icon: <Globe className="w-4 h-4" />,
-    color: 'text-blue-500',
-  },
-]
 
 const PRESETS: Record<string, { label: string; layout: TreeNode }> = {
   default: {
@@ -88,16 +67,18 @@ const PRESETS: Record<string, { label: string; layout: TreeNode }> = {
   },
 }
 
-// Helper to check if a pane is present in the tree layout
-function hasPane(tree: TreeNode | null, id: string): boolean {
-  if (!tree) return false
-  if (tree.type === 'pane') {
-    return tree.paneId === id
-  }
-  return hasPane(tree.first, id) || hasPane(tree.second, id)
-}
-
-export function SidebarWrapper({ children, autoSave, onToggleAutoSave }: SidebarWrapperProps) {
+export function SidebarWrapper({
+  children,
+  snapThreshold,
+  onSnapThresholdChange,
+  minSplitPercentage,
+  onMinSplitPercentageChange,
+  maxSplitPercentage,
+  onMaxSplitPercentageChange,
+  logs,
+  useCustomResizer,
+  onUseCustomResizerChange,
+}: SidebarWrapperProps) {
   const { layout, onLayoutChange } = useDashboard()
   const [activePreset, setActivePreset] = useState<string>('default')
   const [isJsonExpanded, setIsJsonExpanded] = useState(true)
@@ -107,16 +88,6 @@ export function SidebarWrapper({ children, autoSave, onToggleAutoSave }: Sidebar
     navigator.clipboard.writeText(JSON.stringify(layout, null, 2))
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
-  }
-
-  const toggleWidget = (id: string, active: boolean) => {
-    if (active) {
-      const newLayout = removePane(layout, id)
-      onLayoutChange(newLayout)
-    } else {
-      const newLayout = addPane(layout, id)
-      onLayoutChange(newLayout)
-    }
   }
 
   const handleApplyPreset = (presetKey: string) => {
@@ -174,96 +145,101 @@ export function SidebarWrapper({ children, autoSave, onToggleAutoSave }: Sidebar
                   <RotateCcw className="w-3.5 h-3.5" /> Reset Default
                 </button>
               </div>
+            </div>
+          </div>
 
-              {/* Auto-Save Toggle */}
-              <div className="flex items-center justify-between bg-bg-pane border border-border-primary rounded p-2 text-xs mt-1 select-none transition-colors duration-200">
-                <span className="text-text-secondary font-medium">Auto-Save Layout</span>
+          {/* Resizing & Callbacks Section */}
+          <div className="border-t border-border-primary/80 pt-3 px-1 space-y-2.5">
+            <div className="text-text-secondary text-[10px] font-bold uppercase tracking-wider select-none">
+              <span>Constraints & Settings</span>
+            </div>
+
+            <div className="space-y-2">
+              {/* Custom Resizer Checkbox */}
+              <div className="flex items-center justify-between bg-bg-pane border border-border-primary rounded p-2 text-xs select-none transition-colors duration-200">
+                <span className="text-text-secondary font-medium">Use Custom Resizer</span>
                 <button
-                  onClick={onToggleAutoSave}
+                  onClick={() => onUseCustomResizerChange(!useCustomResizer)}
                   className={`w-9 h-5 rounded-full p-0.5 transition-colors duration-200 focus:outline-none cursor-pointer ${
-                    autoSave ? 'bg-indigo-600' : 'bg-text-muted'
+                    useCustomResizer ? 'bg-indigo-600' : 'bg-text-muted'
                   }`}
-                  aria-label="Toggle Auto Save"
+                  aria-label="Toggle Custom Resizer"
                 >
                   <div
                     className={`bg-white w-4 h-4 rounded-full shadow transform transition-transform duration-200 ${
-                      autoSave ? 'translate-x-4' : 'translate-x-0'
+                      useCustomResizer ? 'translate-x-4' : 'translate-x-0'
                     }`}
                   />
                 </button>
               </div>
-            </div>
-            <div className="border-b border-border-primary/80 my-3" />
-          </div>
 
-          {/* Widgets Header */}
-          <div className="text-text-secondary text-[10px] font-bold uppercase tracking-wider select-none px-1">
-            <span>Layout Widgets</span>
-          </div>
-
-          {/* Widgets List */}
-          <div className="space-y-2">
-            {AVAILABLE_WIDGETS.map((widget) => {
-              const isActive = hasPane(layout, widget.id)
-              return (
-                <div
-                  key={widget.id}
-                  className={`flex flex-col rounded-lg border p-2 transition-all duration-200 ${
-                    isActive
-                      ? 'bg-indigo-500/5 border-indigo-500/25'
-                      : 'bg-bg-pane border border-border-primary hover:bg-bg-sidebar hover:border-border-secondary'
-                  }`}
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div
-                        className={`w-8 h-8 rounded-md flex items-center justify-center shrink-0 ${
-                          isActive
-                            ? 'bg-indigo-500/10'
-                            : 'bg-bg-sidebar border border-border-primary'
-                        }`}
-                      >
-                        <span className={widget.color}>{widget.icon}</span>
-                      </div>
-                      <div className="truncate">
-                        <p className="text-xs font-semibold text-text-primary truncate">
-                          {widget.title}
-                        </p>
-                        <span
-                          className={`inline-block text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
-                            isActive
-                              ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400'
-                              : 'bg-bg-sidebar border border-border-primary text-text-secondary'
-                          }`}
-                        >
-                          {isActive ? 'Active' : 'Closed'}
-                        </span>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={() => toggleWidget(widget.id, isActive)}
-                      className={`p-1.5 rounded-md cursor-pointer transition-colors ${
-                        isActive
-                          ? 'hover:bg-rose-500/10 text-text-muted hover:text-rose-500'
-                          : 'hover:bg-indigo-500/10 text-text-muted hover:text-indigo-500'
-                      }`}
-                      title={isActive ? 'Remove Pane' : 'Add Pane'}
-                    >
-                      {isActive ? (
-                        <Trash2 className="w-3.5 h-3.5" />
-                      ) : (
-                        <Plus className="w-3.5 h-3.5" />
-                      )}
-                    </button>
-                  </div>
-
-                  <p className="text-[10px] text-text-secondary mt-1.5 leading-relaxed pl-10">
-                    {widget.description}
-                  </p>
+              <div className="flex flex-col gap-1">
+                <div className="flex justify-between text-[10px] text-text-secondary">
+                  <span>Snap Threshold</span>
+                  <span className="font-semibold text-indigo-500">{snapThreshold}px</span>
                 </div>
-              )
-            })}
+                <input
+                  type="range"
+                  min="0"
+                  max="40"
+                  value={snapThreshold}
+                  onChange={(e) => onSnapThresholdChange(Number(e.target.value))}
+                  className="w-full h-1 bg-bg-pane border-none rounded outline-none cursor-pointer accent-indigo-500"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <div className="flex justify-between text-[10px] text-text-secondary">
+                  <span>Min Split Bound</span>
+                  <span className="font-semibold text-indigo-500">{minSplitPercentage}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="5"
+                  max="45"
+                  value={minSplitPercentage}
+                  onChange={(e) => onMinSplitPercentageChange(Number(e.target.value))}
+                  className="w-full h-1 bg-bg-pane border-none rounded outline-none cursor-pointer accent-indigo-500"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <div className="flex justify-between text-[10px] text-text-secondary">
+                  <span>Max Split Bound</span>
+                  <span className="font-semibold text-indigo-500">{maxSplitPercentage}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="55"
+                  max="95"
+                  value={maxSplitPercentage}
+                  onChange={(e) => onMaxSplitPercentageChange(Number(e.target.value))}
+                  className="w-full h-1 bg-bg-pane border-none rounded outline-none cursor-pointer accent-indigo-500"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Interactive Logs Section */}
+          <div className="border-t border-border-primary/80 my-3 pt-3 px-1 space-y-1.5">
+            <div className="text-text-secondary text-[10px] font-bold uppercase tracking-wider select-none flex items-center justify-between">
+              <span>Interactive Logs</span>
+            </div>
+            <div className="bg-bg-pane-inner border border-border-primary rounded p-1.5 font-mono text-[9px] h-32 overflow-y-auto flex flex-col gap-1 transition-colors duration-200">
+              {logs.length === 0 ? (
+                <span className="text-text-muted italic">Perform actions to see logs...</span>
+              ) : (
+                logs.map((log) => (
+                  <div key={log.id} className="text-text-secondary leading-normal">
+                    <span className="text-text-muted mr-1">[{log.time}]</span>
+                    <span className="text-text-primary font-bold">
+                      {log.type.toUpperCase()}
+                    </span>{' '}
+                    {log.message}
+                  </div>
+                ))
+              )}
+            </div>
           </div>
 
           {/* Active Layout JSON Viewer */}

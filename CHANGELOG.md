@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 0.2.1
+
+### Patch Changes
+
+- 4ed8cde: Refactored react-zeugma to Feature Sliced Design (FSD) architecture, applied frontend performance optimizations, and incorporated the resizer edge snapping feature.
+
 ## 0.2.0
 
 ### Minor Changes

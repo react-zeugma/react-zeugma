@@ -251,7 +251,7 @@ export interface PaneRenderProps {
 
 ## SKILL.md
 
-A comprehensive developer skill configuration is published alongside the docs for AI agents and reference integrations. Download it from the [documentation site](https://react-zeugma.com/docs#skill-md).
+A comprehensive developer skill configuration is published alongside the docs for AI agents and reference integrations. Download it from the [documentation site](https://react-zeugma.vercel.app/docs#skill-md).
 
 ---
 

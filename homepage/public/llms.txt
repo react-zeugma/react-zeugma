@@ -4,9 +4,9 @@
 
 ## Navigation
 
-- [Home](https://react-zeugma.com/): Official website and interactive drag-and-drop layout showcase.
-- [Interactive Demo](https://react-zeugma.com/demo): Playground to test recursive pane splitting, resizing, swapping, and fullscreen zoom.
-- [Documentation](https://react-zeugma.com/docs): Full API, custom styling guidelines, and TypeScript type reference.
+- [Home](https://react-zeugma.vercel.app/): Official website and interactive drag-and-drop layout showcase.
+- [Interactive Demo](https://react-zeugma.vercel.app/demo): Playground to test recursive pane splitting, resizing, swapping, and fullscreen zoom.
+- [Documentation](https://react-zeugma.vercel.app/docs): Full API, custom styling guidelines, and TypeScript type reference.
 
 ## Core Documentation
 

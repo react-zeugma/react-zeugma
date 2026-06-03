@@ -44,7 +44,7 @@ export type TreeNode = SplitNode | PaneNode
 
 ### Key Components
 
-- `<DashboardProvider>`: The root context provider that coordinates the drag-and-drop event loop, monitors active drags, and registers layout mutations.
+- `<DashboardProvider>`: The root context provider that coordinates the drag-and-drop event loop, monitors active drags, and registers layout mutations. Supports props: `layout`, `onChange`, `renderPane`, `renderDragOverlay`, `classNames`, `fullscreenPaneId`, `onFullscreenChange`, `onRemove`, and `dragActivationDistance` (configurable pointer sensor activation distance in pixels, defaults to 8).
 - `<PaneTree>`: Recursively renders the split nodes and pane nodes. Must be inside `<DashboardProvider>`.
 - `<Pane id>`: Wraps the individual pane components, utilizing a render prop structure to pass attributes like `isDragging`, `isFullscreen`, `toggleFullscreen`, and `remove`.
 - `<DragHandle>`: Defines the interactive drag region inside a `<Pane>`.

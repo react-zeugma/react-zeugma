@@ -1,7 +1,8 @@
-import React, { useRef, useState } from 'react'
-import { useDashboard, ResizerRenderProps } from '../../../entities/dashboard'
+import React, { useRef, useState, useMemo } from 'react'
+import { useDashboard, ResizerRenderProps, RootDropZones } from '../../../entities/dashboard'
 import { useResizer } from '../../../features/resize-pane'
 import { TreeNode, SplitNode } from '../../../shared/model'
+import { removePane } from '../../../shared'
 
 export interface PaneTreeProps {
   tree?: TreeNode | null
@@ -118,11 +119,18 @@ export const PaneTree: React.FC<PaneTreeProps> = ({
   const {
     layout,
     renderPane,
+    activeId,
+    classNames,
     fullscreenPaneId,
     snapThreshold: contextSnapThreshold,
   } = useDashboard()
 
   const snapThreshold = propSnapThreshold !== undefined ? propSnapThreshold : contextSnapThreshold
+
+  const hasOtherPanes = useMemo(() => {
+    if (!activeId) return false
+    return removePane(layout, activeId) !== null
+  }, [layout, activeId])
 
   // Fullscreen bypass
   if (fullscreenPaneId && !tree) {
@@ -137,20 +145,46 @@ export const PaneTree: React.FC<PaneTreeProps> = ({
 
   if (!currentNode) return null
 
-  if (currentNode.type === 'pane') {
+  const renderContent = () => {
+    if (currentNode.type === 'pane') {
+      return (
+        <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+          {renderPane(currentNode.paneId)}
+        </div>
+      )
+    }
+
     return (
-      <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-        {renderPane(currentNode.paneId)}
+      <PaneSplit
+        currentNode={currentNode}
+        resizerSize={resizerSize}
+        snapThreshold={snapThreshold}
+        renderResizer={renderResizer}
+      />
+    )
+  }
+
+  // Only render RootDropZones at the top-level PaneTree (where tree is undefined)
+  if (tree === undefined) {
+    return (
+      <div
+        className="zeugma-dashboard-root"
+        style={{
+          position: 'relative',
+          width: '100%',
+          height: '100%',
+          overflow: 'hidden',
+        }}
+      >
+        {renderContent()}
+        <RootDropZones
+          activeId={activeId}
+          hasOtherPanes={hasOtherPanes}
+          dropPreviewClassName={classNames.dropPreview}
+        />
       </div>
     )
   }
 
-  return (
-    <PaneSplit
-      currentNode={currentNode}
-      resizerSize={resizerSize}
-      snapThreshold={snapThreshold}
-      renderResizer={renderResizer}
-    />
-  )
+  return renderContent()
 }

@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 0.5.0
+
+### Minor Changes
+
+- Added root-level drop zones to support placing dragged panes into the top, bottom, left, or right half of the entire dashboard root.
+
 ## 0.4.0
 
 ### Minor Changes

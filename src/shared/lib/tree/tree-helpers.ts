@@ -115,3 +115,29 @@ export function updateSplitPercentage(
   }
   return tree
 }
+
+/**
+ * Tree Helper: Split the entire tree at the root using a dragged pane.
+ */
+export function splitRoot(
+  tree: TreeNode | null,
+  draggingId: string,
+  splitType: 'left' | 'right' | 'top' | 'bottom',
+): TreeNode | null {
+  const treeWithoutDragging = removePane(tree, draggingId)
+  if (treeWithoutDragging === null) {
+    return { type: 'pane', paneId: draggingId }
+  }
+
+  const direction: SplitDirection = splitType === 'left' || splitType === 'right' ? 'row' : 'column'
+  const isFirst = splitType === 'left' || splitType === 'top'
+  const draggedNode: TreeNode = { type: 'pane', paneId: draggingId }
+
+  return {
+    type: 'split',
+    direction,
+    first: isFirst ? draggedNode : treeWithoutDragging,
+    second: isFirst ? treeWithoutDragging : draggedNode,
+    splitPercentage: 50,
+  }
+}

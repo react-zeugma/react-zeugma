@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { Outlet } from '@tanstack/react-router'
 import { Navbar } from './components/navbar'
+import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/react'
 
 export default function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
@@ -60,6 +62,8 @@ export default function App() {
       <main className="flex-1">
         <Outlet />
       </main>
+      <Analytics />
+      <SpeedInsights />
     </div>
   )
 }

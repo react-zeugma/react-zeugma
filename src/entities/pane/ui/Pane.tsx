@@ -130,7 +130,8 @@ interface PaneProps {
 }
 
 export const Pane: React.FC<PaneProps> = ({ id, children, style }) => {
-  const { activeId, classNames, fullscreenPaneId, onRemove, onFullscreenChange } = useDashboard()
+  const { activeId, classNames, fullscreenPaneId, onRemove, onFullscreenChange, removePane } =
+    useDashboard()
   const showDropZones = activeId !== null && activeId !== id
 
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id })
@@ -145,7 +146,11 @@ export const Pane: React.FC<PaneProps> = ({ id, children, style }) => {
       if (isFullscreen) {
         onFullscreenChange?.(null)
       }
-      onRemove?.(id)
+      if (onRemove) {
+        onRemove(id)
+      } else {
+        removePane(id)
+      }
     },
   }
 

@@ -1,5 +1,17 @@
 # react-zeugma
 
+## 0.4.0
+
+### Minor Changes
+
+- **API Customization & Callbacks**:
+  - Added custom resizer rendering support (`renderResizer` prop on `DashboardProvider` and `PaneTree`).
+  - Added drag callbacks (`onDragStart`, `onDragEnd`) to listen to pane dragging states.
+  - Added resize callbacks (`onResizeStart`, `onResize`, `onResizeEnd`) to listen to pane resizing states.
+  - Added customizable split bounds (`minSplitPercentage`, `maxSplitPercentage`) to constrain pane sizes.
+  - Exposed convenient layout mutation helpers (`removePane`, `addPane`, `swapPanes`, `splitPane`, `updateSplitPercentage`) directly on `useDashboard()` context hook.
+  - Updated `Pane` removal component logic to automatically fall back to mutating the tree via context if no custom `onRemove` callback is passed.
+
 ## 0.3.0
 
 ### Minor Changes

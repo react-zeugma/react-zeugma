@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react'
 import { TreeNode, SplitNode, SplitDirection } from '../../../shared/model'
 import { updateSplitPercentage } from '../../../shared/lib/tree'
+import { useDashboard } from '../../../entities/dashboard'
 
 interface UseResizerProps {
   containerRef: React.RefObject<HTMLDivElement | null>
@@ -12,6 +13,8 @@ interface UseResizerProps {
   layout: TreeNode | null
   currentNode: SplitNode
   onLayoutChange: (newLayout: TreeNode | null) => void
+  onResizeStart?: () => void
+  onResizeEnd?: () => void
 }
 
 export function useResizer({
@@ -24,7 +27,17 @@ export function useResizer({
   layout,
   currentNode,
   onLayoutChange,
+  onResizeStart: localOnResizeStart,
+  onResizeEnd: localOnResizeEnd,
 }: UseResizerProps) {
+  const {
+    onResizeStart: globalOnResizeStart,
+    onResize: globalOnResize,
+    onResizeEnd: globalOnResizeEnd,
+    minSplitPercentage = 5,
+    maxSplitPercentage = 95,
+  } = useDashboard()
+
   return useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
       e.preventDefault()
@@ -44,6 +57,13 @@ export function useResizer({
     `
       document.head.appendChild(styleEl)
 
+      if (localOnResizeStart) {
+        localOnResizeStart()
+      }
+      if (globalOnResizeStart) {
+        globalOnResizeStart(currentNode)
+      }
+
       const rect = container.getBoundingClientRect()
       const startX = e.clientX
       const startY = e.clientY
@@ -61,6 +81,8 @@ export function useResizer({
         const r = el.getBoundingClientRect()
         return isRow ? r.left + r.width / 2 : r.top + r.height / 2
       })
+
+      let currentPercentage = startPercentage
 
       const handlePointerMove = (moveEvent: PointerEvent) => {
         const delta = isRow
@@ -91,9 +113,16 @@ export function useResizer({
             : ((bestTarget - resizerSize / 2 - rect.top) / (rect.height - resizerSize)) * 100
         }
 
-        const finalPercentage = Math.max(5, Math.min(95, snappedPercentage))
+        const finalPercentage = Math.max(
+          minSplitPercentage,
+          Math.min(maxSplitPercentage, snappedPercentage),
+        )
+        currentPercentage = finalPercentage
         const newLayout = updateSplitPercentage(layout, currentNode, finalPercentage)
         onLayoutChange(newLayout)
+        if (globalOnResize) {
+          globalOnResize(currentNode, finalPercentage)
+        }
       }
 
       const handlePointerUp = () => {
@@ -107,6 +136,13 @@ export function useResizer({
 
         document.removeEventListener('pointermove', handlePointerMove)
         document.removeEventListener('pointerup', handlePointerUp)
+
+        if (localOnResizeEnd) {
+          localOnResizeEnd()
+        }
+        if (globalOnResizeEnd) {
+          globalOnResizeEnd(currentNode, currentPercentage)
+        }
       }
 
       document.addEventListener('pointermove', handlePointerMove)
@@ -122,6 +158,13 @@ export function useResizer({
       layout,
       currentNode,
       onLayoutChange,
+      localOnResizeStart,
+      localOnResizeEnd,
+      globalOnResizeStart,
+      globalOnResize,
+      globalOnResizeEnd,
+      minSplitPercentage,
+      maxSplitPercentage,
     ],
   )
 }

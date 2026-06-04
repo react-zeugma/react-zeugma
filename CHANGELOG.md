@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 0.6.1
+
+### Patch Changes
+
+- 824e083: fix: Issue with the swapping documents is solved
+
 ## 0.6.0
 
 ### Minor Changes

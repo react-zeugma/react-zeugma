@@ -3,6 +3,7 @@ import { useDraggable, useDroppable } from '@dnd-kit/core'
 import { useDashboard } from '../../dashboard'
 import { DragListenersCtx } from '../model/context'
 import { PaneRenderProps } from '../model/types'
+import { findPaneNode } from '../../../shared/lib/tree'
 
 interface DropZoneProps {
   id: string
@@ -130,13 +131,24 @@ interface PaneProps {
 }
 
 export const Pane: React.FC<PaneProps> = ({ id, children, style }) => {
-  const { activeId, classNames, fullscreenPaneId, onRemove, onFullscreenChange, removePane } =
-    useDashboard()
+  const {
+    layout,
+    activeId,
+    classNames,
+    fullscreenPaneId,
+    onRemove,
+    onFullscreenChange,
+    removePane,
+    updatePaneMetadata,
+  } = useDashboard()
   const showDropZones = activeId !== null && activeId !== id
 
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id })
   const dragging = activeId === id || isDragging
   const isFullscreen = fullscreenPaneId === id
+
+  const paneNode = useMemo(() => findPaneNode(layout, id), [layout, id])
+  const metadata = paneNode?.metadata
 
   const renderProps: PaneRenderProps = {
     isDragging: dragging,
@@ -151,6 +163,10 @@ export const Pane: React.FC<PaneProps> = ({ id, children, style }) => {
       } else {
         removePane(id)
       }
+    },
+    metadata,
+    updateMetadata: (updater) => {
+      updatePaneMetadata(id, updater)
     },
   }
 

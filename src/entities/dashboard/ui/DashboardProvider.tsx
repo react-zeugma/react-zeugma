@@ -17,7 +17,7 @@ import {
   updateSplitPercentage,
   splitRoot,
   updatePaneMetadata,
-  findPaneNode,
+  findPane,
 } from '../../../shared/lib/tree'
 import { DEFAULT_DRAG_ACTIVATION_DISTANCE, DEFAULT_SNAP_THRESHOLD } from '../../../shared/config'
 import { DashboardContext, ZeugmaClassNames, ResizerRenderProps } from '../model/context'
@@ -192,7 +192,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
     }
 
     const direction: SplitDirection = dropZone === 'left' || dropZone === 'right' ? 'row' : 'column'
-    const draggedPaneNode = findPaneNode(layout, draggingId) ?? { type: 'pane', paneId: draggingId }
+    const draggedPaneNode = findPane(layout, draggingId) ?? { type: 'pane', paneId: draggingId }
     const treeWithoutDragging = removePane(layout, draggingId)
 
     const newLayout = splitPane(
@@ -243,7 +243,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
       splitType: 'left' | 'right' | 'top' | 'bottom',
       paneToAdd: string,
     ) => {
-      const draggedPaneNode = findPaneNode(layout, paneToAdd) ?? { type: 'pane', paneId: paneToAdd }
+      const draggedPaneNode = findPane(layout, paneToAdd) ?? { type: 'pane', paneId: paneToAdd }
       const treeWithoutDragging = removePane(layout, paneToAdd)
       const newLayout = splitPane(
         treeWithoutDragging,

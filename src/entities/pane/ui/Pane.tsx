@@ -3,7 +3,7 @@ import { useDraggable, useDroppable } from '@dnd-kit/core'
 import { useDashboard } from '../../dashboard'
 import { DragListenersCtx } from '../model/context'
 import { PaneRenderProps } from '../model/types'
-import { findPaneNode } from '../../../shared/lib/tree'
+import { findPane } from '../../../shared/lib/tree'
 
 interface DropZoneProps {
   id: string
@@ -147,7 +147,7 @@ export const Pane: React.FC<PaneProps> = ({ id, children, style }) => {
   const dragging = activeId === id || isDragging
   const isFullscreen = fullscreenPaneId === id
 
-  const paneNode = useMemo(() => findPaneNode(layout, id), [layout, id])
+  const paneNode = useMemo(() => findPane(layout, id), [layout, id])
   const metadata = paneNode?.metadata
 
   const renderProps: PaneRenderProps = {

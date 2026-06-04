@@ -181,6 +181,10 @@ Splits the targeted `targetId` pane inside the tree with `direction` (_row_ / _c
 
 Splits the entire dashboard tree at the root, placing the dragged `draggingId` pane on one half and the rest of the layout tree on the other.
 
+#### `findPane(tree: TreeNode | null, paneId: string): PaneNode | null`
+
+Recursively searches the layout tree and returns the target `PaneNode` if found, or `null` otherwise.
+
 ---
 
 ## Custom Styling
@@ -425,6 +429,8 @@ Import these helpers from `react-zeugma` to manipulate the tree layout programma
   Swaps the positions of two panes in the tree.
 - **`updatePaneMetadata(tree: TreeNode | null, paneId: string, updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined): TreeNode | null`**
   Updates the metadata of a specific pane.
+- **`findPane(tree: TreeNode | null, paneId: string): PaneNode | null`**
+  Recursively searches the layout tree and returns the target `PaneNode` if found, or `null` otherwise.
 
 Alternatively, you can consume the convenient mutation helpers directly from the **`useDashboard()`** context hook inside pane components without importing utilities:
 

@@ -1,5 +1,3 @@
-{/_ @meta title="Introduction" _/}
-
 # react-zeugma
 
 **A recursive, drag-and-drop dashboard layout engine for React.**

@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 0.5.2
+
+### Patch Changes
+
+- docs: update documentation layout, responsiveness, and padding constraints
+
 ## 0.5.1
 
 ### Patch Changes

@@ -1,11 +1,5 @@
 # react-zeugma
 
-## 0.5.2
-
-### Patch Changes
-
-- Updated documentation.
-
 ## 0.5.1
 
 ### Patch Changes

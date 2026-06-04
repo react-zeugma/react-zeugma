@@ -23,12 +23,15 @@ export function splitPane(
   targetId: string,
   direction: SplitDirection,
   splitType: 'left' | 'right' | 'top' | 'bottom',
-  paneToAdd: string,
+  paneToAdd: string | PaneNode,
 ): TreeNode | null {
-  if (tree === null) return { type: 'pane', paneId: paneToAdd }
+  if (tree === null) {
+    return typeof paneToAdd === 'string' ? { type: 'pane', paneId: paneToAdd } : paneToAdd
+  }
   if (tree.type === 'pane') {
     if (tree.paneId === targetId) {
-      const addedNode: PaneNode = { type: 'pane', paneId: paneToAdd }
+      const addedNode: PaneNode =
+        typeof paneToAdd === 'string' ? { type: 'pane', paneId: paneToAdd } : paneToAdd
       const isFirst = splitType === 'left' || splitType === 'top'
       return {
         type: 'split',

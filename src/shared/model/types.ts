@@ -11,6 +11,7 @@ export interface SplitNode {
 export interface PaneNode {
   type: 'pane'
   paneId: string
+  metadata?: Record<string, unknown>
 }
 
 export type TreeNode = SplitNode | PaneNode

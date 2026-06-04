@@ -29,13 +29,12 @@ export function splitPane(
   if (tree.type === 'pane') {
     if (tree.paneId === targetId) {
       const addedNode: PaneNode = { type: 'pane', paneId: paneToAdd }
-      const originalNode: PaneNode = { type: 'pane', paneId: targetId }
       const isFirst = splitType === 'left' || splitType === 'top'
       return {
         type: 'split',
         direction,
-        first: isFirst ? addedNode : originalNode,
-        second: isFirst ? originalNode : addedNode,
+        first: isFirst ? addedNode : tree,
+        second: isFirst ? tree : addedNode,
         splitPercentage: 50,
       }
     }
@@ -53,16 +52,27 @@ export function splitPane(
  */
 export function swapPanes(tree: TreeNode | null, idA: string, idB: string): TreeNode | null {
   if (tree === null) return null
-  if (tree.type === 'pane') {
-    if (tree.paneId === idA) return { ...tree, paneId: idB }
-    if (tree.paneId === idB) return { ...tree, paneId: idA }
-    return tree
+
+  // First pass: collect the full PaneNode references
+  const nodeA = findPaneNode(tree, idA)
+  const nodeB = findPaneNode(tree, idB)
+  if (!nodeA || !nodeB) return tree
+
+  // Second pass: replace each location with the other node
+  function swap(node: TreeNode): TreeNode {
+    if (node.type === 'pane') {
+      if (node.paneId === idA) return { ...nodeB! }
+      if (node.paneId === idB) return { ...nodeA! }
+      return node
+    }
+    return {
+      ...node,
+      first: swap(node.first),
+      second: swap(node.second),
+    }
   }
-  return {
-    ...tree,
-    first: swapPanes(tree.first, idA, idB) || tree.first,
-    second: swapPanes(tree.second, idA, idB) || tree.second,
-  }
+
+  return swap(tree)
 }
 
 /**
@@ -124,14 +134,19 @@ export function splitRoot(
   draggingId: string,
   splitType: 'left' | 'right' | 'top' | 'bottom',
 ): TreeNode | null {
+  // Preserve dragged pane's metadata
+  const draggedPaneNode: PaneNode = findPaneNode(tree, draggingId) ?? {
+    type: 'pane',
+    paneId: draggingId,
+  }
   const treeWithoutDragging = removePane(tree, draggingId)
   if (treeWithoutDragging === null) {
-    return { type: 'pane', paneId: draggingId }
+    return { ...draggedPaneNode }
   }
 
   const direction: SplitDirection = splitType === 'left' || splitType === 'right' ? 'row' : 'column'
   const isFirst = splitType === 'left' || splitType === 'top'
-  const draggedNode: TreeNode = { type: 'pane', paneId: draggingId }
+  const draggedNode: TreeNode = { ...draggedPaneNode }
 
   return {
     type: 'split',
@@ -139,5 +154,44 @@ export function splitRoot(
     first: isFirst ? draggedNode : treeWithoutDragging,
     second: isFirst ? treeWithoutDragging : draggedNode,
     splitPercentage: 50,
+  }
+}
+
+/**
+ * Find a PaneNode by its paneId.
+ */
+export function findPaneNode(tree: TreeNode | null, paneId: string): PaneNode | null {
+  if (tree === null) return null
+  if (tree.type === 'pane') {
+    return tree.paneId === paneId ? tree : null
+  }
+  return findPaneNode(tree.first, paneId) ?? findPaneNode(tree.second, paneId)
+}
+
+/**
+ * Update metadata on a specific pane node using an updater function.
+ */
+export function updatePaneMetadata(
+  tree: TreeNode | null,
+  paneId: string,
+  updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined,
+): TreeNode | null {
+  if (tree === null) return null
+  if (tree.type === 'pane') {
+    if (tree.paneId === paneId) {
+      const newMetadata = updater(tree.metadata)
+      if (newMetadata === undefined) {
+        // Remove metadata key
+        const { metadata: _, ...rest } = tree
+        return rest as PaneNode
+      }
+      return { ...tree, metadata: newMetadata }
+    }
+    return tree
+  }
+  return {
+    ...tree,
+    first: updatePaneMetadata(tree.first, paneId, updater) ?? tree.first,
+    second: updatePaneMetadata(tree.second, paneId, updater) ?? tree.second,
   }
 }

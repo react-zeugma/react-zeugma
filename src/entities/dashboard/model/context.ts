@@ -43,6 +43,10 @@ export interface DashboardContextValue {
     paneToAdd: string,
   ) => void
   updateSplitPercentage: (currentNode: SplitNode, percentage: number) => void
+  updatePaneMetadata: (
+    paneId: string,
+    updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined,
+  ) => void
 }
 
 export const DashboardContext = createContext<DashboardContextValue | undefined>(undefined)

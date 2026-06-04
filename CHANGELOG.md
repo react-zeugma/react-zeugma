@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 0.6.0
+
+### Minor Changes
+
+- Added optional `metadata` property (`Record<string, unknown>`) to `PaneNode`, allowing consumers to attach arbitrary key-value data to individual panes.
+
 ## 0.5.3
 
 ### Patch Changes

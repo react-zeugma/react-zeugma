@@ -16,6 +16,7 @@ import {
   addPane,
   updateSplitPercentage,
   splitRoot,
+  updatePaneMetadata,
 } from '../../../shared/lib/tree'
 import { DEFAULT_DRAG_ACTIVATION_DISTANCE, DEFAULT_SNAP_THRESHOLD } from '../../../shared/config'
 import { DashboardContext, ZeugmaClassNames, ResizerRenderProps } from '../model/context'
@@ -254,6 +255,19 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
     [layout, onChange],
   )
 
+  const handleUpdatePaneMetadata = useCallback(
+    (
+      paneId: string,
+      updater: (
+        current: Record<string, unknown> | undefined,
+      ) => Record<string, unknown> | undefined,
+    ) => {
+      const newLayout = updatePaneMetadata(layout, paneId, updater)
+      onChange(newLayout)
+    },
+    [layout, onChange],
+  )
+
   // Best practice: Memoize context value to prevent unnecessary re-renders of context consumers.
   const contextValue = useMemo(
     () => ({
@@ -277,6 +291,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
       swapPanes: handleSwapPanes,
       splitPane: handleSplitPane,
       updateSplitPercentage: handleUpdateSplitPercentage,
+      updatePaneMetadata: handleUpdatePaneMetadata,
     }),
     [
       layout,
@@ -299,6 +314,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
       handleSwapPanes,
       handleSplitPane,
       handleUpdateSplitPercentage,
+      handleUpdatePaneMetadata,
     ],
   )
 

@@ -349,13 +349,21 @@ const initialLayout: TreeNode = {
   type: 'split',
   direction: 'row',
   splitPercentage: 25,
-  first: { type: 'pane', paneId: 'Explorer' },
+  first: {
+    type: 'pane',
+    paneId: 'Explorer',
+    metadata: { title: 'File Explorer', note: 'Project files' },
+  },
   second: {
     type: 'split',
     direction: 'column',
     splitPercentage: 60,
-    first: { type: 'pane', paneId: 'Editor' },
-    second: { type: 'pane', paneId: 'Preview' },
+    first: { type: 'pane', paneId: 'Editor', metadata: { title: 'Code Editor', note: 'index.ts' } },
+    second: {
+      type: 'pane',
+      paneId: 'Preview',
+      metadata: { title: 'Live Preview', note: 'App Output' },
+    },
   },
 }
 
@@ -641,10 +649,10 @@ function CompleteDemoApplication() {
               renderResizer={useCustomResizer ? renderCustomResizer : undefined}
               renderPane={(id) => (
                 <Pane id={id}>
-                  {({ isDragging, isFullscreen, toggleFullscreen }) => (
+                  {({ isDragging, isFullscreen, toggleFullscreen, metadata, updateMetadata }) => (
                     <div className="pane-card" style={{ opacity: isDragging ? 0.4 : 1 }}>
                       <DragHandle className="pane-header">
-                        <span>{id}</span>
+                        <span>{String(metadata?.title || id)}</span>
                         <div className="header-actions" onPointerDown={(e) => e.stopPropagation()}>
                           <button
                             className="header-btn"
@@ -674,8 +682,41 @@ function CompleteDemoApplication() {
                         >
                           {id}
                         </div>
-                        <div style={{ fontSize: '11px', color: '#71717a' }}>
-                          Drag header to split or swap
+                        {!!metadata?.note && (
+                          <div style={{ fontSize: '11px', color: '#a1a1aa', marginBottom: '8px' }}>
+                            Note: {String(metadata.note)}
+                          </div>
+                        )}
+                        <div
+                          style={{
+                            display: 'flex',
+                            gap: '6px',
+                            width: '100%',
+                            justifyContent: 'center',
+                            marginTop: '6px',
+                          }}
+                        >
+                          <input
+                            type="text"
+                            placeholder="Update note..."
+                            value={String(metadata?.note || '')}
+                            onChange={(e) => {
+                              const val = e.target.value
+                              updateMetadata((prev) => ({ ...prev, note: val }))
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                            onPointerDown={(e) => e.stopPropagation()}
+                            style={{
+                              background: '#27272a',
+                              border: '1px solid #3f3f46',
+                              borderRadius: '4px',
+                              padding: '4px 8px',
+                              fontSize: '11px',
+                              color: '#fff',
+                              outline: 'none',
+                              maxWidth: '120px',
+                            }}
+                          />
                         </div>
                       </div>
                     </div>

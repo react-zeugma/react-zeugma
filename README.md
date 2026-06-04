@@ -226,6 +226,7 @@ export interface SplitNode {
 export interface PaneNode {
   type: 'pane'
   paneId: string
+  metadata?: Record<string, unknown>
 }
 
 export type TreeNode = SplitNode | PaneNode
@@ -243,6 +244,10 @@ export interface PaneRenderProps {
   isFullscreen: boolean
   toggleFullscreen: () => void
   remove: () => void
+  metadata: Record<string, unknown> | undefined
+  updateMetadata: (
+    updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined,
+  ) => void
 }
 
 export interface ResizerRenderProps {
@@ -279,6 +284,10 @@ export interface DashboardContextValue {
     paneToAdd: string,
   ) => void
   updateSplitPercentage: (currentNode: SplitNode, percentage: number) => void
+  updatePaneMetadata: (
+    paneId: string,
+    updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined,
+  ) => void
 }
 ```
 
@@ -320,6 +329,7 @@ export interface SplitNode {
 export interface PaneNode {
   type: 'pane'
   paneId: string
+  metadata?: Record<string, unknown>
 }
 
 export type TreeNode = SplitNode | PaneNode
@@ -382,6 +392,10 @@ interface PaneRenderProps {
   isFullscreen: boolean
   toggleFullscreen: () => void
   remove: () => void
+  metadata: Record<string, unknown> | undefined
+  updateMetadata: (
+    updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined,
+  ) => void
 }
 ```
 
@@ -409,6 +423,8 @@ Import these helpers from `react-zeugma` to manipulate the tree layout programma
   Splits the entire dashboard tree at the root, placing the dragged pane on one half and the remaining layout tree on the other.
 - **`swapPanes(tree: TreeNode | null, idA: string, idB: string): TreeNode | null`**
   Swaps the positions of two panes in the tree.
+- **`updatePaneMetadata(tree: TreeNode | null, paneId: string, updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined): TreeNode | null`**
+  Updates the metadata of a specific pane.
 
 Alternatively, you can consume the convenient mutation helpers directly from the **`useDashboard()`** context hook inside pane components without importing utilities:
 
@@ -417,6 +433,7 @@ Alternatively, you can consume the convenient mutation helpers directly from the
 - **`swapPanes(paneIdA: string, paneIdB: string) => void`**
 - **`splitPane(targetId: string, direction: SplitDirection, splitType: string, paneToAdd: string) => void`**
 - **`updateSplitPercentage(currentNode: SplitNode, percentage: number) => void`**
+- **`updatePaneMetadata(paneId: string, updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined) => void`**
 
 ---
 

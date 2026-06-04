@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 0.7.0
+
+### Minor Changes
+
+- 831edea: Rename `findPaneNode` utility function to `findPane` and add it to the README.
+
 ## 0.6.1
 
 ### Patch Changes

@@ -57,8 +57,8 @@ export function swapPanes(tree: TreeNode | null, idA: string, idB: string): Tree
   if (tree === null) return null
 
   // First pass: collect the full PaneNode references
-  const nodeA = findPaneNode(tree, idA)
-  const nodeB = findPaneNode(tree, idB)
+  const nodeA = findPane(tree, idA)
+  const nodeB = findPane(tree, idB)
   if (!nodeA || !nodeB) return tree
 
   // Second pass: replace each location with the other node
@@ -138,7 +138,7 @@ export function splitRoot(
   splitType: 'left' | 'right' | 'top' | 'bottom',
 ): TreeNode | null {
   // Preserve dragged pane's metadata
-  const draggedPaneNode: PaneNode = findPaneNode(tree, draggingId) ?? {
+  const draggedPaneNode: PaneNode = findPane(tree, draggingId) ?? {
     type: 'pane',
     paneId: draggingId,
   }
@@ -163,12 +163,12 @@ export function splitRoot(
 /**
  * Find a PaneNode by its paneId.
  */
-export function findPaneNode(tree: TreeNode | null, paneId: string): PaneNode | null {
+export function findPane(tree: TreeNode | null, paneId: string): PaneNode | null {
   if (tree === null) return null
   if (tree.type === 'pane') {
     return tree.paneId === paneId ? tree : null
   }
-  return findPaneNode(tree.first, paneId) ?? findPaneNode(tree.second, paneId)
+  return findPane(tree.first, paneId) ?? findPane(tree.second, paneId)
 }
 
 /**

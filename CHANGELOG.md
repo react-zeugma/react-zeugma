@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 0.8.0
+
+### Minor Changes
+
+- 387763f: Change `onChange` layout callback to only fire when user actions are completed (e.g. at the end of a resize gesture or on drag drop end) rather than continuously during resizing.
+
 ## 0.7.0
 
 ### Minor Changes

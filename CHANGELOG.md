@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 0.8.1
+
+### Patch Changes
+
+- 8580fff: Added drag-cancel class.
+
 ## 0.8.0
 
 ### Minor Changes

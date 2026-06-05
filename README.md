@@ -303,7 +303,7 @@ Below is the comprehensive developer skill configuration for integrations, tree 
 
 ````markdown
 ---
-name: use-react-zeugma
+name: react-zeugma
 description: Integrate, configure, style, and programmatically manipulate dashboard layouts using the react-zeugma package.
 ---
 
@@ -560,6 +560,6 @@ During modern excavation efforts, archeologists discovered some of the most brea
 
 ## Links
 
-- [GitHub Repository](https://github.com/yusufarsln98/react-zeugma)
+- [GitHub Repository](https://github.com/react-zeugma/react-zeugma)
 - [npm Package](https://www.npmjs.com/package/react-zeugma)
-- [Contributing Guide](https://github.com/yusufarsln98/react-zeugma/blob/master/CONTRIBUTING.md)
+- [Contributing Guide](https://github.com/react-zeugma/react-zeugma/blob/master/CONTRIBUTING.md)

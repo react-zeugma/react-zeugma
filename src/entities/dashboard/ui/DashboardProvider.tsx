@@ -57,6 +57,21 @@ const CursorOverlay: React.FC<{
   )
 }
 
+class SmartPointerSensor extends PointerSensor {
+  static activators = [
+    {
+      eventName: 'onPointerDown' as const,
+      handler: ({ nativeEvent: event }: { nativeEvent: PointerEvent }) => {
+        const element = event.target as HTMLElement | null
+        if (element?.closest('.drag-cancel')) {
+          return false
+        }
+        return true
+      },
+    },
+  ]
+}
+
 interface DashboardProviderProps {
   layout: TreeNode | null
   onChange: (newLayout: TreeNode | null) => void
@@ -119,7 +134,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
   const [activeId, setActiveId] = useState<string | null>(null)
 
   const sensors = useSensors(
-    useSensor(PointerSensor, {
+    useSensor(SmartPointerSensor, {
       activationConstraint: { distance: dragActivationDistance },
     }),
   )

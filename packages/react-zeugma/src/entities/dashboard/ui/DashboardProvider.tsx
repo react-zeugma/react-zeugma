@@ -7,6 +7,7 @@ import {
   TouchSensor,
   DragStartEvent,
   DragEndEvent,
+  DragMoveEvent,
   pointerWithin,
 } from '@dnd-kit/core'
 import { TreeNode, SplitDirection, SplitNode } from '../../../shared/model'
@@ -120,6 +121,9 @@ interface DashboardProviderProps {
   renderResizer?: (props: ResizerRenderProps) => ReactNode
   minSplitPercentage?: number
   maxSplitPercentage?: number
+  dragOutThreshold?: number
+  onDragOutChange?: (paneId: string | null) => void
+  onDragOut?: (paneId: string) => void
   children: ReactNode
 }
 
@@ -142,6 +146,9 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
   renderResizer,
   minSplitPercentage = 5,
   maxSplitPercentage = 95,
+  dragOutThreshold = 60,
+  onDragOutChange,
+  onDragOut,
   children,
 }) => {
   const [localLayout, setLocalLayout] = useState<TreeNode | null>(layout)
@@ -153,6 +160,19 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
   }
 
   const [activeId, setActiveId] = useState<string | null>(null)
+  const [draggedOutId, setDraggedOutId] = useState<string | null>(null)
+  const containerRef = useRef<HTMLElement | null>(null)
+  const containerRectRef = useRef<DOMRect | null>(null)
+
+  const setContainerRef = useCallback((element: HTMLElement | null) => {
+    containerRef.current = element
+  }, [])
+
+  const onDragOutChangeRef = useRef(onDragOutChange)
+  onDragOutChangeRef.current = onDragOutChange
+
+  const onDragOutRef = useRef(onDragOut)
+  onDragOutRef.current = onDragOut
 
   // Refs for stable closure access — prevents callback identity changes on every layout update
   const layoutRef = useRef(localLayout)
@@ -179,6 +199,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
       classNames.swapPreview,
       classNames.dragOverlay,
       classNames.resizer,
+      classNames.dragOut,
     ],
   )
 
@@ -194,8 +215,96 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
   const handleDragStart = (event: DragStartEvent) => {
     const draggingId = event.active.id.toString()
     setActiveId(draggingId)
+    if (containerRef.current) {
+      containerRectRef.current = containerRef.current.getBoundingClientRect()
+    } else {
+      containerRectRef.current = null
+    }
     if (onDragStart) {
       onDragStart(draggingId)
+    }
+  }
+
+  const handleDragMove = (event: DragMoveEvent) => {
+    const draggingId = event.active.id.toString()
+    const containerRect = containerRectRef.current
+
+    if (!containerRect) {
+      if (draggedOutId !== null) {
+        setDraggedOutId(null)
+        onDragOutChangeRef.current?.(null)
+      }
+      return
+    }
+
+    const ae = event.activatorEvent
+    let px: number | null = null
+    let py: number | null = null
+
+    if (ae instanceof MouseEvent || ae instanceof PointerEvent) {
+      px = ae.clientX + event.delta.x
+      py = ae.clientY + event.delta.y
+    } else if (typeof TouchEvent !== 'undefined' && ae instanceof TouchEvent) {
+      const touch = ae.touches[0] || ae.changedTouches[0]
+      if (touch) {
+        px = touch.clientX + event.delta.x
+        py = touch.clientY + event.delta.y
+      }
+    }
+
+    let distance = 0
+    if (px !== null && py !== null) {
+      let dx = 0
+      let dy = 0
+
+      if (px < containerRect.left) {
+        dx = containerRect.left - px
+      } else if (px > containerRect.right) {
+        dx = px - containerRect.right
+      }
+
+      if (py < containerRect.top) {
+        dy = containerRect.top - py
+      } else if (py > containerRect.bottom) {
+        dy = py - containerRect.bottom
+      }
+
+      distance = Math.sqrt(dx * dx + dy * dy)
+    } else {
+      const activeRect = event.active.rect.current.translated
+      if (activeRect) {
+        const cx = activeRect.left + activeRect.width / 2
+        const cy = activeRect.top + activeRect.height / 2
+        let dx = 0
+        let dy = 0
+
+        if (cx < containerRect.left) {
+          dx = containerRect.left - cx
+        } else if (cx > containerRect.right) {
+          dx = cx - containerRect.right
+        }
+
+        if (cy < containerRect.top) {
+          dy = containerRect.top - cy
+        } else if (cy > containerRect.bottom) {
+          dy = cy - containerRect.bottom
+        }
+
+        distance = Math.sqrt(dx * dx + dy * dy)
+      }
+    }
+
+    const isDraggedOut = distance > dragOutThreshold
+    if (isDraggedOut) {
+      if (draggedOutId !== draggingId) {
+        setDraggedOutId(draggingId)
+        onDragOutChangeRef.current?.(draggingId)
+      }
+    } else {
+      if (draggedOutId !== null) {
+        setDraggedOutId(null)
+        onDragOutChangeRef.current?.(null)
+      }
     }
   }
 
@@ -203,6 +312,29 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
     setActiveId(null)
     const { active, over } = event
     const draggingId = active.id.toString()
+
+    const wasDraggedOut = draggedOutId === draggingId
+
+    setDraggedOutId(null)
+    onDragOutChangeRef.current?.(null)
+    containerRectRef.current = null
+
+    if (wasDraggedOut) {
+      if (onDragOutRef.current) {
+        onDragOutRef.current(draggingId)
+      } else {
+        if (onRemove) {
+          onRemove(draggingId)
+        } else {
+          handleRemovePane(draggingId)
+        }
+      }
+
+      if (onDragEnd) {
+        onDragEnd(draggingId, null, null)
+      }
+      return
+    }
 
     if (!over) {
       if (onDragEnd) {
@@ -377,6 +509,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
       onLayoutChange: handleLocalLayoutChange,
       renderPane: stableRenderPane,
       activeId,
+      draggedOutId,
+      setContainerRef,
       fullscreenPaneId,
       classNames: stableClassNames,
       onRemove,
@@ -392,6 +526,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
     [
       localLayout,
       activeId,
+      draggedOutId,
+      setContainerRef,
       fullscreenPaneId,
       stableClassNames,
       onRemove,
@@ -437,6 +573,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
           sensors={sensors}
           collisionDetection={pointerWithin}
           onDragStart={handleDragStart}
+          onDragMove={handleDragMove}
           onDragEnd={handleDragEnd}
         >
           {children}
@@ -445,7 +582,9 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
           <CursorOverlay
             activeId={activeId}
             render={renderDragOverlay}
-            className={classNames.dragOverlay}
+            className={`${classNames.dragOverlay || ''} ${
+              activeId === draggedOutId ? classNames.dragOut || 'zeugma-dragout' : ''
+            }`.trim()}
           />
         )}
       </DashboardStateContext.Provider>

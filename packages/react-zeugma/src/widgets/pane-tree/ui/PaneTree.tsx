@@ -126,6 +126,8 @@ export const PaneTree: React.FC<PaneTreeProps> = ({
     layout,
     renderPane,
     activeId,
+    draggedOutId,
+    setContainerRef,
     classNames,
     fullscreenPaneId,
     snapThreshold: contextSnapThreshold,
@@ -172,9 +174,11 @@ export const PaneTree: React.FC<PaneTreeProps> = ({
 
   // Only render RootDropZones at the top-level PaneTree (where tree is undefined)
   if (tree === undefined) {
+    const isDragOutActive = activeId !== null && activeId === draggedOutId
     return (
       <div
-        className="zeugma-dashboard-root"
+        ref={setContainerRef}
+        className={`zeugma-dashboard-root ${isDragOutActive ? 'zeugma-dashboard-dragout-active' : ''}`.trim()}
         style={{
           position: 'relative',
           width: '100%',

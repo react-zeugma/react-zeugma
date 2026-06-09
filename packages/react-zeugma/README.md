@@ -109,6 +109,9 @@ The context provider that sets up the drag-and-drop state machine, monitors acti
 | `onFullscreenChange`     | `(paneId: string \| null) => void`                                    | No       | Callback triggered when a pane enters or leaves fullscreen.                                                                                                                  |
 | `onRemove`               | `(paneId: string) => void`                                            | No       | Callback triggered when a pane is closed/removed from the layout tree.                                                                                                       |
 | `dragActivationDistance` | `number`                                                              | No       | Minimum pointer drag distance (in pixels) required to activate dragging. Defaults to `8`.                                                                                    |
+| `dragOutThreshold`       | `number`                                                              | No       | Distance in pixels outside the container bounds required to trigger drag-out mode. Defaults to `60`.                                                                         |
+| `onDragOutChange`        | `(activeId: string \| null) => void`                                  | No       | Callback triggered when the drag-out state changes. Receives the pane ID or `null`.                                                                                          |
+| `onDragOut`              | `(activeId: string) => void`                                          | No       | Callback triggered when a pane is dropped outside the container. If not provided, the pane is automatically removed.                                                         |
 | `onDragStart`            | `(activeId: string) => void`                                          | No       | Callback triggered when dragging starts on a pane.                                                                                                                           |
 | `onDragEnd`              | `(activeId: string, overId: string \| null, dropAction: any) => void` | No       | Callback triggered when dragging ends, providing swap or split details. The `overId` is set to `'root'` if dropped onto outer boundaries to split the entire dashboard root. |
 | `onResizeStart`          | `(currentNode: SplitNode) => void`                                    | No       | Callback triggered when resizing starts on a split node.                                                                                                                     |
@@ -241,6 +244,7 @@ export interface ZeugmaClassNames {
   swapPreview?: string
   dragOverlay?: string
   resizer?: string
+  dragOut?: string
 }
 
 export interface PaneRenderProps {
@@ -267,6 +271,8 @@ export interface DashboardStateValue {
   onLayoutChange: (newLayout: TreeNode | null) => void
   renderPane: (paneId: string) => ReactNode
   activeId: string | null
+  draggedOutId: string | null
+  setContainerRef: (element: HTMLElement | null) => void
   fullscreenPaneId: string | null
   classNames: ZeugmaClassNames
   onRemove?: (paneId: string) => void
@@ -364,6 +370,9 @@ The root context provider. It handles the drag-and-drop event loop and coordinat
 - `onFullscreenChange?: (paneId: string | null) => void` — (Optional) Callback triggered when a pane enters/leaves fullscreen.
 - `onRemove?: (paneId: string) => void` — (Optional) Callback triggered when a pane is closed/removed.
 - `dragActivationDistance?: number` — (Optional) Minimum pointer drag distance (in pixels) required to activate dragging. Defaults to `8`.
+- `dragOutThreshold?: number` — (Optional) Distance in pixels outside the container boundaries required to activate drag-out mode. Defaults to `60`.
+- `onDragOutChange?: (activeId: string | null) => void` — (Optional) Callback triggered when the drag-out state changes.
+- `onDragOut?: (activeId: string) => void` — (Optional) Callback triggered when a pane is dropped/released outside the container. If not provided, defaults to removing the pane.
 - `onDragStart?: (activeId: string) => void` — (Optional) Callback triggered when dragging starts on a pane.
 - `onDragEnd?: (activeId: string, overId: string | null, dropAction: any) => void` — (Optional) Callback triggered when dragging ends. The `overId` will be `'root'` if the pane was dropped onto the outer dashboard boundaries to split the root layout.
 - `onResizeStart?: (currentNode: SplitNode) => void` — (Optional) Callback triggered when resizing starts.

@@ -1,5 +1,16 @@
 # react-zeugma
 
+## 1.2.0
+
+### Minor Changes
+
+- **Drag-Out-to-Close Gesture**: Added support for closing widgets by dragging them outside of the dashboard container boundaries.
+  - Added `dragOutThreshold` prop (default `60` pixels) to specify the boundary overflow distance required to trigger the dismiss intent.
+  - Added `onDragOutChange` callback to listen for boundary transitions.
+  - Added `onDragOut` callback to handle widget dropping outside the container (automatically falls back to pane removal if no callback is supplied).
+  - Added `draggedOutId` and `setContainerRef` state variables to the state context hook (`useDashboardState()`).
+  - Added `dragOut` class name to `ZeugmaClassNames` to configure custom visual styles when a widget is dragged out.
+
 ## 1.1.1
 
 ### Patch Changes

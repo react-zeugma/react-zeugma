@@ -13,6 +13,7 @@
     "build:homepage": "npm run build --workspace=homepage",
     "lint:lib": "npm run lint --workspace=react-zeugma",
     "storybook": "npm run storybook --workspace=react-zeugma",
+    "changeset": "changeset",
     "prepare": "husky"
   },
   "devDependencies": {

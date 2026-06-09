@@ -14,5 +14,11 @@
     "lint:lib": "npm run lint --workspace=react-zeugma",
     "storybook": "npm run storybook --workspace=react-zeugma",
     "prepare": "husky"
+  },
+  "devDependencies": {
+    "next": "^16.2.7"
+  },
+  "overrides": {
+    "postcss": "^8.5.10"
   }
 }

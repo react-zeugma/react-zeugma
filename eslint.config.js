@@ -7,6 +7,14 @@ export default defineConfig(
   },
   ...tseslint.configs.recommended,
   {
+    languageOptions: {
+      parserOptions: {
+        project: ['./packages/react-zeugma/tsconfig.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+  },
+  {
     rules: {
       '@typescript-eslint/no-unused-vars': [
         'warn',

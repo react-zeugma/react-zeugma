@@ -476,6 +476,7 @@ export function Demo() {
                     role="separator"
                     data-direction={direction}
                     onPointerDown={onPointerDown}
+                    style={{ touchAction: 'none' }}
                     className={`transition-all duration-150 z-50 flex items-center justify-center select-none ${
                       isRow ? 'w-1 h-full cursor-col-resize' : 'h-1 w-full cursor-row-resize'
                     } ${isResizing ? 'bg-indigo-500' : 'bg-transparent hover:bg-indigo-500/20'}`}

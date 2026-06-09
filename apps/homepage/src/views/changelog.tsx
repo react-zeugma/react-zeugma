@@ -1,7 +1,9 @@
 'use client'
 
+import { useMemo } from 'react'
 import { MdxRenderer } from '../components/mdx-renderer'
 import { Footer } from '../components/footer'
+import { useScrollAnchor } from '../lib/use-scroll-anchor'
 import type { RootContent } from '../lib/parse-mdx'
 
 interface ChangelogProps {
@@ -9,13 +11,36 @@ interface ChangelogProps {
 }
 
 export function Changelog({ contentNodes }: ChangelogProps) {
-  const scrollToSection = (id: string) => {
-    const el = document.getElementById(id)
-    if (el) {
-      window.history.pushState(null, '', `#${id}`)
-      window.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' })
+  const sectionIds = useMemo(() => {
+    const ids: string[] = []
+    const getSlug = (text: string) =>
+      text
+        .toLowerCase()
+        .replace(/[<>`]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '')
+
+    const nodeText = (node: any): string => {
+      if ('value' in node) return node.value
+      if ('children' in node) {
+        return node.children.map(nodeText).join('')
+      }
+      return ''
     }
-  }
+
+    for (const node of contentNodes) {
+      if (node.type === 'heading' && (node.depth === 1 || node.depth === 2)) {
+        ids.push(getSlug(nodeText(node)))
+      }
+    }
+    return ids
+  }, [contentNodes])
+
+  const { scrollToSection } = useScrollAnchor({
+    sectionIds,
+    offset: 80,
+    clearHashAtTop: true,
+  })
 
   return (
     <div className="flex flex-col min-h-screen bg-bg-app transition-colors duration-200">

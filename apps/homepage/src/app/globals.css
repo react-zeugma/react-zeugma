@@ -155,12 +155,12 @@ body {
   z-index: 9999;
 }
 
-/* Drag-out-to-close visual effects */
-.zeugma-dragout > * {
+/* Drag-to-dismiss visual effects */
+.zeugma-dismiss-preview > * {
   transform: scale(0.9) !important;
   transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
 
-.zeugma-dashboard-dragout-active {
+.zeugma-dashboard-dismiss-active {
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }

@@ -121,9 +121,9 @@ interface DashboardProviderProps {
   renderResizer?: (props: ResizerRenderProps) => ReactNode
   minSplitPercentage?: number
   maxSplitPercentage?: number
-  dragOutThreshold?: number
-  onDragOutChange?: (paneId: string | null) => void
-  onDragOut?: (paneId: string) => void
+  enableDragToDismiss?: boolean
+  dismissThreshold?: number
+  onDismissIntentChange?: (paneId: string | null) => void
   children: ReactNode
 }
 
@@ -146,9 +146,9 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
   renderResizer,
   minSplitPercentage = 5,
   maxSplitPercentage = 95,
-  dragOutThreshold = 60,
-  onDragOutChange,
-  onDragOut,
+  enableDragToDismiss = false,
+  dismissThreshold = 60,
+  onDismissIntentChange,
   children,
 }) => {
   const [localLayout, setLocalLayout] = useState<TreeNode | null>(layout)
@@ -160,7 +160,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
   }
 
   const [activeId, setActiveId] = useState<string | null>(null)
-  const [draggedOutId, setDraggedOutId] = useState<string | null>(null)
+  const [dismissIntentId, setDismissIntentId] = useState<string | null>(null)
   const containerRef = useRef<HTMLElement | null>(null)
   const containerRectRef = useRef<DOMRect | null>(null)
 
@@ -168,11 +168,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
     containerRef.current = element
   }, [])
 
-  const onDragOutChangeRef = useRef(onDragOutChange)
-  onDragOutChangeRef.current = onDragOutChange
-
-  const onDragOutRef = useRef(onDragOut)
-  onDragOutRef.current = onDragOut
+  const onDismissIntentChangeRef = useRef(onDismissIntentChange)
+  onDismissIntentChangeRef.current = onDismissIntentChange
 
   // Refs for stable closure access — prevents callback identity changes on every layout update
   const layoutRef = useRef(localLayout)
@@ -199,7 +196,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
       classNames.swapPreview,
       classNames.dragOverlay,
       classNames.resizer,
-      classNames.dragOut,
+      classNames.dismissPreview,
     ],
   )
 
@@ -215,7 +212,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
   const handleDragStart = (event: DragStartEvent) => {
     const draggingId = event.active.id.toString()
     setActiveId(draggingId)
-    if (containerRef.current) {
+    if (enableDragToDismiss && containerRef.current) {
       containerRectRef.current = containerRef.current.getBoundingClientRect()
     } else {
       containerRectRef.current = null
@@ -226,13 +223,15 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
   }
 
   const handleDragMove = (event: DragMoveEvent) => {
+    if (!enableDragToDismiss) return
+
     const draggingId = event.active.id.toString()
     const containerRect = containerRectRef.current
 
     if (!containerRect) {
-      if (draggedOutId !== null) {
-        setDraggedOutId(null)
-        onDragOutChangeRef.current?.(null)
+      if (dismissIntentId !== null) {
+        setDismissIntentId(null)
+        onDismissIntentChangeRef.current?.(null)
       }
       return
     }
@@ -294,16 +293,16 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
       }
     }
 
-    const isDraggedOut = distance > dragOutThreshold
-    if (isDraggedOut) {
-      if (draggedOutId !== draggingId) {
-        setDraggedOutId(draggingId)
-        onDragOutChangeRef.current?.(draggingId)
+    const isDismissIntent = distance > dismissThreshold
+    if (isDismissIntent) {
+      if (dismissIntentId !== draggingId) {
+        setDismissIntentId(draggingId)
+        onDismissIntentChangeRef.current?.(draggingId)
       }
     } else {
-      if (draggedOutId !== null) {
-        setDraggedOutId(null)
-        onDragOutChangeRef.current?.(null)
+      if (dismissIntentId !== null) {
+        setDismissIntentId(null)
+        onDismissIntentChangeRef.current?.(null)
       }
     }
   }
@@ -313,21 +312,17 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
     const { active, over } = event
     const draggingId = active.id.toString()
 
-    const wasDraggedOut = draggedOutId === draggingId
+    const wasDismissIntent = enableDragToDismiss && dismissIntentId === draggingId
 
-    setDraggedOutId(null)
-    onDragOutChangeRef.current?.(null)
+    setDismissIntentId(null)
+    onDismissIntentChangeRef.current?.(null)
     containerRectRef.current = null
 
-    if (wasDraggedOut) {
-      if (onDragOutRef.current) {
-        onDragOutRef.current(draggingId)
+    if (wasDismissIntent) {
+      if (onRemove) {
+        onRemove(draggingId)
       } else {
-        if (onRemove) {
-          onRemove(draggingId)
-        } else {
-          handleRemovePane(draggingId)
-        }
+        handleRemovePane(draggingId)
       }
 
       if (onDragEnd) {
@@ -509,7 +504,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
       onLayoutChange: handleLocalLayoutChange,
       renderPane: stableRenderPane,
       activeId,
-      draggedOutId,
+      dismissIntentId,
       setContainerRef,
       fullscreenPaneId,
       classNames: stableClassNames,
@@ -526,7 +521,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
     [
       localLayout,
       activeId,
-      draggedOutId,
+      dismissIntentId,
       setContainerRef,
       fullscreenPaneId,
       stableClassNames,
@@ -583,7 +578,9 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
             activeId={activeId}
             render={renderDragOverlay}
             className={`${classNames.dragOverlay || ''} ${
-              activeId === draggedOutId ? classNames.dragOut || 'zeugma-dragout' : ''
+              activeId === dismissIntentId
+                ? classNames.dismissPreview || 'zeugma-dismiss-preview'
+                : ''
             }`.trim()}
           />
         )}

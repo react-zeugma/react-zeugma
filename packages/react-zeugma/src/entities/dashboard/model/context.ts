@@ -7,7 +7,7 @@ export interface ZeugmaClassNames {
   swapPreview?: string
   dragOverlay?: string
   resizer?: string
-  dragOut?: string
+  dismissPreview?: string
 }
 
 export interface ResizerRenderProps {
@@ -27,7 +27,7 @@ export interface DashboardStateValue {
   onLayoutChange: (newLayout: TreeNode | null) => void
   renderPane: (paneId: string) => ReactNode
   activeId: string | null
-  draggedOutId: string | null
+  dismissIntentId: string | null
   setContainerRef: (element: HTMLElement | null) => void
   fullscreenPaneId: string | null
   classNames: ZeugmaClassNames

@@ -293,7 +293,7 @@ export function Demo() {
   const [minSplit, setMinSplit] = useState(10)
   const [maxSplit, setMaxSplit] = useState(90)
   const [logs, setLogs] = useState<LogEntry[]>([])
-  const [localDraggedOutId, setLocalDraggedOutId] = useState<string | null>(null)
+  const [localDismissIntentId, setLocalDismissIntentId] = useState<string | null>(null)
 
   React.useEffect(() => {
     const savedResizer = localStorage.getItem('zeugma-demo-custom-resizer')
@@ -324,7 +324,7 @@ export function Demo() {
 
   const handleDragStart = React.useCallback(
     (activeId: string) => {
-      setLocalDraggedOutId(null)
+      setLocalDismissIntentId(null)
       addLog('drag', `Started dragging "${activeId}"`)
     },
     [addLog],
@@ -340,7 +340,7 @@ export function Demo() {
         position?: 'top' | 'bottom' | 'left' | 'right' | 'center'
       } | null,
     ) => {
-      setLocalDraggedOutId(null)
+      setLocalDismissIntentId(null)
       if (!overId) {
         addLog('drag', `Released "${activeId}" without drop target`)
       } else if (dropAction) {
@@ -354,9 +354,9 @@ export function Demo() {
     [addLog],
   )
 
-  const handleDragOutChange = React.useCallback(
+  const handleDismissIntentChange = React.useCallback(
     (paneId: string | null) => {
-      setLocalDraggedOutId(paneId)
+      setLocalDismissIntentId(paneId)
       if (paneId) {
         addLog('drag', `Ready to close: Widget "${paneId}" dragged out`)
       } else {
@@ -388,19 +388,17 @@ export function Demo() {
 
   const handleRemove = React.useCallback(
     (paneId: string) => {
+      const isDragOut = localDismissIntentId === paneId
+      setLocalDismissIntentId(null)
       const newLayout = removePane(layout, paneId)
       handleLayoutChange(newLayout)
+      if (isDragOut) {
+        addLog('drag', `Closed: Widget "${paneId}" dragged out and released`)
+      } else {
+        addLog('drag', `Closed: Widget "${paneId}" removed`)
+      }
     },
-    [layout],
-  )
-
-  const handleDragOut = React.useCallback(
-    (paneId: string) => {
-      setLocalDraggedOutId(null)
-      addLog('drag', `Closed: Widget "${paneId}" dragged out and released`)
-      handleRemove(paneId)
-    },
-    [addLog, handleRemove],
+    [layout, localDismissIntentId, addLog],
   )
 
   const renderPane = (id: string) => {
@@ -408,7 +406,7 @@ export function Demo() {
       <Pane id={id}>
         {(paneProps: PaneRenderProps) => {
           const { title } = getWidgetDetails(id)
-          const isThisDraggedOut = id === localDraggedOutId
+          const isThisDraggedOut = id === localDismissIntentId
 
           return (
             <div
@@ -473,7 +471,7 @@ export function Demo() {
       violet: 'bg-violet-500',
     }
     const dotClass = colorDotMap[color] || 'bg-indigo-500'
-    const isDraggedOut = id === localDraggedOutId
+    const isDraggedOut = id === localDismissIntentId
 
     if (isDraggedOut) {
       return (
@@ -513,9 +511,9 @@ export function Demo() {
         maxSplitPercentage={maxSplit}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
-        onDragOutChange={handleDragOutChange}
-        onDragOut={handleDragOut}
-        dragOutThreshold={60}
+        onDismissIntentChange={handleDismissIntentChange}
+        enableDragToDismiss={true}
+        dismissThreshold={60}
         onResizeStart={handleResizeStart}
         onResizeEnd={handleResizeEnd}
         renderResizer={
@@ -549,7 +547,7 @@ export function Demo() {
             'bg-amber-500/10 backdrop-blur-[2px] border-2 border-dashed border-amber-400/50 shadow-[0_0_15px_rgba(245,158,11,0.2)] rounded-lg transition-all duration-200',
           resizer:
             'bg-transparent hover:bg-indigo-500/50 active:bg-indigo-500 transition-colors duration-150 z-50',
-          dragOut: 'zeugma-dragout',
+          dismissPreview: 'zeugma-dismiss-preview',
         }}
       >
         <SidebarWrapper

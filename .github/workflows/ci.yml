@@ -17,6 +17,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run lint
-      - run: npm run typecheck
-      - run: npm run build
+      - run: npm run lint --workspace=react-zeugma
+      - run: npm run typecheck --workspace=react-zeugma
+      - run: npm run build --workspace=react-zeugma
+      - run: npm run build --workspace=homepage

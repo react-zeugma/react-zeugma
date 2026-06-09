@@ -1,98 +1,24 @@
 {
-  "name": "react-zeugma",
-  "version": "1.0.0",
-  "description": "Recursive drag-and-drop dashboard layout engine for React — combining the tree-based splitting of react-mosaic with the declarative API of react-grid-layout.",
+  "name": "react-zeugma-monorepo",
+  "private": true,
   "type": "module",
-  "sideEffects": false,
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs",
-      "default": "./dist/index.js"
-    }
-  },
-  "files": [
-    "dist",
-    "README.md"
-  ],
-  "author": "yusufarsln98",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/react-zeugma/react-zeugma.git"
-  },
-  "bugs": {
-    "url": "https://github.com/react-zeugma/react-zeugma/issues"
-  },
-  "homepage": "https://react-zeugma.vercel.app",
-  "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org/"
-  },
-  "keywords": [
-    "react",
-    "drag-and-drop",
-    "dashboard",
-    "grid",
-    "mosaic",
-    "zeugma",
-    "dnd-kit",
-    "layout",
-    "split-pane",
-    "recursive",
-    "tree",
-    "panel",
-    "resizable",
-    "widget"
+  "workspaces": [
+    "packages/react-zeugma",
+    "apps/homepage"
   ],
   "scripts": {
-    "build": "tsup",
-    "dev": "tsup --watch",
-    "lint": "eslint src --ext ts,tsx",
-    "typecheck": "tsc --noEmit",
-    "format": "prettier --write \"src/**/*.{ts,tsx}\" \"docs/**/*.{ts,tsx,mdx}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx}\" \"docs/**/*.{ts,tsx,mdx}\"",
-    "storybook": "storybook dev -p 6006",
-    "build:storybook": "storybook build -o storybook-static",
-    "prepare": "husky",
-    "version": "changeset version",
-    "release": "npm run build && changeset publish"
-  },
-  "peerDependencies": {
-    "react": "^18.0.0 || ^19.0.0",
-    "react-dom": "^18.0.0 || ^19.0.0"
-  },
-  "dependencies": {
-    "@dnd-kit/core": "^6.3.1",
-    "@dnd-kit/sortable": "^10.0.0",
-    "@dnd-kit/utilities": "^3.2.2"
+    "dev:lib": "npm run dev --workspace=react-zeugma",
+    "dev:homepage": "npm run dev --workspace=homepage",
+    "build:lib": "npm run build --workspace=react-zeugma",
+    "build:homepage": "npm run build --workspace=homepage",
+    "lint:lib": "npm run lint --workspace=react-zeugma",
+    "storybook": "npm run storybook --workspace=react-zeugma",
+    "prepare": "husky"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.31.0",
-    "@storybook/addon-docs": "^10.4.1",
-    "@storybook/react-vite": "^10.4.1",
-    "@types/node": "^25.9.1",
-    "@types/react": "^19.2.15",
-    "@types/react-dom": "^19.2.3",
-    "eslint": "^10.4.1",
-    "eslint-plugin-storybook": "^10.4.1",
-    "husky": "^9.1.7",
-    "lint-staged": "^16.4.0",
-    "prettier": "^3.8.3",
-    "react": "^19.2.6",
-    "react-dom": "^19.2.6",
-    "storybook": "^10.4.1",
-    "tsup": "^8.5.1",
-    "typescript": "^6.0.3",
-    "typescript-eslint": "^8.60.0"
+    "next": "^16.2.7"
   },
-  "eslintConfig": {
-    "extends": [
-      "plugin:storybook/recommended"
-    ]
+  "overrides": {
+    "postcss": "^8.5.10"
   }
 }

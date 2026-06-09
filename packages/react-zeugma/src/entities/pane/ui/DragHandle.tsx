@@ -15,7 +15,7 @@ export const DragHandle: React.FC<DragHandleProps> = ({ children, className, sty
   return (
     <div
       className={className}
-      style={{ cursor: 'grab', userSelect: 'none', ...style }}
+      style={{ cursor: 'grab', userSelect: 'none', touchAction: 'none', ...style }}
       {...dragProps}
     >
       {children}

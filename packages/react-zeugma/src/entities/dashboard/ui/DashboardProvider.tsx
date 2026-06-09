@@ -4,6 +4,7 @@ import {
   useSensor,
   useSensors,
   PointerSensor,
+  TouchSensor,
   DragStartEvent,
   DragEndEvent,
   pointerWithin,
@@ -67,6 +68,21 @@ class SmartPointerSensor extends PointerSensor {
     {
       eventName: 'onPointerDown' as const,
       handler: ({ nativeEvent: event }: { nativeEvent: PointerEvent }) => {
+        const element = event.target as HTMLElement | null
+        if (element?.closest('.drag-cancel')) {
+          return false
+        }
+        return true
+      },
+    },
+  ]
+}
+
+class SmartTouchSensor extends TouchSensor {
+  static activators = [
+    {
+      eventName: 'onTouchStart' as const,
+      handler: ({ nativeEvent: event }: { nativeEvent: TouchEvent }) => {
         const element = event.target as HTMLElement | null
         if (element?.closest('.drag-cancel')) {
           return false
@@ -169,6 +185,9 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
   const sensors = useSensors(
     useSensor(SmartPointerSensor, {
       activationConstraint: { distance: dragActivationDistance },
+    }),
+    useSensor(SmartTouchSensor, {
+      activationConstraint: { delay: 250, tolerance: 5 },
     }),
   )
 

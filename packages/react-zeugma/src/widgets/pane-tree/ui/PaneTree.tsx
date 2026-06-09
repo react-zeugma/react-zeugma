@@ -93,6 +93,7 @@ const PaneSplit: React.FC<PaneSplitProps> = ({
             position: 'relative',
             zIndex: 10,
             userSelect: 'none',
+            touchAction: 'none',
             boxSizing: 'border-box',
             flexShrink: 0,
           }}

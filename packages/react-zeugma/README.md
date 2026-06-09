@@ -296,8 +296,6 @@ export interface DashboardActionsValue {
     updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined,
   ) => void
 }
-
-export type DashboardContextValue = DashboardStateValue & DashboardActionsValue
 ```
 
 ---
@@ -441,9 +439,8 @@ Alternatively, you can consume state and mutation helpers directly from the cont
 
 - **`useDashboardState()`**: Returns the reactive state values (e.g., `layout`, `activeId`, `classNames`). Consumers of this hook will re-render whenever layout state updates.
 - **`useDashboardActions()`**: Returns the stable layout mutation actions (e.g., `removePane`, `splitPane`). Because these actions have a permanent identity, consumers of this hook **will not** re-render when layout state changes, providing a significant performance optimization.
-- **`useDashboard()`**: Returns both state and actions (backward compatible; equivalent to the union of both).
 
-The actions returned by `useDashboardActions()` (or the combined `useDashboard()`) are:
+The actions returned by `useDashboardActions()` are:
 
 - **`removePane(paneId: string) => void`**
 - **`addPane(paneId: string) => void`**

@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 1.1.1
+
+### Patch Changes
+
+- Bump version to force new release and sync documents.
+
 ## 1.1.0
 
 ### Minor Changes

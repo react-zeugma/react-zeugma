@@ -16,6 +16,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      - run: npm install -g npm@latest
       - run: npm install
       - run: npm run lint --workspace=react-zeugma
       - run: npm run typecheck --workspace=react-zeugma

@@ -1,5 +1,17 @@
 # react-zeugma
 
+## 1.3.0
+
+### Minor Changes
+
+- **Refactored to Drag-to-Dismiss Conventions**: Refactored the boundary overflow drag-to-close gesture API to follow standard conventions.
+  - Added `enableDragToDismiss` boolean prop (default `false`) to explicitly activate the feature.
+  - Renamed `dragOutThreshold` prop to `dismissThreshold` (default `60` pixels).
+  - Renamed `onDragOutChange` callback to `onDismissIntentChange`.
+  - Renamed context state `draggedOutId` to `dismissIntentId` (`useDashboardState()`).
+  - Renamed `dragOut` property in `classNames` to `dismissPreview` for consistency.
+  - Removed the redundant `onDragOut` callback and unified boundary drop events to trigger the existing `onRemove` callback directly.
+
 ## 1.2.0
 
 ### Minor Changes

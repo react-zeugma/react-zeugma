@@ -1,10 +1,25 @@
 import { useContext } from 'react'
-import { DashboardContext } from './context'
+import {
+  DashboardStateContext,
+  DashboardActionsContext,
+  DashboardStateValue,
+  DashboardActionsValue,
+} from './context'
 
-export const useDashboard = () => {
-  const context = useContext(DashboardContext)
-  if (!context) {
-    throw new Error('useDashboard must be used within a DashboardProvider')
+/** Returns only reactive state. Use when you need layout, activeId, classNames, etc. */
+export const useDashboardState = (): DashboardStateValue => {
+  const state = useContext(DashboardStateContext)
+  if (!state) {
+    throw new Error('useDashboardState must be used within a DashboardProvider')
   }
-  return context
+  return state
+}
+
+/** Returns only stable action dispatchers. Consumers of this hook never re-render from state changes. */
+export const useDashboardActions = (): DashboardActionsValue => {
+  const actions = useContext(DashboardActionsContext)
+  if (!actions) {
+    throw new Error('useDashboardActions must be used within a DashboardProvider')
+  }
+  return actions
 }

@@ -20,7 +20,12 @@ import {
   findPane,
 } from '../../../shared/lib/tree'
 import { DEFAULT_DRAG_ACTIVATION_DISTANCE, DEFAULT_SNAP_THRESHOLD } from '../../../shared/config'
-import { DashboardContext, ZeugmaClassNames, ResizerRenderProps } from '../model/context'
+import {
+  DashboardStateContext,
+  DashboardActionsContext,
+  ZeugmaClassNames,
+  ResizerRenderProps,
+} from '../model/context'
 
 /** Cursor-following overlay rendered via portal */
 const CursorOverlay: React.FC<{
@@ -124,14 +129,42 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
   children,
 }) => {
   const [localLayout, setLocalLayout] = useState<TreeNode | null>(layout)
-  const [prevLayout, setPrevLayout] = useState<TreeNode | null>(layout)
+  const prevLayoutRef = useRef(layout)
 
-  if (layout !== prevLayout) {
+  if (layout !== prevLayoutRef.current) {
+    prevLayoutRef.current = layout
     setLocalLayout(layout)
-    setPrevLayout(layout)
   }
 
   const [activeId, setActiveId] = useState<string | null>(null)
+
+  // Refs for stable closure access — prevents callback identity changes on every layout update
+  const layoutRef = useRef(localLayout)
+  layoutRef.current = localLayout
+
+  const onChangeRef = useRef(onChange)
+  onChangeRef.current = onChange
+
+  const renderPaneRef = useRef(renderPane)
+  renderPaneRef.current = renderPane
+
+  const onResizeEndPropRef = useRef(onResizeEnd)
+  onResizeEndPropRef.current = onResizeEnd
+
+  // Stable renderPane wrapper — immune to consumer passing inline functions
+  const stableRenderPane = useCallback((paneId: string) => renderPaneRef.current(paneId), [])
+
+  // Shallow-memoize classNames by individual fields to avoid identity busting from inline objects
+  const stableClassNames = useMemo(
+    () => classNames,
+    [
+      classNames.pane,
+      classNames.dropPreview,
+      classNames.swapPreview,
+      classNames.dragOverlay,
+      classNames.resizer,
+    ],
+  )
 
   const sensors = useSensors(
     useSensor(SmartPointerSensor, {
@@ -246,32 +279,23 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
     setLocalLayout(newLayout)
   }, [])
 
-  const handleRemovePane = useCallback(
-    (paneId: string) => {
-      const newLayout = removePane(localLayout, paneId)
-      setLocalLayout(newLayout)
-      onChange(newLayout)
-    },
-    [localLayout, onChange],
-  )
+  const handleRemovePane = useCallback((paneId: string) => {
+    const newLayout = removePane(layoutRef.current, paneId)
+    setLocalLayout(newLayout)
+    onChangeRef.current(newLayout)
+  }, [])
 
-  const handleAddPane = useCallback(
-    (paneId: string) => {
-      const newLayout = addPane(localLayout, paneId)
-      setLocalLayout(newLayout)
-      onChange(newLayout)
-    },
-    [localLayout, onChange],
-  )
+  const handleAddPane = useCallback((paneId: string) => {
+    const newLayout = addPane(layoutRef.current, paneId)
+    setLocalLayout(newLayout)
+    onChangeRef.current(newLayout)
+  }, [])
 
-  const handleSwapPanes = useCallback(
-    (paneIdA: string, paneIdB: string) => {
-      const newLayout = swapPanes(localLayout, paneIdA, paneIdB)
-      setLocalLayout(newLayout)
-      onChange(newLayout)
-    },
-    [localLayout, onChange],
-  )
+  const handleSwapPanes = useCallback((paneIdA: string, paneIdB: string) => {
+    const newLayout = swapPanes(layoutRef.current, paneIdA, paneIdB)
+    setLocalLayout(newLayout)
+    onChangeRef.current(newLayout)
+  }, [])
 
   const handleSplitPane = useCallback(
     (
@@ -280,11 +304,11 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
       splitType: 'left' | 'right' | 'top' | 'bottom',
       paneToAdd: string,
     ) => {
-      const draggedPaneNode = findPane(localLayout, paneToAdd) ?? {
+      const draggedPaneNode = findPane(layoutRef.current, paneToAdd) ?? {
         type: 'pane',
         paneId: paneToAdd,
       }
-      const treeWithoutDragging = removePane(localLayout, paneToAdd)
+      const treeWithoutDragging = removePane(layoutRef.current, paneToAdd)
       const newLayout = splitPane(
         treeWithoutDragging,
         targetId,
@@ -293,19 +317,16 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
         draggedPaneNode,
       )
       setLocalLayout(newLayout)
-      onChange(newLayout)
+      onChangeRef.current(newLayout)
     },
-    [localLayout, onChange],
+    [],
   )
 
-  const handleUpdateSplitPercentage = useCallback(
-    (currentNode: SplitNode, percentage: number) => {
-      const newLayout = updateSplitPercentage(localLayout, currentNode, percentage)
-      setLocalLayout(newLayout)
-      onChange(newLayout)
-    },
-    [localLayout, onChange],
-  )
+  const handleUpdateSplitPercentage = useCallback((currentNode: SplitNode, percentage: number) => {
+    const newLayout = updateSplitPercentage(layoutRef.current, currentNode, percentage)
+    setLocalLayout(newLayout)
+    onChangeRef.current(newLayout)
+  }, [])
 
   const handleUpdatePaneMetadata = useCallback(
     (
@@ -314,34 +335,31 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
         current: Record<string, unknown> | undefined,
       ) => Record<string, unknown> | undefined,
     ) => {
-      const newLayout = updatePaneMetadata(localLayout, paneId, updater)
+      const newLayout = updatePaneMetadata(layoutRef.current, paneId, updater)
       setLocalLayout(newLayout)
-      onChange(newLayout)
+      onChangeRef.current(newLayout)
     },
-    [localLayout, onChange],
+    [],
   )
 
-  const handleResizeEnd = useCallback(
-    (currentNode: SplitNode, percentage: number) => {
-      const finalLayout = updateSplitPercentage(localLayout, currentNode, percentage)
-      setLocalLayout(finalLayout)
-      onChange(finalLayout)
-      if (onResizeEnd) {
-        onResizeEnd(currentNode, percentage)
-      }
-    },
-    [localLayout, onChange, onResizeEnd],
-  )
+  const handleResizeEnd = useCallback((currentNode: SplitNode, percentage: number) => {
+    const finalLayout = updateSplitPercentage(layoutRef.current, currentNode, percentage)
+    setLocalLayout(finalLayout)
+    onChangeRef.current(finalLayout)
+    if (onResizeEndPropRef.current) {
+      onResizeEndPropRef.current(currentNode, percentage)
+    }
+  }, [])
 
-  // Best practice: Memoize context value to prevent unnecessary re-renders of context consumers.
-  const contextValue = useMemo(
+  // State context — reactive values that change during runtime
+  const stateValue = useMemo(
     () => ({
       layout: localLayout,
       onLayoutChange: handleLocalLayoutChange,
-      renderPane,
+      renderPane: stableRenderPane,
       activeId,
       fullscreenPaneId,
-      classNames,
+      classNames: stableClassNames,
       onRemove,
       onFullscreenChange,
       snapThreshold,
@@ -351,6 +369,30 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
       renderResizer,
       minSplitPercentage,
       maxSplitPercentage,
+    }),
+    [
+      localLayout,
+      activeId,
+      fullscreenPaneId,
+      stableClassNames,
+      onRemove,
+      onFullscreenChange,
+      snapThreshold,
+      onResizeStart,
+      onResize,
+      renderResizer,
+      minSplitPercentage,
+      maxSplitPercentage,
+      // Stable callbacks (empty deps) — included for exhaustive-deps lint rule
+      handleLocalLayoutChange,
+      stableRenderPane,
+      handleResizeEnd,
+    ],
+  )
+
+  // Actions context — stable dispatch functions that never change identity
+  const actionsValue = useMemo(
+    () => ({
       removePane: handleRemovePane,
       addPane: handleAddPane,
       swapPanes: handleSwapPanes,
@@ -359,21 +401,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
       updatePaneMetadata: handleUpdatePaneMetadata,
     }),
     [
-      localLayout,
-      handleLocalLayoutChange,
-      renderPane,
-      activeId,
-      fullscreenPaneId,
-      classNames,
-      onRemove,
-      onFullscreenChange,
-      snapThreshold,
-      onResizeStart,
-      onResize,
-      handleResizeEnd,
-      renderResizer,
-      minSplitPercentage,
-      maxSplitPercentage,
       handleRemovePane,
       handleAddPane,
       handleSwapPanes,
@@ -384,23 +411,25 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
   )
 
   return (
-    <DashboardContext.Provider value={contextValue}>
-      <DndContext
-        id="zeugma-dnd-context"
-        sensors={sensors}
-        collisionDetection={pointerWithin}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-      >
-        {children}
-      </DndContext>
-      {activeId && renderDragOverlay && (
-        <CursorOverlay
-          activeId={activeId}
-          render={renderDragOverlay}
-          className={classNames.dragOverlay}
-        />
-      )}
-    </DashboardContext.Provider>
+    <DashboardActionsContext.Provider value={actionsValue}>
+      <DashboardStateContext.Provider value={stateValue}>
+        <DndContext
+          id="zeugma-dnd-context"
+          sensors={sensors}
+          collisionDetection={pointerWithin}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+        >
+          {children}
+        </DndContext>
+        {activeId && renderDragOverlay && (
+          <CursorOverlay
+            activeId={activeId}
+            render={renderDragOverlay}
+            className={classNames.dragOverlay}
+          />
+        )}
+      </DashboardStateContext.Provider>
+    </DashboardActionsContext.Provider>
   )
 }

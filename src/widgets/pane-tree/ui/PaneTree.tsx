@@ -1,5 +1,5 @@
 import React, { useRef, useState, useMemo } from 'react'
-import { useDashboard, ResizerRenderProps, RootDropZones } from '../../../entities/dashboard'
+import { useDashboardState, ResizerRenderProps, RootDropZones } from '../../../entities/dashboard'
 import { useResizer } from '../../../features/resize-pane'
 import { TreeNode, SplitNode } from '../../../shared/model'
 import { removePane } from '../../../shared'
@@ -27,7 +27,12 @@ const PaneSplit: React.FC<PaneSplitProps> = ({
   snapThreshold,
   renderResizer: propRenderResizer,
 }) => {
-  const { layout, onLayoutChange, classNames, renderResizer: contextRenderResizer } = useDashboard()
+  const {
+    layout,
+    onLayoutChange,
+    classNames,
+    renderResizer: contextRenderResizer,
+  } = useDashboardState()
   const [isResizing, setIsResizing] = useState(false)
 
   const renderResizer = propRenderResizer || contextRenderResizer
@@ -123,14 +128,14 @@ export const PaneTree: React.FC<PaneTreeProps> = ({
     classNames,
     fullscreenPaneId,
     snapThreshold: contextSnapThreshold,
-  } = useDashboard()
+  } = useDashboardState()
 
   const snapThreshold = propSnapThreshold !== undefined ? propSnapThreshold : contextSnapThreshold
 
   const hasOtherPanes = useMemo(() => {
-    if (!activeId) return false
+    if (tree !== undefined || !activeId) return false
     return removePane(layout, activeId) !== null
-  }, [layout, activeId])
+  }, [tree, layout, activeId])
 
   // Fullscreen bypass
   if (fullscreenPaneId && !tree) {

@@ -293,6 +293,7 @@ export function Demo() {
   const [minSplit, setMinSplit] = useState(10)
   const [maxSplit, setMaxSplit] = useState(90)
   const [logs, setLogs] = useState<LogEntry[]>([])
+  const [localDraggedOutId, setLocalDraggedOutId] = useState<string | null>(null)
 
   React.useEffect(() => {
     const savedResizer = localStorage.getItem('zeugma-demo-custom-resizer')
@@ -323,6 +324,7 @@ export function Demo() {
 
   const handleDragStart = React.useCallback(
     (activeId: string) => {
+      setLocalDraggedOutId(null)
       addLog('drag', `Started dragging "${activeId}"`)
     },
     [addLog],
@@ -338,6 +340,7 @@ export function Demo() {
         position?: 'top' | 'bottom' | 'left' | 'right' | 'center'
       } | null,
     ) => {
+      setLocalDraggedOutId(null)
       if (!overId) {
         addLog('drag', `Released "${activeId}" without drop target`)
       } else if (dropAction) {
@@ -346,6 +349,18 @@ export function Demo() {
             ? `split-${dropAction.position} onto "${overId}"`
             : `swapped with "${overId}"`
         addLog('drag', `Dropped "${activeId}": ${detail}`)
+      }
+    },
+    [addLog],
+  )
+
+  const handleDragOutChange = React.useCallback(
+    (paneId: string | null) => {
+      setLocalDraggedOutId(paneId)
+      if (paneId) {
+        addLog('drag', `Ready to close: Widget "${paneId}" dragged out`)
+      } else {
+        addLog('drag', `Cancel close: Widget brought back inside`)
       }
     },
     [addLog],
@@ -371,22 +386,37 @@ export function Demo() {
     setLayout(newLayout)
   }
 
-  const handleRemove = (paneId: string) => {
-    const newLayout = removePane(layout, paneId)
-    handleLayoutChange(newLayout)
-  }
+  const handleRemove = React.useCallback(
+    (paneId: string) => {
+      const newLayout = removePane(layout, paneId)
+      handleLayoutChange(newLayout)
+    },
+    [layout],
+  )
+
+  const handleDragOut = React.useCallback(
+    (paneId: string) => {
+      setLocalDraggedOutId(null)
+      addLog('drag', `Closed: Widget "${paneId}" dragged out and released`)
+      handleRemove(paneId)
+    },
+    [addLog, handleRemove],
+  )
 
   const renderPane = (id: string) => {
     return (
       <Pane id={id}>
         {(paneProps: PaneRenderProps) => {
           const { title } = getWidgetDetails(id)
+          const isThisDraggedOut = id === localDraggedOutId
 
           return (
             <div
               className={`zeugma-pane-container h-full border border-border-primary rounded-lg overflow-hidden shadow-md bg-bg-pane relative transition-all duration-200 ${
                 paneProps.isDragging
-                  ? 'opacity-30 grayscale pointer-events-none select-none scale-[0.98]'
+                  ? isThisDraggedOut
+                    ? 'scale-[0.90] pointer-events-none select-none'
+                    : 'scale-[0.98] pointer-events-none select-none'
                   : ''
               }`}
             >
@@ -409,10 +439,16 @@ export function Demo() {
                 />
               )}
               {paneProps.isDragging && (
-                <div className="absolute inset-0 bg-bg-app/40 backdrop-blur-[1px] flex items-center justify-center pointer-events-none select-none z-50">
-                  <span className="text-text-secondary font-bold uppercase tracking-wider text-[10px] bg-bg-pane border border-border-primary px-2.5 py-1 rounded shadow-md">
-                    Dragging...
-                  </span>
+                <div className="absolute inset-0 bg-bg-app/40 flex items-center justify-center pointer-events-none select-none z-50">
+                  {isThisDraggedOut ? (
+                    <span className="text-zinc-900 font-bold uppercase tracking-wider text-[10px] bg-zinc-100 border border-zinc-300 px-2.5 py-1 rounded shadow-sm dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-100">
+                      Close Widget
+                    </span>
+                  ) : (
+                    <span className="text-text-secondary font-bold uppercase tracking-wider text-[10px] bg-bg-pane border border-border-primary px-2.5 py-1 rounded shadow-md">
+                      Dragging...
+                    </span>
+                  )}
                 </div>
               )}
             </div>
@@ -437,6 +473,18 @@ export function Demo() {
       violet: 'bg-violet-500',
     }
     const dotClass = colorDotMap[color] || 'bg-indigo-500'
+    const isDraggedOut = id === localDraggedOutId
+
+    if (isDraggedOut) {
+      return (
+        <div className="px-3.5 py-2 bg-zinc-900 border border-zinc-700 dark:bg-zinc-100 dark:border-zinc-300 rounded-lg shadow-2xl flex items-center gap-2.5 opacity-95 backdrop-blur-md pointer-events-none select-none text-zinc-100 dark:text-zinc-900">
+          <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 animate-pulse" />
+          <span className="text-[11px] uppercase tracking-wider font-bold">
+            Release to Close: {currentTitle}
+          </span>
+        </div>
+      )
+    }
 
     return (
       <div className="px-3.5 py-2 bg-bg-sidebar border border-border-secondary rounded-lg shadow-2xl flex items-center gap-2.5 opacity-95 backdrop-blur-md pointer-events-none select-none">
@@ -465,6 +513,9 @@ export function Demo() {
         maxSplitPercentage={maxSplit}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
+        onDragOutChange={handleDragOutChange}
+        onDragOut={handleDragOut}
+        dragOutThreshold={60}
         onResizeStart={handleResizeStart}
         onResizeEnd={handleResizeEnd}
         renderResizer={
@@ -498,6 +549,7 @@ export function Demo() {
             'bg-amber-500/10 backdrop-blur-[2px] border-2 border-dashed border-amber-400/50 shadow-[0_0_15px_rgba(245,158,11,0.2)] rounded-lg transition-all duration-200',
           resizer:
             'bg-transparent hover:bg-indigo-500/50 active:bg-indigo-500 transition-colors duration-150 z-50',
+          dragOut: 'zeugma-dragout',
         }}
       >
         <SidebarWrapper

@@ -24,7 +24,7 @@ export async function fetchDocs(): Promise<string> {
  */
 export async function fetchChangelog(): Promise<string> {
   try {
-    const localPath = path.resolve(process.cwd(), '../../CHANGELOG.md')
+    const localPath = path.resolve(process.cwd(), '../../packages/react-zeugma/CHANGELOG.md')
     if (existsSync(localPath)) {
       return readFileSync(localPath, 'utf-8')
     }

@@ -3,6 +3,7 @@
 import { Suspense, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { Boxes, MousePointer2, Focus, Layout, ArrowRight, Copy, Check } from 'lucide-react'
+import { useScrollAnchor } from '../lib/use-scroll-anchor'
 import dynamic from 'next/dynamic'
 
 const MosaicDemo = dynamic(
@@ -98,6 +99,11 @@ export function Home() {
     setTileOrder(order)
   }, [])
 
+  const { scrollToSection } = useScrollAnchor({
+    sectionIds: ['designed-for-workspace-builders', 'spell-react-zeugma'],
+    offset: 80,
+  })
+
   return (
     <div className="flex flex-col min-h-screen bg-bg-app">
       {/* Hero Section */}
@@ -152,8 +158,21 @@ export function Home() {
       <section className="py-24 px-6 border-t border-border-primary bg-bg-app relative z-20">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-16 items-start">
           <div className="flex-1 w-full text-left">
-            <h2 className="text-3xl font-bold text-text-primary mb-6">
-              Designed for Workspace Builders
+            <h2
+              id="designed-for-workspace-builders"
+              className="group flex items-center gap-2 text-3xl font-bold text-text-primary mb-6 scroll-mt-20"
+            >
+              <span>Designed for Workspace Builders</span>
+              <a
+                href="#designed-for-workspace-builders"
+                onClick={(e) => {
+                  e.preventDefault()
+                  scrollToSection('designed-for-workspace-builders')
+                }}
+                className="text-text-muted hover:text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity font-mono text-xl select-none"
+              >
+                #
+              </a>
             </h2>
             <p className="text-text-secondary text-base leading-relaxed mb-12 max-w-xl">
               Stop fighting with CSS Grid or wrestling absolute positioning math.{' '}
@@ -192,26 +211,41 @@ export function Home() {
             <div className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#D8BA8E] mb-2 select-none">
               Can You Solve It?
             </div>
-            <h2 className="text-2xl font-extrabold text-text-primary mb-4 font-serif tracking-wide select-none">
-              Spell{' '}
-              <span className="inline-flex gap-px">
-                {tileOrder.split('').map((letter, i) => {
-                  const target = 'REACT-ZEUGMA'
-                  const isCorrect = letter === target[i]
-                  return (
-                    <span
-                      key={i}
-                      className="inline-block transition-all duration-300"
-                      style={{
-                        color: isCorrect ? '#C29B47' : 'var(--text-muted)',
-                        transform: isCorrect ? 'scale(1.1)' : 'scale(1)',
-                      }}
-                    >
-                      {letter}
-                    </span>
-                  )
-                })}
+            <h2
+              id="spell-react-zeugma"
+              className="group flex items-center gap-2 text-2xl font-extrabold text-text-primary mb-4 font-serif tracking-wide select-none scroll-mt-20"
+            >
+              <span>
+                Spell{' '}
+                <span className="inline-flex gap-px">
+                  {tileOrder.split('').map((letter, i) => {
+                    const target = 'REACT-ZEUGMA'
+                    const isCorrect = letter === target[i]
+                    return (
+                      <span
+                        key={i}
+                        className="inline-block transition-all duration-300"
+                        style={{
+                          color: isCorrect ? '#C29B47' : 'var(--text-muted)',
+                          transform: isCorrect ? 'scale(1.1)' : 'scale(1)',
+                        }}
+                      >
+                        {letter}
+                      </span>
+                    )
+                  })}
+                </span>
               </span>
+              <a
+                href="#spell-react-zeugma"
+                onClick={(e) => {
+                  e.preventDefault()
+                  scrollToSection('spell-react-zeugma')
+                }}
+                className="text-text-muted hover:text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity font-mono text-xl select-none"
+              >
+                #
+              </a>
             </h2>
             <div className="text-text-secondary text-[13px] leading-relaxed">
               <p>

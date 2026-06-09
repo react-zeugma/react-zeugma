@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 1.3.1
+
+### Patch Changes
+
+- **Fix Strict Mode Layout Sync**: Changed layout prop synchronization to use state instead of ref to prevent double-rendering bugs and errors in development mode/React Strict Mode.
+
 ## 1.3.0
 
 ### Minor Changes

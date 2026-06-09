@@ -152,10 +152,10 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
   children,
 }) => {
   const [localLayout, setLocalLayout] = useState<TreeNode | null>(layout)
-  const prevLayoutRef = useRef(layout)
+  const [prevLayout, setPrevLayout] = useState<TreeNode | null>(layout)
 
-  if (layout !== prevLayoutRef.current) {
-    prevLayoutRef.current = layout
+  if (layout !== prevLayout) {
+    setPrevLayout(layout)
     setLocalLayout(layout)
   }
 

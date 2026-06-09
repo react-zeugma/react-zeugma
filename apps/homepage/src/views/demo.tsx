@@ -148,7 +148,7 @@ const MetadataWidget = ({
                   title: newTitle,
                 }))
               }}
-              className="flex-1 bg-bg-pane border border-border-primary rounded px-2 py-0.5 text-xs text-text-primary focus:outline-none focus:border-indigo-500 transition-colors"
+              className="flex-1 min-w-0 bg-bg-pane border border-border-primary rounded px-2 py-0.5 text-xs text-text-primary focus:outline-none focus:border-indigo-500 transition-colors"
               placeholder="Pane title..."
             />
           </div>
@@ -158,7 +158,7 @@ const MetadataWidget = ({
             <span className="text-[10px] uppercase font-bold tracking-wider text-text-muted min-w-[50px]">
               Color:
             </span>
-            <div className="flex gap-1.5">
+            <div className="flex flex-wrap gap-1.5">
               {colors.map((c) => {
                 const colorBgMap: Record<string, string> = {
                   indigo: 'bg-indigo-500',
@@ -205,7 +205,7 @@ const MetadataWidget = ({
                   notes: newNotes,
                 }))
               }}
-              className="flex-1 bg-bg-pane border border-border-primary rounded px-2 py-0.5 text-xs text-text-primary focus:outline-none focus:border-indigo-500 transition-colors"
+              className="flex-1 min-w-0 bg-bg-pane border border-border-primary rounded px-2 py-0.5 text-xs text-text-primary focus:outline-none focus:border-indigo-500 transition-colors"
               placeholder="Add custom notes..."
             />
           </div>

@@ -3,7 +3,7 @@ import tseslint from 'typescript-eslint';
 
 export default defineConfig(
   {
-    ignores: ['dist/', 'homepage/', 'storybook-static/', 'node_modules/', '*.config.*'],
+    ignores: ['**/dist/', 'apps/homepage/', '**/storybook-static/', 'node_modules/', '*.config.*'],
   },
   ...tseslint.configs.recommended,
   {

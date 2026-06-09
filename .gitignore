@@ -28,8 +28,11 @@ npm-debug.log*
 # typescript
 *.tsbuildinfo
 
-# demo build
-homepage/dist/
+# demo build / next.js
+.next/
+out/
+build/
+.vercel/
 
 # storybook
 storybook-static/

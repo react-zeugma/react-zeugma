@@ -27,7 +27,7 @@ jobs:
           cache: npm
 
       - name: Install Dependencies
-        run: npm ci
+        run: npm install
 
       - name: Create Release Pull Request or Publish to NPM
         id: changesets

@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react'
 import { TreeNode, SplitNode, SplitDirection } from '../../../shared/model'
 import { updateSplitPercentage } from '../../../shared/lib/tree'
-import { useDashboard } from '../../../entities/dashboard'
+import { useDashboardState } from '../../../entities/dashboard'
 
 interface UseResizerProps {
   containerRef: React.RefObject<HTMLDivElement | null>
@@ -36,7 +36,7 @@ export function useResizer({
     onResizeEnd: globalOnResizeEnd,
     minSplitPercentage = 5,
     maxSplitPercentage = 95,
-  } = useDashboard()
+  } = useDashboardState()
 
   return useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
@@ -118,8 +118,15 @@ export function useResizer({
           Math.min(maxSplitPercentage, snappedPercentage),
         )
         currentPercentage = finalPercentage
-        const newLayout = updateSplitPercentage(layout, currentNode, finalPercentage)
-        onLayoutChange(newLayout)
+
+        // Imperatively update the sibling pane container flex sizes during drag
+        const firstChild = container.children[0] as HTMLElement
+        const secondChild = container.children[container.children.length - 1] as HTMLElement
+        if (firstChild && secondChild) {
+          firstChild.style.flex = `${finalPercentage} 1 0%`
+          secondChild.style.flex = `${100 - finalPercentage} 1 0%`
+        }
+
         if (globalOnResize) {
           globalOnResize(currentNode, finalPercentage)
         }
@@ -136,6 +143,11 @@ export function useResizer({
 
         document.removeEventListener('pointermove', handlePointerMove)
         document.removeEventListener('pointerup', handlePointerUp)
+
+        // Write to React state once resizing completes
+        const newLayout = updateSplitPercentage(layout, currentNode, currentPercentage)
+        console.log('onLayoutChange (finalized) called with percentage:', currentPercentage)
+        onLayoutChange(newLayout)
 
         if (localOnResizeEnd) {
           localOnResizeEnd()

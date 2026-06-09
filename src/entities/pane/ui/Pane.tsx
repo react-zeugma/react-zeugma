@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
-import { useDashboard } from '../../dashboard'
+import { useDashboardState, useDashboardActions } from '../../dashboard'
 import { DragListenersCtx } from '../model/context'
 import { PaneRenderProps } from '../model/types'
 import { findPane } from '../../../shared/lib/tree'
@@ -32,21 +32,19 @@ const activationPositions: Record<string, React.CSSProperties> = {
   },
   left: {
     position: 'absolute',
-    top: 0,
-    bottom: 0,
+    top: '25%',
     left: 0,
     width: '25%',
-    height: '100%',
+    height: '50%',
     zIndex: 20,
     pointerEvents: 'auto',
   },
   right: {
     position: 'absolute',
-    top: 0,
-    bottom: 0,
+    top: '25%',
     right: 0,
     width: '25%',
-    height: '100%',
+    height: '50%',
     zIndex: 20,
     pointerEvents: 'auto',
   },
@@ -131,16 +129,9 @@ interface PaneProps {
 }
 
 export const Pane: React.FC<PaneProps> = ({ id, children, style }) => {
-  const {
-    layout,
-    activeId,
-    classNames,
-    fullscreenPaneId,
-    onRemove,
-    onFullscreenChange,
-    removePane,
-    updatePaneMetadata,
-  } = useDashboard()
+  const { layout, activeId, classNames, fullscreenPaneId, onRemove, onFullscreenChange } =
+    useDashboardState()
+  const { removePane, updatePaneMetadata } = useDashboardActions()
   const showDropZones = activeId !== null && activeId !== id
 
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id })
@@ -150,25 +141,37 @@ export const Pane: React.FC<PaneProps> = ({ id, children, style }) => {
   const paneNode = useMemo(() => findPane(layout, id), [layout, id])
   const metadata = paneNode?.metadata
 
-  const renderProps: PaneRenderProps = {
-    isDragging: dragging,
-    isFullscreen,
-    toggleFullscreen: () => onFullscreenChange?.(isFullscreen ? null : id),
-    remove: () => {
-      if (isFullscreen) {
-        onFullscreenChange?.(null)
-      }
-      if (onRemove) {
-        onRemove(id)
-      } else {
-        removePane(id)
-      }
-    },
-    metadata,
-    updateMetadata: (updater) => {
-      updatePaneMetadata(id, updater)
-    },
-  }
+  const renderProps: PaneRenderProps = useMemo(
+    () => ({
+      isDragging: dragging,
+      isFullscreen,
+      toggleFullscreen: () => onFullscreenChange?.(isFullscreen ? null : id),
+      remove: () => {
+        if (isFullscreen) {
+          onFullscreenChange?.(null)
+        }
+        if (onRemove) {
+          onRemove(id)
+        } else {
+          removePane(id)
+        }
+      },
+      metadata,
+      updateMetadata: (updater) => {
+        updatePaneMetadata(id, updater)
+      },
+    }),
+    [
+      dragging,
+      isFullscreen,
+      onFullscreenChange,
+      id,
+      onRemove,
+      removePane,
+      metadata,
+      updatePaneMetadata,
+    ],
+  )
 
   // Best practice: Memoize drag context value to prevent unnecessary re-renders of the drag handle.
   const contextValue = useMemo(

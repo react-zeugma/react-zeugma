@@ -1,5 +1,26 @@
 # react-zeugma
 
+## 1.0.0
+
+### Major Changes
+
+- **API Cleanups & Breaking Changes**:
+  - Removed **`useDashboard()`** context hook entirely.
+  - Removed **`DashboardContextValue`** type entirely.
+  - Users are now required to use **`useDashboardState()`** for reactive layout values and **`useDashboardActions()`** for stable mutation actions, preventing accidental full-tree re-render waterfalls.
+
+### Minor Changes
+
+- **Context Splitting**: Split the single context structure into `DashboardStateContext` (for reactive state values) and `DashboardActionsContext` (for stable mutation actions).
+  - Added **`useDashboardState()`** hook to consume only reactive layout state.
+  - Added **`useDashboardActions()`** hook to consume stable dispatch functions (e.g. `removePane`, `splitPane`). Because these action callbacks are stable and never change reference, components utilizing `useDashboardActions()` will not trigger re-renders on layout updates, improving performance.
+- **Performance Optimizations**:
+  - **Imperative Resizing**: Flex layouts are now updated imperatively during drag gestures, writing to React state only when resizing completes, preventing full-tree layout updates on every frame.
+  - **Ref-Based Prop Syncing**: Replaced two-useState state syncing pattern in `DashboardProvider` with a single ref-based pattern, saving render cycles.
+  - **Stable callbacks**: Added stable refs for `onResizeEnd` and custom `renderPane` handlers to immunize callbacks against inline consumer updates.
+  - **Memoized Pane Props**: Memoized `renderProps` in `Pane` to prevent unnecessary child pane content component re-renders.
+  - **Guarded tree traversal**: Guarded the recursive tree-traversal calculation `hasOtherPanes` in `PaneTree` to only run at the root layout node.
+
 ## 0.8.1
 
 ### Patch Changes

@@ -17,7 +17,11 @@ export interface ResizerRenderProps {
   onPointerDown: (e: React.PointerEvent<HTMLDivElement>) => void
 }
 
-export interface DashboardContextValue {
+/**
+ * State context — holds reactive values that change during runtime.
+ * All consumers of this context will re-render when any of these values change.
+ */
+export interface DashboardStateValue {
   layout: TreeNode | null
   onLayoutChange: (newLayout: TreeNode | null) => void
   renderPane: (paneId: string) => ReactNode
@@ -33,6 +37,13 @@ export interface DashboardContextValue {
   renderResizer?: (props: ResizerRenderProps) => ReactNode
   minSplitPercentage?: number
   maxSplitPercentage?: number
+}
+
+/**
+ * Actions context — holds stable dispatch functions with permanent identity.
+ * Consumers of only this context will never re-render from layout/drag state changes.
+ */
+export interface DashboardActionsValue {
   removePane: (paneId: string) => void
   addPane: (paneId: string) => void
   swapPanes: (paneIdA: string, paneIdB: string) => void
@@ -48,5 +59,5 @@ export interface DashboardContextValue {
     updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined,
   ) => void
 }
-
-export const DashboardContext = createContext<DashboardContextValue | undefined>(undefined)
+export const DashboardStateContext = createContext<DashboardStateValue | undefined>(undefined)
+export const DashboardActionsContext = createContext<DashboardActionsValue | undefined>(undefined)

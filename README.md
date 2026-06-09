@@ -262,7 +262,7 @@ export interface ResizerRenderProps {
   onPointerDown: (e: React.PointerEvent<HTMLDivElement>) => void
 }
 
-export interface DashboardContextValue {
+export interface DashboardStateValue {
   layout: TreeNode | null
   onLayoutChange: (newLayout: TreeNode | null) => void
   renderPane: (paneId: string) => ReactNode
@@ -278,6 +278,9 @@ export interface DashboardContextValue {
   renderResizer?: (props: ResizerRenderProps) => ReactNode
   minSplitPercentage?: number
   maxSplitPercentage?: number
+}
+
+export interface DashboardActionsValue {
   removePane: (paneId: string) => void
   addPane: (paneId: string) => void
   swapPanes: (paneIdA: string, paneIdB: string) => void
@@ -293,6 +296,8 @@ export interface DashboardContextValue {
     updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined,
   ) => void
 }
+
+export type DashboardContextValue = DashboardStateValue & DashboardActionsValue
 ```
 
 ---
@@ -432,7 +437,13 @@ Import these helpers from `react-zeugma` to manipulate the tree layout programma
 - **`findPane(tree: TreeNode | null, paneId: string): PaneNode | null`**
   Recursively searches the layout tree and returns the target `PaneNode` if found, or `null` otherwise.
 
-Alternatively, you can consume the convenient mutation helpers directly from the **`useDashboard()`** context hook inside pane components without importing utilities:
+Alternatively, you can consume state and mutation helpers directly from the context hooks:
+
+- **`useDashboardState()`**: Returns the reactive state values (e.g., `layout`, `activeId`, `classNames`). Consumers of this hook will re-render whenever layout state updates.
+- **`useDashboardActions()`**: Returns the stable layout mutation actions (e.g., `removePane`, `splitPane`). Because these actions have a permanent identity, consumers of this hook **will not** re-render when layout state changes, providing a significant performance optimization.
+- **`useDashboard()`**: Returns both state and actions (backward compatible; equivalent to the union of both).
+
+The actions returned by `useDashboardActions()` (or the combined `useDashboard()`) are:
 
 - **`removePane(paneId: string) => void`**
 - **`addPane(paneId: string) => void`**

@@ -86,7 +86,7 @@ export default function App() {
 
 export function Home() {
   const [copied, setCopied] = useState(false)
-  const [tileOrder, setTileOrder] = useState('ZEUGMA')
+  const [tileOrder, setTileOrder] = useState('REACT-ZEUGMA')
 
   const handleCopy = () => {
     navigator.clipboard.writeText('npm i react-zeugma')
@@ -196,7 +196,7 @@ export function Home() {
               Spell{' '}
               <span className="inline-flex gap-px">
                 {tileOrder.split('').map((letter, i) => {
-                  const target = 'ZEUGMA'
+                  const target = 'REACT-ZEUGMA'
                   const isCorrect = letter === target[i]
                   return (
                     <span
@@ -232,7 +232,7 @@ export function Home() {
 
           <Suspense
             fallback={
-              <div className="mosaic-demo w-[280px] h-[280px] md:w-[320px] md:h-[320px] ml-auto bg-bg-pane rounded-xl animate-pulse -rotate-12" />
+              <div className="mosaic-demo w-[280px] h-[360px] md:w-[320px] md:h-[420px] mx-auto md:mr-0 md:ml-auto bg-bg-pane rounded-xl animate-pulse rotate-0" />
             }
           >
             <MosaicDemo onOrderChange={handleOrderChange} />

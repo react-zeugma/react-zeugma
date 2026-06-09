@@ -5,15 +5,23 @@ import { DashboardProvider, PaneTree, Pane, DragHandle } from 'react-zeugma'
 import type { TreeNode } from 'react-zeugma'
 import { Fireworks } from './fireworks'
 
-const MOSAIC_LETTERS = ['Z', 'E', 'U', 'G', 'M', 'A']
-const LETTER_COLOR_MAP: Record<string, string> = {
-  Z: '#2A4259', // Euphrates Blue
-  E: '#C29B47', // Ancient Gold
-  U: '#8B5A44', // Brown Clay
-  G: '#B5543C', // Terracotta
-  M: '#596643', // Olive Green
-  A: '#D8BA8E', // Sandstone
+const TILE_IDS = ['R', 'E1', 'A1', 'C', 'T', 'HYPHEN', 'Z', 'E2', 'U', 'G', 'M', 'A2']
+
+const TILE_MAP: Record<string, { letter: string; color: string }> = {
+  R: { letter: 'R', color: '#2A4259' }, // Euphrates Blue
+  E1: { letter: 'E', color: '#C29B47' }, // Ancient Gold
+  A1: { letter: 'A', color: '#8B5A44' }, // Brown Clay
+  C: { letter: 'C', color: '#B5543C' }, // Terracotta
+  T: { letter: 'T', color: '#596643' }, // Olive Green
+  HYPHEN: { letter: '-', color: '#7E8B99' }, // Slate Gray
+  Z: { letter: 'Z', color: '#2A4259' }, // Euphrates Blue
+  E2: { letter: 'E', color: '#C29B47' }, // Ancient Gold
+  U: { letter: 'U', color: '#8B5A44' }, // Brown Clay
+  G: { letter: 'G', color: '#B5543C' }, // Terracotta
+  M: { letter: 'M', color: '#596643' }, // Olive Green
+  A2: { letter: 'A', color: '#D8BA8E' }, // Sandstone
 }
+
 const LIGHT_COLORS = new Set(['#D8BA8E', '#C29B47'])
 
 function shuffle<T>(arr: T[]): T[] {
@@ -40,36 +48,78 @@ function extractReadingOrder(node: TreeNode): string[] {
   return [...firstIds, ...secondIds]
 }
 
-function buildBentoLayout(letters: string[]): TreeNode {
-  // Asymmetric bento: left column (2 stacked) + right 2×2 grid
+function buildLayout(tiles: string[]): TreeNode {
+  // Asymmetric bento grid for 12 tiles
   return {
     type: 'split',
     direction: 'row',
-    splitPercentage: 38,
+    splitPercentage: 40,
     first: {
+      // Left column (40% width): split vertically into top half (2 rows) and bottom half (3 rows)
       type: 'split',
       direction: 'column',
-      splitPercentage: 58,
-      first: { type: 'pane', paneId: letters[0] },
-      second: { type: 'pane', paneId: letters[1] },
-    },
-    second: {
-      type: 'split',
-      direction: 'column',
-      splitPercentage: 42,
+      splitPercentage: 40,
       first: {
+        // Top half: split horizontally (2 side-by-side)
         type: 'split',
         direction: 'row',
-        splitPercentage: 55,
-        first: { type: 'pane', paneId: letters[2] },
-        second: { type: 'pane', paneId: letters[3] },
+        splitPercentage: 50,
+        first: { type: 'pane', paneId: tiles[0] },
+        second: { type: 'pane', paneId: tiles[1] },
       },
       second: {
+        // Bottom half: split vertically (3 stacked)
         type: 'split',
-        direction: 'row',
-        splitPercentage: 45,
-        first: { type: 'pane', paneId: letters[4] },
-        second: { type: 'pane', paneId: letters[5] },
+        direction: 'column',
+        splitPercentage: 33.3,
+        first: { type: 'pane', paneId: tiles[2] },
+        second: {
+          type: 'split',
+          direction: 'column',
+          splitPercentage: 50,
+          first: { type: 'pane', paneId: tiles[3] },
+          second: { type: 'pane', paneId: tiles[4] },
+        },
+      },
+    },
+    second: {
+      // Right column (60% width): split horizontally into middle column (45% width) and right column (55% width)
+      type: 'split',
+      direction: 'row',
+      splitPercentage: 45,
+      first: {
+        // Middle column of right side: split vertically (3 stacked)
+        type: 'split',
+        direction: 'column',
+        splitPercentage: 33.3,
+        first: { type: 'pane', paneId: tiles[5] },
+        second: {
+          type: 'split',
+          direction: 'column',
+          splitPercentage: 50,
+          first: { type: 'pane', paneId: tiles[6] },
+          second: { type: 'pane', paneId: tiles[7] },
+        },
+      },
+      second: {
+        // Right column of right side: split vertically (4 stacked)
+        type: 'split',
+        direction: 'column',
+        splitPercentage: 50,
+        first: {
+          type: 'split',
+          direction: 'column',
+          splitPercentage: 50,
+          first: { type: 'pane', paneId: tiles[8] },
+          second: { type: 'pane', paneId: tiles[9] },
+        },
+        second: {
+          type: 'split',
+          direction: 'column',
+          splitPercentage: 50,
+          first: { type: 'pane', paneId: tiles[10] },
+          second: { type: 'pane', paneId: tiles[11] },
+        },
       },
     },
   }
@@ -84,11 +134,11 @@ export function MosaicDemo({ onOrderChange }: MosaicDemoProps) {
   const [mosaicAnimated, setMosaicAnimated] = useState(false)
   const [entranceDone, setEntranceDone] = useState(false)
   const mosaicRef = useRef<HTMLDivElement | null>(null)
-  const [shuffledLetters] = useState(() => shuffle(MOSAIC_LETTERS))
+  const [shuffledLetters] = useState(() => shuffle(TILE_IDS))
   const onOrderChangeRef = useRef(onOrderChange)
   onOrderChangeRef.current = onOrderChange
   const [mosaicLayout, setMosaicLayout] = useState<TreeNode | null>(() =>
-    buildBentoLayout(shuffledLetters),
+    buildLayout(shuffledLetters),
   )
   const [showFireworks, setShowFireworks] = useState(false)
   const wasZeugmaRef = useRef(false)
@@ -97,9 +147,9 @@ export function MosaicDemo({ onOrderChange }: MosaicDemoProps) {
     setMosaicLayout(newLayout)
     if (newLayout) {
       const order = extractReadingOrder(newLayout)
-      const joined = order.join('')
+      const joined = order.map((id) => TILE_MAP[id]?.letter || '').join('')
       onOrderChangeRef.current?.(joined)
-      const isNowZeugma = joined === 'ZEUGMA'
+      const isNowZeugma = joined === 'REACT-ZEUGMA'
       if (isNowZeugma && !wasZeugmaRef.current) {
         setShowFireworks(true)
       }
@@ -109,7 +159,8 @@ export function MosaicDemo({ onOrderChange }: MosaicDemoProps) {
 
   // Report initial order on mount
   useEffect(() => {
-    onOrderChangeRef.current?.(shuffledLetters.join(''))
+    const joined = shuffledLetters.map((id) => TILE_MAP[id]?.letter || '').join('')
+    onOrderChangeRef.current?.(joined)
   }, [shuffledLetters])
 
   const handleFireworksComplete = useCallback(() => {
@@ -117,7 +168,8 @@ export function MosaicDemo({ onOrderChange }: MosaicDemoProps) {
   }, [])
 
   const renderMosaicPane = (id: string) => {
-    const color = LETTER_COLOR_MAP[id] || '#2A4259'
+    const tile = TILE_MAP[id]
+    const color = tile?.color || '#2A4259'
     const isLight = LIGHT_COLORS.has(color)
     const animIndex = shuffledLetters.indexOf(id)
 
@@ -151,7 +203,7 @@ export function MosaicDemo({ onOrderChange }: MosaicDemoProps) {
                       : '0ms',
                 }}
               >
-                {id}
+                {tile?.letter || id}
               </div>
             </DragHandle>
           </div>
@@ -196,8 +248,8 @@ export function MosaicDemo({ onOrderChange }: MosaicDemoProps) {
   return (
     <div
       ref={mosaicRef}
-      className={`mosaic-demo w-[280px] h-[280px] md:w-[320px] md:h-[320px] ml-auto transition-all duration-700 ease-out relative ${
-        mosaicVisible ? 'opacity-100 translate-y-0 -rotate-12' : 'opacity-0 translate-y-6 rotate-0'
+      className={`mosaic-demo w-[280px] h-[360px] md:w-[320px] md:h-[420px] mx-auto md:mr-0 md:ml-auto transition-all duration-700 ease-out relative ${
+        mosaicVisible ? 'opacity-100 translate-y-0 rotate-0' : 'opacity-0 translate-y-6 rotate-0'
       }`}
     >
       {mosaicVisible && mosaicLayout && (

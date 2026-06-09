@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { BookOpen, ChevronRight, Menu, X, Download } from 'lucide-react'
+import { useScrollAnchor } from '../lib/use-scroll-anchor'
 import { Footer } from '../components/footer'
 import { MdxRenderer } from '../components/mdx-renderer'
 import type { DocSection } from '../lib/parse-mdx'
@@ -34,82 +35,22 @@ function NavLink({ section, isActive, onClick }: NavLinkProps) {
 }
 
 export function Docs({ sections, skillMdContent }: DocsProps) {
-  const [activeSection, setActiveSection] = useState(sections[0]?.id ?? 'introduction')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   // Build the sidebar navigation items from the parsed sections (memoized to prevent effect re-runs)
   const navSections = useMemo(() => sections.map((s) => ({ id: s.id, title: s.title })), [sections])
+  const sectionIds = useMemo(() => navSections.map((s) => s.id), [navSections])
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const isMobile = window.innerWidth < 1024
-      const stickyHeight = isMobile ? 100 : 56
-      const scrollPosition = window.scrollY + stickyHeight + 40
-
-      // Check if at the bottom of the page
-      const isAtBottom =
-        window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 100
-      if (isAtBottom && navSections.length > 0) {
-        const lastSectionId = navSections[navSections.length - 1].id
-        setActiveSection(lastSectionId)
-        if (window.location.hash !== `#${lastSectionId}`) {
-          window.history.replaceState(null, '', `#${lastSectionId}`)
-        }
-        return
-      }
-
-      for (const section of navSections) {
-        const el = document.getElementById(section.id)
-        if (el) {
-          const absoluteTop = el.getBoundingClientRect().top + window.scrollY
-          const height = el.offsetHeight
-          if (scrollPosition >= absoluteTop && scrollPosition < absoluteTop + height) {
-            setActiveSection(section.id)
-            if (window.location.hash !== `#${section.id}`) {
-              window.history.replaceState(null, '', `#${section.id}`)
-            }
-            break
-          }
-        }
-      }
-    }
-
-    const handleHashChange = () => {
-      const hash = window.location.hash
-      if (hash) {
-        const id = hash.replace('#', '')
-        const el = document.getElementById(id)
-        if (el) {
-          const isMobile = window.innerWidth < 1024
-          const offset = isMobile ? 120 : 80
-          const absoluteTop = el.getBoundingClientRect().top + window.scrollY
-          window.scrollTo({ top: absoluteTop - offset, behavior: 'smooth' })
-          setActiveSection(id)
-        }
-      }
-    }
-
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    window.addEventListener('hashchange', handleHashChange)
-    handleHashChange()
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll)
-      window.removeEventListener('hashchange', handleHashChange)
-    }
-  }, [navSections])
+  const { scrollToSection: baseScrollToSection, activeId: activeSection } = useScrollAnchor({
+    sectionIds,
+    offset: () => (window.innerWidth < 1024 ? 120 : 80),
+    clearHashAtTop: false,
+    initialActiveId: sections[0]?.id ?? 'introduction',
+  })
 
   const scrollToSection = (id: string) => {
-    const el = document.getElementById(id)
-    if (el) {
-      window.history.pushState(null, '', `#${id}`)
-      const isMobile = window.innerWidth < 1024
-      const offset = isMobile ? 120 : 80
-      const absoluteTop = el.getBoundingClientRect().top + window.scrollY
-      window.scrollTo({ top: absoluteTop - offset, behavior: 'smooth' })
-      setActiveSection(id)
-      setMobileMenuOpen(false)
-    }
+    baseScrollToSection(id)
+    setMobileMenuOpen(false)
   }
 
   const handleDownloadSkill = () => {

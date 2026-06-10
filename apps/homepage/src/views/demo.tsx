@@ -3,8 +3,39 @@
 import React, { useState } from 'react'
 import { DashboardProvider, PaneTree, Pane, DragHandle, removePane } from 'react-zeugma'
 import type { TreeNode, PaneRenderProps, ResizerRenderProps, SplitNode } from 'react-zeugma'
-import { Box } from 'lucide-react'
-import { SidebarWrapper, type LogEntry } from '../components/sidebar-wrapper'
+import {
+  Box,
+  LineChart,
+  Table,
+  Gauge,
+  Image as ImageIcon,
+  BarChart2,
+  CheckCircle2,
+  Activity,
+} from 'lucide-react'
+import { SidebarWrapper, type LogEntry, PRESETS } from '../components/sidebar-wrapper'
+import {
+  AnalyticsWidget,
+  TransactionsWidget,
+  SystemWidget,
+  GalleryWidget,
+  ConversionsWidget,
+  TasksWidget,
+  PerformanceWidget,
+} from '../components/heavy-widgets'
+import { FpsProvider } from '../hooks/use-fps'
+
+const WIDGET_ICON = <Box className="w-3.5 h-3.5 text-indigo-500" />
+const PLACEHOLDER_ICON = <Box className="w-3.5 h-3.5 text-indigo-400" />
+const CENTER_ICON = <Box className="w-8 h-8 text-indigo-500 opacity-80" />
+
+const ANALYTICS_ICON = <LineChart className="w-3.5 h-3.5 text-indigo-500" />
+const TRANSACTIONS_ICON = <Table className="w-3.5 h-3.5 text-emerald-500" />
+const SYSTEM_ICON = <Gauge className="w-3.5 h-3.5 text-rose-500" />
+const GALLERY_ICON = <ImageIcon className="w-3.5 h-3.5 text-sky-500" />
+const CONVERSIONS_ICON = <BarChart2 className="w-3.5 h-3.5 text-violet-500" />
+const TASKS_ICON = <CheckCircle2 className="w-3.5 h-3.5 text-amber-500" />
+const PERFORMANCE_ICON = <Activity className="w-3.5 h-3.5 text-indigo-500" />
 
 interface UIPlaceholderProps {
   title: string
@@ -87,14 +118,9 @@ const GenericWidget = ({ title, metadata, ...props }: WidgetProps & { title?: st
   const currentNotes = (metadata?.notes as string) || ''
 
   return (
-    <UIPlaceholder
-      title={currentTitle}
-      icon={<Box className="w-3.5 h-3.5 text-indigo-400" />}
-      metadata={metadata}
-      {...props}
-    >
+    <UIPlaceholder title={currentTitle} icon={PLACEHOLDER_ICON} metadata={metadata} {...props}>
       <div className="flex flex-col items-center justify-center gap-3">
-        <Box className="w-8 h-8 text-indigo-500 opacity-80" />
+        {CENTER_ICON}
         <p className="text-text-secondary text-sm leading-relaxed max-w-sm px-4">
           {currentTitle}: A dynamically generated layout node. Drag and split to arrange it anywhere
           in your workspace.
@@ -118,12 +144,7 @@ const MetadataWidget = ({
   const colors = ['indigo', 'emerald', 'amber', 'rose', 'sky', 'violet']
 
   return (
-    <UIPlaceholder
-      title={currentTitle}
-      icon={<Box className="w-3.5 h-3.5 text-indigo-400" />}
-      metadata={metadata}
-      {...props}
-    >
+    <UIPlaceholder title={currentTitle} icon={PLACEHOLDER_ICON} metadata={metadata} {...props}>
       <div className="flex flex-col items-center justify-start gap-3 w-full max-w-sm mx-auto py-1">
         <div className="flex flex-col items-center gap-1 text-center">
           <p className="text-text-secondary text-xs leading-relaxed">
@@ -227,6 +248,8 @@ const MetadataWidget = ({
 
 const getWidgetDetails = (id: string) => {
   let title = id
+  let icon = WIDGET_ICON
+
   if (id.startsWith('random-')) {
     title = `Widget #${id.substring(7)}`
   } else if (id.startsWith('widget-')) {
@@ -237,10 +260,32 @@ const getWidgetDetails = (id: string) => {
     title = 'Widget #2'
   } else if (id === 'preview') {
     title = 'Widget #3'
+  } else if (id === 'heavy-analytics') {
+    title = 'Analytics'
+    icon = ANALYTICS_ICON
+  } else if (id === 'heavy-transactions') {
+    title = 'Transactions'
+    icon = TRANSACTIONS_ICON
+  } else if (id === 'heavy-system') {
+    title = 'System Status'
+    icon = SYSTEM_ICON
+  } else if (id === 'heavy-gallery') {
+    title = 'Media Gallery'
+    icon = GALLERY_ICON
+  } else if (id === 'heavy-conversions') {
+    title = 'Conversions'
+    icon = CONVERSIONS_ICON
+  } else if (id === 'heavy-tasks') {
+    title = 'Tasks'
+    icon = TASKS_ICON
+  } else if (id === 'heavy-performance') {
+    title = 'Performance'
+    icon = PERFORMANCE_ICON
   }
+
   return {
     title,
-    icon: <Box className="w-3.5 h-3.5 text-indigo-500" />,
+    icon,
   }
 }
 
@@ -286,7 +331,18 @@ export function Demo() {
     },
   }
 
-  const [layout, setLayout] = useState<TreeNode | null>(defaultIDELayout)
+  const [layout, setLayout] = useState<TreeNode | null>(null)
+  const [isMounted, setIsMounted] = useState<boolean>(false)
+
+  React.useEffect(() => {
+    const hash = window.location.hash.replace('#', '')
+    let initialLayout: TreeNode = defaultIDELayout
+    if (hash && PRESETS[hash]) {
+      initialLayout = PRESETS[hash].layout
+    }
+    setLayout(initialLayout)
+    setIsMounted(true)
+  }, [])
   const [useCustomResizer, setUseCustomResizer] = useState<boolean>(true)
   const [fullscreenPaneId, setFullscreenPaneId] = useState<string | null>(null)
   const [snapThreshold, setSnapThreshold] = useState(12)
@@ -427,6 +483,83 @@ export function Demo() {
                   metadata={paneProps.metadata}
                   updateMetadata={paneProps.updateMetadata}
                 />
+              ) : id === 'heavy-analytics' ? (
+                <UIPlaceholder
+                  title={title}
+                  icon={ANALYTICS_ICON}
+                  isFullscreen={paneProps.isFullscreen}
+                  toggleFullscreen={paneProps.toggleFullscreen}
+                  remove={paneProps.remove}
+                  metadata={paneProps.metadata}
+                >
+                  <AnalyticsWidget />
+                </UIPlaceholder>
+              ) : id === 'heavy-transactions' ? (
+                <UIPlaceholder
+                  title={title}
+                  icon={TRANSACTIONS_ICON}
+                  isFullscreen={paneProps.isFullscreen}
+                  toggleFullscreen={paneProps.toggleFullscreen}
+                  remove={paneProps.remove}
+                  metadata={paneProps.metadata}
+                >
+                  <TransactionsWidget />
+                </UIPlaceholder>
+              ) : id === 'heavy-system' ? (
+                <UIPlaceholder
+                  title={title}
+                  icon={SYSTEM_ICON}
+                  isFullscreen={paneProps.isFullscreen}
+                  toggleFullscreen={paneProps.toggleFullscreen}
+                  remove={paneProps.remove}
+                  metadata={paneProps.metadata}
+                >
+                  <SystemWidget />
+                </UIPlaceholder>
+              ) : id === 'heavy-gallery' ? (
+                <UIPlaceholder
+                  title={title}
+                  icon={GALLERY_ICON}
+                  isFullscreen={paneProps.isFullscreen}
+                  toggleFullscreen={paneProps.toggleFullscreen}
+                  remove={paneProps.remove}
+                  metadata={paneProps.metadata}
+                >
+                  <GalleryWidget />
+                </UIPlaceholder>
+              ) : id === 'heavy-conversions' ? (
+                <UIPlaceholder
+                  title={title}
+                  icon={CONVERSIONS_ICON}
+                  isFullscreen={paneProps.isFullscreen}
+                  toggleFullscreen={paneProps.toggleFullscreen}
+                  remove={paneProps.remove}
+                  metadata={paneProps.metadata}
+                >
+                  <ConversionsWidget />
+                </UIPlaceholder>
+              ) : id === 'heavy-tasks' ? (
+                <UIPlaceholder
+                  title={title}
+                  icon={TASKS_ICON}
+                  isFullscreen={paneProps.isFullscreen}
+                  toggleFullscreen={paneProps.toggleFullscreen}
+                  remove={paneProps.remove}
+                  metadata={paneProps.metadata}
+                >
+                  <TasksWidget />
+                </UIPlaceholder>
+              ) : id === 'heavy-performance' ? (
+                <UIPlaceholder
+                  title={title}
+                  icon={PERFORMANCE_ICON}
+                  isFullscreen={paneProps.isFullscreen}
+                  toggleFullscreen={paneProps.toggleFullscreen}
+                  remove={paneProps.remove}
+                  metadata={paneProps.metadata}
+                >
+                  <PerformanceWidget />
+                </UIPlaceholder>
               ) : (
                 <GenericWidget
                   title={title}
@@ -496,88 +629,99 @@ export function Demo() {
   }
 
   return (
-    <div className="h-[calc(100vh-3.5rem)] bg-bg-app overflow-hidden transition-colors duration-200">
-      <h1 className="sr-only">react-zeugma Live Workspace Demo</h1>
-      <DashboardProvider
-        layout={layout}
-        onChange={handleLayoutChange}
-        renderPane={renderPane}
-        renderDragOverlay={renderDragOverlay}
-        fullscreenPaneId={fullscreenPaneId}
-        onFullscreenChange={setFullscreenPaneId}
-        onRemove={handleRemove}
-        snapThreshold={snapThreshold}
-        minSplitPercentage={minSplit}
-        maxSplitPercentage={maxSplit}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-        onDismissIntentChange={handleDismissIntentChange}
-        enableDragToDismiss={true}
-        dismissThreshold={60}
-        onResizeStart={handleResizeStart}
-        onResizeEnd={handleResizeEnd}
-        renderResizer={
-          useCustomResizer
-            ? ({ direction, isResizing, onPointerDown }: ResizerRenderProps) => {
-                const isRow = direction === 'row'
-                return (
-                  <div
-                    role="separator"
-                    data-direction={direction}
-                    onPointerDown={onPointerDown}
-                    style={{ touchAction: 'none' }}
-                    className={`transition-all duration-150 z-50 flex items-center justify-center select-none ${
-                      isRow ? 'w-1 h-full cursor-col-resize' : 'h-1 w-full cursor-row-resize'
-                    } ${isResizing ? 'bg-indigo-500' : 'bg-transparent hover:bg-indigo-500/20'}`}
-                  >
-                    <div
-                      className={`rounded-full bg-zinc-600 transition-all duration-150 ${
-                        isResizing ? 'bg-indigo-500 opacity-0' : 'opacity-100'
-                      } ${isRow ? 'w-[1.5px] h-3.5' : 'w-3.5 h-[1.5px]'}`}
-                    />
-                  </div>
-                )
-              }
-            : undefined
-        }
-        classNames={{
-          dropPreview:
-            'bg-indigo-500/10 backdrop-blur-[2px] border-2 border-dashed border-indigo-400/50 shadow-[0_0_15px_rgba(99,102,241,0.2)] rounded-lg transition-all duration-200',
-          swapPreview:
-            'bg-amber-500/10 backdrop-blur-[2px] border-2 border-dashed border-amber-400/50 shadow-[0_0_15px_rgba(245,158,11,0.2)] rounded-lg transition-all duration-200',
-          resizer:
-            'bg-transparent hover:bg-indigo-500/50 active:bg-indigo-500 transition-colors duration-150 z-50',
-          dismissPreview: 'zeugma-dismiss-preview',
-        }}
-      >
-        <SidebarWrapper
+    <FpsProvider>
+      <div className="h-[calc(100vh-3.5rem)] bg-bg-app overflow-hidden transition-colors duration-200">
+        <h1 className="sr-only">react-zeugma Live Workspace Demo</h1>
+        <DashboardProvider
+          layout={layout}
+          onChange={handleLayoutChange}
+          renderPane={renderPane}
+          renderDragOverlay={renderDragOverlay}
+          fullscreenPaneId={fullscreenPaneId}
+          onFullscreenChange={setFullscreenPaneId}
+          onRemove={handleRemove}
           snapThreshold={snapThreshold}
-          onSnapThresholdChange={setSnapThreshold}
           minSplitPercentage={minSplit}
-          onMinSplitPercentageChange={setMinSplit}
           maxSplitPercentage={maxSplit}
-          onMaxSplitPercentageChange={setMaxSplit}
-          logs={logs}
-          useCustomResizer={useCustomResizer}
-          onUseCustomResizerChange={handleUseCustomResizerChange}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          onDismissIntentChange={handleDismissIntentChange}
+          enableDragToDismiss={true}
+          dismissThreshold={60}
+          onResizeStart={handleResizeStart}
+          onResizeEnd={handleResizeEnd}
+          renderResizer={
+            useCustomResizer
+              ? ({ direction, isResizing, onPointerDown }: ResizerRenderProps) => {
+                  const isRow = direction === 'row'
+                  return (
+                    <div
+                      role="separator"
+                      data-direction={direction}
+                      onPointerDown={onPointerDown}
+                      style={{ touchAction: 'none' }}
+                      className={`transition-all duration-150 z-50 flex items-center justify-center select-none ${
+                        isRow ? 'w-1 h-full cursor-col-resize' : 'h-1 w-full cursor-row-resize'
+                      } ${isResizing ? 'bg-indigo-500' : 'bg-transparent hover:bg-indigo-500/20'}`}
+                    >
+                      <div
+                        className={`rounded-full bg-zinc-600 transition-all duration-150 ${
+                          isResizing ? 'bg-indigo-500 opacity-0' : 'opacity-100'
+                        } ${isRow ? 'w-[1.5px] h-3.5' : 'w-3.5 h-[1.5px]'}`}
+                      />
+                    </div>
+                  )
+                }
+              : undefined
+          }
+          classNames={{
+            dropPreview:
+              'bg-indigo-500/10 backdrop-blur-[2px] border-2 border-dashed border-indigo-400/50 shadow-[0_0_15px_rgba(99,102,241,0.2)] rounded-lg transition-all duration-200',
+            swapPreview:
+              'bg-amber-500/10 backdrop-blur-[2px] border-2 border-dashed border-amber-400/50 shadow-[0_0_15px_rgba(245,158,11,0.2)] rounded-lg transition-all duration-200',
+            resizer:
+              'bg-transparent hover:bg-indigo-500/50 active:bg-indigo-500 transition-colors duration-150 z-50',
+            dismissPreview: 'zeugma-dismiss-preview',
+          }}
         >
-          <div className="h-full w-full p-2 overflow-hidden bg-bg-app">
-            {layout ? (
-              <PaneTree />
-            ) : (
-              <div className="h-full flex flex-col items-center justify-center text-text-secondary">
-                <p className="mb-4">All panes closed.</p>
-                <button
-                  onClick={() => handleLayoutChange(defaultIDELayout)}
-                  className="px-4 py-2 bg-text-primary hover:bg-text-primary/90 text-bg-app rounded text-sm transition-colors cursor-pointer"
-                >
-                  Reset Layout
-                </button>
-              </div>
-            )}
-          </div>
-        </SidebarWrapper>
-      </DashboardProvider>
-    </div>
+          <SidebarWrapper
+            snapThreshold={snapThreshold}
+            onSnapThresholdChange={setSnapThreshold}
+            minSplitPercentage={minSplit}
+            onMinSplitPercentageChange={setMinSplit}
+            maxSplitPercentage={maxSplit}
+            onMaxSplitPercentageChange={setMaxSplit}
+            logs={logs}
+            useCustomResizer={useCustomResizer}
+            onUseCustomResizerChange={handleUseCustomResizerChange}
+          >
+            <div className="h-full w-full p-2 overflow-hidden bg-bg-app">
+              {!isMounted ? (
+                <div className="h-full flex items-center justify-center bg-bg-app text-text-muted select-none">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-8 h-8 rounded-full border-2 border-indigo-500 border-t-transparent animate-spin" />
+                    <span className="text-xs font-semibold uppercase tracking-wider text-indigo-500 animate-pulse">
+                      Loading Workspace...
+                    </span>
+                  </div>
+                </div>
+              ) : layout ? (
+                <PaneTree />
+              ) : (
+                <div className="h-full flex flex-col items-center justify-center text-text-secondary">
+                  <p className="mb-4">All panes closed.</p>
+                  <button
+                    onClick={() => handleLayoutChange(defaultIDELayout)}
+                    className="px-4 py-2 bg-text-primary hover:bg-text-primary/90 text-bg-app rounded text-sm transition-colors cursor-pointer"
+                  >
+                    Reset Layout
+                  </button>
+                </div>
+              )}
+            </div>
+          </SidebarWrapper>
+        </DashboardProvider>
+      </div>
+    </FpsProvider>
   )
 }

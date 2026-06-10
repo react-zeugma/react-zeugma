@@ -348,11 +348,16 @@ export function Demo() {
   const [resizableHeight, setResizableHeight] = useState(false)
   const [containerHeight, setContainerHeight] = useState<number>(800)
   const [showResizeAlert, setShowResizeAlert] = useState(true)
+  const [highlightResizer, setHighlightResizer] = useState(false)
   const scrollContainerRef = React.useRef<HTMLDivElement>(null)
 
   React.useEffect(() => {
     if (resizableHeight) {
       setShowResizeAlert(true)
+      const timer = setTimeout(() => {
+        setShowResizeAlert(false)
+      }, 5000)
+      return () => clearTimeout(timer)
     }
   }, [resizableHeight])
 
@@ -374,12 +379,21 @@ export function Demo() {
           top: el.scrollHeight,
           behavior: 'smooth',
         })
+        setHighlightResizer(true)
       }, 600)
+
+      // Phase 3: Remove highlight after 2.5 seconds
+      const timer3 = setTimeout(() => {
+        setHighlightResizer(false)
+      }, 3100)
 
       return () => {
         clearTimeout(timer1)
         clearTimeout(timer2)
+        clearTimeout(timer3)
       }
+    } else {
+      setHighlightResizer(false)
     }
   }, [resizableHeight, containerHeight])
 
@@ -747,7 +761,7 @@ export function Demo() {
                     persist={true}
                     localStorageKey="demo-container"
                     resizerHeight={6}
-                    resizerClassName="zeugma-container-resizer"
+                    resizerClassName={`zeugma-container-resizer ${highlightResizer ? 'zeugma-resizer-highlight' : ''}`}
                     onHeightChange={setContainerHeight}
                   >
                     <PaneTree />

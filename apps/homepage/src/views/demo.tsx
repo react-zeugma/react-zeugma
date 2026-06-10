@@ -20,7 +20,7 @@ import {
   CheckCircle2,
   Activity,
 } from 'lucide-react'
-import { SidebarWrapper, type LogEntry, PRESETS } from '../components/sidebar-wrapper'
+import { SidebarWrapper, type LogEntry } from '../components/sidebar-wrapper'
 import {
   AnalyticsWidget,
   TransactionsWidget,
@@ -342,12 +342,7 @@ export function Demo() {
   const [isMounted, setIsMounted] = useState<boolean>(false)
 
   React.useEffect(() => {
-    const hash = window.location.hash.replace('#', '')
-    let initialLayout: TreeNode = defaultIDELayout
-    if (hash && PRESETS[hash]) {
-      initialLayout = PRESETS[hash].layout
-    }
-    setLayout(initialLayout)
+    setLayout(defaultIDELayout)
     setIsMounted(true)
   }, [])
 
@@ -664,7 +659,7 @@ export function Demo() {
           <div
             className={`w-full mx-auto transition-all duration-500 ease-in-out ${
               resizableHeight
-                ? 'max-w-[1800px] rounded-xl border border-border-primary bg-bg-pane shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)] dark:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.55)] overflow-hidden h-full'
+                ? 'max-w-[1800px] rounded-xl border border-border-primary bg-bg-pane shadow-[0_0_50px_0_rgba(0,0,0,0.2)] dark:shadow-[0_0_50px_0_rgba(0,0,0,0.7)] overflow-hidden h-full'
                 : 'max-w-full rounded-none border-none shadow-none h-full'
             }`}
           >
@@ -680,7 +675,7 @@ export function Demo() {
               onResizableHeightChange={setResizableHeight}
               onPresetChange={(preset) => {
                 if (preset === 'tall-stress') {
-                  setContainerHeight(1200)
+                  setContainerHeight(1600)
                 }
               }}
             >

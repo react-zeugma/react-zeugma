@@ -12,7 +12,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head suppressHydrationWarning>
         {isDev && (
           <script
-            src="https://unpkg.com/react-scan/dist/auto.global.js"
+            src="https://unpkg.com/react-scan@latest/dist/auto.global.js"
             crossOrigin="anonymous"
             async
           />

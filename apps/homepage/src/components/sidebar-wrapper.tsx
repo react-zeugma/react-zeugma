@@ -36,6 +36,7 @@ interface SidebarWrapperProps {
   onResizableHeightChange: (val: boolean) => void
   logs: LogEntry[]
   onPresetChange?: (presetKey: string) => void
+  contentRef?: React.RefObject<HTMLDivElement | null>
 }
 
 export const PRESETS: Record<string, { label: string; layout: TreeNode }> = {
@@ -225,6 +226,7 @@ export function SidebarWrapper({
   onResizableHeightChange,
   logs,
   onPresetChange,
+  contentRef,
 }: SidebarWrapperProps) {
   const { layout, onLayoutChange } = useZeugmaState()
   const [activePreset, setActivePreset] = useState<string>('default')
@@ -232,13 +234,14 @@ export function SidebarWrapper({
   const [copied, setCopied] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
 
-  const mainContentRef = React.useRef<HTMLDivElement>(null)
+  const fallbackRef = React.useRef<HTMLDivElement>(null)
+  const activeRef = contentRef || fallbackRef
 
   React.useEffect(() => {
-    if (!resizableHeight && mainContentRef.current) {
-      mainContentRef.current.scrollTop = 0
+    if (!resizableHeight && activeRef.current) {
+      activeRef.current.scrollTop = 0
     }
-  }, [resizableHeight])
+  }, [resizableHeight, activeRef])
 
   const handleCopyJson = () => {
     navigator.clipboard.writeText(JSON.stringify(layout, null, 2))
@@ -485,7 +488,7 @@ export function SidebarWrapper({
 
       {/* Main Content Area */}
       <div
-        ref={mainContentRef}
+        ref={activeRef}
         className={`flex-1 min-w-0 h-full relative bg-bg-app ${resizableHeight ? 'overflow-y-auto' : 'overflow-hidden'}`}
       >
         {children}

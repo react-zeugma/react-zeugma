@@ -348,12 +348,40 @@ export function Demo() {
   const [resizableHeight, setResizableHeight] = useState(false)
   const [containerHeight, setContainerHeight] = useState<number>(800)
   const [showResizeAlert, setShowResizeAlert] = useState(true)
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null)
 
   React.useEffect(() => {
     if (resizableHeight) {
       setShowResizeAlert(true)
     }
   }, [resizableHeight])
+
+  React.useEffect(() => {
+    if (resizableHeight && scrollContainerRef.current) {
+      const el = scrollContainerRef.current
+
+      // Phase 1: Fast scroll for instant updates
+      const timer1 = setTimeout(() => {
+        el.scrollTo({
+          top: el.scrollHeight,
+          behavior: 'smooth',
+        })
+      }, 100)
+
+      // Phase 2: Final scroll after the 500ms CSS transition completes
+      const timer2 = setTimeout(() => {
+        el.scrollTo({
+          top: el.scrollHeight,
+          behavior: 'smooth',
+        })
+      }, 600)
+
+      return () => {
+        clearTimeout(timer1)
+        clearTimeout(timer2)
+      }
+    }
+  }, [resizableHeight, containerHeight])
 
   const addLog = React.useCallback((type: 'drag' | 'resize', message: string) => {
     const timeStr = new Date().toLocaleTimeString([], {
@@ -679,6 +707,7 @@ export function Demo() {
             }`}
           >
             <SidebarWrapper
+              contentRef={scrollContainerRef}
               snapThreshold={snapThreshold}
               onSnapThresholdChange={setSnapThreshold}
               minSplitPercentage={minSplit}

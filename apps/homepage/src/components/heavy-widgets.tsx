@@ -105,9 +105,8 @@ export function AnalyticsWidget() {
         </div>
       </div>
 
-      {/* Recharts Area/Line Composed Chart */}
       <div className="flex-1 min-h-[140px] w-full relative bg-bg-pane-inner border border-border-primary/60 rounded-xl p-2 flex items-center justify-center">
-        <ResponsiveContainer width="100%" height="100%" debounce={200}>
+        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0} debounce={200}>
           <ComposedChart data={chartData} margin={{ top: 10, right: 5, left: -25, bottom: 0 }}>
             <defs>
               <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
@@ -526,7 +525,7 @@ export function SystemWidget() {
 
       {/* Live Chart area */}
       <div className="flex-1 min-h-[120px] w-full relative bg-bg-pane-inner border border-border-primary/60 rounded-xl p-2 flex items-center justify-center">
-        <ResponsiveContainer width="100%" height="100%" debounce={200}>
+        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0} debounce={200}>
           <ComposedChart data={metrics.history} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
             <defs>
               <linearGradient id="colorCpu" x1="0" y1="0" x2="0" y2="1">
@@ -797,7 +796,7 @@ export function ConversionsWidget() {
 
       {/* Horizontal Bar Chart */}
       <div className="flex-1 min-h-[120px] w-full bg-bg-pane-inner border border-border-primary/60 rounded-xl p-2 flex items-center justify-center">
-        <ResponsiveContainer width="100%" height="100%" debounce={200}>
+        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0} debounce={200}>
           <BarChart
             layout="vertical"
             data={funnelData}

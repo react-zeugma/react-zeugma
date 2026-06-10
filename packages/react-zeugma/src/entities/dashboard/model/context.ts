@@ -10,14 +10,6 @@ export interface ZeugmaClassNames {
   dismissPreview?: string
 }
 
-export interface ResizerRenderProps {
-  direction: SplitDirection
-  splitPercentage: number
-  resizerSize: number
-  isResizing: boolean
-  onPointerDown: (e: React.PointerEvent<HTMLDivElement>) => void
-}
-
 /**
  * State context — holds reactive values that change during runtime.
  * All consumers of this context will re-render when any of these values change.
@@ -37,7 +29,6 @@ export interface DashboardStateValue {
   onResizeStart?: (currentNode: SplitNode) => void
   onResize?: (currentNode: SplitNode, percentage: number) => void
   onResizeEnd?: (currentNode: SplitNode, percentage: number) => void
-  renderResizer?: (props: ResizerRenderProps) => ReactNode
   minSplitPercentage?: number
   maxSplitPercentage?: number
 }

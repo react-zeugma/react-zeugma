@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react'
 import { TreeNode, SplitNode, SplitDirection } from '../../../shared/model'
 import { updateSplitPercentage } from '../../../shared/lib/tree'
+import { createDragSession } from '../../../shared/lib/drag-session'
 import { useDashboardState } from '../../../entities/dashboard'
 
 interface UseResizerProps {
@@ -44,19 +45,6 @@ export function useResizer({
       const container = containerRef.current
       if (!container) return
 
-      document.body.classList.add('zeugma-resizing')
-
-      // Inject global cursor style to keep resizing cursor active across the entire page during drag
-      const styleEl = document.createElement('style')
-      styleEl.id = 'zeugma-global-cursor-style'
-      styleEl.textContent = `
-      * {
-        cursor: ${isRow ? 'col-resize' : 'row-resize'} !important;
-        user-select: none !important;
-      }
-    `
-      document.head.appendChild(styleEl)
-
       if (localOnResizeStart) {
         localOnResizeStart()
       }
@@ -68,11 +56,9 @@ export function useResizer({
       const startX = e.clientX
       const startY = e.clientY
       const startPercentage = splitPercentage
+      const resizerEl = e.currentTarget
 
       // Cache other resizers of the same direction once at drag-start to prevent layout thrashing on move
-      const resizerEl = e.currentTarget
-      resizerEl.setAttribute('data-resizing', 'true')
-
       const otherResizers = Array.from(
         document.querySelectorAll('div[role="separator"][data-direction]'),
       ).filter((el) => el !== resizerEl && el.getAttribute('data-direction') === direction)
@@ -84,81 +70,69 @@ export function useResizer({
 
       let currentPercentage = startPercentage
 
-      const handlePointerMove = (moveEvent: PointerEvent) => {
-        const delta = isRow
-          ? ((moveEvent.clientX - startX) / rect.width) * 100
-          : ((moveEvent.clientY - startY) / rect.height) * 100
-        const proposedPercentage = startPercentage + delta
+      createDragSession({
+        cursor: isRow ? 'col-resize' : 'row-resize',
+        resizerEl,
+        onMove: (moveEvent: PointerEvent) => {
+          const delta = isRow
+            ? ((moveEvent.clientX - startX) / rect.width) * 100
+            : ((moveEvent.clientY - startY) / rect.height) * 100
+          const proposedPercentage = startPercentage + delta
 
-        // Find physical position corresponding to proposed percentage
-        const proposedPos = isRow
-          ? rect.left + (rect.width - resizerSize) * (proposedPercentage / 100) + resizerSize / 2
-          : rect.top + (rect.height - resizerSize) * (proposedPercentage / 100) + resizerSize / 2
+          // Find physical position corresponding to proposed percentage
+          const proposedPos = isRow
+            ? rect.left + (rect.width - resizerSize) * (proposedPercentage / 100) + resizerSize / 2
+            : rect.top + (rect.height - resizerSize) * (proposedPercentage / 100) + resizerSize / 2
 
-        let closestDistance = Infinity
-        let bestTarget: number | null = null
+          let closestDistance = Infinity
+          let bestTarget: number | null = null
 
-        for (const pos of otherPositions) {
-          const dist = Math.abs(proposedPos - pos)
-          if (dist < snapThreshold && dist < closestDistance) {
-            closestDistance = dist
-            bestTarget = pos
+          for (const pos of otherPositions) {
+            const dist = Math.abs(proposedPos - pos)
+            if (dist < snapThreshold && dist < closestDistance) {
+              closestDistance = dist
+              bestTarget = pos
+            }
           }
-        }
 
-        let snappedPercentage = proposedPercentage
-        if (bestTarget !== null) {
-          snappedPercentage = isRow
-            ? ((bestTarget - resizerSize / 2 - rect.left) / (rect.width - resizerSize)) * 100
-            : ((bestTarget - resizerSize / 2 - rect.top) / (rect.height - resizerSize)) * 100
-        }
+          let snappedPercentage = proposedPercentage
+          if (bestTarget !== null) {
+            snappedPercentage = isRow
+              ? ((bestTarget - resizerSize / 2 - rect.left) / (rect.width - resizerSize)) * 100
+              : ((bestTarget - resizerSize / 2 - rect.top) / (rect.height - resizerSize)) * 100
+          }
 
-        const finalPercentage = Math.max(
-          minSplitPercentage,
-          Math.min(maxSplitPercentage, snappedPercentage),
-        )
-        currentPercentage = finalPercentage
+          const finalPercentage = Math.max(
+            minSplitPercentage,
+            Math.min(maxSplitPercentage, snappedPercentage),
+          )
+          currentPercentage = finalPercentage
 
-        // Imperatively update the sibling pane container flex sizes during drag
-        const firstChild = container.children[0] as HTMLElement
-        const secondChild = container.children[container.children.length - 1] as HTMLElement
-        if (firstChild && secondChild) {
-          firstChild.style.flex = `${finalPercentage} 1 0%`
-          secondChild.style.flex = `${100 - finalPercentage} 1 0%`
-        }
+          // Imperatively update the sibling pane container flex sizes during drag
+          const firstChild = container.children[0] as HTMLElement
+          const secondChild = container.children[container.children.length - 1] as HTMLElement
+          if (firstChild && secondChild) {
+            firstChild.style.flex = `${finalPercentage} 1 0%`
+            secondChild.style.flex = `${100 - finalPercentage} 1 0%`
+          }
 
-        if (globalOnResize) {
-          globalOnResize(currentNode, finalPercentage)
-        }
-      }
+          if (globalOnResize) {
+            globalOnResize(currentNode, finalPercentage)
+          }
+        },
+        onEnd: () => {
+          // Write to React state once resizing completes
+          const newLayout = updateSplitPercentage(layout, currentNode, currentPercentage)
+          onLayoutChange(newLayout)
 
-      const handlePointerUp = () => {
-        document.body.classList.remove('zeugma-resizing')
-        resizerEl.removeAttribute('data-resizing')
-
-        const globalStyle = document.getElementById('zeugma-global-cursor-style')
-        if (globalStyle) {
-          globalStyle.remove()
-        }
-
-        document.removeEventListener('pointermove', handlePointerMove)
-        document.removeEventListener('pointerup', handlePointerUp)
-
-        // Write to React state once resizing completes
-        const newLayout = updateSplitPercentage(layout, currentNode, currentPercentage)
-        console.log('onLayoutChange (finalized) called with percentage:', currentPercentage)
-        onLayoutChange(newLayout)
-
-        if (localOnResizeEnd) {
-          localOnResizeEnd()
-        }
-        if (globalOnResizeEnd) {
-          globalOnResizeEnd(currentNode, currentPercentage)
-        }
-      }
-
-      document.addEventListener('pointermove', handlePointerMove)
-      document.addEventListener('pointerup', handlePointerUp)
+          if (localOnResizeEnd) {
+            localOnResizeEnd()
+          }
+          if (globalOnResizeEnd) {
+            globalOnResizeEnd(currentNode, currentPercentage)
+          }
+        },
+      })
     },
     [
       containerRef,

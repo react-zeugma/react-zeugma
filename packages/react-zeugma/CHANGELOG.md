@@ -1,5 +1,15 @@
 # react-zeugma
 
+## 1.4.0
+
+### Minor Changes
+
+- **Added `ResizableContainer` Widget**: Introduced a new container component that provides vertical resizing via a bottom-edge drag handle.
+  - Supports controlled `height` or auto-derived initial heights.
+  - Supports optional localStorage height persistence via the `persist` boolean and customizable `localStorageKey` (defaults to `'default-pane'`).
+  - Added an `active` boolean prop (default `true`) to toggle resizable behavior dynamically while keeping internal child components continuously mounted.
+  - Implemented infinite auto-scrolling during drag gestures when moving near parent container boundaries, calculating height updates to dynamically account for scroll offsets.
+
 ## 1.3.1
 
 ### Patch Changes

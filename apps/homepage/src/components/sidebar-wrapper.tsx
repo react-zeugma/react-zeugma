@@ -32,9 +32,10 @@ interface SidebarWrapperProps {
   onMinSplitPercentageChange: (val: number) => void
   maxSplitPercentage: number
   onMaxSplitPercentageChange: (val: number) => void
+  resizableHeight: boolean
+  onResizableHeightChange: (val: boolean) => void
   logs: LogEntry[]
-  useCustomResizer: boolean
-  onUseCustomResizerChange: (val: boolean) => void
+  onPresetChange?: (presetKey: string) => void
 }
 
 export const PRESETS: Record<string, { label: string; layout: TreeNode }> = {
@@ -132,6 +133,84 @@ export const PRESETS: Record<string, { label: string; layout: TreeNode }> = {
       },
     },
   },
+  'tall-stress': {
+    label: 'Tall Scroll Stress-Test',
+    layout: {
+      type: 'split',
+      direction: 'column',
+      splitPercentage: 15,
+      first: {
+        type: 'pane',
+        paneId: 'heavy-analytics',
+        metadata: { title: 'Analytics Dashboard', color: 'indigo' },
+      },
+      second: {
+        type: 'split',
+        direction: 'column',
+        splitPercentage: 20,
+        first: {
+          type: 'pane',
+          paneId: 'heavy-conversions',
+          metadata: { title: 'Conversion Funnel', color: 'violet' },
+        },
+        second: {
+          type: 'split',
+          direction: 'column',
+          splitPercentage: 25,
+          first: {
+            type: 'pane',
+            paneId: 'heavy-transactions',
+            metadata: { title: 'Recent Transactions', color: 'emerald' },
+          },
+          second: {
+            type: 'split',
+            direction: 'column',
+            splitPercentage: 30,
+            first: {
+              type: 'pane',
+              paneId: 'heavy-performance',
+              metadata: { title: 'Performance Monitor', color: 'sky' },
+            },
+            second: {
+              type: 'split',
+              direction: 'column',
+              splitPercentage: 40,
+              first: {
+                type: 'pane',
+                paneId: 'heavy-system',
+                metadata: { title: 'System Status', color: 'rose' },
+              },
+              second: {
+                type: 'split',
+                direction: 'column',
+                splitPercentage: 50,
+                first: {
+                  type: 'pane',
+                  paneId: 'heavy-tasks',
+                  metadata: { title: 'Development Tasks', color: 'amber' },
+                },
+                second: {
+                  type: 'split',
+                  direction: 'column',
+                  splitPercentage: 50,
+                  first: {
+                    type: 'pane',
+                    paneId: 'heavy-gallery',
+                    metadata: { title: 'Media Assets', color: 'sky' },
+                  },
+                  second: {
+                    type: 'pane',
+                    paneId: 'explorer',
+                    metadata: { title: 'File Explorer', color: 'indigo' },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
 }
 
 export function SidebarWrapper({
@@ -142,9 +221,10 @@ export function SidebarWrapper({
   onMinSplitPercentageChange,
   maxSplitPercentage,
   onMaxSplitPercentageChange,
+  resizableHeight,
+  onResizableHeightChange,
   logs,
-  useCustomResizer,
-  onUseCustomResizerChange,
+  onPresetChange,
 }: SidebarWrapperProps) {
   const { layout, onLayoutChange } = useDashboardState()
   const [activePreset, setActivePreset] = useState<string>('default')
@@ -152,22 +232,35 @@ export function SidebarWrapper({
   const [copied, setCopied] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
 
+  const mainContentRef = React.useRef<HTMLDivElement>(null)
+
+  React.useEffect(() => {
+    if (!resizableHeight && mainContentRef.current) {
+      mainContentRef.current.scrollTop = 0
+    }
+  }, [resizableHeight])
+
   React.useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#', '')
       if (PRESETS[hash]) {
         setActivePreset(hash)
         onLayoutChange(PRESETS[hash].layout)
+        onPresetChange?.(hash)
+        if (hash === 'tall-stress') {
+          onResizableHeightChange(true)
+        }
       } else if (!hash) {
         setActivePreset('default')
         onLayoutChange(PRESETS.default.layout)
+        onPresetChange?.('default')
         window.history.replaceState(null, '', '#default')
       }
     }
     window.addEventListener('hashchange', handleHashChange)
     handleHashChange()
     return () => window.removeEventListener('hashchange', handleHashChange)
-  }, [onLayoutChange])
+  }, [onLayoutChange, onResizableHeightChange, onPresetChange])
 
   const handleCopyJson = () => {
     navigator.clipboard.writeText(JSON.stringify(layout, null, 2))
@@ -179,12 +272,17 @@ export function SidebarWrapper({
     setActivePreset(presetKey)
     onLayoutChange(PRESETS[presetKey].layout)
     window.location.hash = presetKey
+    onPresetChange?.(presetKey)
+    if (presetKey === 'tall-stress') {
+      onResizableHeightChange(true)
+    }
   }
 
   const handleReset = () => {
     const targetPreset = PRESETS[activePreset] ? activePreset : 'default'
     onLayoutChange(PRESETS[targetPreset].layout)
     window.location.hash = targetPreset
+    onPresetChange?.(targetPreset)
   }
 
   const handleAddRandomWidget = () => {
@@ -264,24 +362,6 @@ export function SidebarWrapper({
             </div>
 
             <div className="space-y-2">
-              {/* Custom Resizer Checkbox */}
-              <div className="flex items-center justify-between bg-bg-pane border border-border-primary rounded p-2 text-xs select-none transition-colors duration-200">
-                <span className="text-text-secondary font-medium">Use Custom Resizer</span>
-                <button
-                  onClick={() => onUseCustomResizerChange(!useCustomResizer)}
-                  className={`w-9 h-5 rounded-full p-0.5 transition-colors duration-200 focus:outline-none cursor-pointer ${
-                    useCustomResizer ? 'bg-indigo-600' : 'bg-text-muted'
-                  }`}
-                  aria-label="Toggle Custom Resizer"
-                >
-                  <div
-                    className={`bg-white w-4 h-4 rounded-full shadow transform transition-transform duration-200 ${
-                      useCustomResizer ? 'translate-x-4' : 'translate-x-0'
-                    }`}
-                  />
-                </button>
-              </div>
-
               <div className="flex flex-col gap-1">
                 <div className="flex justify-between text-[10px] text-text-secondary">
                   <span>Snap Threshold</span>
@@ -326,6 +406,32 @@ export function SidebarWrapper({
                   className="w-full h-1 bg-bg-pane border-none rounded outline-none cursor-pointer accent-indigo-500"
                 />
               </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-[10px] text-text-secondary">Resizable Height</span>
+              <button
+                type="button"
+                disabled={activePreset === 'tall-stress'}
+                onClick={() => onResizableHeightChange(!resizableHeight)}
+                className={`relative w-8 h-[18px] rounded-full transition-colors duration-200 border ${
+                  activePreset === 'tall-stress'
+                    ? 'bg-indigo-500/50 border-indigo-500/30 cursor-not-allowed'
+                    : resizableHeight
+                      ? 'bg-indigo-500 border-indigo-600 cursor-pointer'
+                      : 'bg-bg-pane border-border-primary cursor-pointer'
+                }`}
+                title={
+                  activePreset === 'tall-stress' ? 'Required for scroll stress-test' : undefined
+                }
+              >
+                <span
+                  className="absolute top-px left-[2px] w-[14px] h-[14px] rounded-full bg-white shadow-sm transition-transform duration-200"
+                  style={{
+                    transform: resizableHeight ? 'translateX(12px)' : 'translateX(0px)',
+                  }}
+                />
+              </button>
             </div>
           </div>
 
@@ -402,7 +508,10 @@ export function SidebarWrapper({
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 min-w-0 h-full relative overflow-hidden bg-bg-app">
+      <div
+        ref={mainContentRef}
+        className={`flex-1 min-w-0 h-full relative bg-bg-app ${resizableHeight ? 'overflow-y-auto' : 'overflow-hidden'}`}
+      >
         {children}
 
         {/* Floating Mobile Toggle Button */}

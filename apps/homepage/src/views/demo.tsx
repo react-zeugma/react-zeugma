@@ -676,6 +676,8 @@ export function Demo() {
               onPresetChange={(preset) => {
                 if (preset === 'tall-stress') {
                   setContainerHeight(1600)
+                } else {
+                  setContainerHeight(800)
                 }
               }}
             >
@@ -710,7 +712,10 @@ export function Demo() {
                   <div className="h-full flex flex-col items-center justify-center text-text-secondary">
                     <p className="mb-4">All panes closed.</p>
                     <button
-                      onClick={() => handleLayoutChange(defaultIDELayout)}
+                      onClick={() => {
+                        handleLayoutChange(defaultIDELayout)
+                        setContainerHeight(800)
+                      }}
                       className="px-4 py-2 bg-text-primary hover:bg-text-primary/90 text-bg-app rounded text-sm transition-colors cursor-pointer"
                     >
                       Reset Layout

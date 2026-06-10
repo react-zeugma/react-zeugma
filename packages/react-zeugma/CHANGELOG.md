@@ -1,5 +1,15 @@
 # react-zeugma
 
+## 2.1.0
+
+### Minor Changes
+
+- **Removed Root-Level Tile Placement**:
+  - Removed the root-level drop zones feature that allowed placing tiles to the top, bottom, left, or right edges of the entire dashboard root.
+  - Removed the `RootDropZone` and `RootDropZones` components.
+  - Removed the `splitRoot` tree utility function. Consumers who relied on `splitRoot` should use `splitPane` to split against a specific target pane instead.
+  - The `onDragEnd` callback no longer reports `'root'` as the `overId` for root-level drops.
+
 ## 2.0.0
 
 ### Major Changes

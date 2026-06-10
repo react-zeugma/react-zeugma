@@ -8,6 +8,11 @@ export const globalMetadata: Metadata = {
   },
   description:
     'A flexible, headless, and completely unopinionated workspace layout engine for React. Split, drag, and resize panes recursively without constraints.',
+
+  verification: {
+    google: 'p1Yy4RYx3yF6E5ZbbrV50GZHwKnEXR-7M2UxPlHDHKc',
+  },
+
   keywords: [
     'react',
     'drag-and-drop',

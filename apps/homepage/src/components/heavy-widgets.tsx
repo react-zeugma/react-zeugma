@@ -852,7 +852,7 @@ interface TaskItem {
 
 export function TasksWidget() {
   const [tasks, setTasks] = useState<TaskItem[]>([
-    { id: '1', text: 'Implement DashboardProvider layout sync', done: true, priority: 'High' },
+    { id: '1', text: 'Implement Zeugma layout sync', done: true, priority: 'High' },
     { id: '2', text: 'Optimize drag-and-drop re-renders', done: true, priority: 'High' },
     { id: '3', text: 'Integrate Recharts libraries for analytics', done: true, priority: 'Medium' },
     { id: '4', text: 'Add 6-widget Heavy UI grid preset', done: false, priority: 'High' },

@@ -17,7 +17,7 @@ const TOKEN_REGEX = [
     pattern: /\b(import|from|export|default|function|return|const|let|var|if|else|new)\b/g,
   },
   { type: 'builtin', pattern: /\b(useState|useEffect|useRef|useMemo|useCallback)\b/g },
-  { type: 'component', pattern: /\b(DashboardProvider|PaneTree|Pane|DragHandle|TreeNode)\b/g },
+  { type: 'component', pattern: /\b(Zeugma|PaneTree|Pane|DragHandle|TreeNode)\b/g },
   { type: 'number', pattern: /\b(\d+)\b/g },
   { type: 'tag', pattern: /(&lt;\/?)([a-zA-Z][\w-]*)/g },
 ]

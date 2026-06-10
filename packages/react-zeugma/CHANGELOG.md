@@ -1,5 +1,14 @@
 # react-zeugma
 
+## 1.5.0
+
+### Minor Changes
+
+- **Rename Core Layout Wrapper to `<Zeugma>`**:
+  - Renamed the primary layout provider component from `<DashboardProvider>` to `<Zeugma>` (with `<ZeugmaProps>`) to align with the workspace layout engine branding.
+  - Deprecated `<DashboardProvider>` and `<DashboardProviderProps>` exports.
+  - Updated context hook error messages to reference Zeugma providers.
+
 ## 1.4.1
 
 ### Patch Changes

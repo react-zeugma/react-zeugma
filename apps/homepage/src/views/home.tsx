@@ -43,7 +43,7 @@ const FEATURES = [
 ]
 
 const CODE = `import { useState } from 'react';
-import { DashboardProvider, PaneTree, Pane, DragHandle } from 'react-zeugma';
+import { Zeugma, PaneTree, Pane, DragHandle } from 'react-zeugma';
 
 export default function App() {
   const [layout, setLayout] = useState({
@@ -61,7 +61,7 @@ export default function App() {
   });
 
   return (
-    <DashboardProvider
+    <Zeugma
       layout={layout}
       onChange={setLayout}
       renderPane={(id) => (
@@ -81,7 +81,7 @@ export default function App() {
       )}
     >
       <PaneTree />
-    </DashboardProvider>
+    </Zeugma>
   );
 }`
 

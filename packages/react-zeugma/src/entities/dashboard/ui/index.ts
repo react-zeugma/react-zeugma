@@ -1,2 +1,2 @@
-export * from './DashboardProvider'
+export * from './Zeugma'
 export * from './RootDropZone'

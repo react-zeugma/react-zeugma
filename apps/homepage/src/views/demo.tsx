@@ -1,14 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import {
-  DashboardProvider,
-  PaneTree,
-  Pane,
-  DragHandle,
-  removePane,
-  ResizableContainer,
-} from 'react-zeugma'
+import { Zeugma, PaneTree, Pane, DragHandle, removePane, ResizableContainer } from 'react-zeugma'
 import type { TreeNode, PaneRenderProps, SplitNode } from 'react-zeugma'
 import {
   Box,
@@ -630,7 +623,7 @@ export function Demo() {
         }`}
       >
         <h1 className="sr-only">react-zeugma Live Workspace Demo</h1>
-        <DashboardProvider
+        <Zeugma
           layout={layout}
           onChange={handleLayoutChange}
           renderPane={renderPane}
@@ -725,7 +718,7 @@ export function Demo() {
               </div>
             </SidebarWrapper>
           </div>
-        </DashboardProvider>
+        </Zeugma>
       </div>
     </FpsProvider>
   )

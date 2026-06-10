@@ -10,7 +10,7 @@ import {
 export const useDashboardState = (): DashboardStateValue => {
   const state = useContext(DashboardStateContext)
   if (!state) {
-    throw new Error('useDashboardState must be used within a DashboardProvider')
+    throw new Error('useDashboardState must be used within a Zeugma provider')
   }
   return state
 }
@@ -19,7 +19,7 @@ export const useDashboardState = (): DashboardStateValue => {
 export const useDashboardActions = (): DashboardActionsValue => {
   const actions = useContext(DashboardActionsContext)
   if (!actions) {
-    throw new Error('useDashboardActions must be used within a DashboardProvider')
+    throw new Error('useDashboardActions must be used within a Zeugma provider')
   }
   return actions
 }

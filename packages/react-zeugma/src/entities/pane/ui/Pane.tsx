@@ -122,9 +122,12 @@ const DropZone: React.FC<DropZoneProps> = ({ id, position, activeClassName }) =>
   )
 }
 
-interface PaneProps {
+export interface PaneProps {
+  /** The unique ID of the pane, matching a `paneId` in the layout tree schema. */
   id: string
+  /** Render prop function providing pane state (isDragging, isFullscreen, etc.) and handlers. */
   children: (props: PaneRenderProps) => React.ReactNode
+  /** Optional inline CSS styles applied to the pane outer container. */
   style?: React.CSSProperties
 }
 

@@ -15,6 +15,7 @@ import {
   Sliders,
   X,
 } from 'lucide-react'
+import { FpsMonitor } from './fps-monitor'
 
 export interface LogEntry {
   id: string
@@ -36,7 +37,7 @@ interface SidebarWrapperProps {
   onUseCustomResizerChange: (val: boolean) => void
 }
 
-const PRESETS: Record<string, { label: string; layout: TreeNode }> = {
+export const PRESETS: Record<string, { label: string; layout: TreeNode }> = {
   default: {
     label: 'Default Layout',
     layout: {
@@ -53,7 +54,7 @@ const PRESETS: Record<string, { label: string; layout: TreeNode }> = {
       },
     },
   },
-  splitScreen: {
+  'split-screen': {
     label: 'Split Screen (Editor & Preview)',
     layout: {
       type: 'split',
@@ -63,9 +64,73 @@ const PRESETS: Record<string, { label: string; layout: TreeNode }> = {
       second: { type: 'pane', paneId: 'preview' },
     },
   },
-  editorFocus: {
-    label: 'Editor Focus',
-    layout: { type: 'pane', paneId: 'editor' },
+  'heavy-ui': {
+    label: 'Heavy UI Dashboard',
+    layout: {
+      type: 'split',
+      direction: 'row',
+      splitPercentage: 33.3,
+      first: {
+        type: 'split',
+        direction: 'column',
+        splitPercentage: 50,
+        first: {
+          type: 'pane',
+          paneId: 'heavy-analytics',
+          metadata: { title: 'Analytics Dashboard', color: 'indigo' },
+        },
+        second: {
+          type: 'pane',
+          paneId: 'heavy-conversions',
+          metadata: { title: 'Conversion Funnel', color: 'violet' },
+        },
+      },
+      second: {
+        type: 'split',
+        direction: 'row',
+        splitPercentage: 50,
+        first: {
+          type: 'split',
+          direction: 'column',
+          splitPercentage: 55,
+          first: {
+            type: 'pane',
+            paneId: 'heavy-transactions',
+            metadata: { title: 'Recent Transactions', color: 'emerald' },
+          },
+          second: {
+            type: 'pane',
+            paneId: 'heavy-tasks',
+            metadata: { title: 'Development Tasks', color: 'amber' },
+          },
+        },
+        second: {
+          type: 'split',
+          direction: 'column',
+          splitPercentage: 33.3,
+          first: {
+            type: 'pane',
+            paneId: 'heavy-performance',
+            metadata: { title: 'Performance Monitor', color: 'sky' },
+          },
+          second: {
+            type: 'split',
+            direction: 'column',
+            splitPercentage: 50,
+            first: {
+              type: 'pane',
+              paneId: 'heavy-system',
+              metadata: { title: 'System Status', color: 'rose' },
+            },
+            second: {
+              type: 'pane',
+              paneId: 'heavy-gallery',
+              metadata: { title: 'Media Assets', color: 'sky' },
+            },
+          },
+        },
+      },
+    },
   },
 }
 
@@ -87,6 +152,23 @@ export function SidebarWrapper({
   const [copied, setCopied] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
 
+  React.useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '')
+      if (PRESETS[hash]) {
+        setActivePreset(hash)
+        onLayoutChange(PRESETS[hash].layout)
+      } else if (!hash) {
+        setActivePreset('default')
+        onLayoutChange(PRESETS.default.layout)
+        window.history.replaceState(null, '', '#default')
+      }
+    }
+    window.addEventListener('hashchange', handleHashChange)
+    handleHashChange()
+    return () => window.removeEventListener('hashchange', handleHashChange)
+  }, [onLayoutChange])
+
   const handleCopyJson = () => {
     navigator.clipboard.writeText(JSON.stringify(layout, null, 2))
     setCopied(true)
@@ -96,11 +178,13 @@ export function SidebarWrapper({
   const handleApplyPreset = (presetKey: string) => {
     setActivePreset(presetKey)
     onLayoutChange(PRESETS[presetKey].layout)
+    window.location.hash = presetKey
   }
 
   const handleReset = () => {
     setActivePreset('default')
     onLayoutChange(PRESETS.default.layout)
+    window.location.hash = 'default'
   }
 
   const handleAddRandomWidget = () => {
@@ -244,6 +328,9 @@ export function SidebarWrapper({
               </div>
             </div>
           </div>
+
+          {/* Performance Monitor Section */}
+          <FpsMonitor />
 
           {/* Interactive Logs Section */}
           <div className="border-t border-border-primary/80 my-3 pt-3 px-1 space-y-1.5">

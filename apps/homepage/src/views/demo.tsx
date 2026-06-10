@@ -358,6 +358,7 @@ export function Demo() {
   const [logs, setLogs] = useState<LogEntry[]>([])
   const [localDismissIntentId, setLocalDismissIntentId] = useState<string | null>(null)
   const [resizableHeight, setResizableHeight] = useState(false)
+  const [containerHeight, setContainerHeight] = useState<number>(800)
 
   const addLog = React.useCallback((type: 'drag' | 'resize', message: string) => {
     const timeStr = new Date().toLocaleTimeString([], {
@@ -626,7 +627,13 @@ export function Demo() {
 
   return (
     <FpsProvider>
-      <div className="h-[calc(100vh-3.5rem)] bg-bg-app overflow-hidden transition-colors duration-200">
+      <div
+        className={`transition-all duration-500 ease-in-out ${
+          resizableHeight
+            ? 'h-[calc(100vh-3.5rem)] overflow-y-auto p-6 md:p-10 bg-zinc-100 dark:bg-zinc-950/40 flex items-center justify-center'
+            : 'h-[calc(100vh-3.5rem)] overflow-hidden bg-bg-app p-0'
+        }`}
+      >
         <h1 className="sr-only">react-zeugma Live Workspace Demo</h1>
         <DashboardProvider
           layout={layout}
@@ -648,63 +655,76 @@ export function Demo() {
           onResizeEnd={handleResizeEnd}
           classNames={{
             dropPreview:
-              'bg-indigo-500/10 backdrop-blur-[2px] border-2 border-dashed border-indigo-400/50 shadow-[0_0_15px_rgba(99,102,241,0.2)] rounded-lg transition-all duration-200',
+              'bg-indigo-500/10 backdrop-blur-[2px] border-2 border-dashed border-indigo-400/50 shadow-[0_25px_50px_-12px_rgba(99,102,241,0.2)] rounded-lg transition-all duration-200',
             swapPreview:
-              'bg-amber-500/10 backdrop-blur-[2px] border-2 border-dashed border-amber-400/50 shadow-[0_0_15px_rgba(245,158,11,0.2)] rounded-lg transition-all duration-200',
+              'bg-amber-500/10 backdrop-blur-[2px] border-2 border-dashed border-amber-400/50 shadow-[0_25px_50px_-12px_rgba(245,158,11,0.2)] rounded-lg transition-all duration-200',
             dismissPreview: 'zeugma-dismiss-preview',
           }}
         >
-          <SidebarWrapper
-            snapThreshold={snapThreshold}
-            onSnapThresholdChange={setSnapThreshold}
-            minSplitPercentage={minSplit}
-            onMinSplitPercentageChange={setMinSplit}
-            maxSplitPercentage={maxSplit}
-            onMaxSplitPercentageChange={setMaxSplit}
-            logs={logs}
-            resizableHeight={resizableHeight}
-            onResizableHeightChange={setResizableHeight}
+          <div
+            className={`w-full mx-auto transition-all duration-500 ease-in-out ${
+              resizableHeight
+                ? 'max-w-[1800px] rounded-xl border border-border-primary bg-bg-pane shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)] dark:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.55)] overflow-hidden h-full'
+                : 'max-w-full rounded-none border-none shadow-none h-full'
+            }`}
           >
-            <div
-              className={`w-full p-2 bg-bg-app ${resizableHeight ? 'h-auto overflow-visible' : 'h-full overflow-hidden'}`}
+            <SidebarWrapper
+              snapThreshold={snapThreshold}
+              onSnapThresholdChange={setSnapThreshold}
+              minSplitPercentage={minSplit}
+              onMinSplitPercentageChange={setMinSplit}
+              maxSplitPercentage={maxSplit}
+              onMaxSplitPercentageChange={setMaxSplit}
+              logs={logs}
+              resizableHeight={resizableHeight}
+              onResizableHeightChange={setResizableHeight}
+              onPresetChange={(preset) => {
+                if (preset === 'tall-stress') {
+                  setContainerHeight(800)
+                }
+              }}
             >
-              {!isMounted ? (
-                <div className="h-full flex items-center justify-center bg-bg-app text-text-muted select-none">
-                  <div className="flex flex-col items-center gap-3">
-                    <div className="w-8 h-8 rounded-full border-2 border-indigo-500 border-t-transparent animate-spin" />
-                    <span className="text-xs font-semibold uppercase tracking-wider text-indigo-500 animate-pulse">
-                      Loading Workspace...
-                    </span>
+              <div
+                className={`w-full p-2 bg-bg-app transition-all duration-500 ease-in-out ${
+                  resizableHeight ? 'min-h-full' : 'h-full overflow-hidden'
+                }`}
+              >
+                {!isMounted ? (
+                  <div className="h-full flex items-center justify-center bg-bg-app text-text-muted select-none">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-8 h-8 rounded-full border-2 border-indigo-500 border-t-transparent animate-spin" />
+                      <span className="text-xs font-semibold uppercase tracking-wider text-indigo-500 animate-pulse">
+                        Loading Workspace...
+                      </span>
+                    </div>
                   </div>
-                </div>
-              ) : layout ? (
-                resizableHeight ? (
+                ) : layout ? (
                   <ResizableContainer
-                    height={500}
-                    minHeight={200}
+                    active={resizableHeight}
+                    height={containerHeight}
+                    minHeight={300}
                     persist={true}
-                    localStorageKey="demo"
+                    localStorageKey="demo-container"
                     resizerHeight={6}
                     resizerClassName="zeugma-container-resizer"
+                    onHeightChange={setContainerHeight}
                   >
                     <PaneTree />
                   </ResizableContainer>
                 ) : (
-                  <PaneTree />
-                )
-              ) : (
-                <div className="h-full flex flex-col items-center justify-center text-text-secondary">
-                  <p className="mb-4">All panes closed.</p>
-                  <button
-                    onClick={() => handleLayoutChange(defaultIDELayout)}
-                    className="px-4 py-2 bg-text-primary hover:bg-text-primary/90 text-bg-app rounded text-sm transition-colors cursor-pointer"
-                  >
-                    Reset Layout
-                  </button>
-                </div>
-              )}
-            </div>
-          </SidebarWrapper>
+                  <div className="h-full flex flex-col items-center justify-center text-text-secondary">
+                    <p className="mb-4">All panes closed.</p>
+                    <button
+                      onClick={() => handleLayoutChange(defaultIDELayout)}
+                      className="px-4 py-2 bg-text-primary hover:bg-text-primary/90 text-bg-app rounded text-sm transition-colors cursor-pointer"
+                    >
+                      Reset Layout
+                    </button>
+                  </div>
+                )}
+              </div>
+            </SidebarWrapper>
+          </div>
         </DashboardProvider>
       </div>
     </FpsProvider>

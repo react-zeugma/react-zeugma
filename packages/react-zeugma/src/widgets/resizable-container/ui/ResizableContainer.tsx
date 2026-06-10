@@ -6,6 +6,8 @@ const DEFAULT_PERSIST_KEY = 'default-pane'
 
 export interface ResizableContainerProps {
   children: React.ReactNode
+  /** Whether the resizable container is active. When false, acts as a normal 100% height container. */
+  active?: boolean
   /** Current height in pixels (controlled mode) or default/initial height */
   height?: number
   /** Called when the height changes during or after a drag */
@@ -49,6 +51,7 @@ function writePersistedHeight(key: string, height: number): void {
 
 export const ResizableContainer: React.FC<ResizableContainerProps> = ({
   children,
+  active = true,
   height: heightProp,
   onHeightChange,
   minHeight = 100,
@@ -72,12 +75,19 @@ export const ResizableContainer: React.FC<ResizableContainerProps> = ({
   // Determine effective height: if persist is set, use internal state; otherwise use prop
   const effectiveHeight = storageKey ? internalHeight : (heightProp ?? internalHeight)
 
-  // Sync from controlled prop when not persisting
+  const prevHeightPropRef = useRef<number | undefined>(heightProp)
+
+  // Sync from controlled prop when changed
   useEffect(() => {
-    if (!storageKey && heightProp !== undefined) {
-      setInternalHeight(clamp(heightProp, minHeight, maxHeight))
+    if (heightProp !== undefined && heightProp !== prevHeightPropRef.current) {
+      const clamped = clamp(heightProp, minHeight, maxHeight)
+      setInternalHeight(clamped)
+      if (storageKey) {
+        writePersistedHeight(storageKey, clamped)
+      }
     }
-  }, [storageKey, heightProp, minHeight, maxHeight])
+    prevHeightPropRef.current = heightProp
+  }, [heightProp, minHeight, maxHeight, storageKey])
 
   // Resolve maxHeight
   const resolveMaxHeight = useCallback((): number => {
@@ -177,6 +187,22 @@ export const ResizableContainer: React.FC<ResizableContainerProps> = ({
     },
     [effectiveHeight, minHeight, resolveMaxHeight, onHeightChange, storageKey],
   )
+
+  if (!active) {
+    return (
+      <div
+        className={`zeugma-resizable-container disabled ${className || ''}`.trim()}
+        style={{
+          height: '100%',
+          position: 'relative',
+          overflow: 'hidden',
+          boxSizing: 'border-box',
+        }}
+      >
+        <div style={{ height: '100%', overflow: 'hidden' }}>{children}</div>
+      </div>
+    )
+  }
 
   return (
     <div

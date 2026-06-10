@@ -35,6 +35,7 @@ interface SidebarWrapperProps {
   resizableHeight: boolean
   onResizableHeightChange: (val: boolean) => void
   logs: LogEntry[]
+  onPresetChange?: (presetKey: string) => void
 }
 
 export const PRESETS: Record<string, { label: string; layout: TreeNode }> = {
@@ -132,6 +133,84 @@ export const PRESETS: Record<string, { label: string; layout: TreeNode }> = {
       },
     },
   },
+  'tall-stress': {
+    label: 'Tall Scroll Stress-Test',
+    layout: {
+      type: 'split',
+      direction: 'column',
+      splitPercentage: 15,
+      first: {
+        type: 'pane',
+        paneId: 'heavy-analytics',
+        metadata: { title: 'Analytics Dashboard', color: 'indigo' },
+      },
+      second: {
+        type: 'split',
+        direction: 'column',
+        splitPercentage: 20,
+        first: {
+          type: 'pane',
+          paneId: 'heavy-conversions',
+          metadata: { title: 'Conversion Funnel', color: 'violet' },
+        },
+        second: {
+          type: 'split',
+          direction: 'column',
+          splitPercentage: 25,
+          first: {
+            type: 'pane',
+            paneId: 'heavy-transactions',
+            metadata: { title: 'Recent Transactions', color: 'emerald' },
+          },
+          second: {
+            type: 'split',
+            direction: 'column',
+            splitPercentage: 30,
+            first: {
+              type: 'pane',
+              paneId: 'heavy-performance',
+              metadata: { title: 'Performance Monitor', color: 'sky' },
+            },
+            second: {
+              type: 'split',
+              direction: 'column',
+              splitPercentage: 40,
+              first: {
+                type: 'pane',
+                paneId: 'heavy-system',
+                metadata: { title: 'System Status', color: 'rose' },
+              },
+              second: {
+                type: 'split',
+                direction: 'column',
+                splitPercentage: 50,
+                first: {
+                  type: 'pane',
+                  paneId: 'heavy-tasks',
+                  metadata: { title: 'Development Tasks', color: 'amber' },
+                },
+                second: {
+                  type: 'split',
+                  direction: 'column',
+                  splitPercentage: 50,
+                  first: {
+                    type: 'pane',
+                    paneId: 'heavy-gallery',
+                    metadata: { title: 'Media Assets', color: 'sky' },
+                  },
+                  second: {
+                    type: 'pane',
+                    paneId: 'explorer',
+                    metadata: { title: 'File Explorer', color: 'indigo' },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
 }
 
 export function SidebarWrapper({
@@ -145,6 +224,7 @@ export function SidebarWrapper({
   resizableHeight,
   onResizableHeightChange,
   logs,
+  onPresetChange,
 }: SidebarWrapperProps) {
   const { layout, onLayoutChange } = useDashboardState()
   const [activePreset, setActivePreset] = useState<string>('default')
@@ -166,16 +246,21 @@ export function SidebarWrapper({
       if (PRESETS[hash]) {
         setActivePreset(hash)
         onLayoutChange(PRESETS[hash].layout)
+        onPresetChange?.(hash)
+        if (hash === 'tall-stress') {
+          onResizableHeightChange(true)
+        }
       } else if (!hash) {
         setActivePreset('default')
         onLayoutChange(PRESETS.default.layout)
+        onPresetChange?.('default')
         window.history.replaceState(null, '', '#default')
       }
     }
     window.addEventListener('hashchange', handleHashChange)
     handleHashChange()
     return () => window.removeEventListener('hashchange', handleHashChange)
-  }, [onLayoutChange])
+  }, [onLayoutChange, onResizableHeightChange, onPresetChange])
 
   const handleCopyJson = () => {
     navigator.clipboard.writeText(JSON.stringify(layout, null, 2))
@@ -187,12 +272,17 @@ export function SidebarWrapper({
     setActivePreset(presetKey)
     onLayoutChange(PRESETS[presetKey].layout)
     window.location.hash = presetKey
+    onPresetChange?.(presetKey)
+    if (presetKey === 'tall-stress') {
+      onResizableHeightChange(true)
+    }
   }
 
   const handleReset = () => {
     const targetPreset = PRESETS[activePreset] ? activePreset : 'default'
     onLayoutChange(PRESETS[targetPreset].layout)
     window.location.hash = targetPreset
+    onPresetChange?.(targetPreset)
   }
 
   const handleAddRandomWidget = () => {
@@ -322,12 +412,18 @@ export function SidebarWrapper({
               <span className="text-[10px] text-text-secondary">Resizable Height</span>
               <button
                 type="button"
+                disabled={activePreset === 'tall-stress'}
                 onClick={() => onResizableHeightChange(!resizableHeight)}
-                className={`relative w-8 h-[18px] rounded-full transition-colors duration-200 cursor-pointer border ${
-                  resizableHeight
-                    ? 'bg-indigo-500 border-indigo-600'
-                    : 'bg-bg-pane border-border-primary'
+                className={`relative w-8 h-[18px] rounded-full transition-colors duration-200 border ${
+                  activePreset === 'tall-stress'
+                    ? 'bg-indigo-500/50 border-indigo-500/30 cursor-not-allowed'
+                    : resizableHeight
+                      ? 'bg-indigo-500 border-indigo-600 cursor-pointer'
+                      : 'bg-bg-pane border-border-primary cursor-pointer'
                 }`}
+                title={
+                  activePreset === 'tall-stress' ? 'Required for scroll stress-test' : undefined
+                }
               >
                 <span
                   className="absolute top-px left-[2px] w-[14px] h-[14px] rounded-full bg-white shadow-sm transition-transform duration-200"

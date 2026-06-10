@@ -182,9 +182,9 @@ export function SidebarWrapper({
   }
 
   const handleReset = () => {
-    setActivePreset('default')
-    onLayoutChange(PRESETS.default.layout)
-    window.location.hash = 'default'
+    const targetPreset = PRESETS[activePreset] ? activePreset : 'default'
+    onLayoutChange(PRESETS[targetPreset].layout)
+    window.location.hash = targetPreset
   }
 
   const handleAddRandomWidget = () => {
@@ -251,7 +251,7 @@ export function SidebarWrapper({
                   onClick={handleReset}
                   className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded bg-bg-pane hover:bg-bg-sidebar text-text-primary text-xs font-medium border border-border-primary hover:border-border-secondary transition-all cursor-pointer shadow-sm"
                 >
-                  <RotateCcw className="w-3.5 h-3.5" /> Reset Default
+                  <RotateCcw className="w-3.5 h-3.5" /> Reset
                 </button>
               </div>
             </div>

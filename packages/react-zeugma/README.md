@@ -98,27 +98,27 @@ export default function Dashboard() {
 
 The context provider that sets up the drag-and-drop state machine, monitors active drags, and registers layout change notifications.
 
-| Prop                     | Type                                                                  | Required | Description                                                                                                                                                                  |
-| ------------------------ | --------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `layout`                 | `TreeNode \| null`                                                    | Yes      | The serializable tree layout schema.                                                                                                                                         |
-| `onChange`               | `(layout: TreeNode \| null) => void`                                  | Yes      | Fires when resizes, splits, swaps, or removes modify the tree.                                                                                                               |
-| `renderPane`             | `(paneId: string) => ReactNode`                                       | Yes      | Renderer function lookup that returns a `<Pane>` structure.                                                                                                                  |
-| `classNames`             | `ZeugmaClassNames`                                                    | No       | Custom classes for overriding pane, resizer, and drop preview overlays.                                                                                                      |
-| `fullscreenPaneId`       | `string \| null`                                                      | No       | Active ID of the pane taking full viewport coverage.                                                                                                                         |
-| `renderDragOverlay`      | `(activeId: string) => ReactNode`                                     | No       | Renders a custom cursor-following drag preview overlay.                                                                                                                      |
-| `onFullscreenChange`     | `(paneId: string \| null) => void`                                    | No       | Callback triggered when a pane enters or leaves fullscreen.                                                                                                                  |
-| `onRemove`               | `(paneId: string) => void`                                            | No       | Callback triggered when a pane is closed/removed from the layout tree.                                                                                                       |
-| `dragActivationDistance` | `number`                                                              | No       | Minimum pointer drag distance (in pixels) required to activate dragging. Defaults to `8`.                                                                                    |
-| `enableDragToDismiss`    | `boolean`                                                             | No       | If true, enables the drag-out-to-dismiss gesture where panes can be closed by dragging them outside. Defaults to `false`.                                                    |
-| `dragOutThreshold`       | `number`                                                              | No       | Distance in pixels outside the container bounds required to trigger drag-out mode. Defaults to `60`.                                                                         |
-| `onDragOutChange`        | `(activeId: string \| null) => void`                                  | No       | Callback triggered when the drag-out state changes. Receives the pane ID or `null`.                                                                                          |
-| `onDragStart`            | `(activeId: string) => void`                                          | No       | Callback triggered when dragging starts on a pane.                                                                                                                           |
-| `onDragEnd`              | `(activeId: string, overId: string \| null, dropAction: any) => void` | No       | Callback triggered when dragging ends, providing swap or split details. The `overId` is set to `'root'` if dropped onto outer boundaries to split the entire dashboard root. |
-| `onResizeStart`          | `(currentNode: SplitNode) => void`                                    | No       | Callback triggered when resizing starts on a split node.                                                                                                                     |
-| `onResize`               | `(currentNode: SplitNode, percentage: number) => void`                | No       | Callback triggered continuously while resizing a split node.                                                                                                                 |
-| `onResizeEnd`            | `(currentNode: SplitNode, percentage: number) => void`                | No       | Callback triggered when resizing ends on a split node.                                                                                                                       |
-| `minSplitPercentage`     | `number`                                                              | No       | Minimum resizing limit percentage. Defaults to `5`.                                                                                                                          |
-| `maxSplitPercentage`     | `number`                                                              | No       | Maximum resizing limit percentage. Defaults to `95`.                                                                                                                         |
+| Prop                     | Type                                                                  | Required | Description                                                                                                               |
+| ------------------------ | --------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `layout`                 | `TreeNode \| null`                                                    | Yes      | The serializable tree layout schema.                                                                                      |
+| `onChange`               | `(layout: TreeNode \| null) => void`                                  | Yes      | Fires when resizes, splits, swaps, or removes modify the tree.                                                            |
+| `renderPane`             | `(paneId: string) => ReactNode`                                       | Yes      | Renderer function lookup that returns a `<Pane>` structure.                                                               |
+| `classNames`             | `ZeugmaClassNames`                                                    | No       | Custom classes for overriding pane, resizer, and drop preview overlays.                                                   |
+| `fullscreenPaneId`       | `string \| null`                                                      | No       | Active ID of the pane taking full viewport coverage.                                                                      |
+| `renderDragOverlay`      | `(activeId: string) => ReactNode`                                     | No       | Renders a custom cursor-following drag preview overlay.                                                                   |
+| `onFullscreenChange`     | `(paneId: string \| null) => void`                                    | No       | Callback triggered when a pane enters or leaves fullscreen.                                                               |
+| `onRemove`               | `(paneId: string) => void`                                            | No       | Callback triggered when a pane is closed/removed from the layout tree.                                                    |
+| `dragActivationDistance` | `number`                                                              | No       | Minimum pointer drag distance (in pixels) required to activate dragging. Defaults to `8`.                                 |
+| `enableDragToDismiss`    | `boolean`                                                             | No       | If true, enables the drag-out-to-dismiss gesture where panes can be closed by dragging them outside. Defaults to `false`. |
+| `dragOutThreshold`       | `number`                                                              | No       | Distance in pixels outside the container bounds required to trigger drag-out mode. Defaults to `60`.                      |
+| `onDragOutChange`        | `(activeId: string \| null) => void`                                  | No       | Callback triggered when the drag-out state changes. Receives the pane ID or `null`.                                       |
+| `onDragStart`            | `(activeId: string) => void`                                          | No       | Callback triggered when dragging starts on a pane.                                                                        |
+| `onDragEnd`              | `(activeId: string, overId: string \| null, dropAction: any) => void` | No       | Callback triggered when dragging ends, providing swap or split details.                                                   |
+| `onResizeStart`          | `(currentNode: SplitNode) => void`                                    | No       | Callback triggered when resizing starts on a split node.                                                                  |
+| `onResize`               | `(currentNode: SplitNode, percentage: number) => void`                | No       | Callback triggered continuously while resizing a split node.                                                              |
+| `onResizeEnd`            | `(currentNode: SplitNode, percentage: number) => void`                | No       | Callback triggered when resizing ends on a split node.                                                                    |
+| `minSplitPercentage`     | `number`                                                              | No       | Minimum resizing limit percentage. Defaults to `5`.                                                                       |
+| `maxSplitPercentage`     | `number`                                                              | No       | Maximum resizing limit percentage. Defaults to `95`.                                                                      |
 
 ### `<PaneTree>`
 
@@ -194,10 +194,6 @@ Swaps the positions of `idA` and `idB` nodes directly inside the tree structure.
 #### `splitPane(tree, targetId, direction, splitType, paneToAdd)`
 
 Splits the targeted `targetId` pane inside the tree with `direction` (_row_ / _column_) and type (_left_, _right_, _top_, _bottom_) to insert `paneToAdd`.
-
-#### `splitRoot(tree, draggingId, splitType)`
-
-Splits the entire dashboard tree at the root, placing the dragged `draggingId` pane on one half and the rest of the layout tree on the other.
 
 #### `findPane(tree: TreeNode | null, paneId: string): PaneNode | null`
 
@@ -380,7 +376,7 @@ The root context provider. It handles the drag-and-drop event loop and coordinat
 - `dragOutThreshold?: number` — (Optional) Distance in pixels outside the container boundaries required to activate drag-out mode. Defaults to `60`.
 - `onDragOutChange?: (activeId: string | null) => void` — (Optional) Callback triggered when the drag-out state changes.
 - `onDragStart?: (activeId: string) => void` — (Optional) Callback triggered when dragging starts on a pane.
-- `onDragEnd?: (activeId: string, overId: string | null, dropAction: any) => void` — (Optional) Callback triggered when dragging ends. The `overId` will be `'root'` if the pane was dropped onto the outer dashboard boundaries to split the root layout.
+- `onDragEnd?: (activeId: string, overId: string | null, dropAction: any) => void` — (Optional) Callback triggered when dragging ends, providing swap or split details.
 - `onResizeStart?: (currentNode: SplitNode) => void` — (Optional) Callback triggered when resizing starts.
 - `onResize?: (currentNode: SplitNode, percentage: number) => void` — (Optional) Callback triggered during resizing.
 - `onResizeEnd?: (currentNode: SplitNode, percentage: number) => void` — (Optional) Callback triggered when resizing ends.
@@ -456,8 +452,6 @@ Import these helpers from `react-zeugma` to manipulate the tree layout programma
   Removes a pane from the tree and collapses the leftover sibling split node.
 - **`splitPane(tree: TreeNode | null, targetId: string, direction: SplitDirection, splitType: 'left' | 'right' | 'top' | 'bottom', paneToAdd: string): TreeNode | null`**
   Splits a specific target pane by nesting it under a new `SplitNode` along with a new pane.
-- **`splitRoot(tree: TreeNode | null, draggingId: string, splitType: 'left' | 'right' | 'top' | 'bottom'): TreeNode | null`**
-  Splits the entire dashboard tree at the root, placing the dragged pane on one half and the remaining layout tree on the other.
 - **`swapPanes(tree: TreeNode | null, idA: string, idB: string): TreeNode | null`**
   Swaps the positions of two panes in the tree.
 - **`updatePaneMetadata(tree: TreeNode | null, paneId: string, updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined): TreeNode | null`**

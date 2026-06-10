@@ -138,73 +138,73 @@ export const PRESETS: Record<string, { label: string; layout: TreeNode }> = {
     layout: {
       type: 'split',
       direction: 'column',
-      splitPercentage: 15,
+      splitPercentage: 25,
       first: {
-        type: 'pane',
-        paneId: 'heavy-analytics',
-        metadata: { title: 'Analytics Dashboard', color: 'indigo' },
-      },
-      second: {
         type: 'split',
-        direction: 'column',
-        splitPercentage: 20,
+        direction: 'row',
+        splitPercentage: 50,
         first: {
+          type: 'pane',
+          paneId: 'heavy-analytics',
+          metadata: { title: 'Analytics Dashboard', color: 'indigo' },
+        },
+        second: {
           type: 'pane',
           paneId: 'heavy-conversions',
           metadata: { title: 'Conversion Funnel', color: 'violet' },
         },
-        second: {
+      },
+      second: {
+        type: 'split',
+        direction: 'column',
+        splitPercentage: 33.3,
+        first: {
           type: 'split',
-          direction: 'column',
-          splitPercentage: 25,
+          direction: 'row',
+          splitPercentage: 50,
           first: {
             type: 'pane',
             paneId: 'heavy-transactions',
             metadata: { title: 'Recent Transactions', color: 'emerald' },
           },
           second: {
+            type: 'pane',
+            paneId: 'heavy-performance',
+            metadata: { title: 'Performance Monitor', color: 'sky' },
+          },
+        },
+        second: {
+          type: 'split',
+          direction: 'column',
+          splitPercentage: 50,
+          first: {
             type: 'split',
-            direction: 'column',
-            splitPercentage: 30,
+            direction: 'row',
+            splitPercentage: 50,
             first: {
               type: 'pane',
-              paneId: 'heavy-performance',
-              metadata: { title: 'Performance Monitor', color: 'sky' },
+              paneId: 'heavy-system',
+              metadata: { title: 'System Status', color: 'rose' },
             },
             second: {
-              type: 'split',
-              direction: 'column',
-              splitPercentage: 40,
-              first: {
-                type: 'pane',
-                paneId: 'heavy-system',
-                metadata: { title: 'System Status', color: 'rose' },
-              },
-              second: {
-                type: 'split',
-                direction: 'column',
-                splitPercentage: 50,
-                first: {
-                  type: 'pane',
-                  paneId: 'heavy-tasks',
-                  metadata: { title: 'Development Tasks', color: 'amber' },
-                },
-                second: {
-                  type: 'split',
-                  direction: 'column',
-                  splitPercentage: 50,
-                  first: {
-                    type: 'pane',
-                    paneId: 'heavy-gallery',
-                    metadata: { title: 'Media Assets', color: 'sky' },
-                  },
-                  second: {
-                    type: 'pane',
-                    paneId: 'explorer',
-                    metadata: { title: 'File Explorer', color: 'indigo' },
-                  },
-                },
-              },
+              type: 'pane',
+              paneId: 'heavy-tasks',
+              metadata: { title: 'Development Tasks', color: 'amber' },
+            },
+          },
+          second: {
+            type: 'split',
+            direction: 'row',
+            splitPercentage: 50,
+            first: {
+              type: 'pane',
+              paneId: 'heavy-gallery',
+              metadata: { title: 'Media Assets', color: 'sky' },
+            },
+            second: {
+              type: 'pane',
+              paneId: 'explorer',
+              metadata: { title: 'File Explorer', color: 'indigo' },
             },
           },
         },
@@ -240,28 +240,6 @@ export function SidebarWrapper({
     }
   }, [resizableHeight])
 
-  React.useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.replace('#', '')
-      if (PRESETS[hash]) {
-        setActivePreset(hash)
-        onLayoutChange(PRESETS[hash].layout)
-        onPresetChange?.(hash)
-        if (hash === 'tall-stress') {
-          onResizableHeightChange(true)
-        }
-      } else if (!hash) {
-        setActivePreset('default')
-        onLayoutChange(PRESETS.default.layout)
-        onPresetChange?.('default')
-        window.history.replaceState(null, '', '#default')
-      }
-    }
-    window.addEventListener('hashchange', handleHashChange)
-    handleHashChange()
-    return () => window.removeEventListener('hashchange', handleHashChange)
-  }, [onLayoutChange, onResizableHeightChange, onPresetChange])
-
   const handleCopyJson = () => {
     navigator.clipboard.writeText(JSON.stringify(layout, null, 2))
     setCopied(true)
@@ -271,7 +249,6 @@ export function SidebarWrapper({
   const handleApplyPreset = (presetKey: string) => {
     setActivePreset(presetKey)
     onLayoutChange(PRESETS[presetKey].layout)
-    window.location.hash = presetKey
     onPresetChange?.(presetKey)
     if (presetKey === 'tall-stress') {
       onResizableHeightChange(true)
@@ -281,7 +258,6 @@ export function SidebarWrapper({
   const handleReset = () => {
     const targetPreset = PRESETS[activePreset] ? activePreset : 'default'
     onLayoutChange(PRESETS[targetPreset].layout)
-    window.location.hash = targetPreset
     onPresetChange?.(targetPreset)
   }
 

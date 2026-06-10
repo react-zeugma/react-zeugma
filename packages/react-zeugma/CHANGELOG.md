@@ -1,5 +1,13 @@
 # react-zeugma
 
+## 1.4.1
+
+### Patch Changes
+
+- **Fix Layout State Syncing & Refactor Callback Refs**:
+  - Fixed `handleLocalLayoutChange` (exposed as `onLayoutChange` in state context) to correctly propagate layout updates to the parent component via `onChange(newLayout)`. This resolves a bug where layout actions (such as resizes or preset selection) were reverted on parent re-renders.
+  - Refactored `DashboardProvider` to eliminate `useRef` callback-bypassing refs (`layoutRef`, `onChangeRef`, `onDismissIntentChangeRef`, `onResizeEndPropRef`, `renderPaneRef`), replacing them with standard, clean React dependencies in `useCallback` hooks.
+
 ## 1.4.0
 
 ### Minor Changes

@@ -680,7 +680,7 @@ export function Demo() {
               onResizableHeightChange={setResizableHeight}
               onPresetChange={(preset) => {
                 if (preset === 'tall-stress') {
-                  setContainerHeight(800)
+                  setContainerHeight(1200)
                 }
               }}
             >

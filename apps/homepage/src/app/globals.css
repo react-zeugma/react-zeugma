@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@custom-variant dark (&:where(.dark, .dark *));
 @import 'tw-animate-css';
 @import '@fontsource-variable/geist';
 

@@ -390,21 +390,21 @@ export function SidebarWrapper({
                 type="button"
                 disabled={activePreset === 'tall-stress'}
                 onClick={() => onResizableHeightChange(!resizableHeight)}
-                className={`relative w-8 h-[18px] rounded-full transition-colors duration-200 border ${
+                className={`relative w-9 h-5 rounded-full transition-colors duration-200 border ${
                   activePreset === 'tall-stress'
                     ? 'bg-indigo-500/50 border-indigo-500/30 cursor-not-allowed'
                     : resizableHeight
-                      ? 'bg-indigo-500 border-indigo-600 cursor-pointer'
-                      : 'bg-bg-pane border-border-primary cursor-pointer'
+                      ? 'bg-indigo-600 border-indigo-700 cursor-pointer'
+                      : 'bg-zinc-200 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 cursor-pointer'
                 }`}
                 title={
                   activePreset === 'tall-stress' ? 'Required for scroll stress-test' : undefined
                 }
               >
                 <span
-                  className="absolute top-px left-[2px] w-[14px] h-[14px] rounded-full bg-white shadow-sm transition-transform duration-200"
+                  className="absolute top-px left-[2px] w-4 h-4 rounded-full bg-white shadow-md transition-transform duration-200"
                   style={{
-                    transform: resizableHeight ? 'translateX(12px)' : 'translateX(0px)',
+                    transform: resizableHeight ? 'translateX(16px)' : 'translateX(0px)',
                   }}
                 />
               </button>

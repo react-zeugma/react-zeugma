@@ -1,5 +1,20 @@
 # react-zeugma
 
+## 2.0.0
+
+### Major Changes
+
+- **Renamed Context Hooks & Types**:
+  - Rebranded and renamed all dashboard context hooks, state, values, and contexts to use `Zeugma`-prefixed names instead of legacy `Dashboard` naming.
+  - Renamed hooks: `useDashboardState` -> `useZeugmaState`, `useDashboardActions` -> `useZeugmaActions`.
+  - Renamed context state values: `DashboardStateValue` -> `ZeugmaStateValue`, `DashboardActionsValue` -> `ZeugmaActionsValue`.
+  - Renamed context objects: `DashboardStateContext` -> `ZeugmaStateContext`, `DashboardActionsContext` -> `ZeugmaActionsContext`.
+  - Removed all deprecated `DashboardProvider` and `DashboardProviderProps` exports.
+
+- **Refactored Dashboard Architecture**:
+  - Renamed the internal component entity directory from `entities/dashboard` to `entities/zeugma`.
+  - Modularized the dashboard code: split types/interfaces into `model/types.ts`, context creation into `model/context.ts`, hooks into `model/hooks.ts`, custom sensors into `lib/sensors.ts`, and helper components into `ui/CursorOverlay.tsx`.
+
 ## 1.5.0
 
 ### Minor Changes

@@ -1,7 +1,14 @@
 'use client'
 
 import React, { useState } from 'react'
-import { DashboardProvider, PaneTree, Pane, DragHandle, removePane } from 'react-zeugma'
+import {
+  DashboardProvider,
+  PaneTree,
+  Pane,
+  DragHandle,
+  removePane,
+  ResizableContainer,
+} from 'react-zeugma'
 import type { TreeNode, PaneRenderProps, SplitNode } from 'react-zeugma'
 import {
   Box,
@@ -350,6 +357,7 @@ export function Demo() {
   const [maxSplit, setMaxSplit] = useState(90)
   const [logs, setLogs] = useState<LogEntry[]>([])
   const [localDismissIntentId, setLocalDismissIntentId] = useState<string | null>(null)
+  const [resizableHeight, setResizableHeight] = useState(false)
 
   const addLog = React.useCallback((type: 'drag' | 'resize', message: string) => {
     const timeStr = new Date().toLocaleTimeString([], {
@@ -654,8 +662,12 @@ export function Demo() {
             maxSplitPercentage={maxSplit}
             onMaxSplitPercentageChange={setMaxSplit}
             logs={logs}
+            resizableHeight={resizableHeight}
+            onResizableHeightChange={setResizableHeight}
           >
-            <div className="h-full w-full p-2 overflow-hidden bg-bg-app">
+            <div
+              className={`w-full p-2 bg-bg-app ${resizableHeight ? 'h-auto overflow-visible' : 'h-full overflow-hidden'}`}
+            >
               {!isMounted ? (
                 <div className="h-full flex items-center justify-center bg-bg-app text-text-muted select-none">
                   <div className="flex flex-col items-center gap-3">
@@ -666,7 +678,20 @@ export function Demo() {
                   </div>
                 </div>
               ) : layout ? (
-                <PaneTree />
+                resizableHeight ? (
+                  <ResizableContainer
+                    height={500}
+                    minHeight={200}
+                    persist={true}
+                    localStorageKey="demo"
+                    resizerHeight={6}
+                    resizerClassName="zeugma-container-resizer"
+                  >
+                    <PaneTree />
+                  </ResizableContainer>
+                ) : (
+                  <PaneTree />
+                )
               ) : (
                 <div className="h-full flex flex-col items-center justify-center text-text-secondary">
                   <p className="mb-4">All panes closed.</p>

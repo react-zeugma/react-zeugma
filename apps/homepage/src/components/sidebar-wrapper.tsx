@@ -32,6 +32,8 @@ interface SidebarWrapperProps {
   onMinSplitPercentageChange: (val: number) => void
   maxSplitPercentage: number
   onMaxSplitPercentageChange: (val: number) => void
+  resizableHeight: boolean
+  onResizableHeightChange: (val: boolean) => void
   logs: LogEntry[]
 }
 
@@ -140,6 +142,8 @@ export function SidebarWrapper({
   onMinSplitPercentageChange,
   maxSplitPercentage,
   onMaxSplitPercentageChange,
+  resizableHeight,
+  onResizableHeightChange,
   logs,
 }: SidebarWrapperProps) {
   const { layout, onLayoutChange } = useDashboardState()
@@ -147,6 +151,14 @@ export function SidebarWrapper({
   const [isJsonExpanded, setIsJsonExpanded] = useState(true)
   const [copied, setCopied] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
+
+  const mainContentRef = React.useRef<HTMLDivElement>(null)
+
+  React.useEffect(() => {
+    if (!resizableHeight && mainContentRef.current) {
+      mainContentRef.current.scrollTop = 0
+    }
+  }, [resizableHeight])
 
   React.useEffect(() => {
     const handleHashChange = () => {
@@ -305,6 +317,26 @@ export function SidebarWrapper({
                 />
               </div>
             </div>
+
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-[10px] text-text-secondary">Resizable Height</span>
+              <button
+                type="button"
+                onClick={() => onResizableHeightChange(!resizableHeight)}
+                className={`relative w-8 h-[18px] rounded-full transition-colors duration-200 cursor-pointer border ${
+                  resizableHeight
+                    ? 'bg-indigo-500 border-indigo-600'
+                    : 'bg-bg-pane border-border-primary'
+                }`}
+              >
+                <span
+                  className="absolute top-px left-[2px] w-[14px] h-[14px] rounded-full bg-white shadow-sm transition-transform duration-200"
+                  style={{
+                    transform: resizableHeight ? 'translateX(12px)' : 'translateX(0px)',
+                  }}
+                />
+              </button>
+            </div>
           </div>
 
           {/* Performance Monitor Section */}
@@ -380,7 +412,10 @@ export function SidebarWrapper({
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 min-w-0 h-full relative overflow-hidden bg-bg-app">
+      <div
+        ref={mainContentRef}
+        className={`flex-1 min-w-0 h-full relative bg-bg-app ${resizableHeight ? 'overflow-y-auto' : 'overflow-hidden'}`}
+      >
         {children}
 
         {/* Floating Mobile Toggle Button */}

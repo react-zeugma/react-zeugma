@@ -33,8 +33,6 @@ interface SidebarWrapperProps {
   maxSplitPercentage: number
   onMaxSplitPercentageChange: (val: number) => void
   logs: LogEntry[]
-  useCustomResizer: boolean
-  onUseCustomResizerChange: (val: boolean) => void
 }
 
 export const PRESETS: Record<string, { label: string; layout: TreeNode }> = {
@@ -143,8 +141,6 @@ export function SidebarWrapper({
   maxSplitPercentage,
   onMaxSplitPercentageChange,
   logs,
-  useCustomResizer,
-  onUseCustomResizerChange,
 }: SidebarWrapperProps) {
   const { layout, onLayoutChange } = useDashboardState()
   const [activePreset, setActivePreset] = useState<string>('default')
@@ -264,24 +260,6 @@ export function SidebarWrapper({
             </div>
 
             <div className="space-y-2">
-              {/* Custom Resizer Checkbox */}
-              <div className="flex items-center justify-between bg-bg-pane border border-border-primary rounded p-2 text-xs select-none transition-colors duration-200">
-                <span className="text-text-secondary font-medium">Use Custom Resizer</span>
-                <button
-                  onClick={() => onUseCustomResizerChange(!useCustomResizer)}
-                  className={`w-9 h-5 rounded-full p-0.5 transition-colors duration-200 focus:outline-none cursor-pointer ${
-                    useCustomResizer ? 'bg-indigo-600' : 'bg-text-muted'
-                  }`}
-                  aria-label="Toggle Custom Resizer"
-                >
-                  <div
-                    className={`bg-white w-4 h-4 rounded-full shadow transform transition-transform duration-200 ${
-                      useCustomResizer ? 'translate-x-4' : 'translate-x-0'
-                    }`}
-                  />
-                </button>
-              </div>
-
               <div className="flex flex-col gap-1">
                 <div className="flex justify-between text-[10px] text-text-secondary">
                   <span>Snap Threshold</span>

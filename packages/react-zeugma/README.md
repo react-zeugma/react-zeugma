@@ -117,7 +117,6 @@ The context provider that sets up the drag-and-drop state machine, monitors acti
 | `onResizeStart`          | `(currentNode: SplitNode) => void`                                    | No       | Callback triggered when resizing starts on a split node.                                                                                                                     |
 | `onResize`               | `(currentNode: SplitNode, percentage: number) => void`                | No       | Callback triggered continuously while resizing a split node.                                                                                                                 |
 | `onResizeEnd`            | `(currentNode: SplitNode, percentage: number) => void`                | No       | Callback triggered when resizing ends on a split node.                                                                                                                       |
-| `renderResizer`          | `(props: ResizerRenderProps) => ReactNode`                            | No       | Custom renderer function for rendering custom-styled resizer bars.                                                                                                           |
 | `minSplitPercentage`     | `number`                                                              | No       | Minimum resizing limit percentage. Defaults to `5`.                                                                                                                          |
 | `maxSplitPercentage`     | `number`                                                              | No       | Maximum resizing limit percentage. Defaults to `95`.                                                                                                                         |
 
@@ -258,14 +257,6 @@ export interface PaneRenderProps {
   ) => void
 }
 
-export interface ResizerRenderProps {
-  direction: SplitDirection
-  splitPercentage: number
-  resizerSize: number
-  isResizing: boolean
-  onPointerDown: (e: React.PointerEvent<HTMLDivElement>) => void
-}
-
 export interface DashboardStateValue {
   layout: TreeNode | null
   onLayoutChange: (newLayout: TreeNode | null) => void
@@ -281,7 +272,6 @@ export interface DashboardStateValue {
   onResizeStart?: (currentNode: SplitNode) => void
   onResize?: (currentNode: SplitNode, percentage: number) => void
   onResizeEnd?: (currentNode: SplitNode, percentage: number) => void
-  renderResizer?: (props: ResizerRenderProps) => ReactNode
   minSplitPercentage?: number
   maxSplitPercentage?: number
 }
@@ -378,7 +368,6 @@ The root context provider. It handles the drag-and-drop event loop and coordinat
 - `onResizeStart?: (currentNode: SplitNode) => void` — (Optional) Callback triggered when resizing starts.
 - `onResize?: (currentNode: SplitNode, percentage: number) => void` — (Optional) Callback triggered during resizing.
 - `onResizeEnd?: (currentNode: SplitNode, percentage: number) => void` — (Optional) Callback triggered when resizing ends.
-- `renderResizer?: (props: ResizerRenderProps) => ReactNode` — (Optional) Custom resizer bar component renderer.
 - `minSplitPercentage?: number` — (Optional) Minimum resizing limit percentage (defaults to `5`).
 - `maxSplitPercentage?: number` — (Optional) Maximum resizing limit percentage (defaults to `95`).
 

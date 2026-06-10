@@ -22,12 +22,7 @@ import {
   findPane,
 } from '../../../shared/lib/tree'
 import { DEFAULT_DRAG_ACTIVATION_DISTANCE, DEFAULT_SNAP_THRESHOLD } from '../../../shared/config'
-import {
-  DashboardStateContext,
-  DashboardActionsContext,
-  ZeugmaClassNames,
-  ResizerRenderProps,
-} from '../model/context'
+import { DashboardStateContext, DashboardActionsContext, ZeugmaClassNames } from '../model/context'
 
 /** Cursor-following overlay rendered via portal */
 const CursorOverlay: React.FC<{
@@ -118,7 +113,6 @@ interface DashboardProviderProps {
   onResizeStart?: (currentNode: SplitNode) => void
   onResize?: (currentNode: SplitNode, percentage: number) => void
   onResizeEnd?: (currentNode: SplitNode, percentage: number) => void
-  renderResizer?: (props: ResizerRenderProps) => ReactNode
   minSplitPercentage?: number
   maxSplitPercentage?: number
   enableDragToDismiss?: boolean
@@ -143,7 +137,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
   onResizeStart,
   onResize,
   onResizeEnd,
-  renderResizer,
   minSplitPercentage = 5,
   maxSplitPercentage = 95,
   enableDragToDismiss = false,
@@ -514,7 +507,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
       onResizeStart,
       onResize,
       onResizeEnd: handleResizeEnd,
-      renderResizer,
       minSplitPercentage,
       maxSplitPercentage,
     }),
@@ -530,7 +522,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
       snapThreshold,
       onResizeStart,
       onResize,
-      renderResizer,
       minSplitPercentage,
       maxSplitPercentage,
       // Stable callbacks (empty deps) — included for exhaustive-deps lint rule

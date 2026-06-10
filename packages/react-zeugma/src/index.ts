@@ -1,7 +1,6 @@
 export { DashboardProvider } from './entities/dashboard'
 export type {
   ZeugmaClassNames,
-  ResizerRenderProps,
   DashboardStateValue,
   DashboardActionsValue,
 } from './entities/dashboard'

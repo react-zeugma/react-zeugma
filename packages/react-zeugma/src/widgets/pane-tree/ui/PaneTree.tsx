@@ -1,14 +1,15 @@
 import React, { useRef, useState, useMemo } from 'react'
-import { useDashboardState, RootDropZones } from '../../../entities/dashboard'
+import { useZeugmaState, RootDropZones } from '../../../entities/zeugma'
 import { useResizer } from '../../../features/resize-pane'
 import { TreeNode, SplitNode } from '../../../shared/model'
 import { removePane } from '../../../shared'
 
 export interface PaneTreeProps {
+  /** The layout subtree node to render. If not specified, defaults to the root layout tree from the Zeugma context. */
   tree?: TreeNode | null
-  /** Size of the resizer in pixels (default 4) */
+  /** Size/thickness of the split handle resizer bars in pixels (default 4). */
   resizerSize?: number
-  /** Threshold in pixels to snap to adjacent resizer edges (default 8) */
+  /** Threshold distance in pixels to snap layout resizers to adjacent edges (default 8). */
   snapThreshold?: number
 }
 
@@ -19,7 +20,7 @@ interface PaneSplitProps {
 }
 
 const PaneSplit: React.FC<PaneSplitProps> = ({ currentNode, resizerSize, snapThreshold }) => {
-  const { layout, onLayoutChange, classNames } = useDashboardState()
+  const { layout, onLayoutChange, classNames } = useZeugmaState()
   const [isResizing, setIsResizing] = useState(false)
 
   const containerRef = useRef<HTMLDivElement>(null)
@@ -96,7 +97,7 @@ export const PaneTree: React.FC<PaneTreeProps> = ({
     classNames,
     fullscreenPaneId,
     snapThreshold: contextSnapThreshold,
-  } = useDashboardState()
+  } = useZeugmaState()
 
   const snapThreshold = propSnapThreshold !== undefined ? propSnapThreshold : contextSnapThreshold
 

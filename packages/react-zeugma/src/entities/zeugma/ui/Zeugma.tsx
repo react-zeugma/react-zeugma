@@ -1,10 +1,8 @@
-import React, { useState, useEffect, useRef, ReactNode, useMemo, useCallback } from 'react'
+import React, { useState, useRef, useMemo, useCallback } from 'react'
 import {
   DndContext,
   useSensor,
   useSensors,
-  PointerSensor,
-  TouchSensor,
   DragStartEvent,
   DragEndEvent,
   DragMoveEvent,
@@ -22,106 +20,12 @@ import {
   findPane,
 } from '../../../shared/lib/tree'
 import { DEFAULT_DRAG_ACTIVATION_DISTANCE, DEFAULT_SNAP_THRESHOLD } from '../../../shared/config'
-import { DashboardStateContext, DashboardActionsContext, ZeugmaClassNames } from '../model/context'
+import { ZeugmaStateContext, ZeugmaActionsContext } from '../model/context'
+import { ZeugmaProps } from '../model/types'
+import { CursorOverlay } from './CursorOverlay'
+import { SmartPointerSensor, SmartTouchSensor } from '../lib/sensors'
 
-/** Cursor-following overlay rendered via portal */
-const CursorOverlay: React.FC<{
-  activeId: string
-  render: (id: string) => ReactNode
-  className?: string
-}> = ({ activeId, render, className }) => {
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const handleMove = (e: PointerEvent) => {
-      if (ref.current) {
-        ref.current.style.transform = `translate(${e.clientX + 12}px, ${e.clientY + 12}px)`
-      }
-    }
-    document.addEventListener('pointermove', handleMove)
-    return () => document.removeEventListener('pointermove', handleMove)
-  }, [])
-
-  return (
-    <div
-      ref={ref}
-      className={className}
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        zIndex: 9999,
-        pointerEvents: 'none',
-      }}
-    >
-      {render(activeId)}
-    </div>
-  )
-}
-
-class SmartPointerSensor extends PointerSensor {
-  static activators = [
-    {
-      eventName: 'onPointerDown' as const,
-      handler: ({ nativeEvent: event }: { nativeEvent: PointerEvent }) => {
-        const element = event.target as HTMLElement | null
-        if (element?.closest('.drag-cancel')) {
-          return false
-        }
-        return true
-      },
-    },
-  ]
-}
-
-class SmartTouchSensor extends TouchSensor {
-  static activators = [
-    {
-      eventName: 'onTouchStart' as const,
-      handler: ({ nativeEvent: event }: { nativeEvent: TouchEvent }) => {
-        const element = event.target as HTMLElement | null
-        if (element?.closest('.drag-cancel')) {
-          return false
-        }
-        return true
-      },
-    },
-  ]
-}
-
-interface DashboardProviderProps {
-  layout: TreeNode | null
-  onChange: (newLayout: TreeNode | null) => void
-  renderPane: (paneId: string) => ReactNode
-  renderDragOverlay?: (activeId: string) => ReactNode
-  classNames?: ZeugmaClassNames
-  fullscreenPaneId?: string | null
-  onFullscreenChange?: (paneId: string | null) => void
-  onRemove?: (paneId: string) => void
-  dragActivationDistance?: number
-  snapThreshold?: number
-  onDragStart?: (activeId: string) => void
-  onDragEnd?: (
-    activeId: string,
-    overId: string | null,
-    dropAction: {
-      type: 'split' | 'swap'
-      direction?: SplitDirection
-      position?: 'top' | 'bottom' | 'left' | 'right' | 'center'
-    } | null,
-  ) => void
-  onResizeStart?: (currentNode: SplitNode) => void
-  onResize?: (currentNode: SplitNode, percentage: number) => void
-  onResizeEnd?: (currentNode: SplitNode, percentage: number) => void
-  minSplitPercentage?: number
-  maxSplitPercentage?: number
-  enableDragToDismiss?: boolean
-  dismissThreshold?: number
-  onDismissIntentChange?: (paneId: string | null) => void
-  children: ReactNode
-}
-
-export const DashboardProvider: React.FC<DashboardProviderProps> = ({
+export const Zeugma: React.FC<ZeugmaProps> = ({
   layout,
   onChange,
   renderPane,
@@ -554,8 +458,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
   )
 
   return (
-    <DashboardActionsContext.Provider value={actionsValue}>
-      <DashboardStateContext.Provider value={stateValue}>
+    <ZeugmaActionsContext.Provider value={actionsValue}>
+      <ZeugmaStateContext.Provider value={stateValue}>
         <DndContext
           id="zeugma-dnd-context"
           sensors={sensors}
@@ -577,7 +481,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
             }`.trim()}
           />
         )}
-      </DashboardStateContext.Provider>
-    </DashboardActionsContext.Provider>
+      </ZeugmaStateContext.Provider>
+    </ZeugmaActionsContext.Provider>
   )
 }

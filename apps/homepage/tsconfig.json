@@ -12,7 +12,8 @@
     "jsx": "react-jsx",
     "incremental": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "react-zeugma": ["../../packages/react-zeugma/src/index.ts"]
     },
     "strict": true,
     "noUnusedLocals": true,

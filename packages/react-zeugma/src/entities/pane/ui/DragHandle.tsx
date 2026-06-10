@@ -1,9 +1,12 @@
 import React, { useContext } from 'react'
 import { DragListenersCtx } from '../model/context'
 
-interface DragHandleProps {
+export interface DragHandleProps {
+  /** The children elements that will trigger dragging when held and dragged. */
   children: React.ReactNode
+  /** Custom CSS class applied to the drag handle element. */
   className?: string
+  /** Optional inline CSS styles applied to the drag handle. */
   style?: React.CSSProperties
 }
 

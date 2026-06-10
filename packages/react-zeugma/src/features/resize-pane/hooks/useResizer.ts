@@ -2,7 +2,7 @@ import React, { useCallback } from 'react'
 import { TreeNode, SplitNode, SplitDirection } from '../../../shared/model'
 import { updateSplitPercentage } from '../../../shared/lib/tree'
 import { createDragSession } from '../../../shared/lib/drag-session'
-import { useDashboardState } from '../../../entities/dashboard'
+import { useZeugmaState } from '../../../entities/zeugma'
 
 interface UseResizerProps {
   containerRef: React.RefObject<HTMLDivElement | null>
@@ -37,7 +37,7 @@ export function useResizer({
     onResizeEnd: globalOnResizeEnd,
     minSplitPercentage = 5,
     maxSplitPercentage = 95,
-  } = useDashboardState()
+  } = useZeugmaState()
 
   return useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {

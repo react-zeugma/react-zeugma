@@ -1,14 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import {
-  DashboardProvider,
-  PaneTree,
-  Pane,
-  DragHandle,
-  removePane,
-  ResizableContainer,
-} from 'react-zeugma'
+import { Zeugma, PaneTree, Pane, DragHandle, removePane, ResizableContainer } from 'react-zeugma'
 import type { TreeNode, PaneRenderProps, SplitNode } from 'react-zeugma'
 import {
   Box,
@@ -354,6 +347,55 @@ export function Demo() {
   const [localDismissIntentId, setLocalDismissIntentId] = useState<string | null>(null)
   const [resizableHeight, setResizableHeight] = useState(false)
   const [containerHeight, setContainerHeight] = useState<number>(800)
+  const [showResizeAlert, setShowResizeAlert] = useState(true)
+  const [highlightResizer, setHighlightResizer] = useState(false)
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null)
+
+  React.useEffect(() => {
+    if (resizableHeight) {
+      setShowResizeAlert(true)
+      const timer = setTimeout(() => {
+        setShowResizeAlert(false)
+      }, 5000)
+      return () => clearTimeout(timer)
+    }
+  }, [resizableHeight])
+
+  React.useEffect(() => {
+    if (resizableHeight && scrollContainerRef.current) {
+      const el = scrollContainerRef.current
+
+      // Phase 1: Fast scroll for instant updates
+      const timer1 = setTimeout(() => {
+        el.scrollTo({
+          top: el.scrollHeight,
+          behavior: 'smooth',
+        })
+      }, 100)
+
+      // Phase 2: Final scroll after the 500ms CSS transition completes
+      const timer2 = setTimeout(() => {
+        el.scrollTo({
+          top: el.scrollHeight,
+          behavior: 'smooth',
+        })
+        setHighlightResizer(true)
+      }, 600)
+
+      // Phase 3: Remove highlight after 2.5 seconds
+      const timer3 = setTimeout(() => {
+        setHighlightResizer(false)
+      }, 3100)
+
+      return () => {
+        clearTimeout(timer1)
+        clearTimeout(timer2)
+        clearTimeout(timer3)
+      }
+    } else {
+      setHighlightResizer(false)
+    }
+  }, [resizableHeight, containerHeight])
 
   const addLog = React.useCallback((type: 'drag' | 'resize', message: string) => {
     const timeStr = new Date().toLocaleTimeString([], {
@@ -623,14 +665,29 @@ export function Demo() {
   return (
     <FpsProvider>
       <div
-        className={`transition-all duration-500 ease-in-out ${
+        className={`transition-all duration-500 ease-in-out relative ${
           resizableHeight
-            ? 'h-[calc(100vh-3.5rem)] overflow-y-auto p-6 md:p-10 bg-zinc-100 dark:bg-zinc-950/40 flex items-center justify-center'
+            ? 'h-[calc(100vh-3.5rem)] overflow-y-auto p-6 md:p-10 bg-zinc-100 dark:bg-zinc-950 flex items-center justify-center'
             : 'h-[calc(100vh-3.5rem)] overflow-hidden bg-bg-app p-0'
         }`}
       >
+        {resizableHeight && showResizeAlert && (
+          <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-40 bg-zinc-900/95 text-zinc-100 dark:bg-white/95 dark:text-zinc-900 text-xs font-semibold px-4 py-2 rounded-full shadow-lg border border-zinc-800 dark:border-zinc-200 flex items-center gap-2.5 animate-in fade-in slide-in-from-top-4 duration-300 pointer-events-auto select-none backdrop-blur-xs">
+            <span className="flex h-2 w-2 relative">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+            </span>
+            <span>Drag the handle at the bottom edge of the container to resize its height.</span>
+            <button
+              onClick={() => setShowResizeAlert(false)}
+              className="ml-1 hover:opacity-75 cursor-pointer text-sm font-bold leading-none p-0.5"
+            >
+              ×
+            </button>
+          </div>
+        )}
         <h1 className="sr-only">react-zeugma Live Workspace Demo</h1>
-        <DashboardProvider
+        <Zeugma
           layout={layout}
           onChange={handleLayoutChange}
           renderPane={renderPane}
@@ -659,11 +716,12 @@ export function Demo() {
           <div
             className={`w-full mx-auto transition-all duration-500 ease-in-out ${
               resizableHeight
-                ? 'max-w-[1800px] rounded-xl border border-border-primary bg-bg-pane shadow-[0_0_50px_0_rgba(0,0,0,0.2)] dark:shadow-[0_0_50px_0_rgba(0,0,0,0.7)] overflow-hidden h-full'
+                ? 'max-w-[1800px] rounded-xl border border-border-primary bg-bg-pane shadow-lg dark:shadow-[0_4px_30px_rgba(255,255,255,0.03),0_15px_60px_rgba(255,255,255,0.06)] overflow-hidden h-full'
                 : 'max-w-full rounded-none border-none shadow-none h-full'
             }`}
           >
             <SidebarWrapper
+              contentRef={scrollContainerRef}
               snapThreshold={snapThreshold}
               onSnapThresholdChange={setSnapThreshold}
               minSplitPercentage={minSplit}
@@ -703,7 +761,7 @@ export function Demo() {
                     persist={true}
                     localStorageKey="demo-container"
                     resizerHeight={6}
-                    resizerClassName="zeugma-container-resizer"
+                    resizerClassName={`zeugma-container-resizer ${highlightResizer ? 'zeugma-resizer-highlight' : ''}`}
                     onHeightChange={setContainerHeight}
                   >
                     <PaneTree />
@@ -725,7 +783,7 @@ export function Demo() {
               </div>
             </SidebarWrapper>
           </div>
-        </DashboardProvider>
+        </Zeugma>
       </div>
     </FpsProvider>
   )

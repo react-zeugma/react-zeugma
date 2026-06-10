@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
-import { useDashboardState, useDashboardActions } from '../../dashboard'
+import { useZeugmaState, useZeugmaActions } from '../../zeugma'
 import { DragListenersCtx } from '../model/context'
 import { PaneRenderProps } from '../model/types'
 import { findPane } from '../../../shared/lib/tree'
@@ -122,16 +122,19 @@ const DropZone: React.FC<DropZoneProps> = ({ id, position, activeClassName }) =>
   )
 }
 
-interface PaneProps {
+export interface PaneProps {
+  /** The unique ID of the pane, matching a `paneId` in the layout tree schema. */
   id: string
+  /** Render prop function providing pane state (isDragging, isFullscreen, etc.) and handlers. */
   children: (props: PaneRenderProps) => React.ReactNode
+  /** Optional inline CSS styles applied to the pane outer container. */
   style?: React.CSSProperties
 }
 
 export const Pane: React.FC<PaneProps> = ({ id, children, style }) => {
   const { layout, activeId, classNames, fullscreenPaneId, onRemove, onFullscreenChange } =
-    useDashboardState()
-  const { removePane, updatePaneMetadata } = useDashboardActions()
+    useZeugmaState()
+  const { removePane, updatePaneMetadata } = useZeugmaActions()
   const showDropZones = activeId !== null && activeId !== id
 
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id })

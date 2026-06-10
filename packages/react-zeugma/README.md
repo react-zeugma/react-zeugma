@@ -41,7 +41,7 @@ Import the core components and configure the layout state inside your React appl
 
 ```tsx
 import { useState } from 'react'
-import { DashboardProvider, PaneTree, Pane, DragHandle, TreeNode } from 'react-zeugma'
+import { Zeugma, PaneTree, Pane, DragHandle, TreeNode } from 'react-zeugma'
 
 const initialLayout: TreeNode = {
   type: 'split',
@@ -81,11 +81,11 @@ export default function Dashboard() {
   const [layout, setLayout] = useState<TreeNode | null>(initialLayout)
 
   return (
-    <DashboardProvider layout={layout} onChange={setLayout} renderPane={(id) => <MyPane id={id} />}>
+    <Zeugma layout={layout} onChange={setLayout} renderPane={(id) => <MyPane id={id} />}>
       <div className="w-screen h-screen">
         <PaneTree />
       </div>
-    </DashboardProvider>
+    </Zeugma>
   )
 }
 ```
@@ -94,7 +94,7 @@ export default function Dashboard() {
 
 ## API Reference
 
-### `<DashboardProvider>`
+### `<Zeugma>`
 
 The context provider that sets up the drag-and-drop state machine, monitors active drags, and registers layout change notifications.
 
@@ -122,7 +122,7 @@ The context provider that sets up the drag-and-drop state machine, monitors acti
 
 ### `<PaneTree>`
 
-Recursively renders the split nodes and pane nodes. Must be placed inside `<DashboardProvider>`.
+Recursively renders the split nodes and pane nodes. Must be placed inside `<Zeugma>`.
 
 | Prop          | Type               | Required | Description                                                         |
 | ------------- | ------------------ | -------- | ------------------------------------------------------------------- |
@@ -210,7 +210,7 @@ Recursively searches the layout tree and returns the target `PaneNode` if found,
 Use custom CSS or styling rules to style resizers, dragging states, drop previews, or active nodes by overriding `classNames` in the provider.
 
 ```tsx
-<DashboardProvider
+<Zeugma
   layout={layout}
   onChange={setLayout}
   renderPane={renderPane}
@@ -225,7 +225,7 @@ Use custom CSS or styling rules to style resizers, dragging states, drop preview
   }}
 >
   <PaneTree />
-</DashboardProvider>
+</Zeugma>
 ```
 
 ---
@@ -273,12 +273,12 @@ export interface PaneRenderProps {
   ) => void
 }
 
-export interface DashboardStateValue {
+export interface ZeugmaStateValue {
   layout: TreeNode | null
   onLayoutChange: (newLayout: TreeNode | null) => void
   renderPane: (paneId: string) => ReactNode
   activeId: string | null
-  draggedOutId: string | null
+  dismissIntentId: string | null
   setContainerRef: (element: HTMLElement | null) => void
   fullscreenPaneId: string | null
   classNames: ZeugmaClassNames
@@ -292,7 +292,7 @@ export interface DashboardStateValue {
   maxSplitPercentage?: number
 }
 
-export interface DashboardActionsValue {
+export interface ZeugmaActionsValue {
   removePane: (paneId: string) => void
   addPane: (paneId: string) => void
   swapPanes: (paneIdA: string, paneIdB: string) => void
@@ -361,7 +361,7 @@ export type TreeNode = SplitNode | PaneNode
 
 ## 2. Core Components
 
-### `<DashboardProvider>`
+### `<Zeugma>`
 
 The root context provider. It handles the drag-and-drop event loop and coordinates the layout state.
 
@@ -389,7 +389,7 @@ The root context provider. It handles the drag-and-drop event loop and coordinat
 
 ### `<PaneTree>`
 
-Recursively renders the split nodes and pane nodes. Must be placed inside `<DashboardProvider>`.
+Recursively renders the split nodes and pane nodes. Must be placed inside `<Zeugma>`.
 
 #### Props
 
@@ -467,10 +467,10 @@ Import these helpers from `react-zeugma` to manipulate the tree layout programma
 
 Alternatively, you can consume state and mutation helpers directly from the context hooks:
 
-- **`useDashboardState()`**: Returns the reactive state values (e.g., `layout`, `activeId`, `classNames`). Consumers of this hook will re-render whenever layout state updates.
-- **`useDashboardActions()`**: Returns the stable layout mutation actions (e.g., `removePane`, `splitPane`). Because these actions have a permanent identity, consumers of this hook **will not** re-render when layout state changes, providing a significant performance optimization.
+- **`useZeugmaState()`**: Returns the reactive state values (e.g., `layout`, `activeId`, `classNames`). Consumers of this hook will re-render whenever layout state updates.
+- **`useZeugmaActions()`**: Returns the stable layout mutation actions (e.g., `removePane`, `splitPane`). Because these actions have a permanent identity, consumers of this hook **will not** re-render when layout state changes, providing a significant performance optimization.
 
-The actions returned by `useDashboardActions()` are:
+The actions returned by `useZeugmaActions()` are:
 
 - **`removePane(paneId: string) => void`**
 - **`addPane(paneId: string) => void`**
@@ -485,7 +485,7 @@ The actions returned by `useDashboardActions()` are:
 
 ```tsx
 import { useState } from 'react'
-import { DashboardProvider, PaneTree, Pane, DragHandle, TreeNode } from 'react-zeugma'
+import { Zeugma, PaneTree, Pane, DragHandle, TreeNode } from 'react-zeugma'
 
 const initialLayout: TreeNode = {
   type: 'split',
@@ -526,7 +526,7 @@ export default function App() {
   }
 
   return (
-    <DashboardProvider
+    <Zeugma
       layout={layout}
       onChange={setLayout}
       renderPane={(id) => <CustomPane id={id} />}
@@ -537,7 +537,7 @@ export default function App() {
       <div style={{ width: '100vw', height: '100vh' }}>
         <PaneTree />
       </div>
-    </DashboardProvider>
+    </Zeugma>
   )
 }
 ```
@@ -546,7 +546,7 @@ export default function App() {
 
 ## 5. Styling Customization
 
-`react-zeugma` is style-agnostic and relies on class name configuration for visual states. Define classes in your styling framework and pass them via the `classNames` prop on `<DashboardProvider>`:
+`react-zeugma` is style-agnostic and relies on class name configuration for visual states. Define classes in your styling framework and pass them via the `classNames` prop on `<Zeugma>`:
 
 ```ts
 interface ZeugmaClassNames {

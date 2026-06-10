@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@custom-variant dark (&:where(.dark, .dark *));
 @import 'tw-animate-css';
 @import '@fontsource-variable/geist';
 
@@ -281,4 +282,30 @@ body {
 .zeugma-container-resizer[data-resizing='true']::after {
   opacity: 0;
   transform: scale(0.5);
+}
+
+/* Highlight style for the resizer handle */
+.zeugma-container-resizer.zeugma-resizer-highlight {
+  background-color: rgba(99, 102, 241, 0.25);
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.4);
+  animation: resizer-pulse 1.2s infinite alternate ease-in-out;
+}
+
+.zeugma-container-resizer.zeugma-resizer-highlight::after {
+  background-color: #6366f1;
+  width: 48px;
+  height: 3px;
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.8);
+  opacity: 1;
+}
+
+@keyframes resizer-pulse {
+  0% {
+    background-color: rgba(99, 102, 241, 0.15);
+    box-shadow: 0 0 6px rgba(99, 102, 241, 0.2);
+  }
+  100% {
+    background-color: rgba(99, 102, 241, 0.35);
+    box-shadow: 0 0 16px rgba(99, 102, 241, 0.6);
+  }
 }

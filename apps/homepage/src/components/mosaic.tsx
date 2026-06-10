@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { DashboardProvider, PaneTree, Pane, DragHandle } from 'react-zeugma'
+import { Zeugma, PaneTree, Pane, DragHandle } from 'react-zeugma'
 import type { TreeNode } from 'react-zeugma'
 import { Fireworks } from './fireworks'
 
@@ -212,7 +212,7 @@ export function MosaicDemo({ onOrderChange }: MosaicDemoProps) {
     )
   }
 
-  // Mount DashboardProvider when section scrolls into view
+  // Mount Zeugma when section scrolls into view
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -253,7 +253,7 @@ export function MosaicDemo({ onOrderChange }: MosaicDemoProps) {
       }`}
     >
       {mosaicVisible && mosaicLayout && (
-        <DashboardProvider
+        <Zeugma
           layout={mosaicLayout}
           onChange={handleLayoutChange}
           renderPane={renderMosaicPane}
@@ -270,7 +270,7 @@ export function MosaicDemo({ onOrderChange }: MosaicDemoProps) {
           <div className="h-full w-full">
             <PaneTree />
           </div>
-        </DashboardProvider>
+        </Zeugma>
       )}
       <Fireworks active={showFireworks} duration={4000} onComplete={handleFireworksComplete} />
     </div>

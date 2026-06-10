@@ -273,12 +273,12 @@ export interface PaneRenderProps {
   ) => void
 }
 
-export interface DashboardStateValue {
+export interface ZeugmaStateValue {
   layout: TreeNode | null
   onLayoutChange: (newLayout: TreeNode | null) => void
   renderPane: (paneId: string) => ReactNode
   activeId: string | null
-  draggedOutId: string | null
+  dismissIntentId: string | null
   setContainerRef: (element: HTMLElement | null) => void
   fullscreenPaneId: string | null
   classNames: ZeugmaClassNames
@@ -292,7 +292,7 @@ export interface DashboardStateValue {
   maxSplitPercentage?: number
 }
 
-export interface DashboardActionsValue {
+export interface ZeugmaActionsValue {
   removePane: (paneId: string) => void
   addPane: (paneId: string) => void
   swapPanes: (paneIdA: string, paneIdB: string) => void
@@ -467,10 +467,10 @@ Import these helpers from `react-zeugma` to manipulate the tree layout programma
 
 Alternatively, you can consume state and mutation helpers directly from the context hooks:
 
-- **`useDashboardState()`**: Returns the reactive state values (e.g., `layout`, `activeId`, `classNames`). Consumers of this hook will re-render whenever layout state updates.
-- **`useDashboardActions()`**: Returns the stable layout mutation actions (e.g., `removePane`, `splitPane`). Because these actions have a permanent identity, consumers of this hook **will not** re-render when layout state changes, providing a significant performance optimization.
+- **`useZeugmaState()`**: Returns the reactive state values (e.g., `layout`, `activeId`, `classNames`). Consumers of this hook will re-render whenever layout state updates.
+- **`useZeugmaActions()`**: Returns the stable layout mutation actions (e.g., `removePane`, `splitPane`). Because these actions have a permanent identity, consumers of this hook **will not** re-render when layout state changes, providing a significant performance optimization.
 
-The actions returned by `useDashboardActions()` are:
+The actions returned by `useZeugmaActions()` are:
 
 - **`removePane(paneId: string) => void`**
 - **`addPane(paneId: string) => void`**

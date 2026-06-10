@@ -1,11 +1,11 @@
-export { Zeugma } from './entities/dashboard'
+export { Zeugma } from './entities/zeugma'
 export type {
   ZeugmaProps,
   ZeugmaClassNames,
-  DashboardStateValue,
-  DashboardActionsValue,
-} from './entities/dashboard'
-export { useDashboardState, useDashboardActions } from './entities/dashboard'
+  ZeugmaStateValue,
+  ZeugmaActionsValue,
+} from './entities/zeugma'
+export { useZeugmaState, useZeugmaActions } from './entities/zeugma'
 export { useResizer } from './features/resize-pane'
 export { PaneTree } from './widgets/pane-tree'
 export { ResizableContainer } from './widgets/resizable-container'

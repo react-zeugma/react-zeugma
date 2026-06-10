@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { useDashboardState, addPane } from 'react-zeugma'
+import { useZeugmaState, addPane } from 'react-zeugma'
 import type { TreeNode } from 'react-zeugma'
 import {
   Code2,
@@ -226,7 +226,7 @@ export function SidebarWrapper({
   logs,
   onPresetChange,
 }: SidebarWrapperProps) {
-  const { layout, onLayoutChange } = useDashboardState()
+  const { layout, onLayoutChange } = useZeugmaState()
   const [activePreset, setActivePreset] = useState<string>('default')
   const [isJsonExpanded, setIsJsonExpanded] = useState(true)
   const [copied, setCopied] = useState(false)

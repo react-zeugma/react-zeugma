@@ -1,5 +1,5 @@
 import React, { useRef, useState, useMemo } from 'react'
-import { useDashboardState, RootDropZones } from '../../../entities/dashboard'
+import { useZeugmaState, RootDropZones } from '../../../entities/zeugma'
 import { useResizer } from '../../../features/resize-pane'
 import { TreeNode, SplitNode } from '../../../shared/model'
 import { removePane } from '../../../shared'
@@ -20,7 +20,7 @@ interface PaneSplitProps {
 }
 
 const PaneSplit: React.FC<PaneSplitProps> = ({ currentNode, resizerSize, snapThreshold }) => {
-  const { layout, onLayoutChange, classNames } = useDashboardState()
+  const { layout, onLayoutChange, classNames } = useZeugmaState()
   const [isResizing, setIsResizing] = useState(false)
 
   const containerRef = useRef<HTMLDivElement>(null)
@@ -97,7 +97,7 @@ export const PaneTree: React.FC<PaneTreeProps> = ({
     classNames,
     fullscreenPaneId,
     snapThreshold: contextSnapThreshold,
-  } = useDashboardState()
+  } = useZeugmaState()
 
   const snapThreshold = propSnapThreshold !== undefined ? propSnapThreshold : contextSnapThreshold
 

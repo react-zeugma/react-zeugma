@@ -1,10 +1,8 @@
-import React, { useState, useEffect, useRef, ReactNode, useMemo, useCallback } from 'react'
+import React, { useState, useRef, useMemo, useCallback } from 'react'
 import {
   DndContext,
   useSensor,
   useSensors,
-  PointerSensor,
-  TouchSensor,
   DragStartEvent,
   DragEndEvent,
   DragMoveEvent,
@@ -22,125 +20,10 @@ import {
   findPane,
 } from '../../../shared/lib/tree'
 import { DEFAULT_DRAG_ACTIVATION_DISTANCE, DEFAULT_SNAP_THRESHOLD } from '../../../shared/config'
-import { DashboardStateContext, DashboardActionsContext, ZeugmaClassNames } from '../model/context'
-
-/** Cursor-following overlay rendered via portal */
-const CursorOverlay: React.FC<{
-  activeId: string
-  render: (id: string) => ReactNode
-  className?: string
-}> = ({ activeId, render, className }) => {
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const handleMove = (e: PointerEvent) => {
-      if (ref.current) {
-        ref.current.style.transform = `translate(${e.clientX + 12}px, ${e.clientY + 12}px)`
-      }
-    }
-    document.addEventListener('pointermove', handleMove)
-    return () => document.removeEventListener('pointermove', handleMove)
-  }, [])
-
-  return (
-    <div
-      ref={ref}
-      className={className}
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        zIndex: 9999,
-        pointerEvents: 'none',
-      }}
-    >
-      {render(activeId)}
-    </div>
-  )
-}
-
-class SmartPointerSensor extends PointerSensor {
-  static activators = [
-    {
-      eventName: 'onPointerDown' as const,
-      handler: ({ nativeEvent: event }: { nativeEvent: PointerEvent }) => {
-        const element = event.target as HTMLElement | null
-        if (element?.closest('.drag-cancel')) {
-          return false
-        }
-        return true
-      },
-    },
-  ]
-}
-
-class SmartTouchSensor extends TouchSensor {
-  static activators = [
-    {
-      eventName: 'onTouchStart' as const,
-      handler: ({ nativeEvent: event }: { nativeEvent: TouchEvent }) => {
-        const element = event.target as HTMLElement | null
-        if (element?.closest('.drag-cancel')) {
-          return false
-        }
-        return true
-      },
-    },
-  ]
-}
-
-export interface ZeugmaProps {
-  /** The layout tree model (TreeNode) defining pane organization and split percentages. Set to null for empty layout. */
-  layout: TreeNode | null
-  /** Callback triggered when the layout changes via drag-and-drop actions, splits, swaps, or resizes. */
-  onChange: (newLayout: TreeNode | null) => void
-  /** Render function mapping unique pane IDs to React elements. Usually renders a <Pane> wrapper. */
-  renderPane: (paneId: string) => ReactNode
-  /** Custom overlay renderer function used to customize the cursor-following drag preview for an active pane. */
-  renderDragOverlay?: (activeId: string) => ReactNode
-  /** Optional CSS class name mapping overrides for custom styles of components like panes, drop/swap previews, overlays, etc. */
-  classNames?: ZeugmaClassNames
-  /** The ID of the pane that is currently taking up the full dashboard area. Null if no pane is fullscreen. */
-  fullscreenPaneId?: string | null
-  /** Callback triggered when a pane is toggled to/from fullscreen mode. Passes the active fullscreen paneId or null. */
-  onFullscreenChange?: (paneId: string | null) => void
-  /** Callback triggered when a pane is removed from the dashboard layout tree. */
-  onRemove?: (paneId: string) => void
-  /** Minimum pixel distance that a user must drag a pane handle before dragging triggers. Defaults to 8. */
-  dragActivationDistance?: number
-  /** Threshold value in pixels for snapping layout resizing handles to adjacent edges. Defaults to 8. */
-  snapThreshold?: number
-  /** Callback triggered when dragging starts for a pane. */
-  onDragStart?: (activeId: string) => void
-  /** Callback triggered when dragging ends, providing details on target pane and drop action (split or swap). */
-  onDragEnd?: (
-    activeId: string,
-    overId: string | null,
-    dropAction: {
-      type: 'split' | 'swap'
-      direction?: SplitDirection
-      position?: 'top' | 'bottom' | 'left' | 'right' | 'center'
-    } | null,
-  ) => void
-  /** Callback triggered when the user starts dragging a resizing handle between split panes. */
-  onResizeStart?: (currentNode: SplitNode) => void
-  /** Callback triggered continuously while the user is dragging a resizing handle. Passes the new split percentage. */
-  onResize?: (currentNode: SplitNode, percentage: number) => void
-  /** Callback triggered when the user stops dragging a resizing handle. Passes the final split percentage. */
-  onResizeEnd?: (currentNode: SplitNode, percentage: number) => void
-  /** Minimum split percentage allowed when resizing split panes. Defaults to 5. */
-  minSplitPercentage?: number
-  /** Maximum split percentage allowed when resizing split panes. Defaults to 95. */
-  maxSplitPercentage?: number
-  /** Whether dragging a pane far enough outside the container triggers a drag-out/dismiss action. Defaults to false. */
-  enableDragToDismiss?: boolean
-  /** The threshold in pixels beyond the container boundaries required to activate the drag-out/dismiss action. */
-  dismissThreshold?: number
-  /** Callback triggered when the drag-out/dismiss intent changes (active pane ID or null when drag returns inside bounds). */
-  onDismissIntentChange?: (paneId: string | null) => void
-  /** Child nodes nested inside the Zeugma context, usually containing a <PaneTree> or similar layout viewer. */
-  children: ReactNode
-}
+import { ZeugmaStateContext, ZeugmaActionsContext } from '../model/context'
+import { ZeugmaProps } from '../model/types'
+import { CursorOverlay } from './CursorOverlay'
+import { SmartPointerSensor, SmartTouchSensor } from '../lib/sensors'
 
 export const Zeugma: React.FC<ZeugmaProps> = ({
   layout,
@@ -575,8 +458,8 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
   )
 
   return (
-    <DashboardActionsContext.Provider value={actionsValue}>
-      <DashboardStateContext.Provider value={stateValue}>
+    <ZeugmaActionsContext.Provider value={actionsValue}>
+      <ZeugmaStateContext.Provider value={stateValue}>
         <DndContext
           id="zeugma-dnd-context"
           sensors={sensors}
@@ -598,7 +481,7 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
             }`.trim()}
           />
         )}
-      </DashboardStateContext.Provider>
-    </DashboardActionsContext.Provider>
+      </ZeugmaStateContext.Provider>
+    </ZeugmaActionsContext.Provider>
   )
 }

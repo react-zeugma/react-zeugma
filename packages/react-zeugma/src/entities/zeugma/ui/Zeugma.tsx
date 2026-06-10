@@ -15,7 +15,6 @@ import {
   swapPanes,
   addPane,
   updateSplitPercentage,
-  splitRoot,
   updatePaneMetadata,
   findPane,
 } from '../../../shared/lib/tree'
@@ -220,30 +219,6 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
     }
 
     const overIdStr = over.id.toString()
-
-    // Check for root drop (places pane like half of the root)
-    const rootMatch = overIdStr.match(/^drop-root-(left|right|top|bottom)$/)
-    if (rootMatch) {
-      const [, dropZone] = rootMatch
-      const newLayout = splitRoot(
-        localLayout,
-        draggingId,
-        dropZone as 'left' | 'right' | 'top' | 'bottom',
-      )
-      setLocalLayout(newLayout)
-      onChange(newLayout)
-
-      if (onDragEnd) {
-        const direction: SplitDirection =
-          dropZone === 'left' || dropZone === 'right' ? 'row' : 'column'
-        onDragEnd(draggingId, 'root', {
-          type: 'split',
-          direction,
-          position: dropZone as 'left' | 'right' | 'top' | 'bottom',
-        })
-      }
-      return
-    }
 
     // Check for center (swap) drop
     const swapMatch = overIdStr.match(/^drop-center-(.+)$/)

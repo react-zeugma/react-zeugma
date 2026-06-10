@@ -1,8 +1,7 @@
-import React, { useRef, useState, useMemo } from 'react'
-import { useZeugmaState, RootDropZones } from '../../../entities/zeugma'
+import React, { useRef, useState } from 'react'
+import { useZeugmaState } from '../../../entities/zeugma'
 import { useResizer } from '../../../features/resize-pane'
 import { TreeNode, SplitNode } from '../../../shared/model'
-import { removePane } from '../../../shared'
 
 export interface PaneTreeProps {
   /** The layout subtree node to render. If not specified, defaults to the root layout tree from the Zeugma context. */
@@ -94,17 +93,11 @@ export const PaneTree: React.FC<PaneTreeProps> = ({
     activeId,
     dismissIntentId,
     setContainerRef,
-    classNames,
     fullscreenPaneId,
     snapThreshold: contextSnapThreshold,
   } = useZeugmaState()
 
   const snapThreshold = propSnapThreshold !== undefined ? propSnapThreshold : contextSnapThreshold
-
-  const hasOtherPanes = useMemo(() => {
-    if (tree !== undefined || !activeId) return false
-    return removePane(layout, activeId) !== null
-  }, [tree, layout, activeId])
 
   // Fullscreen bypass
   if (fullscreenPaneId && !tree) {
@@ -152,11 +145,6 @@ export const PaneTree: React.FC<PaneTreeProps> = ({
         }}
       >
         {renderContent()}
-        <RootDropZones
-          activeId={activeId}
-          hasOtherPanes={hasOtherPanes}
-          dropPreviewClassName={classNames.dropPreview}
-        />
       </div>
     )
   }

@@ -20,6 +20,7 @@
     "radix-ui": "^1.4.3",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
+    "react-is": "^19.0.0",
     "react-zeugma": "^1.0.0",
     "recharts": "^3.8.1",
     "remark-gfm": "^4.0.1",

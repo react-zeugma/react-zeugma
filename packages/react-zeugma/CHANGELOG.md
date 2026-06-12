@@ -1,5 +1,13 @@
 # react-zeugma
 
+## 2.2.2
+
+### Patch Changes
+
+- **Optimize Resize Performance**:
+  - Resizer now keeps the split percentage change completely local to a React hook state during dragging, eliminating heavy re-renders of all dashboard pane widgets on every move event.
+  - The parent `onLayoutChange` and `onChange` callbacks are deferred and invoked exactly once when the drag/resize gesture ends.
+
 ## 2.2.1
 
 ### Patch Changes

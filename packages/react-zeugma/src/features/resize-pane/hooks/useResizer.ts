@@ -13,7 +13,7 @@ interface UseResizerProps {
   snapThreshold: number
   layout: TreeNode | null
   currentNode: SplitNode
-  onLayoutChange: (newLayout: TreeNode | null) => void
+  onLayoutChange: (newLayout: TreeNode | null, localOnly?: boolean) => void
   onResizeStart?: () => void
   onResizeEnd?: () => void
   parentLeft: number
@@ -130,13 +130,16 @@ export function useResizer({
 
           // Update React layout state live on every move event
           const newLayout = updateSplitPercentage(layout, currentNode, finalPercentage)
-          onLayoutChange(newLayout)
+          onLayoutChange(newLayout, true)
 
           if (globalOnResize) {
             globalOnResize(currentNode, finalPercentage)
           }
         },
         onEnd: () => {
+          const finalLayout = updateSplitPercentage(layout, currentNode, currentPercentage)
+          onLayoutChange(finalLayout)
+
           if (localOnResizeEnd) {
             localOnResizeEnd()
           }

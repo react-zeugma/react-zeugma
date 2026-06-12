@@ -77,7 +77,7 @@ export interface ZeugmaStateValue {
   /** The current active layout tree structure, or null if empty. */
   layout: TreeNode | null
   /** Callback to update the layout tree. */
-  onLayoutChange: (newLayout: TreeNode | null) => void
+  onLayoutChange: (newLayout: TreeNode | null, localOnly?: boolean) => void
   /** Renders the inner content of a pane given its unique ID. */
   renderPane: (paneId: string) => ReactNode
   /** The ID of the pane currently being dragged, or null. */

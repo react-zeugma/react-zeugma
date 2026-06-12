@@ -296,9 +296,11 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
   }
 
   const handleLocalLayoutChange = useCallback(
-    (newLayout: TreeNode | null) => {
+    (newLayout: TreeNode | null, localOnly = false) => {
       setLocalLayout(newLayout)
-      onChange(newLayout)
+      if (!localOnly) {
+        onChange(newLayout)
+      }
     },
     [onChange],
   )
@@ -380,14 +382,11 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
 
   const handleResizeEnd = useCallback(
     (currentNode: SplitNode, percentage: number) => {
-      const finalLayout = updateSplitPercentage(localLayout, currentNode, percentage)
-      setLocalLayout(finalLayout)
-      onChange(finalLayout)
       if (onResizeEnd) {
         onResizeEnd(currentNode, percentage)
       }
     },
-    [localLayout, onChange, onResizeEnd],
+    [onResizeEnd],
   )
 
   // State context — reactive values that change during runtime

@@ -2,7 +2,6 @@ import React, { useRef, useMemo, useState } from 'react'
 import { useZeugmaState } from '../../../entities/zeugma'
 import { useResizer } from '../../../features/resize-pane'
 import { TreeNode, SplitNode, SplitDirection, PaneNode } from '../../../shared/model'
-import { removePane, findPane } from '../../../shared/lib/tree'
 
 export interface PaneTreeProps {
   /** The layout subtree node to render. If not specified, defaults to the root layout tree from the Zeugma context. */
@@ -34,11 +33,6 @@ interface ComputedSplitter {
   parentTop: number
   parentWidth: number
   parentHeight: number
-}
-
-interface DraggedPaneInfo {
-  paneId: string
-  node: PaneNode
 }
 
 function computeLayout(
@@ -218,30 +212,10 @@ export const PaneTree: React.FC<PaneTreeProps> = ({
 
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const { panes, splitters, draggedPane } = useMemo(() => {
-    if (!currentNode) return { panes: [], splitters: [], draggedPane: null }
-
-    if (activeId) {
-      const tempTree = removePane(currentNode, activeId)
-      const originalPaneNode = findPane(currentNode, activeId)
-      const draggedPaneObj: DraggedPaneInfo | null = originalPaneNode
-        ? {
-            paneId: activeId,
-            node: originalPaneNode,
-          }
-        : null
-
-      if (tempTree) {
-        const { panes: p, splitters: s } = computeLayout(tempTree)
-        return { panes: p, splitters: s, draggedPane: draggedPaneObj }
-      } else {
-        return { panes: [], splitters: [], draggedPane: draggedPaneObj }
-      }
-    }
-
-    const { panes: p, splitters: s } = computeLayout(currentNode)
-    return { panes: p, splitters: s, draggedPane: null }
-  }, [currentNode, activeId])
+  const { panes, splitters } = useMemo(() => {
+    if (!currentNode) return { panes: [], splitters: [] }
+    return computeLayout(currentNode)
+  }, [currentNode])
 
   if (!currentNode) return null
 
@@ -270,25 +244,7 @@ export const PaneTree: React.FC<PaneTreeProps> = ({
             </div>
           )
         })}
-        {draggedPane && (
-          <div
-            key={draggedPane.paneId}
-            style={{
-              position: 'absolute',
-              left: '0%',
-              top: '0%',
-              width: '0px',
-              height: '0px',
-              overflow: 'hidden',
-              zIndex: 0,
-              opacity: 0,
-              pointerEvents: 'none',
-              display: 'none',
-            }}
-          >
-            {renderPane(draggedPane.paneId)}
-          </div>
-        )}
+
         {!fullscreenPaneId &&
           splitters.map((splitter) => (
             <FlatSplitter

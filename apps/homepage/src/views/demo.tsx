@@ -496,9 +496,18 @@ export function Demo() {
       <Pane id={id}>
         {(paneProps: PaneRenderProps) => {
           const { title } = getWidgetDetails(id)
+          const isThisDraggedOut = id === localDismissIntentId
 
           return (
-            <div className="zeugma-pane-container h-full border border-border-primary rounded-lg overflow-hidden shadow-md bg-bg-pane relative transition-all duration-200">
+            <div
+              className={`zeugma-pane-container h-full border border-border-primary rounded-lg overflow-hidden shadow-md bg-bg-pane relative transition-all duration-200 ${
+                paneProps.isDragging
+                  ? isThisDraggedOut
+                    ? 'scale-[0.90] pointer-events-none select-none'
+                    : 'scale-[0.98] pointer-events-none select-none'
+                  : ''
+              }`}
+            >
               {id === 'explorer' ? (
                 <MetadataWidget
                   title={title}
@@ -593,6 +602,19 @@ export function Demo() {
                   remove={paneProps.remove}
                   metadata={paneProps.metadata}
                 />
+              )}
+              {paneProps.isDragging && (
+                <div className="absolute inset-0 bg-bg-app/40 flex items-center justify-center pointer-events-none select-none z-50">
+                  {isThisDraggedOut ? (
+                    <span className="text-zinc-900 font-bold uppercase tracking-wider text-[10px] bg-zinc-100 border border-zinc-300 px-2.5 py-1 rounded shadow-sm dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-100">
+                      Close Widget
+                    </span>
+                  ) : (
+                    <span className="text-text-secondary font-bold uppercase tracking-wider text-[10px] bg-bg-pane border border-border-primary px-2.5 py-1 rounded shadow-md">
+                      Dragging...
+                    </span>
+                  )}
+                </div>
               )}
             </div>
           )

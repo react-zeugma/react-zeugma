@@ -1,5 +1,12 @@
 # react-zeugma
 
+## 2.2.1
+
+### Patch Changes
+
+- **Revert Drag Hiding and Live Layout Estimation**:
+  - Reverted the live layout estimation and hiding of active dragged widgets. Widgets now remain visible at their original layout position during dragging.
+
 ## 2.2.0
 
 ### Minor Changes

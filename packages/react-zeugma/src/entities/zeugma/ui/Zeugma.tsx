@@ -19,10 +19,23 @@ import {
   findPane,
 } from '../../../shared/lib/tree'
 import { DEFAULT_DRAG_ACTIVATION_DISTANCE, DEFAULT_SNAP_THRESHOLD } from '../../../shared/config'
-import { ZeugmaStateContext, ZeugmaActionsContext } from '../model/context'
+import { ZeugmaStateContext, ZeugmaActionsContext, useLatestPointer } from '../model'
 import { ZeugmaProps } from '../model/types'
 import { CursorOverlay } from './CursorOverlay'
 import { SmartPointerSensor, SmartTouchSensor } from '../lib/sensors'
+
+function getPointerCoordinates(event: Event): { x: number; y: number } | null {
+  if (event instanceof MouseEvent || event instanceof PointerEvent) {
+    return { x: event.clientX, y: event.clientY }
+  }
+  if (typeof TouchEvent !== 'undefined' && event instanceof TouchEvent) {
+    const touch = event.touches[0] || event.changedTouches[0]
+    if (touch) {
+      return { x: touch.clientX, y: touch.clientY }
+    }
+  }
+  return null
+}
 
 export const Zeugma: React.FC<ZeugmaProps> = ({
   layout,
@@ -59,6 +72,7 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
   const [dismissIntentId, setDismissIntentId] = useState<string | null>(null)
   const containerRef = useRef<HTMLElement | null>(null)
   const containerRectRef = useRef<DOMRect | null>(null)
+  const latestPointerRef = useLatestPointer(activeId)
 
   const setContainerRef = useCallback((element: HTMLElement | null) => {
     containerRef.current = element
@@ -92,6 +106,10 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
   const handleDragStart = (event: DragStartEvent) => {
     const draggingId = event.active.id.toString()
     setActiveId(draggingId)
+
+    const ae = event.activatorEvent
+    latestPointerRef.current = getPointerCoordinates(ae)
+
     if (enableDragToDismiss && containerRef.current) {
       containerRectRef.current = containerRef.current.getBoundingClientRect()
     } else {
@@ -120,14 +138,14 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
     let px: number | null = null
     let py: number | null = null
 
-    if (ae instanceof MouseEvent || ae instanceof PointerEvent) {
-      px = ae.clientX + event.delta.x
-      py = ae.clientY + event.delta.y
-    } else if (typeof TouchEvent !== 'undefined' && ae instanceof TouchEvent) {
-      const touch = ae.touches[0] || ae.changedTouches[0]
-      if (touch) {
-        px = touch.clientX + event.delta.x
-        py = touch.clientY + event.delta.y
+    if (latestPointerRef.current) {
+      px = latestPointerRef.current.x
+      py = latestPointerRef.current.y
+    } else {
+      const coords = getPointerCoordinates(ae)
+      if (coords) {
+        px = coords.x + event.delta.x
+        py = coords.y + event.delta.y
       }
     }
 

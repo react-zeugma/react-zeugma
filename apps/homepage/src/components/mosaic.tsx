@@ -264,7 +264,7 @@ export function MosaicDemo({ onOrderChange }: MosaicDemoProps) {
             swapPreview:
               'bg-[#D8BA8E]/25 border-2 border-[#D8BA8E]/50 rounded-lg shadow-[0_0_12px_rgba(216,186,142,0.3)] transition-all duration-200',
             resizer:
-              'bg-transparent hover:bg-[#C29B47]/15 active:bg-[#C29B47]/25 transition-colors duration-150 z-50',
+              'zeugma-mosaic-resizer bg-transparent hover:bg-[#C29B47]/15 active:bg-[#C29B47]/25 transition-colors duration-150 z-50',
           }}
         >
           <div className="h-full w-full">

@@ -309,3 +309,24 @@ body {
     box-shadow: 0 0 16px rgba(99, 102, 241, 0.6);
   }
 }
+
+/* Custom resizer styling for the puzzle */
+.zeugma-mosaic-resizer::after {
+  background-color: #c29b47 !important; /* Ancient Gold */
+  box-shadow: 0 0 6px rgba(194, 155, 71, 0.4);
+  opacity: 0.9;
+}
+
+.zeugma-mosaic-resizer:hover::after {
+  background-color: #d8ba8e !important; /* Sandstone */
+  transform: scale(1.2);
+  box-shadow: 0 0 10px rgba(216, 186, 142, 0.7);
+  opacity: 1;
+}
+
+.zeugma-mosaic-resizer[data-resizing='true']::after {
+  background-color: #b5543c !important; /* Terracotta */
+  transform: scale(1.3);
+  box-shadow: 0 0 12px rgba(181, 84, 60, 0.8);
+  opacity: 1;
+}

@@ -16,6 +16,10 @@ interface UseResizerProps {
   onLayoutChange: (newLayout: TreeNode | null) => void
   onResizeStart?: () => void
   onResizeEnd?: () => void
+  parentLeft: number
+  parentTop: number
+  parentWidth: number
+  parentHeight: number
 }
 
 export function useResizer({
@@ -30,6 +34,10 @@ export function useResizer({
   onLayoutChange,
   onResizeStart: localOnResizeStart,
   onResizeEnd: localOnResizeEnd,
+  parentLeft,
+  parentTop,
+  parentWidth,
+  parentHeight,
 }: UseResizerProps) {
   const {
     onResizeStart: globalOnResizeStart,
@@ -58,6 +66,12 @@ export function useResizer({
       const startPercentage = splitPercentage
       const resizerEl = e.currentTarget
 
+      // Compute the absolute bounds of the parent split area in pixels
+      const splitAreaLeft = rect.left + rect.width * (parentLeft / 100)
+      const splitAreaTop = rect.top + rect.height * (parentTop / 100)
+      const splitAreaWidth = rect.width * (parentWidth / 100)
+      const splitAreaHeight = rect.height * (parentHeight / 100)
+
       // Cache other resizers of the same direction once at drag-start to prevent layout thrashing on move
       const otherResizers = Array.from(
         document.querySelectorAll('div[role="separator"][data-direction]'),
@@ -75,14 +89,18 @@ export function useResizer({
         resizerEl,
         onMove: (moveEvent: PointerEvent) => {
           const delta = isRow
-            ? ((moveEvent.clientX - startX) / rect.width) * 100
-            : ((moveEvent.clientY - startY) / rect.height) * 100
+            ? ((moveEvent.clientX - startX) / splitAreaWidth) * 100
+            : ((moveEvent.clientY - startY) / splitAreaHeight) * 100
           const proposedPercentage = startPercentage + delta
 
           // Find physical position corresponding to proposed percentage
           const proposedPos = isRow
-            ? rect.left + (rect.width - resizerSize) * (proposedPercentage / 100) + resizerSize / 2
-            : rect.top + (rect.height - resizerSize) * (proposedPercentage / 100) + resizerSize / 2
+            ? splitAreaLeft +
+              (splitAreaWidth - resizerSize) * (proposedPercentage / 100) +
+              resizerSize / 2
+            : splitAreaTop +
+              (splitAreaHeight - resizerSize) * (proposedPercentage / 100) +
+              resizerSize / 2
 
           let closestDistance = Infinity
           let bestTarget: number | null = null
@@ -98,8 +116,10 @@ export function useResizer({
           let snappedPercentage = proposedPercentage
           if (bestTarget !== null) {
             snappedPercentage = isRow
-              ? ((bestTarget - resizerSize / 2 - rect.left) / (rect.width - resizerSize)) * 100
-              : ((bestTarget - resizerSize / 2 - rect.top) / (rect.height - resizerSize)) * 100
+              ? ((bestTarget - resizerSize / 2 - splitAreaLeft) / (splitAreaWidth - resizerSize)) *
+                100
+              : ((bestTarget - resizerSize / 2 - splitAreaTop) / (splitAreaHeight - resizerSize)) *
+                100
           }
 
           const finalPercentage = Math.max(
@@ -108,23 +128,15 @@ export function useResizer({
           )
           currentPercentage = finalPercentage
 
-          // Imperatively update the sibling pane container flex sizes during drag
-          const firstChild = container.children[0] as HTMLElement
-          const secondChild = container.children[container.children.length - 1] as HTMLElement
-          if (firstChild && secondChild) {
-            firstChild.style.flex = `${finalPercentage} 1 0%`
-            secondChild.style.flex = `${100 - finalPercentage} 1 0%`
-          }
+          // Update React layout state live on every move event
+          const newLayout = updateSplitPercentage(layout, currentNode, finalPercentage)
+          onLayoutChange(newLayout)
 
           if (globalOnResize) {
             globalOnResize(currentNode, finalPercentage)
           }
         },
         onEnd: () => {
-          // Write to React state once resizing completes
-          const newLayout = updateSplitPercentage(layout, currentNode, currentPercentage)
-          onLayoutChange(newLayout)
-
           if (localOnResizeEnd) {
             localOnResizeEnd()
           }
@@ -151,6 +163,10 @@ export function useResizer({
       globalOnResizeEnd,
       minSplitPercentage,
       maxSplitPercentage,
+      parentLeft,
+      parentTop,
+      parentWidth,
+      parentHeight,
     ],
   )
 }

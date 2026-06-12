@@ -19,7 +19,7 @@ import {
   findPane,
 } from '../../../shared/lib/tree'
 import { DEFAULT_DRAG_ACTIVATION_DISTANCE, DEFAULT_SNAP_THRESHOLD } from '../../../shared/config'
-import { ZeugmaStateContext, ZeugmaActionsContext } from '../model/context'
+import { ZeugmaStateContext, ZeugmaActionsContext, useLatestPointer } from '../model'
 import { ZeugmaProps } from '../model/types'
 import { CursorOverlay } from './CursorOverlay'
 import { SmartPointerSensor, SmartTouchSensor } from '../lib/sensors'
@@ -59,6 +59,7 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
   const [dismissIntentId, setDismissIntentId] = useState<string | null>(null)
   const containerRef = useRef<HTMLElement | null>(null)
   const containerRectRef = useRef<DOMRect | null>(null)
+  const latestPointerRef = useLatestPointer(activeId)
 
   const setContainerRef = useCallback((element: HTMLElement | null) => {
     containerRef.current = element
@@ -92,6 +93,19 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
   const handleDragStart = (event: DragStartEvent) => {
     const draggingId = event.active.id.toString()
     setActiveId(draggingId)
+
+    const ae = event.activatorEvent
+    if (ae instanceof MouseEvent || ae instanceof PointerEvent) {
+      latestPointerRef.current = { x: ae.clientX, y: ae.clientY }
+    } else if (typeof TouchEvent !== 'undefined' && ae instanceof TouchEvent) {
+      const touch = ae.touches[0] || ae.changedTouches[0]
+      if (touch) {
+        latestPointerRef.current = { x: touch.clientX, y: touch.clientY }
+      }
+    } else {
+      latestPointerRef.current = null
+    }
+
     if (enableDragToDismiss && containerRef.current) {
       containerRectRef.current = containerRef.current.getBoundingClientRect()
     } else {
@@ -120,7 +134,10 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
     let px: number | null = null
     let py: number | null = null
 
-    if (ae instanceof MouseEvent || ae instanceof PointerEvent) {
+    if (latestPointerRef.current) {
+      px = latestPointerRef.current.x
+      py = latestPointerRef.current.y
+    } else if (ae instanceof MouseEvent || ae instanceof PointerEvent) {
       px = ae.clientX + event.delta.x
       py = ae.clientY + event.delta.y
     } else if (typeof TouchEvent !== 'undefined' && ae instanceof TouchEvent) {

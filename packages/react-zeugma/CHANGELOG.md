@@ -1,5 +1,22 @@
 # react-zeugma
 
+## 2.2.0
+
+### Minor Changes
+
+- **Flat Layout Rendering with Absolute Positioning**:
+  - Re-architected layout engine from recursive nested flexboxes to a single-level flat layout positioned with relative percentages.
+  - Keeps all pane widgets continuously mounted when reordering, resizing, or switching to and from fullscreen, resolving virtual DOM remounting issues.
+- **Live Layout Estimation during Drag**:
+  - Dynamically collapses and resizes the remaining panes during dragging as if the dragged pane was removed, giving accurate drop zone previews.
+  - Retains the dragged pane mounted invisibly (`display: 'none'`) during the drag to preserve its state and prevent unmounting.
+
+### Patch Changes
+
+- **Fix Drag-Out False-Positives next to Edges**:
+  - Implemented window-level pointer/touch move listeners during active drags to track the actual mouse/finger client coordinates.
+  - Fixes a bug where hiding the original drag source element in the DOM (via `display: none` for live estimation) caused `@dnd-kit`'s layout delta calculations to jump, resulting in false-positive `onDragOut`/dismiss actions when releasing items near the edges.
+
 ## 2.1.0
 
 ### Minor Changes

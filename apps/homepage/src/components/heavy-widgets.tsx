@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useMemo } from 'react'
+import { createPortal } from 'react-dom'
 import { useSharedFps } from '../hooks/use-fps'
 import {
   TrendingUp,
@@ -618,11 +619,10 @@ export function GalleryWidget() {
 
   const handleLike = (id: string, e: React.MouseEvent) => {
     e.stopPropagation()
-    setLiked((prev) => {
-      const isLiked = !prev[id]
-      setLikes((l) => ({ ...l, [id]: isLiked ? l[id] + 1 : l[id] - 1 }))
-      return { ...prev, [id]: isLiked }
-    })
+    const wasLiked = !!liked[id]
+    const isLiked = !wasLiked
+    setLiked((prev) => ({ ...prev, [id]: isLiked }))
+    setLikes((l) => ({ ...l, [id]: isLiked ? l[id] + 1 : l[id] - 1 }))
   }
 
   return (
@@ -676,70 +676,73 @@ export function GalleryWidget() {
       </div>
 
       {/* Lightbox / Modal */}
-      {activeImage && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="relative max-w-3xl w-full bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden shadow-2xl flex flex-col md:flex-row">
-            {/* Modal Image */}
-            <div className="flex-1 aspect-video md:aspect-auto md:h-[450px] bg-black relative">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={activeImage.src}
-                alt={activeImage.title}
-                className="w-full h-full object-contain"
-              />
-            </div>
+      {activeImage &&
+        typeof window !== 'undefined' &&
+        createPortal(
+          <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="relative max-w-3xl w-full bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden shadow-2xl flex flex-col md:flex-row">
+              {/* Modal Image */}
+              <div className="flex-1 aspect-video md:aspect-auto md:h-[450px] bg-black relative">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={activeImage.src}
+                  alt={activeImage.title}
+                  className="w-full h-full object-contain"
+                />
+              </div>
 
-            {/* Modal Sidebar Info */}
-            <div className="w-full md:w-64 p-5 flex flex-col justify-between border-t md:border-t-0 md:border-l border-zinc-800 bg-zinc-900 text-white">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-indigo-400">
-                    {activeImage.category}
+              {/* Modal Sidebar Info */}
+              <div className="w-full md:w-64 p-5 flex flex-col justify-between border-t md:border-t-0 md:border-l border-zinc-800 bg-zinc-900 text-white">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-indigo-400">
+                      {activeImage.category}
+                    </span>
+                    <button
+                      onClick={() => setActiveImage(null)}
+                      className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-base font-extrabold tracking-tight">{activeImage.title}</h3>
+                    <p className="text-xs text-zinc-400 leading-relaxed">
+                      Ancient artwork from the Zeugma Mosaic Museum in Gaziantep, Turkey, showcasing
+                      the rich history and craftsmanship of Roman-era mosaics.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between border-t border-zinc-800 pt-4 mt-6">
+                  <div className="flex gap-1.5">
+                    <button
+                      onClick={(e) => handleLike(activeImage.id, e)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold cursor-pointer transition-colors"
+                    >
+                      <Heart
+                        className={`w-4 h-4 ${liked[activeImage.id] ? 'fill-rose-500 text-rose-500' : ''}`}
+                      />
+                      <span>{likes[activeImage.id]}</span>
+                    </button>
+                    <a
+                      href={activeImage.src}
+                      download
+                      className="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white cursor-pointer transition-colors"
+                      title="Download Asset"
+                    >
+                      <Download className="w-4 h-4" />
+                    </a>
+                  </div>
+                  <span className="text-[10px] text-zinc-500 font-medium uppercase tracking-wider select-none">
+                    Asset #{activeImage.id}
                   </span>
-                  <button
-                    onClick={() => setActiveImage(null)}
-                    className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
                 </div>
-                <div className="space-y-1">
-                  <h3 className="text-base font-extrabold tracking-tight">{activeImage.title}</h3>
-                  <p className="text-xs text-zinc-400 leading-relaxed">
-                    Ancient artwork from the Zeugma Mosaic Museum in Gaziantep, Turkey, showcasing
-                    the rich history and craftsmanship of Roman-era mosaics.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between border-t border-zinc-800 pt-4 mt-6">
-                <div className="flex gap-1.5">
-                  <button
-                    onClick={(e) => handleLike(activeImage.id, e)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold cursor-pointer transition-colors"
-                  >
-                    <Heart
-                      className={`w-4 h-4 ${liked[activeImage.id] ? 'fill-rose-500 text-rose-500' : ''}`}
-                    />
-                    <span>{likes[activeImage.id]}</span>
-                  </button>
-                  <a
-                    href={activeImage.src}
-                    download
-                    className="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white cursor-pointer transition-colors"
-                    title="Download Asset"
-                  >
-                    <Download className="w-4 h-4" />
-                  </a>
-                </div>
-                <span className="text-[10px] text-zinc-500 font-medium uppercase tracking-wider select-none">
-                  Asset #{activeImage.id}
-                </span>
               </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </div>
   )
 }

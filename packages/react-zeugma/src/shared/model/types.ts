@@ -10,9 +10,11 @@ export interface SplitNode {
 
 export interface PaneNode {
   type: 'pane'
-  paneId: string
+  id: string
+  tabs: string[]
+  activeTabId: string
   locked?: boolean
-  metadata?: Record<string, unknown>
+  tabsMetadata?: Record<string, Record<string, unknown>>
 }
 
 export type TreeNode = SplitNode | PaneNode

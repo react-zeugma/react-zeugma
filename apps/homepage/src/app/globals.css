@@ -330,3 +330,12 @@ body {
   box-shadow: 0 0 12px rgba(181, 84, 60, 0.8);
   opacity: 1;
 }
+
+/* Scrollbar Utilities */
+.scrollbar-none {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}

@@ -29,8 +29,8 @@ export interface ZeugmaProps {
   onChange: (newLayout: TreeNode | null) => void
   /** Render function mapping unique pane IDs to React elements. Usually renders a <Pane> wrapper. */
   renderPane: (paneId: string) => ReactNode
-  /** Custom overlay renderer function used to customize the cursor-following drag preview for an active pane. */
-  renderDragOverlay?: (activeId: string) => ReactNode
+  /** Custom overlay renderer function used to customize the cursor-following drag preview for an active pane or tab. */
+  renderDragOverlay?: (activeId: string, type: 'pane' | 'tab') => ReactNode
   /** Optional CSS class name mapping overrides for custom styles of components like panes, drop/swap previews, overlays, etc. */
   classNames?: ZeugmaClassNames
   /** The ID of the pane that is currently taking up the full dashboard area. Null if no pane is fullscreen. */
@@ -73,6 +73,8 @@ export interface ZeugmaProps {
   onDismissIntentChange?: (paneId: string | null) => void
   /** Whether the layout is locked. When locked, resizing, dragging, and dropping are disabled. */
   locked?: boolean
+  /** Render function mapping tab IDs to React elements. Used to render tab widgets inside portals. */
+  renderWidget?: (tabId: string) => ReactNode
   /** Child nodes nested inside the Zeugma context, usually containing a <PaneTree> or similar layout viewer. */
   children: ReactNode
 }
@@ -138,11 +140,19 @@ export interface ZeugmaActionsValue {
   ) => void
   /** Updates the split percentage of a specific split branch node. */
   updateSplitPercentage: (currentNode: SplitNode, percentage: number) => void
-  /** Stable callback to update metadata for a specific pane. */
-  updatePaneMetadata: (
-    paneId: string,
+  /** Stable callback to update metadata for a specific tab. */
+  updateTabMetadata: (
+    tabId: string,
     updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined,
   ) => void
   /** Stable callback to update the locked status of a specific pane in the layout tree. */
   updatePaneLock: (paneId: string, locked: boolean) => void
+  /** Stable callback to activate a tab within a pane. */
+  selectTab: (paneId: string, tabId: string) => void
+  /** Stable callback to merge a dragged tab/pane into another pane's tab list. */
+  mergeTab: (draggedTabId: string, targetPaneId: string) => void
+  /** Stable callback to move/reorder a tab to another pane next to a target tab. */
+  moveTab: (draggedTabId: string, targetTabId: string, position?: 'before' | 'after') => void
+  /** Stable callback to remove/close a specific tab from the layout. */
+  removeTab: (tabId: string) => void
 }

@@ -41,7 +41,7 @@ function shuffle<T>(arr: T[]): T[] {
  */
 function extractReadingOrder(node: TreeNode): string[] {
   if (node.type === 'pane') {
-    return [node.paneId]
+    return [node.activeTabId]
   }
   const firstIds = extractReadingOrder(node.first)
   const secondIds = extractReadingOrder(node.second)
@@ -64,21 +64,21 @@ function buildLayout(tiles: string[]): TreeNode {
         type: 'split',
         direction: 'row',
         splitPercentage: 50,
-        first: { type: 'pane', paneId: tiles[0] },
-        second: { type: 'pane', paneId: tiles[1] },
+        first: { type: 'pane', id: tiles[0], tabs: [tiles[0]], activeTabId: tiles[0] },
+        second: { type: 'pane', id: tiles[1], tabs: [tiles[1]], activeTabId: tiles[1] },
       },
       second: {
         // Bottom half: split vertically (3 stacked)
         type: 'split',
         direction: 'column',
         splitPercentage: 33.3,
-        first: { type: 'pane', paneId: tiles[2] },
+        first: { type: 'pane', id: tiles[2], tabs: [tiles[2]], activeTabId: tiles[2] },
         second: {
           type: 'split',
           direction: 'column',
           splitPercentage: 50,
-          first: { type: 'pane', paneId: tiles[3] },
-          second: { type: 'pane', paneId: tiles[4] },
+          first: { type: 'pane', id: tiles[3], tabs: [tiles[3]], activeTabId: tiles[3] },
+          second: { type: 'pane', id: tiles[4], tabs: [tiles[4]], activeTabId: tiles[4] },
         },
       },
     },
@@ -92,13 +92,13 @@ function buildLayout(tiles: string[]): TreeNode {
         type: 'split',
         direction: 'column',
         splitPercentage: 33.3,
-        first: { type: 'pane', paneId: tiles[5] },
+        first: { type: 'pane', id: tiles[5], tabs: [tiles[5]], activeTabId: tiles[5] },
         second: {
           type: 'split',
           direction: 'column',
           splitPercentage: 50,
-          first: { type: 'pane', paneId: tiles[6] },
-          second: { type: 'pane', paneId: tiles[7] },
+          first: { type: 'pane', id: tiles[6], tabs: [tiles[6]], activeTabId: tiles[6] },
+          second: { type: 'pane', id: tiles[7], tabs: [tiles[7]], activeTabId: tiles[7] },
         },
       },
       second: {
@@ -110,15 +110,15 @@ function buildLayout(tiles: string[]): TreeNode {
           type: 'split',
           direction: 'column',
           splitPercentage: 50,
-          first: { type: 'pane', paneId: tiles[8] },
-          second: { type: 'pane', paneId: tiles[9] },
+          first: { type: 'pane', id: tiles[8], tabs: [tiles[8]], activeTabId: tiles[8] },
+          second: { type: 'pane', id: tiles[9], tabs: [tiles[9]], activeTabId: tiles[9] },
         },
         second: {
           type: 'split',
           direction: 'column',
           splitPercentage: 50,
-          first: { type: 'pane', paneId: tiles[10] },
-          second: { type: 'pane', paneId: tiles[11] },
+          first: { type: 'pane', id: tiles[10], tabs: [tiles[10]], activeTabId: tiles[10] },
+          second: { type: 'pane', id: tiles[11], tabs: [tiles[11]], activeTabId: tiles[11] },
         },
       },
     },

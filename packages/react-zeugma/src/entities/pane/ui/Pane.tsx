@@ -1,13 +1,13 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useCallback, useEffect, useContext } from 'react'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
-import { useZeugmaState, useZeugmaActions } from '../../zeugma'
+import { useZeugmaState, useZeugmaActions, PortalRegistryContext } from '../../zeugma'
 import { DragListenersCtx } from '../model/context'
 import { PaneRenderProps } from '../model/types'
 import { findPane } from '../../../shared/lib/tree'
 
 interface DropZoneProps {
   id: string
-  position: 'top' | 'bottom' | 'left' | 'right' | 'center' | 'full'
+  position: 'top' | 'bottom' | 'left' | 'right' | 'center' | 'full' | 'top-header'
   activeClassName?: string
 }
 
@@ -159,28 +159,64 @@ export const Pane: React.FC<PaneProps> = ({ id, children, style, locked: propLoc
     activeId,
     classNames,
     fullscreenPaneId,
-    onRemove,
     onFullscreenChange,
     locked: globalLocked,
   } = useZeugmaState()
-  const { removePane, updatePaneMetadata } = useZeugmaActions()
+  const { removePane, updateTabMetadata, selectTab, removeTab } = useZeugmaActions()
+  const portalRegistry = useContext(PortalRegistryContext)
+  if (!portalRegistry) {
+    throw new Error('Pane must be used within a Zeugma provider')
+  }
+  const { registerPortalTarget } = portalRegistry
 
   const paneNode = useMemo(() => findPane(layout, id), [layout, id])
-  const metadata = paneNode?.metadata
+  const paneContainerId = paneNode?.id ?? id
+  const tabs = paneNode?.tabs ?? [id]
+  const activeTabId = paneNode?.activeTabId ?? id
+  const tabsMetadata = paneNode?.tabsMetadata
+
+  const metadata = tabsMetadata?.[id]
   const localLocked = paneNode?.locked ?? false
 
   const isPaneLocked = propLocked || localLocked
   const isDraggableDisabled = globalLocked || isPaneLocked
   const isDroppableDisabled = globalLocked || isPaneLocked
 
-  const showDropZones = activeId !== null && activeId !== id && !isDroppableDisabled
+  const showDropZones =
+    activeId !== null &&
+    activeId !== id &&
+    (!tabs.includes(activeId) || tabs.length > 1) &&
+    !isDroppableDisabled
 
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+  const { attributes, listeners, setNodeRef } = useDraggable({
     id,
     disabled: isDraggableDisabled,
   })
-  const dragging = activeId === id || isDragging
+
+  const dragging = activeId !== null && tabs.includes(activeId)
   const isFullscreen = fullscreenPaneId === id
+
+  const renderActiveTab = useCallback(() => {
+    return (
+      <div
+        id={`zeugma-tab-target-${activeTabId}`}
+        className="zeugma-tab-content-wrapper"
+        style={{
+          height: '100%',
+          width: '100%',
+        }}
+      />
+    )
+  }, [activeTabId])
+
+  // Register portal targets using selector-based useEffect to avoid ref callback loops
+  useEffect(() => {
+    const el = document.getElementById(`zeugma-tab-target-${activeTabId}`) as HTMLDivElement | null
+    registerPortalTarget(activeTabId, el)
+    return () => {
+      registerPortalTarget(activeTabId, null)
+    }
+  }, [activeTabId, registerPortalTarget])
 
   const renderProps: PaneRenderProps = useMemo(
     () => ({
@@ -191,28 +227,43 @@ export const Pane: React.FC<PaneProps> = ({ id, children, style, locked: propLoc
         if (isFullscreen) {
           onFullscreenChange?.(null)
         }
-        if (onRemove) {
-          onRemove(id)
-        } else {
-          removePane(id)
-        }
+        removePane(paneContainerId)
       },
       metadata,
       updateMetadata: (updater) => {
-        updatePaneMetadata(id, updater)
+        updateTabMetadata(id, updater)
       },
       locked: isDraggableDisabled,
+      tabs,
+      activeTabId,
+      selectTab: (tabId) => selectTab(paneContainerId, tabId),
+      removeTab: (tabId) => {
+        if (isFullscreen && tabId === activeTabId) {
+          onFullscreenChange?.(null)
+        }
+        removeTab(tabId)
+      },
+      tabsMetadata,
+      updateTabMetadata: (tabId, updater) => {
+        updateTabMetadata(tabId, updater)
+      },
+      renderActiveTab,
     }),
     [
       dragging,
       isFullscreen,
       onFullscreenChange,
       id,
-      onRemove,
-      removePane,
+      removeTab,
       metadata,
-      updatePaneMetadata,
+      updateTabMetadata,
       isDraggableDisabled,
+      tabs,
+      activeTabId,
+      selectTab,
+      paneContainerId,
+      tabsMetadata,
+      renderActiveTab,
     ],
   )
 
@@ -260,11 +311,13 @@ export const Pane: React.FC<PaneProps> = ({ id, children, style, locked: propLoc
                 activeClassName={classNames.dropPreview}
               />
             ))}
-            <DropZone
-              id={`drop-center-${id}`}
-              position="center"
-              activeClassName={classNames.swapPreview}
-            />
+            {!tabs.includes(activeId) && (
+              <DropZone
+                id={`drop-center-${id}`}
+                position="center"
+                activeClassName={classNames.swapPreview}
+              />
+            )}
           </div>
         )}
 

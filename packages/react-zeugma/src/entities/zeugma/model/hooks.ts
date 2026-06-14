@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef } from 'react'
+import { useContext, useEffect, useRef, useState, useCallback } from 'react'
 import { ZeugmaStateContext, ZeugmaActionsContext } from './context'
 import { ZeugmaStateValue, ZeugmaActionsValue } from './types'
 
@@ -68,4 +68,17 @@ export function useBodyCursorOverride(isOverLocked: boolean) {
       document.body.style.removeProperty('cursor')
     }
   }, [isOverLocked])
+}
+
+export function usePortalRegistry() {
+  const [portalTargets, setPortalTargets] = useState<Record<string, HTMLDivElement | null>>({})
+
+  const registerPortalTarget = useCallback((tabId: string, el: HTMLDivElement | null) => {
+    setPortalTargets((prev) => {
+      if (prev[tabId] === el) return prev
+      return { ...prev, [tabId]: el }
+    })
+  }, [])
+
+  return { portalTargets, registerPortalTarget }
 }

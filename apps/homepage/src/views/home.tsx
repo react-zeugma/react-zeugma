@@ -50,13 +50,13 @@ export default function App() {
     type: 'split',
     direction: 'row',
     splitPercentage: 25,
-    first: { type: 'pane', paneId: 'sidebar' },
+    first: { type: 'pane', id: 'sidebar', tabs: ['sidebar'], activeTabId: 'sidebar' },
     second: {
       type: 'split',
       direction: 'column',
       splitPercentage: 70,
-      first: { type: 'pane', paneId: 'editor' },
-      second: { type: 'pane', paneId: 'terminal' }
+      first: { type: 'pane', id: 'editor', tabs: ['editor'], activeTabId: 'editor' },
+      second: { type: 'pane', id: 'terminal', tabs: ['terminal'], activeTabId: 'terminal' }
     }
   });
 

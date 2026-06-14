@@ -113,7 +113,7 @@ const FlatSplitter: React.FC<FlatSplitterProps> = ({
   snapThreshold,
   containerRef,
 }) => {
-  const { layout, onLayoutChange, classNames } = useZeugmaState()
+  const { layout, onLayoutChange, classNames, locked } = useZeugmaState()
   const [isResizing, setIsResizing] = useState(false)
 
   const {
@@ -156,7 +156,8 @@ const FlatSplitter: React.FC<FlatSplitterProps> = ({
         top: `${top}%`,
         width: `${resizerSize}px`,
         height: `${height}%`,
-        cursor: 'col-resize',
+        cursor: locked ? 'default' : 'col-resize',
+        pointerEvents: locked ? 'none' : 'auto',
         zIndex: 10,
         userSelect: 'none',
         touchAction: 'none',
@@ -168,7 +169,8 @@ const FlatSplitter: React.FC<FlatSplitterProps> = ({
         top: `calc(${top}% - ${resizerSize / 2}px)`,
         width: `${width}%`,
         height: `${resizerSize}px`,
-        cursor: 'row-resize',
+        cursor: locked ? 'default' : 'row-resize',
+        pointerEvents: locked ? 'none' : 'auto',
         zIndex: 10,
         userSelect: 'none',
         touchAction: 'none',
@@ -203,6 +205,8 @@ export const PaneTree: React.FC<PaneTreeProps> = ({
     setContainerRef,
     fullscreenPaneId,
     snapThreshold: contextSnapThreshold,
+    locked,
+    classNames,
   } = useZeugmaState()
 
   const snapThreshold =
@@ -269,10 +273,14 @@ export const PaneTree: React.FC<PaneTreeProps> = ({
       ;(containerRef as React.RefObject<HTMLDivElement | null>).current = el
     }
 
+    const dashboardClass = `zeugma-dashboard-root ${
+      isDismissActive ? 'zeugma-dashboard-dismiss-active' : ''
+    } ${locked ? classNames.dashboardLocked || 'zeugma-dashboard-locked' : ''}`.trim()
+
     return (
       <div
         ref={handleRef}
-        className={`zeugma-dashboard-root ${isDismissActive ? 'zeugma-dashboard-dismiss-active' : ''}`.trim()}
+        className={dashboardClass}
         style={{
           position: 'relative',
           width: '100%',

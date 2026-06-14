@@ -11,6 +11,7 @@ export interface SplitNode {
 export interface PaneNode {
   type: 'pane'
   paneId: string
+  locked?: boolean
   metadata?: Record<string, unknown>
 }
 

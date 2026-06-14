@@ -45,10 +45,12 @@ export function useResizer({
     onResizeEnd: globalOnResizeEnd,
     minSplitPercentage = 5,
     maxSplitPercentage = 95,
+    locked = false,
   } = useZeugmaState()
 
   return useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
+      if (locked) return
       e.preventDefault()
       const container = containerRef.current
       if (!container) return

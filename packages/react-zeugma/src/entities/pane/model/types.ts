@@ -13,4 +13,6 @@ export interface PaneRenderProps {
   updateMetadata: (
     updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined,
   ) => void
+  /** True if this specific pane or the dashboard globally is locked. */
+  locked: boolean
 }

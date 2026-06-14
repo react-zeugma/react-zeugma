@@ -34,6 +34,8 @@ interface SidebarWrapperProps {
   onMaxSplitPercentageChange: (val: number) => void
   resizableHeight: boolean
   onResizableHeightChange: (val: boolean) => void
+  layoutLocked: boolean
+  onLayoutLockedChange: (val: boolean) => void
   logs: LogEntry[]
   onPresetChange?: (presetKey: string) => void
   contentRef?: React.RefObject<HTMLDivElement | null>
@@ -224,6 +226,8 @@ export function SidebarWrapper({
   onMaxSplitPercentageChange,
   resizableHeight,
   onResizableHeightChange,
+  layoutLocked,
+  onLayoutLockedChange,
   logs,
   onPresetChange,
   contentRef,
@@ -385,6 +389,26 @@ export function SidebarWrapper({
                   className="w-full h-1 bg-bg-pane border-none rounded outline-none cursor-pointer accent-indigo-500"
                 />
               </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-[10px] text-text-secondary">Lock Layout</span>
+              <button
+                type="button"
+                onClick={() => onLayoutLockedChange(!layoutLocked)}
+                className={`relative w-9 h-5 rounded-full transition-colors duration-200 border ${
+                  layoutLocked
+                    ? 'bg-indigo-600 border-indigo-700 cursor-pointer'
+                    : 'bg-zinc-200 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 cursor-pointer'
+                }`}
+              >
+                <span
+                  className="absolute top-px left-[2px] w-4 h-4 rounded-full bg-white shadow-md transition-transform duration-200"
+                  style={{
+                    transform: layoutLocked ? 'translateX(16px)' : 'translateX(0px)',
+                  }}
+                />
+              </button>
             </div>
 
             <div className="flex items-center justify-between pt-1">

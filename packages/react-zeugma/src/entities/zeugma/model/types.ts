@@ -4,6 +4,8 @@ import { TreeNode, SplitDirection, SplitNode } from '../../../shared/model'
 export interface ZeugmaClassNames {
   /** CSS class applied to the outer container div of each `<Pane>`. */
   pane?: string
+  /** CSS class applied to the pane container when locked. */
+  paneLocked?: string
   /** CSS class applied to drop zone indicators when hovering over layout edges to split a pane. */
   dropPreview?: string
   /** CSS class applied to the drop zone indicator when hovering over the center of a pane to swap. */
@@ -14,6 +16,10 @@ export interface ZeugmaClassNames {
   resizer?: string
   /** CSS class applied to the background dismiss zone indicator during a drag-out dismiss gesture. */
   dismissPreview?: string
+  /** CSS class applied to root container when dashboard is globally locked. */
+  dashboardLocked?: string
+  /** CSS class applied to drop zone indicator when hovering over a locked pane. */
+  lockedPreview?: string
 }
 
 export interface ZeugmaProps {
@@ -65,6 +71,8 @@ export interface ZeugmaProps {
   dismissThreshold?: number
   /** Callback triggered when the drag-out/dismiss intent changes (active pane ID or null when drag returns inside bounds). */
   onDismissIntentChange?: (paneId: string | null) => void
+  /** Whether the layout is locked. When locked, resizing, dragging, and dropping are disabled. */
+  locked?: boolean
   /** Child nodes nested inside the Zeugma context, usually containing a <PaneTree> or similar layout viewer. */
   children: ReactNode
 }
@@ -106,6 +114,8 @@ export interface ZeugmaStateValue {
   minSplitPercentage?: number
   /** Maximum split percentage allowed when resizing. */
   maxSplitPercentage?: number
+  /** Whether the layout is globally locked. */
+  locked: boolean
 }
 
 /**
@@ -133,4 +143,6 @@ export interface ZeugmaActionsValue {
     paneId: string,
     updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined,
   ) => void
+  /** Stable callback to update the locked status of a specific pane in the layout tree. */
+  updatePaneLock: (paneId: string, locked: boolean) => void
 }

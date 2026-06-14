@@ -48,6 +48,32 @@ const CONVERSIONS_ICON = <BarChart2 className="w-3.5 h-3.5 text-violet-500" />
 const TASKS_ICON = <CheckCircle2 className="w-3.5 h-3.5 text-amber-500" />
 const PERFORMANCE_ICON = <Activity className="w-3.5 h-3.5 text-indigo-500" />
 
+const globalMountCounts = new Map<string, number>()
+
+function useRenderCounter(widgetId: string) {
+  const mountRef = React.useRef(0)
+
+  if (mountRef.current === 0) {
+    const prevMounts = globalMountCounts.get(widgetId) || 0
+    const nextMounts = prevMounts + 1
+    globalMountCounts.set(widgetId, nextMounts)
+    mountRef.current = nextMounts
+  }
+
+  const renderRef = React.useRef(0)
+  renderRef.current += 1
+
+  return {
+    mounts: mountRef.current,
+    renders: renderRef.current,
+  }
+}
+
+const RenderCounterContext = React.createContext<{ mounts: number; renders: number }>({
+  mounts: 0,
+  renders: 0,
+})
+
 interface UIPlaceholderProps {
   id: string
   title: string
@@ -75,6 +101,8 @@ const UIPlaceholder = ({
   const { updatePaneLock } = useZeugmaActions()
   const color = (metadata?.color as string) || 'indigo'
 
+  const { mounts, renders } = useRenderCounter(id)
+
   const colorDotMap: Record<string, string> = {
     indigo: 'bg-indigo-500',
     emerald: 'bg-emerald-500',
@@ -92,48 +120,58 @@ const UIPlaceholder = ({
   }`
 
   return (
-    <div className="h-full w-full bg-bg-pane flex flex-col relative overflow-hidden group transition-colors duration-200">
-      <DragHandle>
-        <div className={headerClass}>
-          <div className="flex items-center gap-2 z-10 pointer-events-none">
-            <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />
-            {icon}
-            <span className="text-[11px] uppercase tracking-wider text-text-primary font-bold">
-              {title}
-            </span>
-            {isLocked && <Lock className="w-2.5 h-2.5 text-text-muted shrink-0 ml-1.5" />}
-          </div>
+    <RenderCounterContext.Provider value={{ mounts, renders }}>
+      <div className="h-full w-full bg-bg-pane flex flex-col relative overflow-hidden group transition-colors duration-200">
+        <DragHandle>
+          <div className={headerClass}>
+            <div className="flex items-center gap-2 z-10 pointer-events-none">
+              <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />
+              {icon}
+              <span className="text-[11px] uppercase tracking-wider text-text-primary font-bold">
+                {title}
+              </span>
+              {isLocked && <Lock className="w-2.5 h-2.5 text-text-muted shrink-0 ml-1.5" />}
+            </div>
 
-          <div className="drag-cancel flex gap-1.5 items-center z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            {!globalLocked && (
+            <div className="drag-cancel flex gap-1.5 items-center z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              {!globalLocked && (
+                <button
+                  onClick={() => updatePaneLock(id, !locked)}
+                  className={`w-5 h-5 flex items-center justify-center rounded text-text-muted hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer`}
+                  title={locked ? 'Unlock Pane' : 'Lock Pane'}
+                >
+                  {locked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
+                </button>
+              )}
               <button
-                onClick={() => updatePaneLock(id, !locked)}
-                className={`w-5 h-5 flex items-center justify-center rounded text-text-muted hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer`}
-                title={locked ? 'Unlock Pane' : 'Lock Pane'}
-              >
-                {locked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
-              </button>
-            )}
-            <button
-              onClick={toggleFullscreen}
-              className="w-2.5 h-2.5 rounded-full bg-text-muted hover:bg-[#27c93f] transition-colors cursor-pointer"
-              title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
-            />
-            {!isLocked && (
-              <button
-                onClick={remove}
-                className="w-2.5 h-2.5 rounded-full bg-text-muted hover:bg-[#ff5f56] transition-colors cursor-pointer"
-                title="Close Pane"
+                onClick={toggleFullscreen}
+                className="w-2.5 h-2.5 rounded-full bg-text-muted hover:bg-[#27c93f] transition-colors cursor-pointer"
+                title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
               />
-            )}
+              {!isLocked && (
+                <button
+                  onClick={remove}
+                  className="w-2.5 h-2.5 rounded-full bg-text-muted hover:bg-[#ff5f56] transition-colors cursor-pointer"
+                  title="Close Pane"
+                />
+              )}
+            </div>
+          </div>
+        </DragHandle>
+
+        <div className="flex-1 overflow-auto bg-bg-pane-inner text-sm flex flex-col p-4 transition-colors duration-200 relative">
+          {children}
+          <div className="absolute bottom-2 right-2 px-2 py-0.5 bg-bg-sidebar/95 backdrop-blur-xs border border-border-primary/60 rounded-full text-[9px] font-mono text-text-muted flex gap-2 select-none z-30 pointer-events-none opacity-70 hover:opacity-100 transition-opacity duration-200 shadow-xs">
+            <span>
+              Mounts: <strong className="text-text-primary">{mounts}</strong>
+            </span>
+            <span>
+              Renders: <strong className="text-text-primary">{renders}</strong>
+            </span>
           </div>
         </div>
-      </DragHandle>
-
-      <div className="flex-1 overflow-auto bg-bg-pane-inner text-sm flex flex-col p-4 transition-colors duration-200">
-        {children}
       </div>
-    </div>
+    </RenderCounterContext.Provider>
   )
 }
 
@@ -164,6 +202,33 @@ const GenericWidget = ({ title, metadata, ...props }: WidgetProps & { title?: st
         {currentNotes && <p className="text-text-muted text-xs italic">Note: "{currentNotes}"</p>}
       </div>
     </UIPlaceholder>
+  )
+}
+
+const MetadataDebug = ({
+  id,
+  locked,
+  metadata,
+}: {
+  id: string
+  locked: boolean
+  metadata?: Record<string, unknown>
+}) => {
+  const { mounts, renders } = React.useContext(RenderCounterContext)
+  return (
+    <pre className="whitespace-pre-wrap font-mono text-[9px] text-text-secondary leading-normal">
+      {JSON.stringify(
+        {
+          paneId: id,
+          locked,
+          metadata: metadata || {},
+          mounts,
+          renders,
+        },
+        null,
+        2,
+      )}
+    </pre>
   )
 }
 
@@ -281,9 +346,7 @@ const MetadataWidget = ({
             <span>Layout Node (outside metadata):</span>
             {locked && <span className="text-rose-500 font-bold uppercase text-[8px]">LOCKED</span>}
           </div>
-          <pre className="whitespace-pre-wrap font-mono text-[9px] text-text-secondary leading-normal">
-            {JSON.stringify({ paneId: id, locked, metadata: metadata || {} }, null, 2)}
-          </pre>
+          <MetadataDebug id={id} locked={locked} metadata={metadata} />
         </div>
       </div>
     </UIPlaceholder>

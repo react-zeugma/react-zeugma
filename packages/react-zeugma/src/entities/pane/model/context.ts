@@ -1,3 +1,7 @@
-import { createContext } from 'react'
+import React, { createContext } from 'react'
 
-export const DragListenersCtx = createContext<Record<string, unknown> | null>(null)
+export interface DragListenersCtxValue extends React.HTMLAttributes<HTMLDivElement> {
+  disabled?: boolean
+}
+
+export const DragListenersCtx = createContext<DragListenersCtxValue | null>(null)

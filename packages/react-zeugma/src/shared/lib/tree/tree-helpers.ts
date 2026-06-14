@@ -167,3 +167,30 @@ export function updatePaneMetadata(
     second: updatePaneMetadata(tree.second, paneId, updater) ?? tree.second,
   }
 }
+
+/**
+ * Update the locked status on a specific pane node in the layout tree.
+ */
+export function updatePaneLock(
+  tree: TreeNode | null,
+  paneId: string,
+  locked: boolean,
+): TreeNode | null {
+  if (tree === null) return null
+  if (tree.type === 'pane') {
+    if (tree.paneId === paneId) {
+      if (locked === false) {
+        // If false, we can delete the key or keep it. Let's delete it if false or just set it
+        const { locked: _, ...rest } = tree
+        return rest as PaneNode
+      }
+      return { ...tree, locked }
+    }
+    return tree
+  }
+  return {
+    ...tree,
+    first: updatePaneLock(tree.first, paneId, locked) ?? tree.first,
+    second: updatePaneLock(tree.second, paneId, locked) ?? tree.second,
+  }
+}

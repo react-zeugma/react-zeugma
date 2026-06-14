@@ -1,5 +1,18 @@
 # react-zeugma
 
+## 2.3.0
+
+### Minor Changes
+
+- **Layout and Pane Lock Feature**:
+  - Added support for a first-class `locked` property on the layout tree nodes (`PaneNode`).
+  - Added global dashboard-level locking via the `locked` prop on `<Zeugma>`, which disables all pane dragging and split resizing.
+  - Implemented the `updatePaneLock` action to toggle individual pane locks dynamically.
+  - Implemented automatic pointer cursor overrides (`not-allowed`) using a custom `useBodyCursorOverride` hook when attempting to drag over locked drop zones.
+  - Added visual drop previews for blocked target actions (`lockedPreview`).
+  - Provided custom class configurations for locks: `paneLocked`, `dashboardLocked`, and `lockedPreview`.
+  - Fully type-safe context updates for drag handles, removing legacy `as any` type assertions.
+
 ## 2.2.2
 
 ### Patch Changes

@@ -17,9 +17,15 @@ import {
   updateSplitPercentage,
   updatePaneMetadata,
   findPane,
+  updatePaneLock,
 } from '../../../shared/lib/tree'
 import { DEFAULT_DRAG_ACTIVATION_DISTANCE, DEFAULT_SNAP_THRESHOLD } from '../../../shared/config'
-import { ZeugmaStateContext, ZeugmaActionsContext, useLatestPointer } from '../model'
+import {
+  ZeugmaStateContext,
+  ZeugmaActionsContext,
+  useLatestPointer,
+  useBodyCursorOverride,
+} from '../model'
 import { ZeugmaProps } from '../model/types'
 import { CursorOverlay } from './CursorOverlay'
 import { SmartPointerSensor, SmartTouchSensor } from '../lib/sensors'
@@ -58,6 +64,7 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
   enableDragToDismiss = false,
   dismissThreshold = 60,
   onDismissIntentChange,
+  locked = false,
   children,
 }) => {
   const [localLayout, setLocalLayout] = useState<TreeNode | null>(layout)
@@ -78,6 +85,10 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
     containerRef.current = element
   }, [])
 
+  const [isOverLocked, setIsOverLocked] = useState(false)
+
+  useBodyCursorOverride(isOverLocked)
+
   // Stable renderPane wrapper — immune to consumer passing inline functions
   const stableRenderPane = useCallback((paneId: string) => renderPane(paneId), [renderPane])
 
@@ -86,11 +97,14 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
     () => classNames,
     [
       classNames.pane,
+      classNames.paneLocked,
       classNames.dropPreview,
       classNames.swapPreview,
       classNames.dragOverlay,
       classNames.resizer,
       classNames.dismissPreview,
+      classNames.dashboardLocked,
+      classNames.lockedPreview,
     ],
   )
 
@@ -121,6 +135,11 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
   }
 
   const handleDragMove = (event: DragMoveEvent) => {
+    const { over } = event
+    const overIdStr = over?.id.toString() || ''
+    const isOverLockedPane = overIdStr.startsWith('drop-locked-')
+    setIsOverLocked(isOverLockedPane)
+
     if (!enableDragToDismiss) return
 
     const draggingId = event.active.id.toString()
@@ -207,6 +226,7 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
 
   const handleDragEnd = (event: DragEndEvent) => {
     setActiveId(null)
+    setIsOverLocked(false)
     const { active, over } = event
     const draggingId = active.id.toString()
 
@@ -237,6 +257,13 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
     }
 
     const overIdStr = over.id.toString()
+
+    if (overIdStr.startsWith('drop-locked-')) {
+      if (onDragEnd) {
+        onDragEnd(draggingId, null, null)
+      }
+      return
+    }
 
     // Check for center (swap) drop
     const swapMatch = overIdStr.match(/^drop-center-(.+)$/)
@@ -380,6 +407,15 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
     [localLayout, onChange],
   )
 
+  const handleUpdatePaneLock = useCallback(
+    (paneId: string, isLocked: boolean) => {
+      const newLayout = updatePaneLock(localLayout, paneId, isLocked)
+      setLocalLayout(newLayout)
+      onChange(newLayout)
+    },
+    [localLayout, onChange],
+  )
+
   const handleResizeEnd = useCallback(
     (currentNode: SplitNode, percentage: number) => {
       if (onResizeEnd) {
@@ -408,6 +444,7 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
       onResizeEnd: handleResizeEnd,
       minSplitPercentage,
       maxSplitPercentage,
+      locked,
     }),
     [
       localLayout,
@@ -426,6 +463,7 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
       handleLocalLayoutChange,
       stableRenderPane,
       handleResizeEnd,
+      locked,
     ],
   )
 
@@ -438,6 +476,7 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
       splitPane: handleSplitPane,
       updateSplitPercentage: handleUpdateSplitPercentage,
       updatePaneMetadata: handleUpdatePaneMetadata,
+      updatePaneLock: handleUpdatePaneLock,
     }),
     [
       handleRemovePane,
@@ -446,6 +485,7 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
       handleSplitPane,
       handleUpdateSplitPercentage,
       handleUpdatePaneMetadata,
+      handleUpdatePaneLock,
     ],
   )
 

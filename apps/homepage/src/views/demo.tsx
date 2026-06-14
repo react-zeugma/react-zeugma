@@ -1,7 +1,16 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Zeugma, PaneTree, Pane, DragHandle, removePane, ResizableContainer } from 'react-zeugma'
+import {
+  Zeugma,
+  PaneTree,
+  Pane,
+  DragHandle,
+  removePane,
+  ResizableContainer,
+  useZeugmaActions,
+  useZeugmaState,
+} from 'react-zeugma'
 import type { TreeNode, PaneRenderProps, SplitNode } from 'react-zeugma'
 import {
   Box,
@@ -12,6 +21,8 @@ import {
   BarChart2,
   CheckCircle2,
   Activity,
+  Lock,
+  Unlock,
 } from 'lucide-react'
 import { SidebarWrapper, type LogEntry } from '../components/sidebar-wrapper'
 import {
@@ -38,6 +49,7 @@ const TASKS_ICON = <CheckCircle2 className="w-3.5 h-3.5 text-amber-500" />
 const PERFORMANCE_ICON = <Activity className="w-3.5 h-3.5 text-indigo-500" />
 
 interface UIPlaceholderProps {
+  id: string
   title: string
   children: React.ReactNode
   icon: React.ReactNode
@@ -45,9 +57,11 @@ interface UIPlaceholderProps {
   toggleFullscreen: () => void
   remove: () => void
   metadata?: Record<string, unknown>
+  locked: boolean
 }
 
 const UIPlaceholder = ({
+  id,
   title,
   children,
   icon,
@@ -55,7 +69,10 @@ const UIPlaceholder = ({
   toggleFullscreen,
   remove,
   metadata,
+  locked,
 }: UIPlaceholderProps) => {
+  const { locked: globalLocked } = useZeugmaState()
+  const { updatePaneLock } = useZeugmaActions()
   const color = (metadata?.color as string) || 'indigo'
 
   const colorDotMap: Record<string, string> = {
@@ -68,30 +85,47 @@ const UIPlaceholder = ({
   }
 
   const dotColor = colorDotMap[color] || colorDotMap.indigo
+  const isLocked = locked || globalLocked
+
+  const headerClass = `px-3 py-2 bg-bg-sidebar border-b border-border-primary flex items-center justify-between transition-colors relative select-none ${
+    isLocked ? 'cursor-default' : 'cursor-grab active:cursor-grabbing hover:bg-bg-sidebar/95'
+  }`
 
   return (
     <div className="h-full w-full bg-bg-pane flex flex-col relative overflow-hidden group transition-colors duration-200">
       <DragHandle>
-        <div className="px-3 py-2 bg-bg-sidebar border-b border-border-primary flex items-center justify-between cursor-grab active:cursor-grabbing hover:bg-bg-sidebar/95 transition-colors relative select-none">
+        <div className={headerClass}>
           <div className="flex items-center gap-2 z-10 pointer-events-none">
             <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />
             {icon}
             <span className="text-[11px] uppercase tracking-wider text-text-primary font-bold">
               {title}
             </span>
+            {isLocked && <Lock className="w-2.5 h-2.5 text-text-muted shrink-0 ml-1.5" />}
           </div>
 
           <div className="drag-cancel flex gap-1.5 items-center z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            {!globalLocked && (
+              <button
+                onClick={() => updatePaneLock(id, !locked)}
+                className={`w-5 h-5 flex items-center justify-center rounded text-text-muted hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer`}
+                title={locked ? 'Unlock Pane' : 'Lock Pane'}
+              >
+                {locked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
+              </button>
+            )}
             <button
               onClick={toggleFullscreen}
               className="w-2.5 h-2.5 rounded-full bg-text-muted hover:bg-[#27c93f] transition-colors cursor-pointer"
               title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
             />
-            <button
-              onClick={remove}
-              className="w-2.5 h-2.5 rounded-full bg-text-muted hover:bg-[#ff5f56] transition-colors cursor-pointer"
-              title="Close Pane"
-            />
+            {!isLocked && (
+              <button
+                onClick={remove}
+                className="w-2.5 h-2.5 rounded-full bg-text-muted hover:bg-[#ff5f56] transition-colors cursor-pointer"
+                title="Close Pane"
+              />
+            )}
           </div>
         </div>
       </DragHandle>
@@ -104,10 +138,12 @@ const UIPlaceholder = ({
 }
 
 interface WidgetProps {
+  id: string
   isFullscreen: boolean
   toggleFullscreen: () => void
   remove: () => void
   metadata?: Record<string, unknown>
+  locked: boolean
   updateMetadata?: (
     updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined,
   ) => void
@@ -132,11 +168,13 @@ const GenericWidget = ({ title, metadata, ...props }: WidgetProps & { title?: st
 }
 
 const MetadataWidget = ({
+  id,
   title,
   metadata,
   updateMetadata,
+  locked,
   ...props
-}: WidgetProps & { title?: string }) => {
+}: WidgetProps & { id: string; title?: string; locked: boolean }) => {
   const currentTitle = (metadata?.title as string) || title || 'Workspace Pane'
   const currentNotes = (metadata?.notes as string) || ''
   const currentColor = (metadata?.color as string) || 'indigo'
@@ -144,11 +182,18 @@ const MetadataWidget = ({
   const colors = ['indigo', 'emerald', 'amber', 'rose', 'sky', 'violet']
 
   return (
-    <UIPlaceholder title={currentTitle} icon={PLACEHOLDER_ICON} metadata={metadata} {...props}>
+    <UIPlaceholder
+      id={id}
+      locked={locked}
+      title={currentTitle}
+      icon={PLACEHOLDER_ICON}
+      metadata={metadata}
+      {...props}
+    >
       <div className="flex flex-col items-center justify-start gap-3 w-full max-w-sm mx-auto py-1">
         <div className="flex flex-col items-center gap-1 text-center">
           <p className="text-text-secondary text-xs leading-relaxed">
-            Drag/split to arrange. Edit local metadata below:
+            Drag/split to arrange. Edit local settings below:
           </p>
         </div>
 
@@ -173,7 +218,6 @@ const MetadataWidget = ({
               placeholder="Pane title..."
             />
           </div>
-
           {/* Color Palette Selector */}
           <div className="flex items-center gap-2">
             <span className="text-[10px] uppercase font-bold tracking-wider text-text-muted min-w-[50px]">
@@ -210,7 +254,6 @@ const MetadataWidget = ({
               })}
             </div>
           </div>
-
           {/* Notes Input */}
           <div className="flex items-center gap-2">
             <span className="text-[10px] uppercase font-bold tracking-wider text-text-muted min-w-[50px]">
@@ -229,16 +272,17 @@ const MetadataWidget = ({
               className="flex-1 min-w-0 bg-bg-pane border border-border-primary rounded px-2 py-0.5 text-xs text-text-primary focus:outline-none focus:border-indigo-500 transition-colors"
               placeholder="Add custom notes..."
             />
-          </div>
+          </div>{' '}
         </div>
 
-        {/* Debug info showing raw metadata pretty printed */}
-        <div className="w-full text-left bg-bg-app border border-border-primary/40 rounded p-1.5 overflow-x-auto max-h-24">
-          <div className="text-[9px] uppercase font-bold tracking-wider mb-1 text-text-muted">
-            Raw metadata state:
+        {/* Debug info showing layout node state */}
+        <div className="w-full text-left bg-bg-app border border-border-primary/40 rounded p-1.5 overflow-x-auto max-h-28">
+          <div className="text-[9px] uppercase font-bold tracking-wider mb-1 text-text-muted flex justify-between">
+            <span>Layout Node (outside metadata):</span>
+            {locked && <span className="text-rose-500 font-bold uppercase text-[8px]">LOCKED</span>}
           </div>
           <pre className="whitespace-pre-wrap font-mono text-[9px] text-text-secondary leading-normal">
-            {JSON.stringify(metadata || {}, null, 2)}
+            {JSON.stringify({ paneId: id, locked, metadata: metadata || {} }, null, 2)}
           </pre>
         </div>
       </div>
@@ -340,6 +384,7 @@ export function Demo() {
   }, [])
 
   const [fullscreenPaneId, setFullscreenPaneId] = useState<string | null>(null)
+  const [layoutLocked, setLayoutLocked] = useState(false)
   const [snapThreshold, setSnapThreshold] = useState(12)
   const [minSplit, setMinSplit] = useState(10)
   const [maxSplit, setMaxSplit] = useState(90)
@@ -510,97 +555,115 @@ export function Demo() {
             >
               {id === 'explorer' ? (
                 <MetadataWidget
+                  id={id}
                   title={title}
                   isFullscreen={paneProps.isFullscreen}
                   toggleFullscreen={paneProps.toggleFullscreen}
                   remove={paneProps.remove}
                   metadata={paneProps.metadata}
                   updateMetadata={paneProps.updateMetadata}
+                  locked={paneProps.locked}
                 />
               ) : id === 'heavy-analytics' ? (
                 <UIPlaceholder
+                  id={id}
                   title={title}
                   icon={ANALYTICS_ICON}
                   isFullscreen={paneProps.isFullscreen}
                   toggleFullscreen={paneProps.toggleFullscreen}
                   remove={paneProps.remove}
                   metadata={paneProps.metadata}
+                  locked={paneProps.locked}
                 >
                   <AnalyticsWidget />
                 </UIPlaceholder>
               ) : id === 'heavy-transactions' ? (
                 <UIPlaceholder
+                  id={id}
                   title={title}
                   icon={TRANSACTIONS_ICON}
                   isFullscreen={paneProps.isFullscreen}
                   toggleFullscreen={paneProps.toggleFullscreen}
                   remove={paneProps.remove}
                   metadata={paneProps.metadata}
+                  locked={paneProps.locked}
                 >
                   <TransactionsWidget />
                 </UIPlaceholder>
               ) : id === 'heavy-system' ? (
                 <UIPlaceholder
+                  id={id}
                   title={title}
                   icon={SYSTEM_ICON}
                   isFullscreen={paneProps.isFullscreen}
                   toggleFullscreen={paneProps.toggleFullscreen}
                   remove={paneProps.remove}
                   metadata={paneProps.metadata}
+                  locked={paneProps.locked}
                 >
                   <SystemWidget />
                 </UIPlaceholder>
               ) : id === 'heavy-gallery' ? (
                 <UIPlaceholder
+                  id={id}
                   title={title}
                   icon={GALLERY_ICON}
                   isFullscreen={paneProps.isFullscreen}
                   toggleFullscreen={paneProps.toggleFullscreen}
                   remove={paneProps.remove}
                   metadata={paneProps.metadata}
+                  locked={paneProps.locked}
                 >
                   <GalleryWidget />
                 </UIPlaceholder>
               ) : id === 'heavy-conversions' ? (
                 <UIPlaceholder
+                  id={id}
                   title={title}
                   icon={CONVERSIONS_ICON}
                   isFullscreen={paneProps.isFullscreen}
                   toggleFullscreen={paneProps.toggleFullscreen}
                   remove={paneProps.remove}
                   metadata={paneProps.metadata}
+                  locked={paneProps.locked}
                 >
                   <ConversionsWidget />
                 </UIPlaceholder>
               ) : id === 'heavy-tasks' ? (
                 <UIPlaceholder
+                  id={id}
                   title={title}
                   icon={TASKS_ICON}
                   isFullscreen={paneProps.isFullscreen}
                   toggleFullscreen={paneProps.toggleFullscreen}
                   remove={paneProps.remove}
                   metadata={paneProps.metadata}
+                  locked={paneProps.locked}
                 >
                   <TasksWidget />
                 </UIPlaceholder>
               ) : id === 'heavy-performance' ? (
                 <UIPlaceholder
+                  id={id}
                   title={title}
                   icon={PERFORMANCE_ICON}
                   isFullscreen={paneProps.isFullscreen}
                   toggleFullscreen={paneProps.toggleFullscreen}
                   remove={paneProps.remove}
                   metadata={paneProps.metadata}
+                  locked={paneProps.locked}
                 >
                   <PerformanceWidget />
                 </UIPlaceholder>
               ) : (
                 <GenericWidget
+                  id={id}
                   title={title}
                   isFullscreen={paneProps.isFullscreen}
                   toggleFullscreen={paneProps.toggleFullscreen}
                   remove={paneProps.remove}
                   metadata={paneProps.metadata}
+                  locked={paneProps.locked}
                 />
               )}
               {paneProps.isDragging && (
@@ -705,12 +768,17 @@ export function Demo() {
           dismissThreshold={60}
           onResizeStart={handleResizeStart}
           onResizeEnd={handleResizeEnd}
+          locked={layoutLocked}
           classNames={{
             dropPreview:
               'bg-indigo-500/10 backdrop-blur-[2px] border-2 border-dashed border-indigo-400/50 shadow-[0_25px_50px_-12px_rgba(99,102,241,0.2)] rounded-lg transition-all duration-200',
             swapPreview:
               'bg-amber-500/10 backdrop-blur-[2px] border-2 border-dashed border-amber-400/50 shadow-[0_25px_50px_-12px_rgba(245,158,11,0.2)] rounded-lg transition-all duration-200',
             dismissPreview: 'zeugma-dismiss-preview',
+            paneLocked:
+              'border-zinc-300 dark:border-zinc-700/80 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] bg-zinc-500/[0.02] dark:bg-zinc-500/[0.02] rounded-lg overflow-hidden transition-all duration-200',
+            lockedPreview:
+              'bg-rose-500/[0.03] backdrop-blur-[0.5px] border-2 border-dashed border-rose-500/20 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] rounded-lg transition-all duration-200',
           }}
         >
           <div
@@ -728,6 +796,8 @@ export function Demo() {
               onMinSplitPercentageChange={setMinSplit}
               maxSplitPercentage={maxSplit}
               onMaxSplitPercentageChange={setMaxSplit}
+              layoutLocked={layoutLocked}
+              onLayoutLockedChange={setLayoutLocked}
               logs={logs}
               resizableHeight={resizableHeight}
               onResizableHeightChange={setResizableHeight}

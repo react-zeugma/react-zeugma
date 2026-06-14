@@ -7,7 +7,7 @@ import { findPane } from '../../../shared/lib/tree'
 
 interface DropZoneProps {
   id: string
-  position: 'top' | 'bottom' | 'left' | 'right' | 'center'
+  position: 'top' | 'bottom' | 'left' | 'right' | 'center' | 'full'
   activeClassName?: string
 }
 
@@ -56,6 +56,16 @@ const activationPositions: Record<string, React.CSSProperties> = {
     height: '50%',
     zIndex: 20,
     pointerEvents: 'auto',
+  },
+  full: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 20,
+    pointerEvents: 'auto',
+    cursor: 'not-allowed',
   },
 }
 
@@ -110,6 +120,16 @@ const previewPositions: Record<string, React.CSSProperties> = {
     pointerEvents: 'none',
     boxSizing: 'border-box',
   },
+  full: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 21,
+    pointerEvents: 'none',
+    boxSizing: 'border-box',
+  },
 }
 
 const DropZone: React.FC<DropZoneProps> = ({ id, position, activeClassName }) => {
@@ -129,20 +149,38 @@ export interface PaneProps {
   children: (props: PaneRenderProps) => React.ReactNode
   /** Optional inline CSS styles applied to the pane outer container. */
   style?: React.CSSProperties
+  /** Optional override to lock this specific pane. */
+  locked?: boolean
 }
 
-export const Pane: React.FC<PaneProps> = ({ id, children, style }) => {
-  const { layout, activeId, classNames, fullscreenPaneId, onRemove, onFullscreenChange } =
-    useZeugmaState()
+export const Pane: React.FC<PaneProps> = ({ id, children, style, locked: propLocked = false }) => {
+  const {
+    layout,
+    activeId,
+    classNames,
+    fullscreenPaneId,
+    onRemove,
+    onFullscreenChange,
+    locked: globalLocked,
+  } = useZeugmaState()
   const { removePane, updatePaneMetadata } = useZeugmaActions()
-  const showDropZones = activeId !== null && activeId !== id
-
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id })
-  const dragging = activeId === id || isDragging
-  const isFullscreen = fullscreenPaneId === id
 
   const paneNode = useMemo(() => findPane(layout, id), [layout, id])
   const metadata = paneNode?.metadata
+  const localLocked = paneNode?.locked ?? false
+
+  const isPaneLocked = propLocked || localLocked
+  const isDraggableDisabled = globalLocked || isPaneLocked
+  const isDroppableDisabled = globalLocked || isPaneLocked
+
+  const showDropZones = activeId !== null && activeId !== id && !isDroppableDisabled
+
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id,
+    disabled: isDraggableDisabled,
+  })
+  const dragging = activeId === id || isDragging
+  const isFullscreen = fullscreenPaneId === id
 
   const renderProps: PaneRenderProps = useMemo(
     () => ({
@@ -163,6 +201,7 @@ export const Pane: React.FC<PaneProps> = ({ id, children, style }) => {
       updateMetadata: (updater) => {
         updatePaneMetadata(id, updater)
       },
+      locked: isDraggableDisabled,
     }),
     [
       dragging,
@@ -173,23 +212,30 @@ export const Pane: React.FC<PaneProps> = ({ id, children, style }) => {
       removePane,
       metadata,
       updatePaneMetadata,
+      isDraggableDisabled,
     ],
   )
 
   // Best practice: Memoize drag context value to prevent unnecessary re-renders of the drag handle.
-  const contextValue = useMemo(
-    () => ({
+  const contextValue = useMemo(() => {
+    if (isDraggableDisabled) {
+      return { disabled: true }
+    }
+    return {
       ...listeners,
       ...attributes,
-    }),
-    [listeners, attributes],
-  )
+    }
+  }, [listeners, attributes, isDraggableDisabled])
+
+  const paneClass = `${classNames.pane || ''} ${
+    isPaneLocked ? classNames.paneLocked || 'zeugma-pane-locked' : ''
+  }`.trim()
 
   return (
     <DragListenersCtx.Provider value={contextValue}>
       <div
         ref={setNodeRef}
-        className={classNames.pane}
+        className={paneClass}
         style={{ position: 'relative', width: '100%', height: '100%', ...style }}
       >
         {children(renderProps)}
@@ -218,6 +264,26 @@ export const Pane: React.FC<PaneProps> = ({ id, children, style }) => {
               id={`drop-center-${id}`}
               position="center"
               activeClassName={classNames.swapPreview}
+            />
+          </div>
+        )}
+
+        {activeId !== null && activeId !== id && isDroppableDisabled && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 15,
+              pointerEvents: 'none',
+            }}
+          >
+            <DropZone
+              id={`drop-locked-${id}`}
+              position="full"
+              activeClassName={classNames.lockedPreview || 'zeugma-locked-preview'}
             />
           </div>
         )}

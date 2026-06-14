@@ -53,3 +53,19 @@ export function useLatestPointer(activeId: string | null) {
 
   return latestPointerRef
 }
+
+/**
+ * Hook to override the body cursor style when drag/hover operations require a specific global cursor (e.g., not-allowed).
+ */
+export function useBodyCursorOverride(isOverLocked: boolean) {
+  useEffect(() => {
+    if (isOverLocked) {
+      document.body.style.setProperty('cursor', 'not-allowed', 'important')
+    } else {
+      document.body.style.removeProperty('cursor')
+    }
+    return () => {
+      document.body.style.removeProperty('cursor')
+    }
+  }, [isOverLocked])
+}

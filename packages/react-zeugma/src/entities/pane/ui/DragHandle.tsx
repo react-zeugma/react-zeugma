@@ -15,11 +15,18 @@ export const DragHandle: React.FC<DragHandleProps> = ({ children, className, sty
   if (!dragProps) {
     throw new Error('<DragHandle> must be used inside a <Pane>')
   }
+  const { disabled, ...rest } = dragProps
+
   return (
     <div
       className={className}
-      style={{ cursor: 'grab', userSelect: 'none', touchAction: 'none', ...style }}
-      {...dragProps}
+      style={{
+        cursor: disabled ? 'default' : 'grab',
+        userSelect: disabled ? 'auto' : 'none',
+        touchAction: disabled ? 'auto' : 'none',
+        ...style,
+      }}
+      {...(disabled ? {} : rest)}
     >
       {children}
     </div>

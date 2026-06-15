@@ -6,8 +6,8 @@ import { Boxes, MousePointer2, Focus, Layout, ArrowRight, Copy, Check } from 'lu
 import { useScrollAnchor } from '../lib/use-scroll-anchor'
 import dynamic from 'next/dynamic'
 
-const BentoPuzzle = dynamic(
-  () => import('../components/bento-puzzle').then((mod) => ({ default: mod.BentoPuzzle })),
+const ZeugmaPuzzle = dynamic(
+  () => import('../components/zeugma-puzzle').then((mod) => ({ default: mod.ZeugmaPuzzle })),
   {
     ssr: false,
     loading: () => (
@@ -98,7 +98,7 @@ export function Home() {
   }
 
   const { scrollToSection } = useScrollAnchor({
-    sectionIds: ['designed-for-workspace-builders', 'bento-grid-challenge'],
+    sectionIds: ['designed-for-workspace-builders', 'zeugma-mosaic-challenge'],
     offset: 80,
   })
 
@@ -201,21 +201,22 @@ export function Home() {
         </div>
       </section>
 
-      {/* Bento Grid Challenge Section */}
+      {/* Zeugma Mosaic Challenge Section */}
       <section className="py-20 px-6 border-t border-border-primary bg-bg-app relative overflow-hidden z-20">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-indigo-500/2 blur-[120px] rounded-full pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-amber-500/2 blur-[120px] rounded-full pointer-events-none" />
         <div className="max-w-7xl mx-auto text-center relative z-10">
           <h2
-            id="bento-grid-challenge"
+            id="zeugma-mosaic-challenge"
             className="text-3xl sm:text-4xl font-extrabold text-text-primary mb-4 tracking-tight"
           >
-            Can you build a bento grid?
+            Restore the Ancient Mosaics
           </h2>
           <p className="text-text-secondary text-sm max-w-xl mx-auto mb-12">
-            Try splitting the panels and docking cards. Recreate the target blueprint layout below
-            to verify your skills.
+            Zeugma means &ldquo;bridge&rdquo; or &ldquo;junction&rdquo; in Greek. Bring the ancient
+            Roman mosaics of Belkıs/Zeugma back to life by splitting and arranging their fragments
+            into a seamless frame.
           </p>
-          <BentoPuzzle />
+          <ZeugmaPuzzle />
         </div>
       </section>
 

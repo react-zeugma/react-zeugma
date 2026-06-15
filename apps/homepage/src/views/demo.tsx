@@ -1136,8 +1136,6 @@ export function Demo() {
           >
             <SidebarWrapper
               contentRef={scrollContainerRef}
-              layout={zeugma.layout}
-              onLayoutChange={zeugma.setLayout}
               snapThreshold={snapThreshold}
               onSnapThresholdChange={setSnapThreshold}
               minSplitPercentage={minSplit}

@@ -220,3 +220,5 @@ export interface ZeugmaActionsValue {
   /** Stable callback to remove/close a specific tab from the layout. */
   removeTab: (tabId: string) => void
 }
+
+export interface ZeugmaContextValue extends ZeugmaStateValue, ZeugmaActionsValue {}

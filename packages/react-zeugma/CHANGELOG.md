@@ -1,5 +1,12 @@
 # react-zeugma
 
+## 4.1.1
+
+### Patch Changes
+
+- **Support Controlled Layout Property**:
+  - Implemented both controlled (`layout`) and uncontrolled (`initialLayout`) state modes inside the `useZeugma` hook. The hook now operates in controlled mode when the `layout` prop is provided, and in uncontrolled (self-managed) mode using `initialLayout` on mount when it is omitted.
+
 ## 4.1.0
 
 ### Minor Changes

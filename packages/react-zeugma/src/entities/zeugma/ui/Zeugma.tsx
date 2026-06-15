@@ -1,4 +1,5 @@
-import React, { useState, useRef, useMemo, useCallback } from 'react'
+import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import {
   DndContext,
   useSensor,
@@ -7,24 +8,33 @@ import {
   DragEndEvent,
   DragMoveEvent,
   pointerWithin,
+  closestCenter,
+  CollisionDetection,
+  DroppableContainer,
 } from '@dnd-kit/core'
-import { TreeNode, SplitDirection, SplitNode } from '../../../shared/model'
+import { TreeNode, SplitDirection, SplitNode, PaneNode } from '../../../shared/model'
 import {
   removePane,
+  removeTab,
   splitPane,
   swapPanes,
   addPane,
   updateSplitPercentage,
-  updatePaneMetadata,
+  updateTabMetadata,
   findPane,
   updatePaneLock,
+  selectTab,
+  mergeTab,
+  moveTab,
 } from '../../../shared/lib/tree'
 import { DEFAULT_DRAG_ACTIVATION_DISTANCE, DEFAULT_SNAP_THRESHOLD } from '../../../shared/config'
 import {
   ZeugmaStateContext,
   ZeugmaActionsContext,
+  PortalRegistryContext,
   useLatestPointer,
   useBodyCursorOverride,
+  usePortalRegistry,
 } from '../model'
 import { ZeugmaProps } from '../model/types'
 import { CursorOverlay } from './CursorOverlay'
@@ -47,6 +57,7 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
   layout,
   onChange,
   renderPane,
+  renderWidget,
   renderDragOverlay,
   classNames = {},
   fullscreenPaneId = null,
@@ -76,7 +87,10 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
   }
 
   const [activeId, setActiveId] = useState<string | null>(null)
+  const [activeType, setActiveType] = useState<'pane' | 'tab' | null>(null)
   const [dismissIntentId, setDismissIntentId] = useState<string | null>(null)
+
+  const { portalTargets, registerPortalTarget } = usePortalRegistry()
   const containerRef = useRef<HTMLElement | null>(null)
   const containerRectRef = useRef<DOMRect | null>(null)
   const latestPointerRef = useLatestPointer(activeId)
@@ -117,9 +131,26 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
     }),
   )
 
+  const customCollisionDetection = useCallback<CollisionDetection>((args) => {
+    const pointerCollisions = pointerWithin(args)
+    if (pointerCollisions.length > 0) return pointerCollisions
+
+    const activeId = args.active.id.toString()
+    if (activeId.startsWith('tab-header-')) {
+      const tabDroppables = args.droppableContainers.filter((container: DroppableContainer) =>
+        container.id.toString().startsWith('tab-drop-'),
+      )
+      return closestCenter({ ...args, droppableContainers: tabDroppables })
+    }
+    return []
+  }, [])
+
   const handleDragStart = (event: DragStartEvent) => {
-    const draggingId = event.active.id.toString()
+    const rawId = event.active.id.toString()
+    const isTabDrag = rawId.startsWith('tab-header-')
+    const draggingId = isTabDrag ? rawId.substring(11) : rawId
     setActiveId(draggingId)
+    setActiveType(isTabDrag ? 'tab' : 'pane')
 
     const ae = event.activatorEvent
     latestPointerRef.current = getPointerCoordinates(ae)
@@ -142,7 +173,9 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
 
     if (!enableDragToDismiss) return
 
-    const draggingId = event.active.id.toString()
+    const rawId = event.active.id.toString()
+    const isTabDrag = rawId.startsWith('tab-header-')
+    const draggingId = isTabDrag ? rawId.substring(11) : rawId
     const containerRect = containerRectRef.current
 
     if (!containerRect) {
@@ -226,9 +259,12 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
 
   const handleDragEnd = (event: DragEndEvent) => {
     setActiveId(null)
+    setActiveType(null)
     setIsOverLocked(false)
     const { active, over } = event
-    const draggingId = active.id.toString()
+    const rawId = active.id.toString()
+    const isTabDrag = rawId.startsWith('tab-header-')
+    const draggingId = isTabDrag ? rawId.substring(11) : rawId
 
     const wasDismissIntent = enableDragToDismiss && dismissIntentId === draggingId
 
@@ -240,7 +276,7 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
       if (onRemove) {
         onRemove(draggingId)
       } else {
-        handleRemovePane(draggingId)
+        handleRemoveTab(draggingId)
       }
 
       if (onDragEnd) {
@@ -261,6 +297,41 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
     if (overIdStr.startsWith('drop-locked-')) {
       if (onDragEnd) {
         onDragEnd(draggingId, null, null)
+      }
+      return
+    }
+
+    // Check for tab reorder drop
+    const tabDropMatch = overIdStr.match(/^tab-drop-(.+)$/)
+    if (tabDropMatch) {
+      const [, targetTabId] = tabDropMatch
+      if (draggingId !== targetTabId) {
+        let position: 'before' | 'after' = 'before'
+        const overRect = over.rect
+        const ae = event.activatorEvent
+        let px: number | null = null
+        if (latestPointerRef.current) {
+          px = latestPointerRef.current.x
+        } else {
+          const coords = getPointerCoordinates(ae)
+          if (coords) {
+            px = coords.x + event.delta.x
+          }
+        }
+
+        if (px !== null) {
+          const center = overRect.left + overRect.width / 2
+          if (px > center) {
+            position = 'after'
+          }
+        }
+
+        const newLayout = moveTab(localLayout, draggingId, targetTabId, position)
+        setLocalLayout(newLayout)
+        onChange(newLayout)
+      }
+      if (onDragEnd) {
+        onDragEnd(draggingId, targetTabId, { type: 'swap', position: 'center' })
       }
       return
     }
@@ -290,7 +361,11 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
     }
 
     const [, dropZone, targetId] = match
-    if (draggingId === targetId) {
+    const parentPane = findPane(localLayout, draggingId)
+    const isParentTarget = parentPane && parentPane.id === targetId
+    const isOnlyTab = parentPane && parentPane.tabs.length === 1
+
+    if (draggingId === targetId || (isParentTarget && isOnlyTab)) {
       if (onDragEnd) {
         onDragEnd(draggingId, null, null)
       }
@@ -298,11 +373,30 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
     }
 
     const direction: SplitDirection = dropZone === 'left' || dropZone === 'right' ? 'row' : 'column'
-    const draggedPaneNode = findPane(localLayout, draggingId) ?? {
-      type: 'pane',
-      paneId: draggingId,
+
+    let draggedPaneNode: PaneNode
+    if (isTabDrag) {
+      const originalPane = findPane(localLayout, draggingId)
+      const sourceMetadata = originalPane?.tabsMetadata?.[draggingId]
+      draggedPaneNode = {
+        type: 'pane',
+        id: draggingId,
+        tabs: [draggingId],
+        activeTabId: draggingId,
+        tabsMetadata: sourceMetadata ? { [draggingId]: sourceMetadata } : undefined,
+      }
+    } else {
+      draggedPaneNode = findPane(localLayout, draggingId) ?? {
+        type: 'pane',
+        id: draggingId,
+        tabs: [draggingId],
+        activeTabId: draggingId,
+      }
     }
-    const treeWithoutDragging = removePane(localLayout, draggingId)
+
+    const treeWithoutDragging = isTabDrag
+      ? removeTab(localLayout, draggingId)
+      : removePane(localLayout, draggingId)
 
     const newLayout = splitPane(
       treeWithoutDragging,
@@ -368,7 +462,9 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
     ) => {
       const draggedPaneNode = findPane(localLayout, paneToAdd) ?? {
         type: 'pane',
-        paneId: paneToAdd,
+        id: paneToAdd,
+        tabs: [paneToAdd],
+        activeTabId: paneToAdd,
       }
       const treeWithoutDragging = removePane(localLayout, paneToAdd)
       const newLayout = splitPane(
@@ -384,6 +480,42 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
     [localLayout, onChange],
   )
 
+  const handleSelectTab = useCallback(
+    (paneId: string, tabId: string) => {
+      const newLayout = selectTab(localLayout, paneId, tabId)
+      setLocalLayout(newLayout)
+      onChange(newLayout)
+    },
+    [localLayout, onChange],
+  )
+
+  const handleMergeTab = useCallback(
+    (draggedTabId: string, targetPaneId: string) => {
+      const newLayout = mergeTab(localLayout, draggedTabId, targetPaneId)
+      setLocalLayout(newLayout)
+      onChange(newLayout)
+    },
+    [localLayout, onChange],
+  )
+
+  const handleMoveTab = useCallback(
+    (draggedTabId: string, targetTabId: string, position?: 'before' | 'after') => {
+      const newLayout = moveTab(localLayout, draggedTabId, targetTabId, position)
+      setLocalLayout(newLayout)
+      onChange(newLayout)
+    },
+    [localLayout, onChange],
+  )
+
+  const handleRemoveTab = useCallback(
+    (tabId: string) => {
+      const newLayout = removeTab(localLayout, tabId)
+      setLocalLayout(newLayout)
+      onChange(newLayout)
+    },
+    [localLayout, onChange],
+  )
+
   const handleUpdateSplitPercentage = useCallback(
     (currentNode: SplitNode, percentage: number) => {
       const newLayout = updateSplitPercentage(localLayout, currentNode, percentage)
@@ -393,14 +525,14 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
     [localLayout, onChange],
   )
 
-  const handleUpdatePaneMetadata = useCallback(
+  const handleUpdateTabMetadata = useCallback(
     (
-      paneId: string,
+      tabId: string,
       updater: (
         current: Record<string, unknown> | undefined,
       ) => Record<string, unknown> | undefined,
     ) => {
-      const newLayout = updatePaneMetadata(localLayout, paneId, updater)
+      const newLayout = updateTabMetadata(localLayout, tabId, updater)
       setLocalLayout(newLayout)
       onChange(newLayout)
     },
@@ -475,8 +607,12 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
       swapPanes: handleSwapPanes,
       splitPane: handleSplitPane,
       updateSplitPercentage: handleUpdateSplitPercentage,
-      updatePaneMetadata: handleUpdatePaneMetadata,
+      updateTabMetadata: handleUpdateTabMetadata,
       updatePaneLock: handleUpdatePaneLock,
+      selectTab: handleSelectTab,
+      mergeTab: handleMergeTab,
+      moveTab: handleMoveTab,
+      removeTab: handleRemoveTab,
     }),
     [
       handleRemovePane,
@@ -484,36 +620,126 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
       handleSwapPanes,
       handleSplitPane,
       handleUpdateSplitPercentage,
-      handleUpdatePaneMetadata,
+      handleUpdateTabMetadata,
       handleUpdatePaneLock,
+      handleSelectTab,
+      handleMergeTab,
+      handleMoveTab,
+      handleRemoveTab,
     ],
+  )
+
+  // Collect all tab IDs in the current layout tree
+  const allTabIds = useMemo(() => {
+    const ids: string[] = []
+    function traverse(node: TreeNode | null) {
+      if (!node) return
+      if (node.type === 'pane') {
+        ids.push(...node.tabs)
+      } else {
+        traverse(node.first)
+        traverse(node.second)
+      }
+    }
+    traverse(localLayout)
+    return ids
+  }, [localLayout])
+
+  const portalRegistryValue = useMemo(
+    () => ({
+      registerPortalTarget,
+    }),
+    [registerPortalTarget],
   )
 
   return (
     <ZeugmaActionsContext.Provider value={actionsValue}>
       <ZeugmaStateContext.Provider value={stateValue}>
-        <DndContext
-          id="zeugma-dnd-context"
-          sensors={sensors}
-          collisionDetection={pointerWithin}
-          onDragStart={handleDragStart}
-          onDragMove={handleDragMove}
-          onDragEnd={handleDragEnd}
-        >
-          {children}
-        </DndContext>
-        {activeId && renderDragOverlay && (
-          <CursorOverlay
-            activeId={activeId}
-            render={renderDragOverlay}
-            className={`${classNames.dragOverlay || ''} ${
-              activeId === dismissIntentId
-                ? classNames.dismissPreview || 'zeugma-dismiss-preview'
-                : ''
-            }`.trim()}
-          />
-        )}
+        <PortalRegistryContext.Provider value={portalRegistryValue}>
+          <DndContext
+            id="zeugma-dnd-context"
+            sensors={sensors}
+            collisionDetection={customCollisionDetection}
+            onDragStart={handleDragStart}
+            onDragMove={handleDragMove}
+            onDragEnd={handleDragEnd}
+          >
+            {children}
+          </DndContext>
+          {activeId && activeType && renderDragOverlay && (
+            <CursorOverlay
+              activeId={activeId}
+              render={(id) => renderDragOverlay(id, activeType)}
+              className={`${classNames.dragOverlay || ''} ${
+                activeId === dismissIntentId
+                  ? classNames.dismissPreview || 'zeugma-dismiss-preview'
+                  : ''
+              }`.trim()}
+            />
+          )}
+          {/* Transparent Portal Host to preserve widget state across pane drags */}
+          <div id="zeugma-portal-host" style={{ display: 'none' }}>
+            {allTabIds.map((tabId) => (
+              <PortalHostItem
+                key={tabId}
+                tabId={tabId}
+                target={portalTargets[tabId] || null}
+                renderWidget={renderWidget}
+              />
+            ))}
+          </div>
+        </PortalRegistryContext.Provider>
       </ZeugmaStateContext.Provider>
     </ZeugmaActionsContext.Provider>
   )
+}
+
+interface PortalHostItemProps {
+  tabId: string
+  target: HTMLDivElement | null
+  renderWidget?: (tabId: string) => React.ReactNode
+}
+
+const PortalHostItem: React.FC<PortalHostItemProps> = ({ tabId, target, renderWidget }) => {
+  const wrapperRef = useRef<HTMLDivElement | null>(null)
+
+  if (!wrapperRef.current && typeof window !== 'undefined') {
+    wrapperRef.current = document.createElement('div')
+    wrapperRef.current.className = `zeugma-portal-wrapper-${tabId}`
+    wrapperRef.current.style.width = '100%'
+    wrapperRef.current.style.height = '100%'
+  }
+
+  const wrapper = wrapperRef.current
+
+  // Move the stable wrapper in the DOM when the target pane element changes
+  useEffect(() => {
+    if (!wrapper) return
+
+    if (target) {
+      target.appendChild(wrapper)
+    } else {
+      let hiddenContainer = document.getElementById('zeugma-hidden-portal-container')
+      if (!hiddenContainer) {
+        hiddenContainer = document.createElement('div')
+        hiddenContainer.id = 'zeugma-hidden-portal-container'
+        hiddenContainer.style.display = 'none'
+        document.body.appendChild(hiddenContainer)
+      }
+      hiddenContainer.appendChild(wrapper)
+    }
+  }, [target, wrapper])
+
+  // Clean up the DOM element on unmount
+  useEffect(() => {
+    return () => {
+      if (wrapperRef.current) {
+        wrapperRef.current.remove()
+      }
+    }
+  }, [])
+
+  if (!wrapper || !renderWidget) return null
+
+  return createPortal(renderWidget(tabId), wrapper)
 }

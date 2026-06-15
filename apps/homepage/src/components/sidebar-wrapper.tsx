@@ -48,13 +48,28 @@ export const PRESETS: Record<string, { label: string; layout: TreeNode }> = {
       type: 'split',
       direction: 'row',
       splitPercentage: 20,
-      first: { type: 'pane', paneId: 'explorer' },
+      first: {
+        type: 'pane',
+        id: 'explorer',
+        tabs: ['explorer'],
+        activeTabId: 'explorer',
+      },
       second: {
         type: 'split',
         direction: 'row',
         splitPercentage: 50,
-        first: { type: 'pane', paneId: 'editor' },
-        second: { type: 'pane', paneId: 'preview' },
+        first: {
+          type: 'pane',
+          id: 'editor',
+          tabs: ['editor'],
+          activeTabId: 'editor',
+        },
+        second: {
+          type: 'pane',
+          id: 'preview',
+          tabs: ['preview'],
+          activeTabId: 'preview',
+        },
       },
     },
   },
@@ -64,8 +79,18 @@ export const PRESETS: Record<string, { label: string; layout: TreeNode }> = {
       type: 'split',
       direction: 'row',
       splitPercentage: 50,
-      first: { type: 'pane', paneId: 'editor' },
-      second: { type: 'pane', paneId: 'preview' },
+      first: {
+        type: 'pane',
+        id: 'editor',
+        tabs: ['editor'],
+        activeTabId: 'editor',
+      },
+      second: {
+        type: 'pane',
+        id: 'preview',
+        tabs: ['preview'],
+        activeTabId: 'preview',
+      },
     },
   },
   'heavy-ui': {
@@ -80,13 +105,21 @@ export const PRESETS: Record<string, { label: string; layout: TreeNode }> = {
         splitPercentage: 50,
         first: {
           type: 'pane',
-          paneId: 'heavy-analytics',
-          metadata: { title: 'Analytics Dashboard', color: 'indigo' },
+          id: 'heavy-analytics',
+          tabs: ['heavy-analytics'],
+          activeTabId: 'heavy-analytics',
+          tabsMetadata: {
+            'heavy-analytics': { title: 'Analytics Dashboard', color: 'indigo' },
+          },
         },
         second: {
           type: 'pane',
-          paneId: 'heavy-conversions',
-          metadata: { title: 'Conversion Funnel', color: 'violet' },
+          id: 'heavy-conversions',
+          tabs: ['heavy-conversions'],
+          activeTabId: 'heavy-conversions',
+          tabsMetadata: {
+            'heavy-conversions': { title: 'Conversion Funnel', color: 'violet' },
+          },
         },
       },
       second: {
@@ -99,13 +132,21 @@ export const PRESETS: Record<string, { label: string; layout: TreeNode }> = {
           splitPercentage: 55,
           first: {
             type: 'pane',
-            paneId: 'heavy-transactions',
-            metadata: { title: 'Recent Transactions', color: 'emerald' },
+            id: 'heavy-transactions',
+            tabs: ['heavy-transactions'],
+            activeTabId: 'heavy-transactions',
+            tabsMetadata: {
+              'heavy-transactions': { title: 'Recent Transactions', color: 'emerald' },
+            },
           },
           second: {
             type: 'pane',
-            paneId: 'heavy-tasks',
-            metadata: { title: 'Development Tasks', color: 'amber' },
+            id: 'heavy-tasks',
+            tabs: ['heavy-tasks'],
+            activeTabId: 'heavy-tasks',
+            tabsMetadata: {
+              'heavy-tasks': { title: 'Development Tasks', color: 'amber' },
+            },
           },
         },
         second: {
@@ -114,8 +155,12 @@ export const PRESETS: Record<string, { label: string; layout: TreeNode }> = {
           splitPercentage: 33.3,
           first: {
             type: 'pane',
-            paneId: 'heavy-performance',
-            metadata: { title: 'Performance Monitor', color: 'sky' },
+            id: 'heavy-performance',
+            tabs: ['heavy-performance'],
+            activeTabId: 'heavy-performance',
+            tabsMetadata: {
+              'heavy-performance': { title: 'Performance Monitor', color: 'sky' },
+            },
           },
           second: {
             type: 'split',
@@ -123,13 +168,21 @@ export const PRESETS: Record<string, { label: string; layout: TreeNode }> = {
             splitPercentage: 50,
             first: {
               type: 'pane',
-              paneId: 'heavy-system',
-              metadata: { title: 'System Status', color: 'rose' },
+              id: 'heavy-system',
+              tabs: ['heavy-system'],
+              activeTabId: 'heavy-system',
+              tabsMetadata: {
+                'heavy-system': { title: 'System Status', color: 'rose' },
+              },
             },
             second: {
               type: 'pane',
-              paneId: 'heavy-gallery',
-              metadata: { title: 'Media Assets', color: 'sky' },
+              id: 'heavy-gallery',
+              tabs: ['heavy-gallery'],
+              activeTabId: 'heavy-gallery',
+              tabsMetadata: {
+                'heavy-gallery': { title: 'Media Assets', color: 'sky' },
+              },
             },
           },
         },
@@ -148,13 +201,21 @@ export const PRESETS: Record<string, { label: string; layout: TreeNode }> = {
         splitPercentage: 50,
         first: {
           type: 'pane',
-          paneId: 'heavy-analytics',
-          metadata: { title: 'Analytics Dashboard', color: 'indigo' },
+          id: 'heavy-analytics',
+          tabs: ['heavy-analytics'],
+          activeTabId: 'heavy-analytics',
+          tabsMetadata: {
+            'heavy-analytics': { title: 'Analytics Dashboard', color: 'indigo' },
+          },
         },
         second: {
           type: 'pane',
-          paneId: 'heavy-conversions',
-          metadata: { title: 'Conversion Funnel', color: 'violet' },
+          id: 'heavy-conversions',
+          tabs: ['heavy-conversions'],
+          activeTabId: 'heavy-conversions',
+          tabsMetadata: {
+            'heavy-conversions': { title: 'Conversion Funnel', color: 'violet' },
+          },
         },
       },
       second: {
@@ -167,13 +228,21 @@ export const PRESETS: Record<string, { label: string; layout: TreeNode }> = {
           splitPercentage: 50,
           first: {
             type: 'pane',
-            paneId: 'heavy-transactions',
-            metadata: { title: 'Recent Transactions', color: 'emerald' },
+            id: 'heavy-transactions',
+            tabs: ['heavy-transactions'],
+            activeTabId: 'heavy-transactions',
+            tabsMetadata: {
+              'heavy-transactions': { title: 'Recent Transactions', color: 'emerald' },
+            },
           },
           second: {
             type: 'pane',
-            paneId: 'heavy-performance',
-            metadata: { title: 'Performance Monitor', color: 'sky' },
+            id: 'heavy-performance',
+            tabs: ['heavy-performance'],
+            activeTabId: 'heavy-performance',
+            tabsMetadata: {
+              'heavy-performance': { title: 'Performance Monitor', color: 'sky' },
+            },
           },
         },
         second: {
@@ -186,13 +255,21 @@ export const PRESETS: Record<string, { label: string; layout: TreeNode }> = {
             splitPercentage: 50,
             first: {
               type: 'pane',
-              paneId: 'heavy-system',
-              metadata: { title: 'System Status', color: 'rose' },
+              id: 'heavy-system',
+              tabs: ['heavy-system'],
+              activeTabId: 'heavy-system',
+              tabsMetadata: {
+                'heavy-system': { title: 'System Status', color: 'rose' },
+              },
             },
             second: {
               type: 'pane',
-              paneId: 'heavy-tasks',
-              metadata: { title: 'Development Tasks', color: 'amber' },
+              id: 'heavy-tasks',
+              tabs: ['heavy-tasks'],
+              activeTabId: 'heavy-tasks',
+              tabsMetadata: {
+                'heavy-tasks': { title: 'Development Tasks', color: 'amber' },
+              },
             },
           },
           second: {
@@ -201,13 +278,21 @@ export const PRESETS: Record<string, { label: string; layout: TreeNode }> = {
             splitPercentage: 50,
             first: {
               type: 'pane',
-              paneId: 'heavy-gallery',
-              metadata: { title: 'Media Assets', color: 'sky' },
+              id: 'heavy-gallery',
+              tabs: ['heavy-gallery'],
+              activeTabId: 'heavy-gallery',
+              tabsMetadata: {
+                'heavy-gallery': { title: 'Media Assets', color: 'sky' },
+              },
             },
             second: {
               type: 'pane',
-              paneId: 'explorer',
-              metadata: { title: 'File Explorer', color: 'indigo' },
+              id: 'explorer',
+              tabs: ['explorer'],
+              activeTabId: 'explorer',
+              tabsMetadata: {
+                explorer: { title: 'File Explorer', color: 'indigo' },
+              },
             },
           },
         },

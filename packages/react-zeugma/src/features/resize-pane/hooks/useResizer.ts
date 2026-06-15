@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react'
 import { TreeNode, SplitNode, SplitDirection } from '../../../shared/model'
-import { updateSplitPercentage } from '../../../shared/lib/tree'
+import { updateSplitPercentage, computeLayout } from '../../../shared/lib/tree'
 import { createDragSession } from '../../../shared/lib/drag-session'
 import { useZeugmaState } from '../../../entities/zeugma'
 
@@ -130,9 +130,26 @@ export function useResizer({
           )
           currentPercentage = finalPercentage
 
-          // Update React layout state live on every move event
+          // Update styles live on the DOM container via CSS Variables (avoiding React re-renders)
           const newLayout = updateSplitPercentage(layout, currentNode, finalPercentage)
-          onLayoutChange(newLayout, true)
+          if (newLayout) {
+            const { panes: newPanes, splitters: newSplitters } = computeLayout(newLayout)
+            const container = containerRef.current
+            if (container) {
+              for (const pane of newPanes) {
+                container.style.setProperty(`--pane-left-${pane.paneId}`, `${pane.left}%`)
+                container.style.setProperty(`--pane-top-${pane.paneId}`, `${pane.top}%`)
+                container.style.setProperty(`--pane-width-${pane.paneId}`, `${pane.width}%`)
+                container.style.setProperty(`--pane-height-${pane.paneId}`, `${pane.height}%`)
+              }
+              for (const spl of newSplitters) {
+                container.style.setProperty(
+                  `--splitter-pos-${spl.id}`,
+                  `${spl.direction === 'row' ? spl.left : spl.top}%`,
+                )
+              }
+            }
+          }
 
           if (globalOnResize) {
             globalOnResize(currentNode, finalPercentage)
@@ -140,6 +157,22 @@ export function useResizer({
         },
         onEnd: () => {
           const finalLayout = updateSplitPercentage(layout, currentNode, currentPercentage)
+
+          // Clean up CSS variables on resize end
+          const container = containerRef.current
+          if (container) {
+            const { panes: newPanes, splitters: newSplitters } = computeLayout(finalLayout)
+            for (const pane of newPanes) {
+              container.style.removeProperty(`--pane-left-${pane.paneId}`)
+              container.style.removeProperty(`--pane-top-${pane.paneId}`)
+              container.style.removeProperty(`--pane-width-${pane.paneId}`)
+              container.style.removeProperty(`--pane-height-${pane.paneId}`)
+            }
+            for (const spl of newSplitters) {
+              container.style.removeProperty(`--splitter-pos-${spl.id}`)
+            }
+          }
+
           onLayoutChange(finalLayout)
 
           if (localOnResizeEnd) {

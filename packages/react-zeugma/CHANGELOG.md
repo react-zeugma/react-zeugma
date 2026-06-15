@@ -1,5 +1,22 @@
 # react-zeugma
 
+## 3.0.0
+
+### Major Changes
+
+- **Tabbed Panes (Tabulation) & High-Performance Layout Engine**:
+  - **First-Class Tabbed Panes**: Added support for multi-tab panels/panes. Panes can now hold multiple tabs, with support for tab selection, closing, and updating tab-specific metadata.
+  - **Clean, Encapsulated APIs**: Introduced a custom `<Tab>` wrapper component that handles all `@dnd-kit` drag-and-drop mechanics internally. Consumers can build custom tabbed layouts without importing or dealing with the underlying DND hooks.
+  - **Drag-to-Reorder, Tabulate & Split**: Implemented intuitive tab drag gestures:
+    - Reorder tabs by dragging them horizontally within their pane.
+    - Merge tabs between panes by dragging one tab onto the header bar dropzone of another pane.
+    - Split a tab off from a tab group to form side-by-side or stacked pane splits by dropping on its outer borders.
+  - **Parent Split Guard**: Enabled parent pane splitting for multi-tab pane groups, accompanied by a guard in the drop handler that blocks splitting single-tab panes (avoiding node deletion issues).
+  - **Tab Drop Fallback**: Implemented a custom hybrid collision detection callback that checks if the pointer is within any active drop zone, falling back to `closestCenter` restricted to `tab-drop-` elements when dragging tab headers. This allows dragging and drop-reordering tabs to the end of lists (into empty tab bar space).
+  - **CSS Custom Property Resizing**: Offloaded active pane resizing to CSS Custom Properties (`--pane-left-${id}`, etc.) set dynamically on the parent container. Size modifications bypass intermediate React rendering entirely, committing to the React tree state exactly once at gesture end (`pointerup`).
+  - **Widget Caching**: Integrated `MemoizedPaneContent` wrapper in `<PaneTree>` to cache layout widget contents. This isolates user-rendered panels (like tables, editors, charts) from executing React render cycles during layout resizes and transitions.
+  - **Refactored Calculations**: Consolidated layout bounding box calculations (`computeLayout`) into pure shared utilities in `tree-helpers.ts` for cleaner separation of concerns.
+
 ## 2.3.0
 
 ### Minor Changes

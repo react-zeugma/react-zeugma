@@ -105,7 +105,7 @@ The context provider that sets up the drag-and-drop state machine, monitors acti
 | `renderPane`             | `(paneId: string) => ReactNode`                                       | Yes      | Renderer function lookup that returns a `<Pane>` structure.                                                               |
 | `classNames`             | `ZeugmaClassNames`                                                    | No       | Custom classes for overriding pane, resizer, and drop preview overlays.                                                   |
 | `fullscreenPaneId`       | `string \| null`                                                      | No       | Active ID of the pane taking full viewport coverage.                                                                      |
-| `renderDragOverlay`      | `(activeId: string) => ReactNode`                                     | No       | Renders a custom cursor-following drag preview overlay.                                                                   |
+| `renderDragOverlay`      | `(activeId: string, type: 'pane' \| 'tab') => ReactNode`              | No       | Renders a custom cursor-following drag preview overlay.                                                                   |
 | `onFullscreenChange`     | `(paneId: string \| null) => void`                                    | No       | Callback triggered when a pane enters or leaves fullscreen.                                                               |
 | `onRemove`               | `(paneId: string) => void`                                            | No       | Callback triggered when a pane is closed/removed from the layout tree.                                                    |
 | `dragActivationDistance` | `number`                                                              | No       | Minimum pointer drag distance (in pixels) required to activate dragging. Defaults to `8`.                                 |
@@ -119,6 +119,7 @@ The context provider that sets up the drag-and-drop state machine, monitors acti
 | `onResizeEnd`            | `(currentNode: SplitNode, percentage: number) => void`                | No       | Callback triggered when resizing ends on a split node.                                                                    |
 | `minSplitPercentage`     | `number`                                                              | No       | Minimum resizing limit percentage. Defaults to `5`.                                                                       |
 | `maxSplitPercentage`     | `number`                                                              | No       | Maximum resizing limit percentage. Defaults to `95`.                                                                      |
+| `renderWidget`           | `(tabId: string) => ReactNode`                                        | No       | Render function mapping tab IDs to React elements. Used to render tab widgets inside portals.                             |
 
 ### `<PaneTree>`
 
@@ -140,12 +141,13 @@ Wraps the individual pane components inside the renderer. Utilizes a render prop
 
 #### Render Props: `PaneRenderProps`
 
-| Parameter          | Type         | Description                                                   |
-| ------------------ | ------------ | ------------------------------------------------------------- |
-| `isDragging`       | `boolean`    | Returns `true` if the node wrapper is actively being dragged. |
-| `isFullscreen`     | `boolean`    | Returns `true` if the pane is zoomed/fullscreen.              |
-| `toggleFullscreen` | `() => void` | Callback to toggle fullscreen viewport coverage.              |
-| `remove`           | `() => void` | Triggers removal of this pane from the layout tree.           |
+| Parameter          | Type              | Description                                                                      |
+| ------------------ | ----------------- | -------------------------------------------------------------------------------- |
+| `isDragging`       | `boolean`         | Returns `true` if the node wrapper is actively being dragged.                    |
+| `isFullscreen`     | `boolean`         | Returns `true` if the pane is zoomed/fullscreen.                                 |
+| `toggleFullscreen` | `() => void`      | Callback to toggle fullscreen viewport coverage.                                 |
+| `remove`           | `() => void`      | Triggers removal of this pane from the layout tree.                              |
+| `renderActiveTab`  | `() => ReactNode` | Renders the target placeholder element for the currently active tab in the pane. |
 
 ### `<DragHandle>`
 
@@ -267,6 +269,16 @@ export interface PaneRenderProps {
   updateMetadata: (
     updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined,
   ) => void
+  tabs: string[]
+  activeTabId: string
+  selectTab: (tabId: string) => void
+  removeTab: (tabId: string) => void
+  tabsMetadata: Record<string, Record<string, unknown>> | undefined
+  updateTabMetadata: (
+    tabId: string,
+    updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined,
+  ) => void
+  renderActiveTab: () => ReactNode
 }
 
 export interface ZeugmaStateValue {
@@ -299,10 +311,15 @@ export interface ZeugmaActionsValue {
     paneToAdd: string,
   ) => void
   updateSplitPercentage: (currentNode: SplitNode, percentage: number) => void
-  updatePaneMetadata: (
-    paneId: string,
+  updateTabMetadata: (
+    tabId: string,
     updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined,
   ) => void
+  updatePaneLock: (paneId: string, locked: boolean) => void
+  selectTab: (paneId: string, tabId: string) => void
+  mergeTab: (draggedTabId: string, targetPaneId: string) => void
+  moveTab: (draggedTabId: string, targetTabId: string, position?: 'before' | 'after') => void
+  removeTab: (tabId: string) => void
 }
 ```
 
@@ -366,7 +383,7 @@ The root context provider. It handles the drag-and-drop event loop and coordinat
 - `layout: TreeNode | null` — The current dashboard layout tree.
 - `onChange: (newLayout: TreeNode | null) => void` — Callback triggered when the layout tree changes (resizing, dragging to split, dragging to swap).
 - `renderPane: (paneId: string) => ReactNode` — Callback to render the contents of a pane given its ID.
-- `renderDragOverlay?: (activeId: string) => ReactNode` — (Optional) Renders a custom cursor-following drag preview.
+- `renderDragOverlay?: (activeId: string, type: 'pane' | 'tab') => ReactNode` — (Optional) Renders a custom cursor-following drag preview.
 - `classNames?: ZeugmaClassNames` — (Optional) CSS class overrides for styling various layout elements.
 - `fullscreenPaneId?: string | null` — (Optional) ID of the pane currently in fullscreen mode.
 - `onFullscreenChange?: (paneId: string | null) => void` — (Optional) Callback triggered when a pane enters/leaves fullscreen.
@@ -382,6 +399,7 @@ The root context provider. It handles the drag-and-drop event loop and coordinat
 - `onResizeEnd?: (currentNode: SplitNode, percentage: number) => void` — (Optional) Callback triggered when resizing ends.
 - `minSplitPercentage?: number` — (Optional) Minimum resizing limit percentage (defaults to `5`).
 - `maxSplitPercentage?: number` — (Optional) Maximum resizing limit percentage (defaults to `95`).
+- `renderWidget?: (tabId: string) => ReactNode` — (Optional) Render function mapping tab IDs to React elements. Used to render tab widgets inside portals.
 
 ### `<PaneTree>`
 
@@ -413,6 +431,16 @@ interface PaneRenderProps {
   updateMetadata: (
     updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined,
   ) => void
+  tabs: string[]
+  activeTabId: string
+  selectTab: (tabId: string) => void
+  removeTab: (tabId: string) => void
+  tabsMetadata: Record<string, Record<string, unknown>> | undefined
+  updateTabMetadata: (
+    tabId: string,
+    updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined,
+  ) => void
+  renderActiveTab: () => ReactNode
 }
 ```
 
@@ -454,8 +482,8 @@ Import these helpers from `react-zeugma` to manipulate the tree layout programma
   Splits a specific target pane by nesting it under a new `SplitNode` along with a new pane.
 - **`swapPanes(tree: TreeNode | null, idA: string, idB: string): TreeNode | null`**
   Swaps the positions of two panes in the tree.
-- **`updatePaneMetadata(tree: TreeNode | null, paneId: string, updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined): TreeNode | null`**
-  Updates the metadata of a specific pane.
+- **`updateTabMetadata(tree: TreeNode | null, tabId: string, updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined): TreeNode | null`**
+  Updates the metadata of a specific tab.
 - **`findPane(tree: TreeNode | null, paneId: string): PaneNode | null`**
   Recursively searches the layout tree and returns the target `PaneNode` if found, or `null` otherwise.
 
@@ -471,7 +499,12 @@ The actions returned by `useZeugmaActions()` are:
 - **`swapPanes(paneIdA: string, paneIdB: string) => void`**
 - **`splitPane(targetId: string, direction: SplitDirection, splitType: string, paneToAdd: string) => void`**
 - **`updateSplitPercentage(currentNode: SplitNode, percentage: number) => void`**
-- **`updatePaneMetadata(paneId: string, updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined) => void`**
+- **`updateTabMetadata(tabId: string, updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined) => void`**
+- **`updatePaneLock(paneId: string, locked: boolean) => void`**
+- **`selectTab(paneId: string, tabId: string) => void`**
+- **`mergeTab(draggedTabId: string, targetPaneId: string) => void`**
+- **`moveTab(draggedTabId: string, targetTabId: string, position?: 'before' | 'after') => void`**
+- **`removeTab(tabId: string) => void`**
 
 ---
 

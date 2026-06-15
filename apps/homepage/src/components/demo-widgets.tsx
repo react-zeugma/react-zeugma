@@ -267,7 +267,6 @@ export const TabHeaderContent = ({
   selectTab,
   removeTab,
   isDragging,
-  isOver,
 }: {
   tabId: string
   activeTabId: string
@@ -276,7 +275,6 @@ export const TabHeaderContent = ({
   selectTab: (id: string) => void
   removeTab: (id: string) => void
   isDragging: boolean
-  isOver: boolean
 }) => {
   const isActive = tabId === activeTabId
   const { title: defaultTitle, icon } = getWidgetDetails(tabId)
@@ -304,9 +302,7 @@ export const TabHeaderContent = ({
         isActive
           ? 'bg-bg-pane text-text-primary border-b-2 ' + activeColorClass
           : 'bg-bg-sidebar/50 text-text-muted hover:text-text-secondary hover:bg-bg-sidebar/80 border-b-transparent'
-      } ${isOver ? 'bg-indigo-500/10 border-l-2 border-l-indigo-500 animate-pulse' : ''} ${
-        isDragging ? 'opacity-40' : ''
-      }`}
+      } ${isDragging ? 'opacity-40' : ''}`}
     >
       <span className="flex items-center gap-1.5 min-w-0 pointer-events-none flex-1">
         {icon && <span className="shrink-0 flex items-center">{icon}</span>}

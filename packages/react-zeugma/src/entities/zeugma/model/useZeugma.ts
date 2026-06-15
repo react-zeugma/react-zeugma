@@ -1,6 +1,11 @@
 import { useState, useRef, useEffect, useCallback, SetStateAction } from 'react'
-import { TreeNode, SplitDirection, SplitNode } from '../../../shared/model'
-import { UseZeugmaOptions, ZeugmaController } from './types'
+import {
+  TreeNode,
+  SplitDirection,
+  SplitNode,
+  UseZeugmaOptions,
+  ZeugmaController,
+} from '../../../shared'
 import { DEFAULT_DRAG_ACTIVATION_DISTANCE, DEFAULT_SNAP_THRESHOLD } from '../../../shared/config'
 import {
   removePane,
@@ -13,7 +18,8 @@ import {
   mergeTab,
   moveTab,
   removeTab,
-  findPane,
+  findPaneById,
+  findPaneContainingTab,
   safeJsonStringify,
 } from '../../../shared/lib'
 
@@ -138,14 +144,18 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
         splitType: 'left' | 'right' | 'top' | 'bottom',
         paneToAdd: string,
       ) => {
-        const draggedPaneNode = findPane(prev, paneToAdd) ?? {
-          type: 'pane',
-          id: paneToAdd,
-          tabs: [paneToAdd],
-          activeTabId: paneToAdd,
-        }
+        const targetPane = findPaneById(prev, targetId) ?? findPaneContainingTab(prev, targetId)
+        if (!targetPane) return prev
+
+        const draggedPaneNode = findPaneById(prev, paneToAdd) ??
+          findPaneContainingTab(prev, paneToAdd) ?? {
+            type: 'pane',
+            id: paneToAdd,
+            tabs: [paneToAdd],
+            activeTabId: paneToAdd,
+          }
         const treeWithoutDragging = removePane(prev, paneToAdd)
-        return splitPane(treeWithoutDragging, targetId, direction, splitType, draggedPaneNode)
+        return splitPane(treeWithoutDragging, targetPane.id, direction, splitType, draggedPaneNode)
       },
     ),
     [wrapMutation],
@@ -172,21 +182,30 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
   )
 
   const handleUpdatePaneLock = useCallback(
-    wrapMutation((prev, paneId: string, isLocked: boolean) =>
-      updatePaneLock(prev, paneId, isLocked),
-    ),
+    wrapMutation((prev, paneId: string, isLocked: boolean) => {
+      const targetPane = findPaneById(prev, paneId) ?? findPaneContainingTab(prev, paneId)
+      if (!targetPane) return prev
+      return updatePaneLock(prev, targetPane.id, isLocked)
+    }),
     [wrapMutation],
   )
 
   const handleSelectTab = useCallback(
-    wrapMutation((prev, paneId: string, tabId: string) => selectTab(prev, paneId, tabId)),
+    wrapMutation((prev, paneId: string, tabId: string) => {
+      const targetPane = findPaneById(prev, paneId) ?? findPaneContainingTab(prev, paneId)
+      if (!targetPane) return prev
+      return selectTab(prev, targetPane.id, tabId)
+    }),
     [wrapMutation],
   )
 
   const handleMergeTab = useCallback(
-    wrapMutation((prev, draggedTabId: string, targetPaneId: string) =>
-      mergeTab(prev, draggedTabId, targetPaneId),
-    ),
+    wrapMutation((prev, draggedTabId: string, targetPaneId: string) => {
+      const targetPane =
+        findPaneById(prev, targetPaneId) ?? findPaneContainingTab(prev, targetPaneId)
+      if (!targetPane) return prev
+      return mergeTab(prev, draggedTabId, targetPane.id)
+    }),
     [wrapMutation],
   )
 
@@ -246,5 +265,5 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
     mergeTab: handleMergeTab,
     moveTab: handleMoveTab,
     removeTab: handleRemoveTab,
-  }
+  } as unknown as ZeugmaController
 }

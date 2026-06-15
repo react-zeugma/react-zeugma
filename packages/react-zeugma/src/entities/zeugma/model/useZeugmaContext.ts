@@ -1,5 +1,4 @@
-import { useZeugmaState, useZeugmaActions } from './hooks'
-import { ZeugmaContextValue } from './types'
+import { useZeugmaState, useZeugmaActions, ZeugmaContextValue } from '../../../shared'
 
 export const useZeugmaContext = (): ZeugmaContextValue => {
   const state = useZeugmaState()

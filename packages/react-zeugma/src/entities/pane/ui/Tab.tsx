@@ -1,6 +1,6 @@
 import React from 'react'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
-import { useZeugmaState } from '../../zeugma'
+import { useZeugmaState, ZeugmaInternalStateValue } from '../../../shared'
 
 export interface TabRenderProps {
   isDragging: boolean
@@ -21,7 +21,12 @@ export interface TabProps {
 }
 
 export const Tab: React.FC<TabProps> = ({ id, locked = false, children, className, style }) => {
-  const { locked: globalLocked } = useZeugmaState()
+  const {
+    locked: globalLocked,
+    classNames = {},
+    overTabId,
+    overTabPosition,
+  } = useZeugmaState() as ZeugmaInternalStateValue
   const isLocked = locked || globalLocked
 
   const {
@@ -44,19 +49,40 @@ export const Tab: React.FC<TabProps> = ({ id, locked = false, children, classNam
     setDropRef(el)
   }
 
+  const isTargetOver = isOver && overTabId === id
+  const dropPosition = isTargetOver ? overTabPosition : null
+
   return (
     <div
       ref={handleRef}
       className={className}
       style={{
         display: 'inline-flex',
+        position: 'relative',
         cursor: isLocked ? 'default' : 'grab',
         ...style,
       }}
       {...(isLocked ? {} : listeners)}
       {...(isLocked ? {} : attributes)}
     >
-      {children({ isDragging, isOver })}
+      {children({ isDragging, isOver: isTargetOver })}
+
+      {isTargetOver && dropPosition && (
+        <div
+          className={classNames.tabDropPreview || ''}
+          style={{
+            position: 'absolute',
+            top: 0,
+            bottom: 0,
+            width: '2px',
+            backgroundColor: '#6366f1',
+            left: dropPosition === 'before' ? 0 : undefined,
+            right: dropPosition === 'after' ? 0 : undefined,
+            pointerEvents: 'none',
+            zIndex: 10,
+          }}
+        />
+      )}
     </div>
   )
 }

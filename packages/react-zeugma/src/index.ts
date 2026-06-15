@@ -5,7 +5,7 @@ export type {
   UseZeugmaOptions,
   ZeugmaController,
   ZeugmaContextValue,
-} from './entities/zeugma'
+} from './shared'
 export { useZeugma, useZeugmaContext } from './entities/zeugma'
 export { useResizer } from './features/resize-pane'
 export { PaneTree } from './widgets/pane-tree'

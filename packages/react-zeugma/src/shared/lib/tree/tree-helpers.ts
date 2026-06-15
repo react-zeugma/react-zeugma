@@ -68,7 +68,7 @@ export function splitPane(
     return paneToAdd
   }
   if (tree.type === 'pane') {
-    if (tree.id === targetId || tree.tabs.includes(targetId)) {
+    if (tree.id === targetId) {
       const addedNode: PaneNode =
         typeof paneToAdd === 'string'
           ? { type: 'pane', id: generateUniqueId(), tabs: [paneToAdd], activeTabId: paneToAdd }
@@ -143,14 +143,25 @@ export function updateSplitPercentage(
 }
 
 /**
- * Find a PaneNode by its ID or by any of its tab IDs.
+ * Find a PaneNode by its ID.
  */
-export function findPane(tree: TreeNode | null, paneId: string): PaneNode | null {
+export function findPaneById(tree: TreeNode | null, paneId: string): PaneNode | null {
   if (tree === null) return null
   if (tree.type === 'pane') {
-    return tree.id === paneId || tree.tabs.includes(paneId) ? tree : null
+    return tree.id === paneId ? tree : null
   }
-  return findPane(tree.first, paneId) ?? findPane(tree.second, paneId)
+  return findPaneById(tree.first, paneId) ?? findPaneById(tree.second, paneId)
+}
+
+/**
+ * Find a PaneNode containing the given tab ID.
+ */
+export function findPaneContainingTab(tree: TreeNode | null, tabId: string): PaneNode | null {
+  if (tree === null) return null
+  if (tree.type === 'pane') {
+    return tree.tabs.includes(tabId) ? tree : null
+  }
+  return findPaneContainingTab(tree.first, tabId) ?? findPaneContainingTab(tree.second, tabId)
 }
 
 /**
@@ -163,7 +174,7 @@ export function updateTabMetadata(
 ): TreeNode | null {
   if (tree === null) return null
   if (tree.type === 'pane') {
-    if (tree.id === tabId || tree.tabs.includes(tabId)) {
+    if (tree.tabs.includes(tabId)) {
       const currentTabsMetadata = tree.tabsMetadata || {}
       const currentTabMeta = currentTabsMetadata[tabId]
       const newTabMeta = updater(currentTabMeta)
@@ -199,7 +210,7 @@ export function updatePaneLock(
 ): TreeNode | null {
   if (tree === null) return null
   if (tree.type === 'pane') {
-    if (tree.id === paneId || tree.tabs.includes(paneId)) {
+    if (tree.id === paneId) {
       if (locked === false) {
         const { locked: _, ...rest } = tree
         return rest as PaneNode
@@ -221,7 +232,7 @@ export function updatePaneLock(
 export function selectTab(tree: TreeNode | null, paneId: string, tabId: string): TreeNode | null {
   if (tree === null) return null
   if (tree.type === 'pane') {
-    if (tree.id === paneId || tree.tabs.includes(paneId)) {
+    if (tree.id === paneId) {
       return { ...tree, activeTabId: tabId }
     }
     return tree
@@ -243,7 +254,7 @@ export function mergeTab(
 ): TreeNode | null {
   if (tree === null) return null
 
-  const sourcePane = findPane(tree, draggedTabId)
+  const sourcePane = findPaneContainingTab(tree, draggedTabId)
   const sourceMetadata = sourcePane?.tabsMetadata?.[draggedTabId]
 
   const cleanTree = removeTab(tree, draggedTabId)
@@ -259,7 +270,7 @@ export function mergeTab(
 
   function insert(node: TreeNode): TreeNode {
     if (node.type === 'pane') {
-      if (node.id === targetPaneId || node.tabs.includes(targetPaneId)) {
+      if (node.id === targetPaneId) {
         const newTabs = [...node.tabs]
         if (!newTabs.includes(draggedTabId)) {
           newTabs.push(draggedTabId)
@@ -298,7 +309,7 @@ export function moveTab(
 ): TreeNode | null {
   if (tree === null) return null
 
-  const sourcePane = findPane(tree, draggedTabId)
+  const sourcePane = findPaneContainingTab(tree, draggedTabId)
   const sourceMetadata = sourcePane?.tabsMetadata?.[draggedTabId]
 
   const cleanTree = removeTab(tree, draggedTabId)
@@ -314,7 +325,7 @@ export function moveTab(
 
   function insert(node: TreeNode): TreeNode {
     if (node.type === 'pane') {
-      if (node.id === targetTabId || node.tabs.includes(targetTabId)) {
+      if (node.tabs.includes(targetTabId)) {
         const newTabs = [...node.tabs]
         const filteredTabs = newTabs.filter((t) => t !== draggedTabId)
         let insertIndex = filteredTabs.indexOf(targetTabId)

@@ -1,7 +1,7 @@
 import React, { useRef, useMemo, useState } from 'react'
-import { useZeugmaState } from '../../../entities/zeugma'
+import { useZeugmaState, ZeugmaInternalStateValue } from '../../../shared'
 import { useResizer } from '../../../features/resize-pane'
-import { TreeNode } from '../../../shared/model'
+import { TreeNode } from '../../../shared'
 import { ComputedSplitter, computeLayout } from '../../../shared/lib/tree'
 
 export interface PaneTreeProps {
@@ -26,7 +26,7 @@ const FlatSplitter: React.FC<FlatSplitterProps> = ({
   snapThreshold,
   containerRef,
 }) => {
-  const { layout, onLayoutChange, classNames, locked } = useZeugmaState()
+  const { layout, setLayout, classNames, locked } = useZeugmaState() as ZeugmaInternalStateValue
   const [isResizing, setIsResizing] = useState(false)
 
   const {
@@ -53,7 +53,7 @@ const FlatSplitter: React.FC<FlatSplitterProps> = ({
     snapThreshold,
     layout,
     currentNode,
-    onLayoutChange,
+    onLayoutChange: setLayout,
     onResizeStart: () => setIsResizing(true),
     onResizeEnd: () => setIsResizing(false),
     parentLeft,
@@ -92,7 +92,7 @@ const FlatSplitter: React.FC<FlatSplitterProps> = ({
 
   return (
     <div
-      className={`zeugma-resizer ${classNames.resizer || ''}`.trim()}
+      className={classNames.resizer || ''}
       data-direction={direction}
       data-resizing={isResizing || undefined}
       style={style}
@@ -127,7 +127,7 @@ export const PaneTree: React.FC<PaneTreeProps> = ({
     snapThreshold: contextSnapThreshold,
     locked,
     classNames,
-  } = useZeugmaState()
+  } = useZeugmaState() as ZeugmaInternalStateValue
 
   const snapThreshold =
     propSnapThreshold !== undefined ? propSnapThreshold : (contextSnapThreshold ?? 8)
@@ -195,9 +195,9 @@ export const PaneTree: React.FC<PaneTreeProps> = ({
       ;(containerRef as React.RefObject<HTMLDivElement | null>).current = el
     }
 
-    const dashboardClass = `zeugma-dashboard-root ${
-      isDismissActive ? 'zeugma-dashboard-dismiss-active' : ''
-    } ${locked ? classNames.dashboardLocked || 'zeugma-dashboard-locked' : ''}`.trim()
+    const dashboardClass = `${classNames.dashboard || ''} ${
+      isDismissActive ? classNames.dashboardDismissActive || '' : ''
+    } ${locked ? classNames.dashboardLocked || '' : ''}`.trim()
 
     return (
       <div

@@ -39,12 +39,12 @@ export function SidebarWrapper({
   onPresetChange,
   contentRef,
 }: SidebarWrapperProps) {
-  const { layout, onLayoutChange, addPane } = useZeugmaContext()
+  const { layout, setLayout, addPane } = useZeugmaContext()
   const [activePreset, setActivePreset] = useState<string>('default')
 
   const handleApplyPreset = (presetKey: string) => {
     setActivePreset(presetKey)
-    onLayoutChange(PRESETS[presetKey].layout)
+    setLayout(PRESETS[presetKey].layout)
     onPresetChange?.(presetKey)
     if (presetKey === 'tall-stress') {
       onResizableHeightChange(true)
@@ -53,7 +53,7 @@ export function SidebarWrapper({
 
   const handleReset = () => {
     const targetPreset = PRESETS[activePreset] ? activePreset : 'default'
-    onLayoutChange(PRESETS[targetPreset].layout)
+    setLayout(PRESETS[targetPreset].layout)
     onPresetChange?.(targetPreset)
   }
 

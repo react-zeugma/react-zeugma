@@ -339,3 +339,9 @@ body {
 .scrollbar-none::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Edge */
 }
+
+/* Tab drop preview indicator customization */
+.zeugma-tab-drop-preview {
+  background-color: #6366f1 !important;
+  width: 2px !important;
+}

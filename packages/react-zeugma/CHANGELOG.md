@@ -1,5 +1,13 @@
 # react-zeugma
 
+## 4.1.0
+
+### Minor Changes
+
+- **Unified Context Access Hook (`useZeugmaContext`)**:
+  - Implemented and exported the new public `useZeugmaContext` hook to simplify dashboard integration. It merges `useZeugmaState` and `useZeugmaActions` into a single, comprehensive layout control hook, removing callback prop-drilling for external components like sidebars.
+  - Added and exported the `ZeugmaContextValue` type interface.
+
 ## 4.0.0
 
 ### Major Changes

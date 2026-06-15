@@ -127,6 +127,16 @@ A custom state hook that initializes and manages the recursive layout tree and h
 | `onResizeEnd`            | `(currentNode: SplitNode, percentage: number) => void`                | —       | Callback triggered when resizing ends.                                     |
 | `onDismissIntentChange`  | `(paneId: string \| null) => void`                                    | —       | Callback triggered when drag-out intent changes.                           |
 
+### `useZeugmaContext()`
+
+A custom React context hook that returns the unified layout controller properties and state actions. Must be used within a `<Zeugma>` provider component.
+
+Provides direct access to the current layout state (e.g., `layout`, `locked`) and mutation actions (e.g., `addPane`, `removePane`, `splitPane`, `updateTabMetadata`, etc.).
+
+```ts
+const { layout, locked, addPane, removeTab } = useZeugmaContext()
+```
+
 ### `<PaneTree>`
 
 Recursively renders the split nodes and pane nodes. Must be placed inside `<Zeugma>`.
@@ -334,6 +344,14 @@ A custom hook to manage the dashboard layout state.
 - `onResize?: (currentNode: SplitNode, percentage: number) => void` — Callback during resizing.
 - `onResizeEnd?: (currentNode: SplitNode, percentage: number) => void` — Callback when resizing ends.
 - `onDismissIntentChange?: (paneId: string | null) => void` — Callback when drag-out intent changes.
+
+### `useZeugmaContext()`
+
+A context consumer hook that retrieves the parent `<Zeugma>` controller state and actions.
+
+```ts
+const { layout, addPane, removeTab } = useZeugmaContext()
+```
 
 ### `<PaneTree>`
 

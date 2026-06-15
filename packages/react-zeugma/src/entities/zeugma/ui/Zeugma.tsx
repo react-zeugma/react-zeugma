@@ -551,21 +551,18 @@ interface PortalHostItemProps {
 }
 
 const PortalHostItem: React.FC<PortalHostItemProps> = ({ tabId, target, renderWidget }) => {
+  const [mounted, setMounted] = useState(false)
   const wrapperRef = useRef<HTMLDivElement | null>(null)
 
-  if (!wrapperRef.current && typeof window !== 'undefined') {
-    wrapperRef.current = document.createElement('div')
-    wrapperRef.current.className = `zeugma-portal-wrapper-${tabId}`
-    wrapperRef.current.style.width = '100%'
-    wrapperRef.current.style.height = '100%'
-  }
-
-  const wrapper = wrapperRef.current
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Move the stable wrapper in the DOM when the target pane element changes
   useEffect(() => {
-    if (!wrapper) return
+    if (!mounted || !wrapperRef.current) return
 
+    const wrapper = wrapperRef.current
     if (target) {
       target.appendChild(wrapper)
     } else {
@@ -578,7 +575,7 @@ const PortalHostItem: React.FC<PortalHostItemProps> = ({ tabId, target, renderWi
       }
       hiddenContainer.appendChild(wrapper)
     }
-  }, [target, wrapper])
+  }, [target, mounted])
 
   // Clean up the DOM element on unmount
   useEffect(() => {
@@ -588,6 +585,17 @@ const PortalHostItem: React.FC<PortalHostItemProps> = ({ tabId, target, renderWi
       }
     }
   }, [])
+
+  if (!mounted) return null
+
+  if (!wrapperRef.current) {
+    wrapperRef.current = document.createElement('div')
+    wrapperRef.current.className = `zeugma-portal-wrapper-${tabId}`
+    wrapperRef.current.style.width = '100%'
+    wrapperRef.current.style.height = '100%'
+  }
+
+  const wrapper = wrapperRef.current
 
   if (!wrapper || !renderWidget) return null
 

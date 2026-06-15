@@ -1,6 +1,6 @@
 import React, { useMemo, useCallback, useEffect, useContext } from 'react'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
-import { useZeugmaState, useZeugmaActions, PortalRegistryContext } from '../../zeugma'
+import { useZeugmaState, useZeugmaActions, PortalRegistryContext } from '../../../shared'
 import { DragListenersCtx } from '../model/context'
 import { PaneRenderProps } from '../model/types'
 import { findPane } from '../../../shared/lib/tree'
@@ -260,7 +260,7 @@ export const Pane: React.FC<PaneProps> = ({ id, children, style, locked: propLoc
   }, [listeners, attributes, isDraggableDisabled])
 
   const paneClass = `${classNames.pane || ''} ${
-    isPaneLocked ? classNames.paneLocked || 'zeugma-pane-locked' : ''
+    isPaneLocked ? classNames.paneLocked || '' : ''
   }`.trim()
 
   return (
@@ -310,7 +310,7 @@ export const Pane: React.FC<PaneProps> = ({ id, children, style, locked: propLoc
             <DropZone
               id={`drop-locked-${id}`}
               position="full"
-              activeClassName={classNames.lockedPreview || 'zeugma-locked-preview'}
+              activeClassName={classNames.lockedPreview || ''}
             />
           </div>
         )}

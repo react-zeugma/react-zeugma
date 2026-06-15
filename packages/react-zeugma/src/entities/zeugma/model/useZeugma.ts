@@ -1,6 +1,11 @@
 import { useState, useRef, useEffect, useCallback, SetStateAction } from 'react'
-import { TreeNode, SplitDirection, SplitNode } from '../../../shared/model'
-import { UseZeugmaOptions, ZeugmaController } from './types'
+import {
+  TreeNode,
+  SplitDirection,
+  SplitNode,
+  UseZeugmaOptions,
+  ZeugmaController,
+} from '../../../shared'
 import { DEFAULT_DRAG_ACTIVATION_DISTANCE, DEFAULT_SNAP_THRESHOLD } from '../../../shared/config'
 import {
   removePane,

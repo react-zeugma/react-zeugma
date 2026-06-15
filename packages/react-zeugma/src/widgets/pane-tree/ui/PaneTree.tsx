@@ -1,7 +1,7 @@
 import React, { useRef, useMemo, useState } from 'react'
-import { useZeugmaState } from '../../../entities/zeugma'
+import { useZeugmaState } from '../../../shared'
 import { useResizer } from '../../../features/resize-pane'
-import { TreeNode } from '../../../shared/model'
+import { TreeNode } from '../../../shared'
 import { ComputedSplitter, computeLayout } from '../../../shared/lib/tree'
 
 export interface PaneTreeProps {
@@ -92,7 +92,7 @@ const FlatSplitter: React.FC<FlatSplitterProps> = ({
 
   return (
     <div
-      className={`zeugma-resizer ${classNames.resizer || ''}`.trim()}
+      className={classNames.resizer || ''}
       data-direction={direction}
       data-resizing={isResizing || undefined}
       style={style}
@@ -195,9 +195,9 @@ export const PaneTree: React.FC<PaneTreeProps> = ({
       ;(containerRef as React.RefObject<HTMLDivElement | null>).current = el
     }
 
-    const dashboardClass = `zeugma-dashboard-root ${
-      isDismissActive ? 'zeugma-dashboard-dismiss-active' : ''
-    } ${locked ? classNames.dashboardLocked || 'zeugma-dashboard-locked' : ''}`.trim()
+    const dashboardClass = `${classNames.dashboard || ''} ${
+      isDismissActive ? classNames.dashboardDismissActive || '' : ''
+    } ${locked ? classNames.dashboardLocked || '' : ''}`.trim()
 
     return (
       <div

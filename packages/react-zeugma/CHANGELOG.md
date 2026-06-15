@@ -1,5 +1,19 @@
 # react-zeugma
 
+## 4.1.2
+
+### Patch Changes
+
+- **Set Dragged Tab as Active & Internal Refactoring**:
+  - Updated the drag-and-drop state machine to set a tab as the active pane tab immediately when dragging starts.
+  - Refactored contexts, context hooks, and types into the `shared` layer to resolve cross-entity FSD dependencies between `entities/pane` and `entities/zeugma`.
+  - Modularized `Zeugma.tsx` by extracting dnd-kit handlers, sensors, and collision detection into a dedicated `useZeugmaDnd` custom hook.
+  - Fixed TypeScript configuration errors resulting from loose types and unused variables.
+- **100% Headless Style-Agnostic Setup & Simplified Tab Drop Preview**:
+  - Removed all internal default fallback class names (such as `zeugma-pane-locked`, `zeugma-locked-preview`, `zeugma-resizer`, `zeugma-dashboard-root`, `zeugma-dashboard-dismiss-active`, `zeugma-dashboard-locked`, and `zeugma-dismiss-preview`) to achieve a fully headless, style-agnostic library.
+  - Added new `dashboard` and `dashboardDismissActive` options to the `ZeugmaClassNames` interface for styling the root container and its active dismiss state.
+  - Replaced the tab drop preview system with an internally-rendered single line element in the `<Tab>` component. This line is absolute-positioned on left/right boundaries internally and can be customized via the single `tabDropPreview` class name.
+
 ## 4.1.1
 
 ### Patch Changes

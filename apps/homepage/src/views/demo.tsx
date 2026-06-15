@@ -11,7 +11,13 @@ import {
   ResizableContainer,
   useZeugma,
 } from 'react-zeugma'
-import type { TreeNode, PaneRenderProps, SplitNode, TabRenderProps } from 'react-zeugma'
+import type {
+  TreeNode,
+  PaneRenderProps,
+  SplitNode,
+  TabRenderProps,
+  ZeugmaController,
+} from 'react-zeugma'
 import { SidebarWrapper, type LogEntry } from '../components/sidebar-wrapper'
 import {
   AnalyticsWidget,
@@ -194,7 +200,7 @@ const TabHeader = ({
       className="flex-1 min-w-[36px] max-w-[160px] h-full"
       style={{ display: 'flex' }}
     >
-      {({ isDragging, isOver }: TabRenderProps) => (
+      {({ isDragging }: TabRenderProps) => (
         <TabHeaderContent
           tabId={tabId}
           activeTabId={activeTabId}
@@ -203,7 +209,6 @@ const TabHeader = ({
           selectTab={selectTab}
           removeTab={removeTab}
           isDragging={isDragging}
-          isOver={isOver}
         />
       )}
     </Tab>
@@ -318,7 +323,7 @@ export function Demo() {
   const [highlightResizer, setHighlightResizer] = useState(false)
   const scrollContainerRef = React.useRef<HTMLDivElement>(null)
 
-  const zeugmaRef = React.useRef<any>(null)
+  const zeugmaRef = React.useRef<ZeugmaController | null>(null)
 
   React.useEffect(() => {
     if (resizableHeight) {
@@ -445,7 +450,7 @@ export function Demo() {
     (id: string) => {
       const isDragOut = localDismissIntentId === id
       setLocalDismissIntentId(null)
-      const pane = findPane(zeugmaRef.current?.layout, id)
+      const pane = findPane(zeugmaRef.current?.layout ?? null, id)
       if (pane) {
         if (pane.tabs.length > 1 && pane.tabs.includes(id)) {
           zeugmaRef.current?.removeTab(id)
@@ -731,6 +736,11 @@ export function Demo() {
           renderWidget={renderWidget}
           renderDragOverlay={renderDragOverlay}
           classNames={{
+            dashboard: 'zeugma-dashboard-root',
+            dashboardDismissActive: 'zeugma-dashboard-dismiss-active',
+            resizer: 'zeugma-resizer',
+            tabDropPreview: 'zeugma-tab-drop-preview',
+            dashboardLocked: 'zeugma-dashboard-locked',
             dropPreview:
               'bg-indigo-500/10 backdrop-blur-[2px] border-2 border-dashed border-indigo-400/50 shadow-[0_25px_50px_-12px_rgba(99,102,241,0.2)] rounded-lg transition-all duration-200',
             dismissPreview: 'zeugma-dismiss-preview',

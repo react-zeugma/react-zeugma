@@ -1,8 +1,7 @@
 import React, { useCallback } from 'react'
-import { TreeNode, SplitNode, SplitDirection } from '../../../shared/model'
+import { TreeNode, SplitNode, SplitDirection, useZeugmaState } from '../../../shared'
 import { updateSplitPercentage, computeLayout } from '../../../shared/lib/tree'
 import { createDragSession } from '../../../shared/lib/drag-session'
-import { useZeugmaState } from '../../../entities/zeugma'
 
 interface UseResizerProps {
   containerRef: React.RefObject<HTMLDivElement | null>

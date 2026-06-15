@@ -42,28 +42,31 @@ const FEATURES = [
   },
 ]
 
-const CODE = `import { useState } from 'react';
-import { Zeugma, PaneTree, Pane, DragHandle } from 'react-zeugma';
+const CODE = `import { Zeugma, PaneTree, Pane, DragHandle, useZeugma } from 'react-zeugma';
 
 export default function App() {
-  const [layout, setLayout] = useState({
-    type: 'split',
-    direction: 'row',
-    splitPercentage: 25,
-    first: { type: 'pane', id: 'sidebar', tabs: ['sidebar'], activeTabId: 'sidebar' },
-    second: {
+  const zeugma = useZeugma({
+    initialLayout: {
       type: 'split',
-      direction: 'column',
-      splitPercentage: 70,
-      first: { type: 'pane', id: 'editor', tabs: ['editor'], activeTabId: 'editor' },
-      second: { type: 'pane', id: 'terminal', tabs: ['terminal'], activeTabId: 'terminal' }
+      direction: 'row',
+      splitPercentage: 25,
+      first: {
+        type: 'pane',
+        id: 'sidebar',
+        tabs: ['sidebar'],
+        activeTabId: 'sidebar'
+      },
+      second: {
+        type: 'pane',
+        id: 'editor',
+        tabs: ['editor', 'terminal'],
+        activeTabId: 'editor'
     }
   });
 
   return (
     <Zeugma
-      layout={layout}
-      onChange={setLayout}
+      {...zeugma}
       renderPane={(id) => (
         <Pane id={id}>
           {({ remove }) => (

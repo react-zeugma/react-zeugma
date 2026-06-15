@@ -254,8 +254,11 @@ export interface SplitNode {
 
 export interface PaneNode {
   type: 'pane'
-  paneId: string
-  metadata?: Record<string, unknown>
+  id: string
+  tabs: string[]
+  activeTabId: string
+  locked?: boolean
+  tabsMetadata?: Record<string, Record<string, unknown>>
 }
 
 export type TreeNode = SplitNode | PaneNode
@@ -298,8 +301,11 @@ export interface SplitNode {
 
 export interface PaneNode {
   type: 'pane'
-  paneId: string
-  metadata?: Record<string, unknown>
+  id: string
+  tabs: string[]
+  activeTabId: string
+  locked?: boolean
+  tabsMetadata?: Record<string, Record<string, unknown>>
 }
 
 export type TreeNode = SplitNode | PaneNode
@@ -495,12 +501,38 @@ export default function App() {
 
 `react-zeugma` is style-agnostic and relies on class name configuration for visual states. Define classes in your styling framework and pass them via the `classNames` prop on `<Zeugma>`:
 
+> [!IMPORTANT]
+> Starting from version `4.1.2`, `react-zeugma` is 100% headless and does not apply any internal default CSS fallback classes (such as `zeugma-resizer`, `zeugma-locked-preview`, etc.). All layout visual states must be styled by providing custom class names via the `classNames` configuration object.
+
 ```ts
 interface ZeugmaClassNames {
+  dashboard?: string // Applied to the root dashboard container
+  dashboardDismissActive?: string // Applied to root container when dismiss intent is active
+  dashboardLocked?: string // Applied to root container when dashboard is globally locked
   pane?: string // Applied to the outer wrapper of <Pane>
+  paneLocked?: string // Applied to the pane container when locked
   dropPreview?: string // Applied to the preview box when hovering over edge dropzones
   dragOverlay?: string // Applied to the cursor-following drag preview portal
   resizer?: string // Applied to the drag-to-resize split bar
+  dismissPreview?: string // Applied to the background dismiss zone indicator during a drag-out dismiss gesture
+  lockedPreview?: string // Applied to drop zone indicator when hovering over a locked pane
+  tabDropPreview?: string // Applied to the drop placeholder line element during tab drags
+}
+```
+
+### Tab Drop Preview Customization
+
+When dragging a tab over another, the library automatically renders a placeholder indicator line absolute-positioned on the left or right edge of the target tab.
+
+To style this indicator line, configure a custom CSS class name via `classNames.tabDropPreview`.
+
+Use this single class name in your CSS to customize the color and size (width) of the placeholder indicator line:
+
+```css
+/* Custom tab drop placeholder styling */
+.my-tab-preview {
+  background-color: #6366f1 !important; /* change color */
+  width: 3px !important; /* change width/size */
 }
 ```
 
@@ -518,7 +550,6 @@ interface ZeugmaClassNames {
 
 /* Edge drop previews */
 ```
-````
 
 ---
 
@@ -537,3 +568,4 @@ During modern excavation efforts, archeologists discovered some of the most brea
 - [GitHub Repository](https://github.com/react-zeugma/react-zeugma)
 - [npm Package](https://www.npmjs.com/package/react-zeugma)
 - [Contributing Guide](https://github.com/react-zeugma/react-zeugma/blob/master/CONTRIBUTING.md)
+````

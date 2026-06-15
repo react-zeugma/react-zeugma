@@ -64,13 +64,11 @@ export function usePortalRegistry() {
   }, [])
 
   const registerPortalTarget = useCallback((tabId: string, el: HTMLDivElement | null) => {
-    setTimeout(() => {
-      if (!isMountedRef.current) return
-      setPortalTargets((prev) => {
-        if (prev[tabId] === el) return prev
-        return { ...prev, [tabId]: el }
-      })
-    }, 0)
+    if (!isMountedRef.current) return
+    setPortalTargets((prev) => {
+      if (prev[tabId] === el) return prev
+      return { ...prev, [tabId]: el }
+    })
   }, [])
 
   return { portalTargets, registerPortalTarget }

@@ -7,7 +7,8 @@ import {
   Pane,
   DragHandle,
   Tab,
-  findPane,
+  findPaneById,
+  findPaneContainingTab,
   ResizableContainer,
   useZeugma,
 } from 'react-zeugma'
@@ -399,7 +400,7 @@ export function Demo() {
       activeId: string,
       overId: string | null,
       dropAction: {
-        type: 'split' | 'swap'
+        type: 'split' | 'move'
         direction?: 'row' | 'column'
         position?: 'top' | 'bottom' | 'left' | 'right' | 'center'
       } | null,
@@ -411,7 +412,7 @@ export function Demo() {
         const detail =
           dropAction.type === 'split'
             ? `split-${dropAction.position} onto "${overId}"`
-            : `swapped with "${overId}"`
+            : `moved next to "${overId}"`
         addLog('drag', `Dropped "${activeId}": ${detail}`)
       }
     },
@@ -450,7 +451,7 @@ export function Demo() {
     (id: string) => {
       const isDragOut = localDismissIntentId === id
       setLocalDismissIntentId(null)
-      const pane = findPane(zeugmaRef.current?.layout ?? null, id)
+      const pane = findPaneContainingTab(zeugmaRef.current?.layout ?? null, id)
       if (pane) {
         if (pane.tabs.length > 1 && pane.tabs.includes(id)) {
           zeugmaRef.current?.removeTab(id)
@@ -497,7 +498,7 @@ export function Demo() {
   const renderWidget = React.useCallback(
     (tabId: string) => {
       const { title, icon } = getWidgetDetails(tabId)
-      const pane = findPane(zeugma.layout, tabId)
+      const pane = findPaneContainingTab(zeugma.layout, tabId)
       const tabMetadata = pane?.tabsMetadata?.[tabId]
       const isFullscreen = zeugma.fullscreenPaneId !== null && zeugma.fullscreenPaneId === pane?.id
       const locked = pane?.locked || layoutLocked
@@ -712,7 +713,9 @@ export function Demo() {
   }
 
   const renderDragOverlay = (id: string, type: 'pane' | 'tab') => {
-    const metadata = findPane(zeugma.layout, id)?.tabsMetadata?.[id]
+    const pane =
+      type === 'tab' ? findPaneContainingTab(zeugma.layout, id) : findPaneById(zeugma.layout, id)
+    const metadata = pane?.tabsMetadata?.[id]
     const isDraggedOut = id === localDismissIntentId
     return <DemoDragOverlay id={id} type={type} isDraggedOut={isDraggedOut} metadata={metadata} />
   }

@@ -26,7 +26,7 @@ export interface UseZeugmaOptions {
   initialLayout?: TreeNode | null
   /** Controlled layout tree model. If provided, the hook will run in controlled mode and sync with this value. */
   layout?: TreeNode | null
-  /** Callback triggered when the layout changes via drag-and-drop actions, splits, swaps, or resizes. */
+  /** Callback triggered when the layout changes via drag-and-drop actions, splits, moves, or resizes. */
   onChange?: (newLayout: TreeNode | null) => void
   /** The ID of the pane that is currently taking up the full dashboard area. Null if no pane is fullscreen. */
   fullscreenPaneId?: string | null
@@ -52,12 +52,12 @@ export interface UseZeugmaOptions {
   onRemove?: (paneId: string) => void
   /** Callback triggered when dragging starts for a pane. */
   onDragStart?: (activeId: string) => void
-  /** Callback triggered when dragging ends, providing details on target pane and drop action (split or swap). */
+  /** Callback triggered when dragging ends, providing details on target pane and drop action (split or move). */
   onDragEnd?: (
     activeId: string,
     overId: string | null,
     dropAction: {
-      type: 'split' | 'swap'
+      type: 'split' | 'move'
       direction?: SplitDirection
       position?: 'top' | 'bottom' | 'left' | 'right' | 'center'
     } | null,
@@ -134,7 +134,7 @@ export interface ZeugmaInternalController extends ZeugmaController {
     activeId: string,
     overId: string | null,
     dropAction: {
-      type: 'split' | 'swap'
+      type: 'split' | 'move'
       direction?: SplitDirection
       position?: 'top' | 'bottom' | 'left' | 'right' | 'center'
     } | null,
@@ -185,7 +185,7 @@ export interface ZeugmaProps extends ZeugmaController {
   renderPane: (paneId: string) => ReactNode
   /** Custom overlay renderer function used to customize the cursor-following drag preview for an active pane or tab. */
   renderDragOverlay?: (activeId: string, type: 'pane' | 'tab') => ReactNode
-  /** Optional CSS class name mapping overrides for custom styles of components like panes, drop/swap previews, overlays, etc. */
+  /** Optional CSS class name mapping overrides for custom styles of components like panes, drop previews, overlays, etc. */
   classNames?: ZeugmaClassNames
   /** Render function mapping tab IDs to React elements. Used to render tab widgets inside portals. */
   renderWidget?: (tabId: string) => ReactNode

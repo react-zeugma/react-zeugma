@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useEffect, useContext } from 'react'
+import React, { useMemo, useCallback, useEffect, useContext, useRef } from 'react'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
 import {
   useZeugmaState,
@@ -8,7 +8,7 @@ import {
 } from '../../../shared'
 import { DragListenersCtx } from '../model/context'
 import { PaneRenderProps } from '../model/types'
-import { findPane } from '../../../shared/lib/tree'
+import { findPaneById } from '../../../shared/lib/tree'
 
 interface DropZoneProps {
   id: string
@@ -140,6 +140,7 @@ export interface PaneProps {
 }
 
 export const Pane: React.FC<PaneProps> = ({ id, children, style, locked: propLocked = false }) => {
+  const targetRef = useRef<HTMLDivElement | null>(null)
   const {
     layout,
     activeId,
@@ -155,7 +156,7 @@ export const Pane: React.FC<PaneProps> = ({ id, children, style, locked: propLoc
   }
   const { registerPortalTarget } = portalRegistry
 
-  const paneNode = useMemo(() => findPane(layout, id), [layout, id])
+  const paneNode = useMemo(() => findPaneById(layout, id), [layout, id])
   const paneContainerId = paneNode?.id ?? id
   const tabs = paneNode?.tabs ?? [id]
   const activeTabId = paneNode?.activeTabId ?? id
@@ -185,6 +186,7 @@ export const Pane: React.FC<PaneProps> = ({ id, children, style, locked: propLoc
   const renderActiveTab = useCallback(() => {
     return (
       <div
+        ref={targetRef}
         id={`zeugma-tab-target-${activeTabId}`}
         className="zeugma-tab-content-wrapper"
         style={{
@@ -195,9 +197,9 @@ export const Pane: React.FC<PaneProps> = ({ id, children, style, locked: propLoc
     )
   }, [activeTabId])
 
-  // Register portal targets using selector-based useEffect to avoid ref callback loops
+  // Register portal targets using targetRef to avoid race conditions during drag & layout changes
   useEffect(() => {
-    const el = document.getElementById(`zeugma-tab-target-${activeTabId}`) as HTMLDivElement | null
+    const el = targetRef.current
     registerPortalTarget(activeTabId, el)
     return () => {
       registerPortalTarget(activeTabId, null)

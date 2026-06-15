@@ -15,7 +15,8 @@ import {
   removePane as removePaneHelper,
   removeTab as removeTabHelper,
   splitPane as splitPaneHelper,
-  findPane,
+  findPaneById,
+  findPaneContainingTab,
   generateUniqueId,
 } from '../../../shared/lib/tree'
 import { SmartPointerSensor, SmartTouchSensor } from '../lib/sensors'
@@ -117,7 +118,7 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
     }
 
     if (isTabDrag) {
-      const parentPane = findPane(layout, draggingId)
+      const parentPane = findPaneContainingTab(layout, draggingId)
       if (parentPane) {
         selectTab(parentPane.id, draggingId)
       }
@@ -332,9 +333,13 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
         }
 
         moveTab(draggingId, targetTabId, position)
-      }
-      if (onDragEnd) {
-        onDragEnd(draggingId, targetTabId, { type: 'swap', position: 'center' })
+        if (onDragEnd) {
+          onDragEnd(draggingId, targetTabId, { type: 'move', position: 'center' })
+        }
+      } else {
+        if (onDragEnd) {
+          onDragEnd(draggingId, null, null)
+        }
       }
       return
     }
@@ -349,7 +354,9 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
     }
 
     const [, dropZone, targetId] = match
-    const parentPane = findPane(layout, draggingId)
+    const parentPane = isTabDrag
+      ? findPaneContainingTab(layout, draggingId)
+      : findPaneById(layout, draggingId)
     const isParentTarget = parentPane && parentPane.id === targetId
     const isOnlyTab = parentPane && parentPane.tabs.length === 1
 
@@ -364,7 +371,7 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
 
     let draggedPaneNode: PaneNode
     if (isTabDrag) {
-      const originalPane = findPane(layout, draggingId)
+      const originalPane = findPaneContainingTab(layout, draggingId)
       const sourceMetadata = originalPane?.tabsMetadata?.[draggingId]
       draggedPaneNode = {
         type: 'pane',
@@ -374,7 +381,7 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
         tabsMetadata: sourceMetadata ? { [draggingId]: sourceMetadata } : undefined,
       }
     } else {
-      draggedPaneNode = findPane(layout, draggingId) ?? {
+      draggedPaneNode = findPaneById(layout, draggingId) ?? {
         type: 'pane',
         id: generateUniqueId(),
         tabs: [draggingId],

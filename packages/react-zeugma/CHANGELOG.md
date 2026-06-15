@@ -1,9 +1,12 @@
 # react-zeugma
 
-## 4.1.2
+## 5.0.0
 
-### Patch Changes
+### Major Changes
 
+- **Terminated Legacy Swap Terminology**:
+  - Replaced the obsolete `swap` drop action type with `move` in `onDragEnd` callbacks and types (`types.ts`, `useZeugmaDnd.ts`, and `demo.tsx`).
+  - Cleaned up comments and styling documentation referring to layout swaps, aligning the vocabulary with the actual move/reorder actions.
 - **Exposed API Refactoring & Context Separation**:
   - Restructured `ZeugmaController` and context types to separate public API from internal drag-and-drop orchestration state variables (such as `activeId`, `activeType`, `dismissIntentId`, `containerRef`, etc.), cleaning up the TypeScript surface.
   - Removed internal actions like `splitPane`, `updateSplitPercentage`, and `moveTab` from the public actions context (`ZeugmaActionsValue`).

@@ -2,8 +2,10 @@ import { ReactNode, Dispatch, SetStateAction, RefObject } from 'react'
 import { TreeNode, SplitDirection, SplitNode } from '../../../shared/model'
 
 export interface UseZeugmaOptions {
-  /** Initial layout tree model defining pane organization and split percentages. Set to null for empty layout. */
-  initialLayout: TreeNode | null
+  /** Initial layout tree model defining pane organization for uncontrolled mode. Only used on initial mount. */
+  initialLayout?: TreeNode | null
+  /** Controlled layout tree model. If provided, the hook will run in controlled mode and sync with this value. */
+  layout?: TreeNode | null
   /** Callback triggered when the layout changes via drag-and-drop actions, splits, swaps, or resizes. */
   onChange?: (newLayout: TreeNode | null) => void
   /** The ID of the pane that is currently taking up the full dashboard area. Null if no pane is fullscreen. */

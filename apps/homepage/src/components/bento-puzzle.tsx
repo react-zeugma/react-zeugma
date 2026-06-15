@@ -442,6 +442,13 @@ function ConservationWidget() {
     </div>
   )
 }
+const defaultBentoLayout: TreeNode = {
+  type: 'pane',
+  id: 'pane-gypsy',
+  tabs: ['gypsy-girl'],
+  activeTabId: 'gypsy-girl',
+}
+
 interface BentoPuzzleProps {
   onSuccess?: () => void
 }
@@ -451,12 +458,7 @@ export function BentoPuzzle({ onSuccess }: BentoPuzzleProps) {
   const [showFireworks, setShowFireworks] = useState(false)
 
   const zeugma = useZeugma({
-    initialLayout: {
-      type: 'pane',
-      id: 'pane-gypsy',
-      tabs: ['gypsy-girl'],
-      activeTabId: 'gypsy-girl',
-    },
+    initialLayout: defaultBentoLayout,
     dragActivationDistance: 6,
     onChange: (newLayout) => {
       // Check if the user built the correct bento layout
@@ -486,12 +488,7 @@ export function BentoPuzzle({ onSuccess }: BentoPuzzleProps) {
   }, [zeugma.layout])
 
   const handleReset = () => {
-    zeugma.setLayout({
-      type: 'pane',
-      id: 'pane-gypsy',
-      tabs: ['gypsy-girl'],
-      activeTabId: 'gypsy-girl',
-    })
+    zeugma.setLayout(defaultBentoLayout)
     setIsSuccess(false)
     setShowFireworks(false)
   }

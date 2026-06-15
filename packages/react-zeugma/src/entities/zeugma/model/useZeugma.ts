@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, SetStateAction } from 'react'
 import { TreeNode, SplitDirection, SplitNode } from '../../../shared/model'
 import { UseZeugmaOptions, ZeugmaController } from './types'
 import { DEFAULT_DRAG_ACTIVATION_DISTANCE, DEFAULT_SNAP_THRESHOLD } from '../../../shared/config'
@@ -14,11 +14,13 @@ import {
   moveTab,
   removeTab,
   findPane,
-} from '../../../shared/lib/tree'
+  safeJsonStringify,
+} from '../../../shared/lib'
 
 export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
   const {
     initialLayout,
+    layout: controlledLayout,
     onChange,
     fullscreenPaneId: controlledFullscreenPaneId,
     onFullscreenChange,
@@ -38,7 +40,12 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
     onDismissIntentChange,
   } = options
 
-  const [layout, setLayout] = useState<TreeNode | null>(initialLayout)
+  const [layout, setLocalLayout] = useState<TreeNode | null>(() => {
+    return controlledLayout !== undefined ? controlledLayout : (initialLayout ?? null)
+  })
+  const [prevControlledLayoutJson, setPrevControlledLayoutJson] = useState<string>(() => {
+    return safeJsonStringify(controlledLayout !== undefined ? controlledLayout : null)
+  })
   const [fullscreenPaneId, setLocalFullscreenPaneId] = useState<string | null>(
     controlledFullscreenPaneId || null,
   )
@@ -73,33 +80,64 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
     }
   }, [controlledFullscreenPaneId])
 
-  // Trigger onChange when layout state changes
-  const isFirstRender = useRef(true)
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false
-      return
+  // Sync state if controlled layout changes from outside during render
+  if (controlledLayout !== undefined) {
+    const currentControlledLayoutJson = safeJsonStringify(controlledLayout)
+    if (currentControlledLayoutJson !== prevControlledLayoutJson) {
+      setPrevControlledLayoutJson(currentControlledLayoutJson)
+      setLocalLayout(controlledLayout)
     }
-    onChange?.(layout)
-  }, [layout, onChange])
+  }
 
-  // Layout Modification Actions using functional updates to remain stable
-  const handleRemovePane = useCallback((paneId: string) => {
-    setLayout((prev) => removePane(prev, paneId))
-  }, [])
+  // A wrapper that computes the layout mutation, updates state, and triggers onChange
+  const wrapMutation = useCallback(
+    <Args extends unknown[]>(
+      mutationFn: (current: TreeNode | null, ...args: Args) => TreeNode | null,
+    ) => {
+      return (...args: Args) => {
+        const prev = layout
+        const next = mutationFn(prev, ...args)
 
-  const handleAddPane = useCallback((paneId: string) => {
-    setLayout((prev) => addPane(prev, paneId))
-  }, [])
+        if (safeJsonStringify(prev) !== safeJsonStringify(next)) {
+          setLocalLayout(next)
+          onChange?.(next)
+        }
+      }
+    },
+    [layout, onChange],
+  )
+
+  const handleSetLayout = useCallback(
+    wrapMutation((prev, nextLayoutOrUpdater: SetStateAction<TreeNode | null>) => {
+      return typeof nextLayoutOrUpdater === 'function'
+        ? (nextLayoutOrUpdater as (prev: TreeNode | null) => TreeNode | null)(prev)
+        : nextLayoutOrUpdater
+    }),
+    [wrapMutation],
+  )
+
+  const setLayout = handleSetLayout
+
+  // Layout Modification Actions using wrapped mutation functions
+  const handleRemovePane = useCallback(
+    wrapMutation((prev, paneId: string) => removePane(prev, paneId)),
+    [wrapMutation],
+  )
+
+  const handleAddPane = useCallback(
+    wrapMutation((prev, paneId: string) => addPane(prev, paneId)),
+    [wrapMutation],
+  )
 
   const handleSplitPane = useCallback(
-    (
-      targetId: string,
-      direction: SplitDirection,
-      splitType: 'left' | 'right' | 'top' | 'bottom',
-      paneToAdd: string,
-    ) => {
-      setLayout((prev) => {
+    wrapMutation(
+      (
+        prev,
+        targetId: string,
+        direction: SplitDirection,
+        splitType: 'left' | 'right' | 'top' | 'bottom',
+        paneToAdd: string,
+      ) => {
         const draggedPaneNode = findPane(prev, paneToAdd) ?? {
           type: 'pane',
           id: paneToAdd,
@@ -108,49 +146,61 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
         }
         const treeWithoutDragging = removePane(prev, paneToAdd)
         return splitPane(treeWithoutDragging, targetId, direction, splitType, draggedPaneNode)
-      })
-    },
-    [],
+      },
+    ),
+    [wrapMutation],
   )
 
-  const handleUpdateSplitPercentage = useCallback((currentNode: SplitNode, percentage: number) => {
-    setLayout((prev) => updateSplitPercentage(prev, currentNode, percentage))
-  }, [])
+  const handleUpdateSplitPercentage = useCallback(
+    wrapMutation((prev, currentNode: SplitNode, percentage: number) =>
+      updateSplitPercentage(prev, currentNode, percentage),
+    ),
+    [wrapMutation],
+  )
 
   const handleUpdateTabMetadata = useCallback(
-    (
-      tabId: string,
-      updater: (
-        current: Record<string, unknown> | undefined,
-      ) => Record<string, unknown> | undefined,
-    ) => {
-      setLayout((prev) => updateTabMetadata(prev, tabId, updater))
-    },
-    [],
+    wrapMutation(
+      (
+        prev,
+        tabId: string,
+        updater: (
+          current: Record<string, unknown> | undefined,
+        ) => Record<string, unknown> | undefined,
+      ) => updateTabMetadata(prev, tabId, updater),
+    ),
+    [wrapMutation],
   )
 
-  const handleUpdatePaneLock = useCallback((paneId: string, isLocked: boolean) => {
-    setLayout((prev) => updatePaneLock(prev, paneId, isLocked))
-  }, [])
+  const handleUpdatePaneLock = useCallback(
+    wrapMutation((prev, paneId: string, isLocked: boolean) =>
+      updatePaneLock(prev, paneId, isLocked),
+    ),
+    [wrapMutation],
+  )
 
-  const handleSelectTab = useCallback((paneId: string, tabId: string) => {
-    setLayout((prev) => selectTab(prev, paneId, tabId))
-  }, [])
+  const handleSelectTab = useCallback(
+    wrapMutation((prev, paneId: string, tabId: string) => selectTab(prev, paneId, tabId)),
+    [wrapMutation],
+  )
 
-  const handleMergeTab = useCallback((draggedTabId: string, targetPaneId: string) => {
-    setLayout((prev) => mergeTab(prev, draggedTabId, targetPaneId))
-  }, [])
+  const handleMergeTab = useCallback(
+    wrapMutation((prev, draggedTabId: string, targetPaneId: string) =>
+      mergeTab(prev, draggedTabId, targetPaneId),
+    ),
+    [wrapMutation],
+  )
 
   const handleMoveTab = useCallback(
-    (draggedTabId: string, targetTabId: string, position?: 'before' | 'after') => {
-      setLayout((prev) => moveTab(prev, draggedTabId, targetTabId, position))
-    },
-    [],
+    wrapMutation((prev, draggedTabId: string, targetTabId: string, position?: 'before' | 'after') =>
+      moveTab(prev, draggedTabId, targetTabId, position),
+    ),
+    [wrapMutation],
   )
 
-  const handleRemoveTab = useCallback((tabId: string) => {
-    setLayout((prev) => removeTab(prev, tabId))
-  }, [])
+  const handleRemoveTab = useCallback(
+    wrapMutation((prev, tabId: string) => removeTab(prev, tabId)),
+    [wrapMutation],
+  )
 
   return {
     layout,

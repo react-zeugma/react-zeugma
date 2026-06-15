@@ -109,23 +109,24 @@ The context provider that sets up the drag-and-drop state machine, monitors acti
 
 A custom state hook that initializes and manages the recursive layout tree and handles drag-and-drop actions.
 
-| Option                   | Type                                                                  | Default | Description                                                                |
-| ------------------------ | --------------------------------------------------------------------- | ------- | -------------------------------------------------------------------------- |
-| `initialLayout`          | `TreeNode \| null`                                                    | Yes     | Initial layout tree structure.                                             |
-| `locked`                 | `boolean`                                                             | `false` | If true, layout resizes and drags are disabled.                            |
-| `dragActivationDistance` | `number`                                                              | `8`     | Minimum pointer drag distance (in pixels) required to activate dragging.   |
-| `snapThreshold`          | `number`                                                              | `8`     | Threshold in pixels to snap layout resizers to adjacent edges.             |
-| `minSplitPercentage`     | `number`                                                              | `5`     | Minimum resizing limit percentage.                                         |
-| `maxSplitPercentage`     | `number`                                                              | `95`    | Maximum resizing limit percentage.                                         |
-| `enableDragToDismiss`    | `boolean`                                                             | `false` | If true, enables the drag-out-to-dismiss gesture to close widgets.         |
-| `dismissThreshold`       | `number`                                                              | `60`    | Distance in pixels outside container bounds required to trigger dismissal. |
-| `onRemove`               | `(paneId: string) => void`                                            | —       | Callback triggered when a pane is removed.                                 |
-| `onDragStart`            | `(activeId: string) => void`                                          | —       | Callback triggered when dragging starts.                                   |
-| `onDragEnd`              | `(activeId: string, overId: string \| null, dropAction: any) => void` | —       | Callback triggered when dragging ends.                                     |
-| `onResizeStart`          | `(currentNode: SplitNode) => void`                                    | —       | Callback triggered when resizing starts.                                   |
-| `onResize`               | `(currentNode: SplitNode, percentage: number) => void`                | —       | Callback triggered during resizing.                                        |
-| `onResizeEnd`            | `(currentNode: SplitNode, percentage: number) => void`                | —       | Callback triggered when resizing ends.                                     |
-| `onDismissIntentChange`  | `(paneId: string \| null) => void`                                    | —       | Callback triggered when drag-out intent changes.                           |
+| Option                   | Type                                                                  | Default | Description                                                                                               |
+| ------------------------ | --------------------------------------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------- |
+| `initialLayout`          | `TreeNode \| null`                                                    | —       | Initial layout tree structure for uncontrolled mode. Only used on initial mount.                          |
+| `layout`                 | `TreeNode \| null`                                                    | —       | Controlled layout tree structure. If provided, the hook runs in controlled mode and synchronizes with it. |
+| `locked`                 | `boolean`                                                             | `false` | If true, layout resizes and drags are disabled.                                                           |
+| `dragActivationDistance` | `number`                                                              | `8`     | Minimum pointer drag distance (in pixels) required to activate dragging.                                  |
+| `snapThreshold`          | `number`                                                              | `8`     | Threshold in pixels to snap layout resizers to adjacent edges.                                            |
+| `minSplitPercentage`     | `number`                                                              | `5`     | Minimum resizing limit percentage.                                                                        |
+| `maxSplitPercentage`     | `number`                                                              | `95`    | Maximum resizing limit percentage.                                                                        |
+| `enableDragToDismiss`    | `boolean`                                                             | `false` | If true, enables the drag-out-to-dismiss gesture to close widgets.                                        |
+| `dismissThreshold`       | `number`                                                              | `60`    | Distance in pixels outside container bounds required to trigger dismissal.                                |
+| `onRemove`               | `(paneId: string) => void`                                            | —       | Callback triggered when a pane is removed.                                                                |
+| `onDragStart`            | `(activeId: string) => void`                                          | —       | Callback triggered when dragging starts.                                                                  |
+| `onDragEnd`              | `(activeId: string, overId: string \| null, dropAction: any) => void` | —       | Callback triggered when dragging ends.                                                                    |
+| `onResizeStart`          | `(currentNode: SplitNode) => void`                                    | —       | Callback triggered when resizing starts.                                                                  |
+| `onResize`               | `(currentNode: SplitNode, percentage: number) => void`                | —       | Callback triggered during resizing.                                                                       |
+| `onResizeEnd`            | `(currentNode: SplitNode, percentage: number) => void`                | —       | Callback triggered when resizing ends.                                                                    |
+| `onDismissIntentChange`  | `(paneId: string \| null) => void`                                    | —       | Callback triggered when drag-out intent changes.                                                          |
 
 ### `useZeugmaContext()`
 
@@ -329,7 +330,7 @@ A custom hook to manage the dashboard layout state.
 
 #### Options
 
-- `initialLayout: TreeNode | null` — Initial layout tree.
+- `initialLayout: TreeNode | null` — Initial layout tree structure.
 - `locked?: boolean` — Whether the layout is globally locked.
 - `dragActivationDistance?: number` — Minimum pointer drag distance (in pixels) required to activate dragging (defaults to `8`).
 - `snapThreshold?: number` — Threshold in pixels to snap layout resizers to adjacent edges (defaults to `8`).

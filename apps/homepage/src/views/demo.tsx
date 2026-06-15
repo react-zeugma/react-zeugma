@@ -478,6 +478,9 @@ export function Demo() {
     dismissThreshold: 60,
     onResizeStart: handleResizeStart,
     onResizeEnd: handleResizeEnd,
+    onChange(newLayout) {
+      console.log({ newLayout })
+    },
   })
 
   zeugmaRef.current = zeugma

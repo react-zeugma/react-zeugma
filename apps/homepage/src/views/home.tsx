@@ -1,17 +1,17 @@
 'use client'
 
-import { Suspense, useState, useCallback } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { Boxes, MousePointer2, Focus, Layout, ArrowRight, Copy, Check } from 'lucide-react'
 import { useScrollAnchor } from '../lib/use-scroll-anchor'
 import dynamic from 'next/dynamic'
 
-const MosaicDemo = dynamic(
-  () => import('../components/mosaic').then((mod) => ({ default: mod.MosaicDemo })),
+const BentoPuzzle = dynamic(
+  () => import('../components/bento-puzzle').then((mod) => ({ default: mod.BentoPuzzle })),
   {
     ssr: false,
     loading: () => (
-      <div className="mosaic-demo w-[280px] h-[280px] md:w-[320px] md:h-[320px] ml-auto bg-bg-pane border border-border-primary rounded-xl animate-pulse" />
+      <div className="w-full min-h-[420px] bg-bg-pane border border-border-primary rounded-2xl animate-pulse" />
     ),
   },
 )
@@ -87,7 +87,6 @@ export default function App() {
 
 export function Home() {
   const [copied, setCopied] = useState(false)
-  const [tileOrder, setTileOrder] = useState('REACT-ZEUGMA')
 
   const handleCopy = () => {
     navigator.clipboard.writeText('npm i react-zeugma')
@@ -95,12 +94,8 @@ export function Home() {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const handleOrderChange = useCallback((order: string) => {
-    setTileOrder(order)
-  }, [])
-
   const { scrollToSection } = useScrollAnchor({
-    sectionIds: ['designed-for-workspace-builders', 'spell-react-zeugma'],
+    sectionIds: ['designed-for-workspace-builders', 'bento-grid-challenge'],
     offset: 80,
   })
 
@@ -203,74 +198,21 @@ export function Home() {
         </div>
       </section>
 
-      {/* Mosaic/Story — Interactive react-zeugma Demo */}
-      <section className="py-16 px-6 border-t border-border-primary bg-bg-sidebar overflow-hidden relative">
-        <div className="absolute inset-0 opacity-[0.02] bg-[url('https://www.transparenttextures.com/patterns/concrete-wall.png')] pointer-events-none" />
-        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center relative z-10">
-          <div>
-            <div className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#D8BA8E] mb-2 select-none">
-              Can You Solve It?
-            </div>
-            <h2
-              id="spell-react-zeugma"
-              className="group flex items-center gap-2 text-2xl font-extrabold text-text-primary mb-4 font-serif tracking-wide select-none scroll-mt-20"
-            >
-              <span>
-                Spell{' '}
-                <span className="inline-flex gap-px">
-                  {tileOrder.split('').map((letter, i) => {
-                    const target = 'REACT-ZEUGMA'
-                    const isCorrect = letter === target[i]
-                    return (
-                      <span
-                        key={i}
-                        className="inline-block transition-all duration-300"
-                        style={{
-                          color: isCorrect ? '#C29B47' : 'var(--text-muted)',
-                          transform: isCorrect ? 'scale(1.1)' : 'scale(1)',
-                        }}
-                      >
-                        {letter}
-                      </span>
-                    )
-                  })}
-                </span>
-              </span>
-              <a
-                href="#spell-react-zeugma"
-                onClick={(e) => {
-                  e.preventDefault()
-                  scrollToSection('spell-react-zeugma')
-                }}
-                className="text-text-muted hover:text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity font-mono text-xl select-none"
-              >
-                #
-              </a>
-            </h2>
-            <div className="text-text-secondary text-[13px] leading-relaxed">
-              <p>
-                Named after the ancient Greco-Roman city in{' '}
-                <strong className="text-text-primary">Gaziantep, Turkey</strong>, world-renowned for
-                its breathtaking mosaics. Just as Zeugma&apos;s ancient artisans assembled countless
-                tesserae into grand masterpieces,{' '}
-                <strong className="text-text-primary">react-zeugma</strong> lets you assemble
-                distinct panes into one seamless workspace.
-              </p>
-            </div>
-
-            <p className="text-text-muted text-[11px] mt-5 flex items-center gap-1.5 italic">
-              <MousePointer2 className="w-3 h-3 shrink-0" />
-              Drag the tiles into the right order.
-            </p>
-          </div>
-
-          <Suspense
-            fallback={
-              <div className="mosaic-demo w-[280px] h-[360px] md:w-[320px] md:h-[420px] mx-auto md:mr-0 md:ml-auto bg-bg-pane rounded-xl animate-pulse rotate-0" />
-            }
+      {/* Bento Grid Challenge Section */}
+      <section className="py-20 px-6 border-t border-border-primary bg-bg-app relative overflow-hidden z-20">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-indigo-500/2 blur-[120px] rounded-full pointer-events-none" />
+        <div className="max-w-7xl mx-auto text-center relative z-10">
+          <h2
+            id="bento-grid-challenge"
+            className="text-3xl sm:text-4xl font-extrabold text-text-primary mb-4 tracking-tight"
           >
-            <MosaicDemo onOrderChange={handleOrderChange} />
-          </Suspense>
+            Can you build a bento grid?
+          </h2>
+          <p className="text-text-secondary text-sm max-w-xl mx-auto mb-12">
+            Try splitting the panels and docking cards. Recreate the target blueprint layout below
+            to verify your skills.
+          </p>
+          <BentoPuzzle />
         </div>
       </section>
 

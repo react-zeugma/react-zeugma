@@ -1,5 +1,9 @@
 import { TreeNode, SplitNode, SplitDirection, PaneNode } from '../../model'
 
+export function generateUniqueId(): string {
+  return 'pane-' + Math.random().toString(36).substring(2, 11)
+}
+
 /**
  * Tree Helper: Remove a pane container and consolidate the tree structure.
  */
@@ -29,10 +33,13 @@ export function removeTab(tree: TreeNode | null, tabId: string): TreeNode | null
       if (tree.activeTabId === tabId) {
         newActive = newTabs[0]
       }
+      const newTabsMetadata = { ...tree.tabsMetadata }
+      delete newTabsMetadata[tabId]
       return {
         ...tree,
         tabs: newTabs,
         activeTabId: newActive,
+        tabsMetadata: Object.keys(newTabsMetadata).length > 0 ? newTabsMetadata : undefined,
       }
     }
     return tree
@@ -56,7 +63,7 @@ export function splitPane(
 ): TreeNode | null {
   if (tree === null) {
     if (typeof paneToAdd === 'string') {
-      return { type: 'pane', id: paneToAdd, tabs: [paneToAdd], activeTabId: paneToAdd }
+      return { type: 'pane', id: generateUniqueId(), tabs: [paneToAdd], activeTabId: paneToAdd }
     }
     return paneToAdd
   }
@@ -64,7 +71,7 @@ export function splitPane(
     if (tree.id === targetId || tree.tabs.includes(targetId)) {
       const addedNode: PaneNode =
         typeof paneToAdd === 'string'
-          ? { type: 'pane', id: paneToAdd, tabs: [paneToAdd], activeTabId: paneToAdd }
+          ? { type: 'pane', id: generateUniqueId(), tabs: [paneToAdd], activeTabId: paneToAdd }
           : paneToAdd
       const isFirst = splitType === 'left' || splitType === 'top'
       return {
@@ -85,38 +92,11 @@ export function splitPane(
 }
 
 /**
- * Tree Helper: Swap the position of two panes in the tree structure.
- */
-export function swapPanes(tree: TreeNode | null, idA: string, idB: string): TreeNode | null {
-  if (tree === null) return null
-
-  // Collect the full PaneNode references
-  const nodeA = findPane(tree, idA)
-  const nodeB = findPane(tree, idB)
-  if (!nodeA || !nodeB) return tree
-
-  function swap(node: TreeNode): TreeNode {
-    if (node.type === 'pane') {
-      if (node.id === nodeA!.id) return { ...nodeB! }
-      if (node.id === nodeB!.id) return { ...nodeA! }
-      return node
-    }
-    return {
-      ...node,
-      first: swap(node.first),
-      second: swap(node.second),
-    }
-  }
-
-  return swap(tree)
-}
-
-/**
  * Tree Helper: Add a pane by recursively splitting the rightmost/bottommost pane in the tree.
  */
 export function addPane(tree: TreeNode | null, paneToAdd: string): TreeNode {
   if (tree === null) {
-    return { type: 'pane', id: paneToAdd, tabs: [paneToAdd], activeTabId: paneToAdd }
+    return { type: 'pane', id: generateUniqueId(), tabs: [paneToAdd], activeTabId: paneToAdd }
   }
 
   function insert(node: TreeNode, parentDirection: SplitDirection | null): TreeNode {
@@ -127,7 +107,7 @@ export function addPane(tree: TreeNode | null, paneToAdd: string): TreeNode {
         direction,
         splitPercentage: 50,
         first: node,
-        second: { type: 'pane', id: paneToAdd, tabs: [paneToAdd], activeTabId: paneToAdd },
+        second: { type: 'pane', id: generateUniqueId(), tabs: [paneToAdd], activeTabId: paneToAdd },
       }
     }
 
@@ -270,7 +250,7 @@ export function mergeTab(
   if (cleanTree === null) {
     return {
       type: 'pane',
-      id: draggedTabId,
+      id: generateUniqueId(),
       tabs: [draggedTabId],
       activeTabId: draggedTabId,
       tabsMetadata: sourceMetadata ? { [draggedTabId]: sourceMetadata } : undefined,
@@ -325,7 +305,7 @@ export function moveTab(
   if (cleanTree === null) {
     return {
       type: 'pane',
-      id: draggedTabId,
+      id: generateUniqueId(),
       tabs: [draggedTabId],
       activeTabId: draggedTabId,
       tabsMetadata: sourceMetadata ? { [draggedTabId]: sourceMetadata } : undefined,

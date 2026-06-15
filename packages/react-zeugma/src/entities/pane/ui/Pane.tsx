@@ -7,7 +7,7 @@ import { findPane } from '../../../shared/lib/tree'
 
 interface DropZoneProps {
   id: string
-  position: 'top' | 'bottom' | 'left' | 'right' | 'center' | 'full' | 'top-header'
+  position: 'top' | 'bottom' | 'left' | 'right' | 'full' | 'top-header'
   activeClassName?: string
 }
 
@@ -44,15 +44,6 @@ const activationPositions: Record<string, React.CSSProperties> = {
     top: '25%',
     right: 0,
     width: '25%',
-    height: '50%',
-    zIndex: 20,
-    pointerEvents: 'auto',
-  },
-  center: {
-    position: 'absolute',
-    top: '25%',
-    left: '25%',
-    width: '50%',
     height: '50%',
     zIndex: 20,
     pointerEvents: 'auto',
@@ -106,16 +97,6 @@ const previewPositions: Record<string, React.CSSProperties> = {
     bottom: 0,
     right: 0,
     width: '50%',
-    zIndex: 21,
-    pointerEvents: 'none',
-    boxSizing: 'border-box',
-  },
-  center: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
     zIndex: 21,
     pointerEvents: 'none',
     boxSizing: 'border-box',
@@ -311,13 +292,6 @@ export const Pane: React.FC<PaneProps> = ({ id, children, style, locked: propLoc
                 activeClassName={classNames.dropPreview}
               />
             ))}
-            {!tabs.includes(activeId) && (
-              <DropZone
-                id={`drop-center-${id}`}
-                position="center"
-                activeClassName={classNames.swapPreview}
-              />
-            )}
           </div>
         )}
 

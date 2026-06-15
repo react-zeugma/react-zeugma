@@ -1,5 +1,13 @@
 # react-zeugma
 
+## 4.2.0
+
+### Minor Changes
+
+- **Add `updateLayout` Action to Context**:
+  - Implemented and exposed `updateLayout` in the actions context (`ZeugmaActionsValue`), allowing nested components to imperatively update the layout state with a clean, stable action callback.
+  - Kept `onLayoutChange` in the state context (`ZeugmaStateValue`) for backwards compatibility.
+
 ## 4.1.1
 
 ### Patch Changes

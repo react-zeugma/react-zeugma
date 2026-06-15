@@ -155,7 +155,7 @@ export interface ZeugmaStateValue {
   /** The current active layout tree structure, or null if empty. */
   layout: TreeNode | null
   /** Callback to update the layout tree. */
-  onLayoutChange: (newLayout: TreeNode | null, localOnly?: boolean) => void
+  onLayoutChange: (newLayout: TreeNode | null) => void
   /** Renders the inner content of a pane given its unique ID. */
   renderPane: (paneId: string) => ReactNode
   /** The ID of the pane currently being dragged, or null. */
@@ -221,6 +221,8 @@ export interface ZeugmaActionsValue {
   moveTab: (draggedTabId: string, targetTabId: string, position?: 'before' | 'after') => void
   /** Stable callback to remove/close a specific tab from the layout. */
   removeTab: (tabId: string) => void
+  /** Stable callback to update the layout tree. */
+  updateLayout: (newLayout: TreeNode | null) => void
 }
 
 export interface ZeugmaContextValue extends ZeugmaStateValue, ZeugmaActionsValue {}

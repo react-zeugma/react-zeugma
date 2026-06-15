@@ -413,7 +413,7 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
   const stateValue = useMemo(
     () => ({
       layout,
-      onLayoutChange: (newLayout: TreeNode | null) => setLayout(newLayout),
+      onLayoutChange: setLayout,
       renderPane: stableRenderPane,
       activeId,
       dismissIntentId,
@@ -464,6 +464,7 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
       mergeTab,
       moveTab,
       removeTab,
+      updateLayout: setLayout,
     }),
     [
       removePane,
@@ -476,6 +477,7 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
       mergeTab,
       moveTab,
       removeTab,
+      setLayout,
     ],
   )
 

@@ -13,7 +13,7 @@ interface UseResizerProps {
   snapThreshold: number
   layout: TreeNode | null
   currentNode: SplitNode
-  onLayoutChange: (newLayout: TreeNode | null, localOnly?: boolean) => void
+  onLayoutChange: (newLayout: TreeNode | null) => void
   onResizeStart?: () => void
   onResizeEnd?: () => void
   parentLeft: number

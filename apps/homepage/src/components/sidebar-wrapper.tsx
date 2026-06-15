@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { useZeugmaState, addPane } from 'react-zeugma'
+import { addPane } from 'react-zeugma'
 import type { TreeNode } from 'react-zeugma'
 import {
   Code2,
@@ -26,6 +26,8 @@ export interface LogEntry {
 
 interface SidebarWrapperProps {
   children: React.ReactNode
+  layout: TreeNode | null
+  onLayoutChange: (layout: TreeNode | null) => void
   snapThreshold: number
   onSnapThresholdChange: (val: number) => void
   minSplitPercentage: number
@@ -303,6 +305,8 @@ export const PRESETS: Record<string, { label: string; layout: TreeNode }> = {
 
 export function SidebarWrapper({
   children,
+  layout,
+  onLayoutChange,
   snapThreshold,
   onSnapThresholdChange,
   minSplitPercentage,
@@ -317,7 +321,6 @@ export function SidebarWrapper({
   onPresetChange,
   contentRef,
 }: SidebarWrapperProps) {
-  const { layout, onLayoutChange } = useZeugmaState()
   const [activePreset, setActivePreset] = useState<string>('default')
   const [isJsonExpanded, setIsJsonExpanded] = useState(true)
   const [copied, setCopied] = useState(false)

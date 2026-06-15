@@ -1,5 +1,117 @@
-import { ReactNode } from 'react'
+import { ReactNode, Dispatch, SetStateAction, RefObject } from 'react'
 import { TreeNode, SplitDirection, SplitNode } from '../../../shared/model'
+
+export interface UseZeugmaOptions {
+  /** Initial layout tree model defining pane organization and split percentages. Set to null for empty layout. */
+  initialLayout: TreeNode | null
+  /** Callback triggered when the layout changes via drag-and-drop actions, splits, swaps, or resizes. */
+  onChange?: (newLayout: TreeNode | null) => void
+  /** The ID of the pane that is currently taking up the full dashboard area. Null if no pane is fullscreen. */
+  fullscreenPaneId?: string | null
+  /** Callback triggered when a pane is toggled to/from fullscreen mode. Passes the active fullscreen paneId or null. */
+  onFullscreenChange?: (paneId: string | null) => void
+  /** Whether the layout is locked. When locked, resizing, dragging, and dropping are disabled. */
+  locked?: boolean
+
+  /** Minimum pixel distance that a user must drag a pane handle before dragging triggers. Defaults to 8. */
+  dragActivationDistance?: number
+  /** Threshold value in pixels for snapping layout resizing handles to adjacent edges. Defaults to 8. */
+  snapThreshold?: number
+  /** Minimum split percentage allowed when resizing split panes. Defaults to 5. */
+  minSplitPercentage?: number
+  /** Maximum split percentage allowed when resizing split panes. Defaults to 95. */
+  maxSplitPercentage?: number
+  /** Whether dragging a pane far enough outside the container triggers a drag-out/dismiss action. Defaults to false. */
+  enableDragToDismiss?: boolean
+  /** The threshold in pixels beyond the container boundaries required to activate the drag-out/dismiss action. Defaults to 60. */
+  dismissThreshold?: number
+
+  /** Callback triggered when a pane is removed from the dashboard layout tree. */
+  onRemove?: (paneId: string) => void
+  /** Callback triggered when dragging starts for a pane. */
+  onDragStart?: (activeId: string) => void
+  /** Callback triggered when dragging ends, providing details on target pane and drop action (split or swap). */
+  onDragEnd?: (
+    activeId: string,
+    overId: string | null,
+    dropAction: {
+      type: 'split' | 'swap'
+      direction?: SplitDirection
+      position?: 'top' | 'bottom' | 'left' | 'right' | 'center'
+    } | null,
+  ) => void
+  /** Callback triggered when the user starts dragging a resizing handle between split panes. */
+  onResizeStart?: (currentNode: SplitNode) => void
+  /** Callback triggered continuously while the user is dragging a resizing handle. Passes the new split percentage. */
+  onResize?: (currentNode: SplitNode, percentage: number) => void
+  /** Callback triggered when the user stops dragging a resizing handle. Passes the final split percentage. */
+  onResizeEnd?: (currentNode: SplitNode, percentage: number) => void
+  /** Callback triggered when the drag-out/dismiss intent changes. */
+  onDismissIntentChange?: (paneId: string | null) => void
+}
+
+export interface ZeugmaController {
+  // State
+  layout: TreeNode | null
+  setLayout: Dispatch<SetStateAction<TreeNode | null>>
+  fullscreenPaneId: string | null
+  setFullscreenPaneId: (paneId: string | null) => void
+  locked: boolean
+  setLocked: Dispatch<SetStateAction<boolean>>
+  activeId: string | null
+  setActiveId: Dispatch<SetStateAction<string | null>>
+  activeType: 'pane' | 'tab' | null
+  setActiveType: Dispatch<SetStateAction<'pane' | 'tab' | null>>
+  dismissIntentId: string | null
+  setDismissIntentId: Dispatch<SetStateAction<string | null>>
+  containerRef: RefObject<HTMLElement | null>
+  setContainerRef: (element: HTMLElement | null) => void
+
+  // Configuration settings (resolved/defaulted)
+  dragActivationDistance: number
+  snapThreshold: number
+  minSplitPercentage: number
+  maxSplitPercentage: number
+  enableDragToDismiss: boolean
+  dismissThreshold: number
+
+  // Callbacks
+  onRemove?: (paneId: string) => void
+  onDragStart?: (activeId: string) => void
+  onDragEnd?: (
+    activeId: string,
+    overId: string | null,
+    dropAction: {
+      type: 'split' | 'swap'
+      direction?: SplitDirection
+      position?: 'top' | 'bottom' | 'left' | 'right' | 'center'
+    } | null,
+  ) => void
+  onResizeStart?: (currentNode: SplitNode) => void
+  onResize?: (currentNode: SplitNode, percentage: number) => void
+  onResizeEnd?: (currentNode: SplitNode, percentage: number) => void
+  onDismissIntentChange?: (paneId: string | null) => void
+
+  // Actions
+  removePane: (paneId: string) => void
+  addPane: (paneId: string) => void
+  splitPane: (
+    targetId: string,
+    direction: SplitDirection,
+    splitType: 'left' | 'right' | 'top' | 'bottom',
+    paneToAdd: string,
+  ) => void
+  updateSplitPercentage: (currentNode: SplitNode, percentage: number) => void
+  updateTabMetadata: (
+    tabId: string,
+    updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined,
+  ) => void
+  updatePaneLock: (paneId: string, locked: boolean) => void
+  selectTab: (paneId: string, tabId: string) => void
+  mergeTab: (draggedTabId: string, targetPaneId: string) => void
+  moveTab: (draggedTabId: string, targetTabId: string, position?: 'before' | 'after') => void
+  removeTab: (tabId: string) => void
+}
 
 export interface ZeugmaClassNames {
   /** CSS class applied to the outer container div of each `<Pane>`. */
@@ -20,57 +132,13 @@ export interface ZeugmaClassNames {
   lockedPreview?: string
 }
 
-export interface ZeugmaProps {
-  /** The layout tree model (TreeNode) defining pane organization and split percentages. Set to null for empty layout. */
-  layout: TreeNode | null
-  /** Callback triggered when the layout changes via drag-and-drop actions, splits, swaps, or resizes. */
-  onChange: (newLayout: TreeNode | null) => void
+export interface ZeugmaProps extends ZeugmaController {
   /** Render function mapping unique pane IDs to React elements. Usually renders a <Pane> wrapper. */
   renderPane: (paneId: string) => ReactNode
   /** Custom overlay renderer function used to customize the cursor-following drag preview for an active pane or tab. */
   renderDragOverlay?: (activeId: string, type: 'pane' | 'tab') => ReactNode
   /** Optional CSS class name mapping overrides for custom styles of components like panes, drop/swap previews, overlays, etc. */
   classNames?: ZeugmaClassNames
-  /** The ID of the pane that is currently taking up the full dashboard area. Null if no pane is fullscreen. */
-  fullscreenPaneId?: string | null
-  /** Callback triggered when a pane is toggled to/from fullscreen mode. Passes the active fullscreen paneId or null. */
-  onFullscreenChange?: (paneId: string | null) => void
-  /** Callback triggered when a pane is removed from the dashboard layout tree. */
-  onRemove?: (paneId: string) => void
-  /** Minimum pixel distance that a user must drag a pane handle before dragging triggers. Defaults to 8. */
-  dragActivationDistance?: number
-  /** Threshold value in pixels for snapping layout resizing handles to adjacent edges. Defaults to 8. */
-  snapThreshold?: number
-  /** Callback triggered when dragging starts for a pane. */
-  onDragStart?: (activeId: string) => void
-  /** Callback triggered when dragging ends, providing details on target pane and drop action (split or swap). */
-  onDragEnd?: (
-    activeId: string,
-    overId: string | null,
-    dropAction: {
-      type: 'split' | 'swap'
-      direction?: SplitDirection
-      position?: 'top' | 'bottom' | 'left' | 'right' | 'center'
-    } | null,
-  ) => void
-  /** Callback triggered when the user starts dragging a resizing handle between split panes. */
-  onResizeStart?: (currentNode: SplitNode) => void
-  /** Callback triggered continuously while the user is dragging a resizing handle. Passes the new split percentage. */
-  onResize?: (currentNode: SplitNode, percentage: number) => void
-  /** Callback triggered when the user stops dragging a resizing handle. Passes the final split percentage. */
-  onResizeEnd?: (currentNode: SplitNode, percentage: number) => void
-  /** Minimum split percentage allowed when resizing split panes. Defaults to 5. */
-  minSplitPercentage?: number
-  /** Maximum split percentage allowed when resizing split panes. Defaults to 95. */
-  maxSplitPercentage?: number
-  /** Whether dragging a pane far enough outside the container triggers a drag-out/dismiss action. Defaults to false. */
-  enableDragToDismiss?: boolean
-  /** The threshold in pixels beyond the container boundaries required to activate the drag-out/dismiss action. */
-  dismissThreshold?: number
-  /** Callback triggered when the drag-out/dismiss intent changes (active pane ID or null when drag returns inside bounds). */
-  onDismissIntentChange?: (paneId: string | null) => void
-  /** Whether the layout is locked. When locked, resizing, dragging, and dropping are disabled. */
-  locked?: boolean
   /** Render function mapping tab IDs to React elements. Used to render tab widgets inside portals. */
   renderWidget?: (tabId: string) => ReactNode
   /** Child nodes nested inside the Zeugma context, usually containing a <PaneTree> or similar layout viewer. */

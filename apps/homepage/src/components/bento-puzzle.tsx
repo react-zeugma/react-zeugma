@@ -19,9 +19,8 @@ import {
   DragHandle,
   TreeNode,
   PaneRenderProps,
-  addPane,
   Tab,
-  mergeTab,
+  useZeugma,
 } from 'react-zeugma'
 import { Fireworks } from './fireworks'
 
@@ -448,15 +447,27 @@ interface BentoPuzzleProps {
 }
 
 export function BentoPuzzle({ onSuccess }: BentoPuzzleProps) {
-  const [layout, setLayout] = useState<TreeNode | null>({
-    type: 'pane',
-    id: 'pane-gypsy',
-    tabs: ['gypsy-girl'],
-    activeTabId: 'gypsy-girl',
-  })
-
   const [isSuccess, setIsSuccess] = useState(false)
   const [showFireworks, setShowFireworks] = useState(false)
+
+  const zeugma = useZeugma({
+    initialLayout: {
+      type: 'pane',
+      id: 'pane-gypsy',
+      tabs: ['gypsy-girl'],
+      activeTabId: 'gypsy-girl',
+    },
+    dragActivationDistance: 6,
+    onChange: (newLayout) => {
+      // Check if the user built the correct bento layout
+      const matched = checkBentoLayoutMatch(newLayout)
+      if (matched && !isSuccess) {
+        setIsSuccess(true)
+        setShowFireworks(true)
+        onSuccess?.()
+      }
+    },
+  })
 
   // Memoize present tabs to disable palette buttons
   const presentTabs = useMemo(() => {
@@ -470,27 +481,12 @@ export function BentoPuzzle({ onSuccess }: BentoPuzzleProps) {
         traverse(node.second)
       }
     }
-    traverse(layout)
+    traverse(zeugma.layout)
     return tabs
-  }, [layout])
-
-  const handleLayoutChange = useCallback(
-    (newLayout: TreeNode | null) => {
-      setLayout(newLayout)
-
-      // Check if the user built the correct bento layout
-      const matched = checkBentoLayoutMatch(newLayout)
-      if (matched && !isSuccess) {
-        setIsSuccess(true)
-        setShowFireworks(true)
-        onSuccess?.()
-      }
-    },
-    [isSuccess, onSuccess],
-  )
+  }, [zeugma.layout])
 
   const handleReset = () => {
-    setLayout({
+    zeugma.setLayout({
       type: 'pane',
       id: 'pane-gypsy',
       tabs: ['gypsy-girl'],
@@ -515,17 +511,15 @@ export function BentoPuzzle({ onSuccess }: BentoPuzzleProps) {
           findFirstPane(node.second)
         }
       }
-      findFirstPane(layout)
+      findFirstPane(zeugma.layout)
 
       if (firstPaneId) {
-        const newLayout = mergeTab(layout, tabId, firstPaneId)
-        handleLayoutChange(newLayout)
+        zeugma.mergeTab(tabId, firstPaneId)
       } else {
-        const newLayout = addPane(layout, tabId)
-        handleLayoutChange(newLayout)
+        zeugma.addPane(tabId)
       }
     },
-    [layout, presentTabs, isSuccess, handleLayoutChange],
+    [zeugma, presentTabs, isSuccess],
   )
 
   const renderWidget = useCallback(
@@ -663,14 +657,12 @@ export function BentoPuzzle({ onSuccess }: BentoPuzzleProps) {
     <div className="w-full flex flex-col gap-8 lg:flex-row items-stretch select-none">
       <style dangerouslySetInnerHTML={{ __html: ANIMATION_STYLES }} />
 
-      {layout && (
+      {zeugma.layout && (
         <Zeugma
-          layout={layout}
-          onChange={handleLayoutChange}
+          {...zeugma}
           renderPane={renderPane}
           renderWidget={renderWidget}
           renderDragOverlay={renderDragOverlay}
-          dragActivationDistance={6}
           classNames={{
             dropPreview:
               'bg-amber-500/10 border-2 border-dashed border-amber-500/40 shadow-[0_0_24px_rgba(245,158,11,0.15)] rounded-xl transition-all duration-200',

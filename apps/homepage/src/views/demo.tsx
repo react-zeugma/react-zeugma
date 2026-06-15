@@ -7,13 +7,9 @@ import {
   Pane,
   DragHandle,
   Tab,
-  removePane,
-  removeTab,
   findPane,
-  updateTabMetadata,
   ResizableContainer,
-  useZeugmaActions,
-  useZeugmaState,
+  useZeugma,
 } from 'react-zeugma'
 import type { TreeNode, PaneRenderProps, SplitNode, TabRenderProps } from 'react-zeugma'
 import {
@@ -88,6 +84,8 @@ interface UIPlaceholderProps {
   remove: () => void
   metadata?: Record<string, unknown>
   locked: boolean
+  globalLocked: boolean
+  updatePaneLock: (paneId: string, locked: boolean) => void
 }
 
 const UIPlaceholder = ({
@@ -100,10 +98,10 @@ const UIPlaceholder = ({
   remove,
   metadata,
   locked,
+  globalLocked,
+  updatePaneLock,
   hideHeader = false,
 }: UIPlaceholderProps & { hideHeader?: boolean }) => {
-  const { locked: globalLocked } = useZeugmaState()
-  const { updatePaneLock } = useZeugmaActions()
   const color = (metadata?.color as string) || 'indigo'
 
   const { mounts, renders } = useRenderCounter(id)
@@ -205,6 +203,8 @@ interface WidgetProps {
   remove: () => void
   metadata?: Record<string, unknown>
   locked: boolean
+  globalLocked: boolean
+  updatePaneLock: (paneId: string, locked: boolean) => void
   updateMetadata?: (
     updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined,
   ) => void
@@ -275,7 +275,7 @@ const MetadataWidget = ({
   locked,
   hideHeader = false,
   ...props
-}: WidgetProps & { id: string; title?: string; locked: boolean; hideHeader?: boolean }) => {
+}: WidgetProps & { title?: string }) => {
   const currentTitle = (metadata?.title as string) || title || 'Workspace Pane'
   const currentNotes = (metadata?.notes as string) || ''
   const currentColor = (metadata?.color as string) || 'indigo'
@@ -516,14 +516,16 @@ const TabHeader = ({
 
 const TabbedPaneWrapper = ({
   paneProps,
+  globalLocked,
+  updatePaneLock,
   children,
 }: {
   paneProps: PaneRenderProps
+  globalLocked: boolean
+  updatePaneLock: (paneId: string, locked: boolean) => void
   children: React.ReactNode
 }) => {
   const { tabs, activeTabId, selectTab, removeTab, tabsMetadata, locked } = paneProps
-  const { updatePaneLock } = useZeugmaActions()
-  const { locked: globalLocked } = useZeugmaState()
 
   return (
     <div className="zeugma-pane-container h-full w-full bg-bg-pane flex flex-col relative overflow-hidden group border border-border-primary rounded-lg shadow-md transition-all duration-200">
@@ -636,16 +638,9 @@ export function Demo() {
     },
   }
 
-  const [layout, setLayout] = useState<TreeNode | null>(null)
   const [isMounted, setIsMounted] = useState<boolean>(false)
-
-  React.useEffect(() => {
-    setLayout(defaultIDELayout)
-    setIsMounted(true)
-  }, [])
-
-  const [fullscreenPaneId, setFullscreenPaneId] = useState<string | null>(null)
   const [layoutLocked, setLayoutLocked] = useState(false)
+
   const [snapThreshold, setSnapThreshold] = useState(12)
   const [minSplit, setMinSplit] = useState(10)
   const [maxSplit, setMaxSplit] = useState(90)
@@ -656,6 +651,8 @@ export function Demo() {
   const [showResizeAlert, setShowResizeAlert] = useState(true)
   const [highlightResizer, setHighlightResizer] = useState(false)
   const scrollContainerRef = React.useRef<HTMLDivElement>(null)
+
+  const zeugmaRef = React.useRef<any>(null)
 
   React.useEffect(() => {
     if (resizableHeight) {
@@ -778,46 +775,62 @@ export function Demo() {
     [addLog],
   )
 
-  const handleLayoutChange = (newLayout: TreeNode | null) => {
-    setLayout(newLayout)
-  }
-
   const handleRemove = React.useCallback(
     (id: string) => {
       const isDragOut = localDismissIntentId === id
       setLocalDismissIntentId(null)
-      const pane = findPane(layout, id)
-      let newLayout: TreeNode | null = null
+      const pane = findPane(zeugmaRef.current?.layout, id)
       if (pane) {
         if (pane.tabs.length > 1 && pane.tabs.includes(id)) {
-          newLayout = removeTab(layout, id)
+          zeugmaRef.current?.removeTab(id)
         } else {
-          newLayout = removePane(layout, pane.id)
+          zeugmaRef.current?.removePane(pane.id)
         }
       } else {
-        newLayout = removePane(layout, id)
+        zeugmaRef.current?.removePane(id)
       }
-      handleLayoutChange(newLayout)
       if (isDragOut) {
         addLog('drag', `Closed: Widget "${id}" dragged out and released`)
       } else {
         addLog('drag', `Closed: Widget "${id}" removed`)
       }
     },
-    [layout, localDismissIntentId, addLog],
+    [localDismissIntentId, addLog],
   )
+
+  const zeugma = useZeugma({
+    initialLayout: defaultIDELayout,
+    locked: layoutLocked,
+    onRemove: handleRemove,
+    snapThreshold: snapThreshold,
+    minSplitPercentage: minSplit,
+    maxSplitPercentage: maxSplit,
+    onDragStart: handleDragStart,
+    onDragEnd: handleDragEnd,
+    onDismissIntentChange: handleDismissIntentChange,
+    enableDragToDismiss: true,
+    dismissThreshold: 60,
+    onResizeStart: handleResizeStart,
+    onResizeEnd: handleResizeEnd,
+  })
+
+  zeugmaRef.current = zeugma
+
+  React.useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   const renderWidget = React.useCallback(
     (tabId: string) => {
       const { title } = getWidgetDetails(tabId)
-      const pane = findPane(layout, tabId)
+      const pane = findPane(zeugma.layout, tabId)
       const tabMetadata = pane?.tabsMetadata?.[tabId]
-      const isFullscreen = fullscreenPaneId !== null && fullscreenPaneId === pane?.id
+      const isFullscreen = zeugma.fullscreenPaneId !== null && zeugma.fullscreenPaneId === pane?.id
       const locked = pane?.locked || layoutLocked
 
       const toggleFullscreen = () => {
         if (pane) {
-          setFullscreenPaneId((prev) => (prev === pane.id ? null : pane.id))
+          zeugma.setFullscreenPaneId(zeugma.fullscreenPaneId === pane.id ? null : pane.id)
         }
       }
 
@@ -826,12 +839,16 @@ export function Demo() {
           current: Record<string, unknown> | undefined,
         ) => Record<string, unknown> | undefined,
       ) => {
-        const newLayout = updateTabMetadata(layout, tabId, updater)
-        setLayout(newLayout)
+        zeugma.updateTabMetadata(tabId, updater)
       }
 
       const remove = () => {
         handleRemove(tabId)
+      }
+
+      const commonProps = {
+        globalLocked: layoutLocked,
+        updatePaneLock: zeugma.updatePaneLock,
       }
 
       if (tabId === 'explorer') {
@@ -846,6 +863,7 @@ export function Demo() {
             updateMetadata={updateMetadata}
             locked={locked}
             hideHeader={true}
+            {...commonProps}
           />
         )
       }
@@ -861,6 +879,7 @@ export function Demo() {
             metadata={tabMetadata}
             locked={locked}
             hideHeader={true}
+            {...commonProps}
           >
             <AnalyticsWidget />
           </UIPlaceholder>
@@ -878,6 +897,7 @@ export function Demo() {
             metadata={tabMetadata}
             locked={locked}
             hideHeader={true}
+            {...commonProps}
           >
             <TransactionsWidget />
           </UIPlaceholder>
@@ -895,6 +915,7 @@ export function Demo() {
             metadata={tabMetadata}
             locked={locked}
             hideHeader={true}
+            {...commonProps}
           >
             <SystemWidget />
           </UIPlaceholder>
@@ -912,6 +933,7 @@ export function Demo() {
             metadata={tabMetadata}
             locked={locked}
             hideHeader={true}
+            {...commonProps}
           >
             <GalleryWidget />
           </UIPlaceholder>
@@ -929,6 +951,7 @@ export function Demo() {
             metadata={tabMetadata}
             locked={locked}
             hideHeader={true}
+            {...commonProps}
           >
             <ConversionsWidget />
           </UIPlaceholder>
@@ -946,6 +969,7 @@ export function Demo() {
             metadata={tabMetadata}
             locked={locked}
             hideHeader={true}
+            {...commonProps}
           >
             <TasksWidget />
           </UIPlaceholder>
@@ -963,6 +987,7 @@ export function Demo() {
             metadata={tabMetadata}
             locked={locked}
             hideHeader={true}
+            {...commonProps}
           >
             <PerformanceWidget />
           </UIPlaceholder>
@@ -978,10 +1003,11 @@ export function Demo() {
           metadata={tabMetadata}
           locked={locked}
           hideHeader={true}
+          {...commonProps}
         />
       )
     },
-    [layout, fullscreenPaneId, layoutLocked, handleRemove],
+    [zeugma.layout, zeugma.fullscreenPaneId, zeugma.updatePaneLock, layoutLocked, handleRemove],
   )
 
   const renderPane = (paneId: string) => {
@@ -991,7 +1017,11 @@ export function Demo() {
           const isThisDraggedOut = paneProps.tabs.includes(localDismissIntentId || '')
 
           return (
-            <TabbedPaneWrapper paneProps={paneProps}>
+            <TabbedPaneWrapper
+              paneProps={paneProps}
+              globalLocked={zeugma.locked}
+              updatePaneLock={zeugma.updatePaneLock}
+            >
               {paneProps.renderActiveTab()}
               {paneProps.isDragging && isThisDraggedOut && (
                 <div className="absolute inset-0 bg-bg-app/40 flex items-center justify-center pointer-events-none select-none z-50">
@@ -1009,7 +1039,7 @@ export function Demo() {
 
   const renderDragOverlay = (id: string, type: 'pane' | 'tab') => {
     const { title, icon } = getWidgetDetails(id)
-    const metadata = findPaneMetadata(layout, id)
+    const metadata = findPaneMetadata(zeugma.layout, id)
     const currentTitle = (metadata?.title as string) || title
     const color = (metadata?.color as string) || 'indigo'
 
@@ -1083,25 +1113,10 @@ export function Demo() {
         )}
         <h1 className="sr-only">react-zeugma Live Workspace Demo</h1>
         <Zeugma
-          layout={layout}
-          onChange={handleLayoutChange}
+          {...zeugma}
           renderPane={renderPane}
           renderWidget={renderWidget}
           renderDragOverlay={renderDragOverlay}
-          fullscreenPaneId={fullscreenPaneId}
-          onFullscreenChange={setFullscreenPaneId}
-          onRemove={handleRemove}
-          snapThreshold={snapThreshold}
-          minSplitPercentage={minSplit}
-          maxSplitPercentage={maxSplit}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-          onDismissIntentChange={handleDismissIntentChange}
-          enableDragToDismiss={true}
-          dismissThreshold={60}
-          onResizeStart={handleResizeStart}
-          onResizeEnd={handleResizeEnd}
-          locked={layoutLocked}
           classNames={{
             dropPreview:
               'bg-indigo-500/10 backdrop-blur-[2px] border-2 border-dashed border-indigo-400/50 shadow-[0_25px_50px_-12px_rgba(99,102,241,0.2)] rounded-lg transition-all duration-200',
@@ -1121,6 +1136,8 @@ export function Demo() {
           >
             <SidebarWrapper
               contentRef={scrollContainerRef}
+              layout={zeugma.layout}
+              onLayoutChange={zeugma.setLayout}
               snapThreshold={snapThreshold}
               onSnapThresholdChange={setSnapThreshold}
               minSplitPercentage={minSplit}
@@ -1154,7 +1171,7 @@ export function Demo() {
                       </span>
                     </div>
                   </div>
-                ) : layout ? (
+                ) : zeugma.layout ? (
                   <ResizableContainer
                     active={resizableHeight}
                     height={containerHeight}
@@ -1172,7 +1189,7 @@ export function Demo() {
                     <p className="mb-4">All panes closed.</p>
                     <button
                       onClick={() => {
-                        handleLayoutChange(defaultIDELayout)
+                        zeugma.setLayout(defaultIDELayout)
                         setContainerHeight(800)
                       }}
                       className="px-4 py-2 bg-text-primary hover:bg-text-primary/90 text-bg-app rounded text-sm transition-colors cursor-pointer"

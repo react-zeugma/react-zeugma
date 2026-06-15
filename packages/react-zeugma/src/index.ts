@@ -2,10 +2,10 @@ export { Zeugma } from './entities/zeugma'
 export type {
   ZeugmaProps,
   ZeugmaClassNames,
-  ZeugmaStateValue,
-  ZeugmaActionsValue,
+  UseZeugmaOptions,
+  ZeugmaController,
 } from './entities/zeugma'
-export { useZeugmaState, useZeugmaActions } from './entities/zeugma'
+export { useZeugma } from './entities/zeugma'
 export { useResizer } from './features/resize-pane'
 export { PaneTree } from './widgets/pane-tree'
 export { ResizableContainer } from './widgets/resizable-container'

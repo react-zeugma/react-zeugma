@@ -4,6 +4,10 @@
 
 ### Patch Changes
 
+- **Exposed API Refactoring & Context Separation**:
+  - Restructured `ZeugmaController` and context types to separate public API from internal drag-and-drop orchestration state variables (such as `activeId`, `activeType`, `dismissIntentId`, `containerRef`, etc.), cleaning up the TypeScript surface.
+  - Removed internal actions like `splitPane`, `updateSplitPercentage`, and `moveTab` from the public actions context (`ZeugmaActionsValue`).
+  - Renamed `onLayoutChange` context state setter function to `setLayout` across context interfaces and consumers to follow standard React hooks conventions.
 - **Set Dragged Tab as Active & Internal Refactoring**:
   - Updated the drag-and-drop state machine to set a tab as the active pane tab immediately when dragging starts.
   - Refactored contexts, context hooks, and types into the `shared` layer to resolve cross-entity FSD dependencies between `entities/pane` and `entities/zeugma`.

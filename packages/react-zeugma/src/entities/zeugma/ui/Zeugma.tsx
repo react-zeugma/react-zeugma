@@ -7,12 +7,14 @@ import {
   ZeugmaActionsContext,
   PortalRegistryContext,
   ZeugmaProps,
+  ZeugmaInternalController,
 } from '../../../shared'
 import { usePortalRegistry, useZeugmaDnd } from '../model'
 import { CursorOverlay } from './CursorOverlay'
 import { PortalHostItem } from './PortalHostItem'
 
 export const Zeugma: React.FC<ZeugmaProps> = (props) => {
+  const internalProps = props as unknown as ZeugmaInternalController & ZeugmaProps
   const {
     renderPane,
     renderWidget,
@@ -45,15 +47,12 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
     // Actions
     removePane,
     addPane,
-    splitPane,
-    updateSplitPercentage,
     updateTabMetadata,
     updatePaneLock,
     selectTab,
     mergeTab,
-    moveTab,
     removeTab,
-  } = props
+  } = internalProps
 
   const { portalTargets, registerPortalTarget } = usePortalRegistry()
 
@@ -61,7 +60,7 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
   const [overTabPosition, setOverTabPosition] = useState<'before' | 'after' | null>(null)
 
   const dnd = useZeugmaDnd({
-    ...props,
+    ...internalProps,
     setOverTabId,
     setOverTabPosition,
   })
@@ -100,7 +99,7 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
   const stateValue = useMemo(
     () => ({
       layout,
-      onLayoutChange: (newLayout: TreeNode | null) => setLayout(newLayout),
+      setLayout,
       renderPane: stableRenderPane,
       activeId,
       dismissIntentId,
@@ -147,27 +146,13 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
     () => ({
       removePane,
       addPane,
-      splitPane,
-      updateSplitPercentage,
       updateTabMetadata,
       updatePaneLock,
       selectTab,
       mergeTab,
-      moveTab,
       removeTab,
     }),
-    [
-      removePane,
-      addPane,
-      splitPane,
-      updateSplitPercentage,
-      updateTabMetadata,
-      updatePaneLock,
-      selectTab,
-      mergeTab,
-      moveTab,
-      removeTab,
-    ],
+    [removePane, addPane, updateTabMetadata, updatePaneLock, selectTab, mergeTab, removeTab],
   )
 
   // Collect all tab IDs in the current layout tree

@@ -10,7 +10,7 @@ import {
   CollisionDetection,
   DroppableContainer,
 } from '@dnd-kit/core'
-import { SplitDirection, PaneNode, ZeugmaController } from '../../../shared'
+import { SplitDirection, PaneNode, ZeugmaInternalController } from '../../../shared'
 import {
   removePane as removePaneHelper,
   removeTab as removeTabHelper,
@@ -34,7 +34,7 @@ function getPointerCoordinates(event: Event): { x: number; y: number } | null {
   return null
 }
 
-interface UseZeugmaDndProps extends ZeugmaController {
+interface UseZeugmaDndProps extends ZeugmaInternalController {
   setOverTabId: Dispatch<SetStateAction<string | null>>
   setOverTabPosition: Dispatch<SetStateAction<'before' | 'after' | null>>
 }

@@ -74,12 +74,42 @@ export interface UseZeugmaOptions {
 
 export interface ZeugmaController {
   // State
+  /** The current active layout tree structure, or null if empty. */
   layout: TreeNode | null
+  /** Updates the layout tree. */
   setLayout: Dispatch<SetStateAction<TreeNode | null>>
+  /** The ID of the pane currently zoomed to fullscreen, or null. */
   fullscreenPaneId: string | null
+  /** Programmatically sets the fullscreen pane ID. */
   setFullscreenPaneId: (paneId: string | null) => void
+  /** Whether the layout is globally locked. */
   locked: boolean
+  /** Programmatically updates the global locked status. */
   setLocked: Dispatch<SetStateAction<boolean>>
+
+  // Public Actions
+  /** Removes the specified pane from the layout tree and collapses its parent split. */
+  removePane: (paneId: string) => void
+  /** Appends/inserts a pane at the bottom-rightmost leaf of the layout tree. */
+  addPane: (paneId: string) => void
+  /** Stable callback to update metadata for a specific tab. */
+  updateTabMetadata: (
+    tabId: string,
+    updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined,
+  ) => void
+  /** Stable callback to update the locked status of a specific pane in the layout tree. */
+  updatePaneLock: (paneId: string, locked: boolean) => void
+  /** Stable callback to activate a tab within a pane. */
+  selectTab: (paneId: string, tabId: string) => void
+  /** Stable callback to merge a dragged tab/pane into another pane's tab list. */
+  mergeTab: (draggedTabId: string, targetPaneId: string) => void
+  /** Stable callback to remove/close a specific tab from the layout. */
+  removeTab: (tabId: string) => void
+}
+
+/** @internal */
+export interface ZeugmaInternalController extends ZeugmaController {
+  // Internal State
   activeId: string | null
   setActiveId: Dispatch<SetStateAction<string | null>>
   activeType: 'pane' | 'tab' | null
@@ -114,9 +144,7 @@ export interface ZeugmaController {
   onResizeEnd?: (currentNode: SplitNode, percentage: number) => void
   onDismissIntentChange?: (paneId: string | null) => void
 
-  // Actions
-  removePane: (paneId: string) => void
-  addPane: (paneId: string) => void
+  // Internal Actions
   splitPane: (
     targetId: string,
     direction: SplitDirection,
@@ -124,15 +152,7 @@ export interface ZeugmaController {
     paneToAdd: string,
   ) => void
   updateSplitPercentage: (currentNode: SplitNode, percentage: number) => void
-  updateTabMetadata: (
-    tabId: string,
-    updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined,
-  ) => void
-  updatePaneLock: (paneId: string, locked: boolean) => void
-  selectTab: (paneId: string, tabId: string) => void
-  mergeTab: (draggedTabId: string, targetPaneId: string) => void
   moveTab: (draggedTabId: string, targetTabId: string, position?: 'before' | 'after') => void
-  removeTab: (tabId: string) => void
 }
 
 export interface ZeugmaClassNames {
@@ -181,35 +201,13 @@ export interface ZeugmaStateValue {
   /** The current active layout tree structure, or null if empty. */
   layout: TreeNode | null
   /** Callback to update the layout tree. */
-  onLayoutChange: (newLayout: TreeNode | null, localOnly?: boolean) => void
+  setLayout: Dispatch<SetStateAction<TreeNode | null>>
   /** Renders the inner content of a pane given its unique ID. */
   renderPane: (paneId: string) => ReactNode
-  /** The ID of the pane currently being dragged, or null. */
-  activeId: string | null
-  /** The ID of the pane currently targeted for dismiss/drag-out, or null. */
-  dismissIntentId: string | null
-  /** Ref setter to measure and track the dashboard root container element. */
-  setContainerRef: (element: HTMLElement | null) => void
   /** The ID of the pane currently zoomed to fullscreen, or null. */
   fullscreenPaneId: string | null
   /** Normalized or overridden CSS classes for custom layout styling. */
   classNames: ZeugmaClassNames
-  /** Callback triggered when a pane is closed/removed from the dashboard. */
-  onRemove?: (paneId: string) => void
-  /** Callback triggered to toggle fullscreen status for a pane. */
-  onFullscreenChange?: (paneId: string | null) => void
-  /** Threshold in pixels to snap layout resizers to adjacent edges. */
-  snapThreshold?: number
-  /** Callback triggered when a split pane starts being resized. */
-  onResizeStart?: (currentNode: SplitNode) => void
-  /** Callback triggered continuously during a split pane resize. */
-  onResize?: (currentNode: SplitNode, percentage: number) => void
-  /** Callback triggered when a split pane resize action is completed. */
-  onResizeEnd?: (currentNode: SplitNode, percentage: number) => void
-  /** Minimum split percentage allowed when resizing. */
-  minSplitPercentage?: number
-  /** Maximum split percentage allowed when resizing. */
-  maxSplitPercentage?: number
   /** Whether the layout is globally locked. */
   locked: boolean
 }
@@ -220,6 +218,19 @@ export interface ZeugmaInternalStateValue extends ZeugmaStateValue {
   overTabId: string | null
   /** The position of the tab drop preview relative to the hovered tab ('before' | 'after'). */
   overTabPosition: 'before' | 'after' | null
+
+  // Drag-and-drop orchestration state
+  activeId: string | null
+  dismissIntentId: string | null
+  setContainerRef: (element: HTMLElement | null) => void
+  onRemove?: (paneId: string) => void
+  onFullscreenChange?: (paneId: string | null) => void
+  snapThreshold?: number
+  onResizeStart?: (currentNode: SplitNode) => void
+  onResize?: (currentNode: SplitNode, percentage: number) => void
+  onResizeEnd?: (currentNode: SplitNode, percentage: number) => void
+  minSplitPercentage?: number
+  maxSplitPercentage?: number
 }
 
 /**
@@ -231,15 +242,6 @@ export interface ZeugmaActionsValue {
   removePane: (paneId: string) => void
   /** Appends/inserts a pane at the bottom-rightmost leaf of the layout tree. */
   addPane: (paneId: string) => void
-  /** Splits a target pane with a new pane in the specified direction and side. */
-  splitPane: (
-    targetId: string,
-    direction: SplitDirection,
-    splitType: 'left' | 'right' | 'top' | 'bottom',
-    paneToAdd: string,
-  ) => void
-  /** Updates the split percentage of a specific split branch node. */
-  updateSplitPercentage: (currentNode: SplitNode, percentage: number) => void
   /** Stable callback to update metadata for a specific tab. */
   updateTabMetadata: (
     tabId: string,
@@ -251,8 +253,6 @@ export interface ZeugmaActionsValue {
   selectTab: (paneId: string, tabId: string) => void
   /** Stable callback to merge a dragged tab/pane into another pane's tab list. */
   mergeTab: (draggedTabId: string, targetPaneId: string) => void
-  /** Stable callback to move/reorder a tab to another pane next to a target tab. */
-  moveTab: (draggedTabId: string, targetTabId: string, position?: 'before' | 'after') => void
   /** Stable callback to remove/close a specific tab from the layout. */
   removeTab: (tabId: string) => void
 }

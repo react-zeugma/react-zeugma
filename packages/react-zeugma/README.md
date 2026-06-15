@@ -132,7 +132,7 @@ A custom state hook that initializes and manages the recursive layout tree and h
 
 A custom React context hook that returns the unified layout controller properties and state actions. Must be used within a `<Zeugma>` provider component.
 
-Provides direct access to the current layout state (e.g., `layout`, `locked`) and mutation actions (e.g., `addPane`, `removePane`, `splitPane`, `updateTabMetadata`, etc.).
+Provides direct access to the current layout state (e.g., `layout`, `locked`) and mutation actions (e.g., `addPane`, `removePane`, `updateTabMetadata`, `removeTab`, `selectTab`, etc.).
 
 ```ts
 const { layout, locked, addPane, removeTab } = useZeugmaContext()

@@ -251,5 +251,5 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
     mergeTab: handleMergeTab,
     moveTab: handleMoveTab,
     removeTab: handleRemoveTab,
-  }
+  } as unknown as ZeugmaController
 }

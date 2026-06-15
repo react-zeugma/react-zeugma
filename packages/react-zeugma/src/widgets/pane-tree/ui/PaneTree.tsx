@@ -1,5 +1,5 @@
 import React, { useRef, useMemo, useState } from 'react'
-import { useZeugmaState } from '../../../shared'
+import { useZeugmaState, ZeugmaInternalStateValue } from '../../../shared'
 import { useResizer } from '../../../features/resize-pane'
 import { TreeNode } from '../../../shared'
 import { ComputedSplitter, computeLayout } from '../../../shared/lib/tree'
@@ -26,7 +26,7 @@ const FlatSplitter: React.FC<FlatSplitterProps> = ({
   snapThreshold,
   containerRef,
 }) => {
-  const { layout, onLayoutChange, classNames, locked } = useZeugmaState()
+  const { layout, setLayout, classNames, locked } = useZeugmaState() as ZeugmaInternalStateValue
   const [isResizing, setIsResizing] = useState(false)
 
   const {
@@ -53,7 +53,7 @@ const FlatSplitter: React.FC<FlatSplitterProps> = ({
     snapThreshold,
     layout,
     currentNode,
-    onLayoutChange,
+    onLayoutChange: setLayout,
     onResizeStart: () => setIsResizing(true),
     onResizeEnd: () => setIsResizing(false),
     parentLeft,
@@ -127,7 +127,7 @@ export const PaneTree: React.FC<PaneTreeProps> = ({
     snapThreshold: contextSnapThreshold,
     locked,
     classNames,
-  } = useZeugmaState()
+  } = useZeugmaState() as ZeugmaInternalStateValue
 
   const snapThreshold =
     propSnapThreshold !== undefined ? propSnapThreshold : (contextSnapThreshold ?? 8)

@@ -1105,8 +1105,6 @@ export function Demo() {
           classNames={{
             dropPreview:
               'bg-indigo-500/10 backdrop-blur-[2px] border-2 border-dashed border-indigo-400/50 shadow-[0_25px_50px_-12px_rgba(99,102,241,0.2)] rounded-lg transition-all duration-200',
-            swapPreview:
-              'bg-amber-500/10 backdrop-blur-[2px] border-2 border-dashed border-amber-400/50 shadow-[0_25px_50px_-12px_rgba(245,158,11,0.2)] rounded-lg transition-all duration-200',
             dismissPreview: 'zeugma-dismiss-preview',
             paneLocked:
               'border-zinc-300 dark:border-zinc-700/80 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] bg-zinc-500/[0.02] dark:bg-zinc-500/[0.02] rounded-lg overflow-hidden transition-all duration-200',

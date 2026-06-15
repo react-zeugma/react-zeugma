@@ -1,5 +1,15 @@
 # react-zeugma
 
+## 3.0.1
+
+### Patch Changes
+
+- **Bento Puzzle Enhancements & Theme-Specific Styling**:
+  - Implemented the custom Zeugma Museum Zen Bento Builder puzzle, complete with interactive archeological widgets (Gypsy Girl, Excavation Grid, Statue of Mars, Euphrates Level, and Conservation Logs).
+  - Encapsulated drag-and-drop mechanics inside `<Tab>` and `<DragHandle>` components.
+  - Made the puzzle non-closable by disabling pane and tab close triggers to preserve layout components.
+  - Aligned drop zone overlays, active tab indicators, reorder markers, and split-pane resizer handles with the warm sand/gold/terracotta theme.
+
 ## 3.0.0
 
 ### Major Changes

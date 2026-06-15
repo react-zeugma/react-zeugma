@@ -8,8 +8,6 @@ export interface ZeugmaClassNames {
   paneLocked?: string
   /** CSS class applied to drop zone indicators when hovering over layout edges to split a pane. */
   dropPreview?: string
-  /** CSS class applied to the drop zone indicator when hovering over the center of a pane to swap. */
-  swapPreview?: string
   /** CSS class applied to the custom cursor-following drag preview portal wrapper. */
   dragOverlay?: string
   /** CSS class applied to the drag-to-resize split bar handles. */
@@ -129,8 +127,6 @@ export interface ZeugmaActionsValue {
   removePane: (paneId: string) => void
   /** Appends/inserts a pane at the bottom-rightmost leaf of the layout tree. */
   addPane: (paneId: string) => void
-  /** Swaps the positions of two panes in the layout tree. */
-  swapPanes: (paneIdA: string, paneIdB: string) => void
   /** Splits a target pane with a new pane in the specified direction and side. */
   splitPane: (
     targetId: string,

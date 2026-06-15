@@ -15,7 +15,7 @@
 ### Core Features
 
 - **Recursive Split Trees**: Nest rows and columns to any depth using a simple serialized JSON node structure.
-- **5-Zone Docking Previews**: Drag panels on the top, bottom, left, or right edges of another pane to split it, or onto the center to swap their positions.
+- **4-Zone Docking Previews**: Drag panels on the top, bottom, left, or right edges of another pane to split it.
 - **Native Flexbox Resizers**: Fluid, non-blocking split handles built on pointer events.
 - **Accessible Drag-and-Drop**: Built on top of the performant and accessible [`@dnd-kit`](https://dndkit.com) toolkit.
 - **Fullscreen Zoom Toggle**: Programmatically expand any pane to cover the entire viewport and snap it back instantly.
@@ -101,7 +101,7 @@ The context provider that sets up the drag-and-drop state machine, monitors acti
 | Prop                     | Type                                                                  | Required | Description                                                                                                               |
 | ------------------------ | --------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------- |
 | `layout`                 | `TreeNode \| null`                                                    | Yes      | The serializable tree layout schema.                                                                                      |
-| `onChange`               | `(layout: TreeNode \| null) => void`                                  | Yes      | Fires when resizes, splits, swaps, or removes modify the tree.                                                            |
+| `onChange`               | `(layout: TreeNode \| null) => void`                                  | Yes      | Fires when resizes, splits, or removes modify the tree.                                                                   |
 | `renderPane`             | `(paneId: string) => ReactNode`                                       | Yes      | Renderer function lookup that returns a `<Pane>` structure.                                                               |
 | `classNames`             | `ZeugmaClassNames`                                                    | No       | Custom classes for overriding pane, resizer, and drop preview overlays.                                                   |
 | `fullscreenPaneId`       | `string \| null`                                                      | No       | Active ID of the pane taking full viewport coverage.                                                                      |
@@ -113,7 +113,7 @@ The context provider that sets up the drag-and-drop state machine, monitors acti
 | `dragOutThreshold`       | `number`                                                              | No       | Distance in pixels outside the container bounds required to trigger drag-out mode. Defaults to `60`.                      |
 | `onDragOutChange`        | `(activeId: string \| null) => void`                                  | No       | Callback triggered when the drag-out state changes. Receives the pane ID or `null`.                                       |
 | `onDragStart`            | `(activeId: string) => void`                                          | No       | Callback triggered when dragging starts on a pane.                                                                        |
-| `onDragEnd`              | `(activeId: string, overId: string \| null, dropAction: any) => void` | No       | Callback triggered when dragging ends, providing swap or split details.                                                   |
+| `onDragEnd`              | `(activeId: string, overId: string \| null, dropAction: any) => void` | No       | Callback triggered when dragging ends, providing split or tab reorder details.                                            |
 | `onResizeStart`          | `(currentNode: SplitNode) => void`                                    | No       | Callback triggered when resizing starts on a split node.                                                                  |
 | `onResize`               | `(currentNode: SplitNode, percentage: number) => void`                | No       | Callback triggered continuously while resizing a split node.                                                              |
 | `onResizeEnd`            | `(currentNode: SplitNode, percentage: number) => void`                | No       | Callback triggered when resizing ends on a split node.                                                                    |
@@ -189,10 +189,6 @@ Recursively scans the layout tree, removes the targeted pane node, and collapses
 
 Recursively matches the bottommost/rightmost pane leaf in the tree, splits it, and inserts the target `paneToAdd`.
 
-#### `swapPanes(tree: TreeNode | null, idA: string, idB: string): TreeNode | null`
-
-Swaps the positions of `idA` and `idB` nodes directly inside the tree structure.
-
 #### `splitPane(tree, targetId, direction, splitType, paneToAdd)`
 
 Splits the targeted `targetId` pane inside the tree with `direction` (_row_ / _column_) and type (_left_, _right_, _top_, _bottom_) to insert `paneToAdd`.
@@ -218,8 +214,6 @@ Use custom CSS or styling rules to style resizers, dragging states, drop preview
       'bg-transparent hover:bg-indigo-500/50 active:bg-indigo-500 transition-colors duration-150',
     // split previews
     dropPreview: 'bg-indigo-500/10 border-2 border-dashed border-indigo-500/50 backdrop-blur-xs',
-    // swap previews
-    swapPreview: 'bg-amber-500/10 border-2 border-dashed border-amber-500/50 backdrop-blur-xs',
   }}
 >
   <PaneTree />
@@ -254,7 +248,6 @@ export type TreeNode = SplitNode | PaneNode
 export interface ZeugmaClassNames {
   pane?: string
   dropPreview?: string
-  swapPreview?: string
   dragOverlay?: string
   resizer?: string
   dragOut?: string
@@ -303,7 +296,6 @@ export interface ZeugmaStateValue {
 export interface ZeugmaActionsValue {
   removePane: (paneId: string) => void
   addPane: (paneId: string) => void
-  swapPanes: (paneIdA: string, paneIdB: string) => void
   splitPane: (
     targetId: string,
     direction: SplitDirection,
@@ -381,7 +373,7 @@ The root context provider. It handles the drag-and-drop event loop and coordinat
 #### Props
 
 - `layout: TreeNode | null` — The current dashboard layout tree.
-- `onChange: (newLayout: TreeNode | null) => void` — Callback triggered when the layout tree changes (resizing, dragging to split, dragging to swap).
+- `onChange: (newLayout: TreeNode | null) => void` — Callback triggered when the layout tree changes (resizing or dragging to split).
 - `renderPane: (paneId: string) => ReactNode` — Callback to render the contents of a pane given its ID.
 - `renderDragOverlay?: (activeId: string, type: 'pane' | 'tab') => ReactNode` — (Optional) Renders a custom cursor-following drag preview.
 - `classNames?: ZeugmaClassNames` — (Optional) CSS class overrides for styling various layout elements.
@@ -393,7 +385,7 @@ The root context provider. It handles the drag-and-drop event loop and coordinat
 - `dragOutThreshold?: number` — (Optional) Distance in pixels outside the container boundaries required to activate drag-out mode. Defaults to `60`.
 - `onDragOutChange?: (activeId: string | null) => void` — (Optional) Callback triggered when the drag-out state changes.
 - `onDragStart?: (activeId: string) => void` — (Optional) Callback triggered when dragging starts on a pane.
-- `onDragEnd?: (activeId: string, overId: string | null, dropAction: any) => void` — (Optional) Callback triggered when dragging ends, providing swap or split details.
+- `onDragEnd?: (activeId: string, overId: string | null, dropAction: any) => void` — (Optional) Callback triggered when dragging ends, providing split or tab reorder details.
 - `onResizeStart?: (currentNode: SplitNode) => void` — (Optional) Callback triggered when resizing starts.
 - `onResize?: (currentNode: SplitNode, percentage: number) => void` — (Optional) Callback triggered during resizing.
 - `onResizeEnd?: (currentNode: SplitNode, percentage: number) => void` — (Optional) Callback triggered when resizing ends.
@@ -480,8 +472,6 @@ Import these helpers from `react-zeugma` to manipulate the tree layout programma
   Removes a pane from the tree and collapses the leftover sibling split node.
 - **`splitPane(tree: TreeNode | null, targetId: string, direction: SplitDirection, splitType: 'left' | 'right' | 'top' | 'bottom', paneToAdd: string): TreeNode | null`**
   Splits a specific target pane by nesting it under a new `SplitNode` along with a new pane.
-- **`swapPanes(tree: TreeNode | null, idA: string, idB: string): TreeNode | null`**
-  Swaps the positions of two panes in the tree.
 - **`updateTabMetadata(tree: TreeNode | null, tabId: string, updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined): TreeNode | null`**
   Updates the metadata of a specific tab.
 - **`findPane(tree: TreeNode | null, paneId: string): PaneNode | null`**
@@ -496,7 +486,6 @@ The actions returned by `useZeugmaActions()` are:
 
 - **`removePane(paneId: string) => void`**
 - **`addPane(paneId: string) => void`**
-- **`swapPanes(paneIdA: string, paneIdB: string) => void`**
 - **`splitPane(targetId: string, direction: SplitDirection, splitType: string, paneToAdd: string) => void`**
 - **`updateSplitPercentage(currentNode: SplitNode, percentage: number) => void`**
 - **`updateTabMetadata(tabId: string, updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined) => void`**
@@ -579,7 +568,6 @@ export default function App() {
 interface ZeugmaClassNames {
   pane?: string // Applied to the outer wrapper of <Pane>
   dropPreview?: string // Applied to the preview box when hovering over edge dropzones
-  swapPreview?: string // Applied to the preview box when hovering over center dropzone
   dragOverlay?: string // Applied to the cursor-following drag preview portal
   resizer?: string // Applied to the drag-to-resize split bar
 }
@@ -598,16 +586,6 @@ interface ZeugmaClassNames {
 }
 
 /* Edge drop previews */
-.my-drop-preview {
-  background-color: rgba(59, 130, 246, 0.2);
-  border: 2px dashed #3b82f6;
-}
-
-/* Center swap preview */
-.my-swap-preview {
-  background-color: rgba(16, 185, 129, 0.25);
-  border: 2px solid #10b981;
-}
 ```
 ````
 

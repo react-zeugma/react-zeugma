@@ -17,7 +17,6 @@ import {
   removePane,
   removeTab,
   splitPane,
-  swapPanes,
   addPane,
   updateSplitPercentage,
   updateTabMetadata,
@@ -26,6 +25,7 @@ import {
   selectTab,
   mergeTab,
   moveTab,
+  generateUniqueId,
 } from '../../../shared/lib/tree'
 import { DEFAULT_DRAG_ACTIVATION_DISTANCE, DEFAULT_SNAP_THRESHOLD } from '../../../shared/config'
 import {
@@ -113,7 +113,6 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
       classNames.pane,
       classNames.paneLocked,
       classNames.dropPreview,
-      classNames.swapPreview,
       classNames.dragOverlay,
       classNames.resizer,
       classNames.dismissPreview,
@@ -336,21 +335,6 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
       return
     }
 
-    // Check for center (swap) drop
-    const swapMatch = overIdStr.match(/^drop-center-(.+)$/)
-    if (swapMatch) {
-      const [, targetId] = swapMatch
-      if (draggingId !== targetId) {
-        const newLayout = swapPanes(localLayout, draggingId, targetId)
-        setLocalLayout(newLayout)
-        onChange(newLayout)
-      }
-      if (onDragEnd) {
-        onDragEnd(draggingId, targetId, { type: 'swap', position: 'center' })
-      }
-      return
-    }
-
     // Check for edge (split) drop
     const match = overIdStr.match(/^drop-(left|right|top|bottom)-(.+)$/)
     if (!match) {
@@ -380,7 +364,7 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
       const sourceMetadata = originalPane?.tabsMetadata?.[draggingId]
       draggedPaneNode = {
         type: 'pane',
-        id: draggingId,
+        id: generateUniqueId(),
         tabs: [draggingId],
         activeTabId: draggingId,
         tabsMetadata: sourceMetadata ? { [draggingId]: sourceMetadata } : undefined,
@@ -388,7 +372,7 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
     } else {
       draggedPaneNode = findPane(localLayout, draggingId) ?? {
         type: 'pane',
-        id: draggingId,
+        id: generateUniqueId(),
         tabs: [draggingId],
         activeTabId: draggingId,
       }
@@ -438,15 +422,6 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
   const handleAddPane = useCallback(
     (paneId: string) => {
       const newLayout = addPane(localLayout, paneId)
-      setLocalLayout(newLayout)
-      onChange(newLayout)
-    },
-    [localLayout, onChange],
-  )
-
-  const handleSwapPanes = useCallback(
-    (paneIdA: string, paneIdB: string) => {
-      const newLayout = swapPanes(localLayout, paneIdA, paneIdB)
       setLocalLayout(newLayout)
       onChange(newLayout)
     },
@@ -604,7 +579,6 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
     () => ({
       removePane: handleRemovePane,
       addPane: handleAddPane,
-      swapPanes: handleSwapPanes,
       splitPane: handleSplitPane,
       updateSplitPercentage: handleUpdateSplitPercentage,
       updateTabMetadata: handleUpdateTabMetadata,
@@ -617,7 +591,6 @@ export const Zeugma: React.FC<ZeugmaProps> = ({
     [
       handleRemovePane,
       handleAddPane,
-      handleSwapPanes,
       handleSplitPane,
       handleUpdateSplitPercentage,
       handleUpdateTabMetadata,

@@ -25,15 +25,13 @@ npm run build
 
 ### Development Scripts
 
-| Command             | Description                                                     |
-| ------------------- | --------------------------------------------------------------- |
-| `npm run dev`       | Watch mode — rebuilds the library on file changes               |
-| `npm run demo`      | Starts the interactive Vite demo app at `http://localhost:5173` |
-| `npm run storybook` | Starts Storybook docs at `http://localhost:6006`                |
-| `npm run build`     | Production build (CJS + ESM + `.d.ts`)                          |
-| `npm run lint`      | Lint source files with ESLint                                   |
-| `npm run typecheck` | Run TypeScript type-checking                                    |
-| `npm run format`    | Format source files with Prettier                               |
+| Command             | Description                                       |
+| ------------------- | ------------------------------------------------- |
+| `npm run dev`       | Watch mode — rebuilds the library on file changes |
+| `npm run build`     | Production build (CJS + ESM + `.d.ts`)            |
+| `npm run lint`      | Lint source files with ESLint                     |
+| `npm run typecheck` | Run TypeScript type-checking                      |
+| `npm run format`    | Format source files with Prettier                 |
 
 ---
 
@@ -50,7 +48,7 @@ git checkout -b fix/my-bugfix
 ### 2. Make Your Changes
 
 - Write your code in `src/`
-- Test interactively using `npm run demo` or `npm run storybook`
+- Test interactively using the homepage app (npm run dev:homepage)
 - Ensure `npm run lint` and `npm run typecheck` pass
 
 ### 3. Add a Changeset
@@ -101,13 +99,8 @@ git push origin feat/my-feature
 
 ```
 react-zeugma/
-├── src/                  # Library source code
-│   ├── components/       # React components
-│   ├── types.ts          # Core TypeScript types
-│   └── index.ts          # Public API entry point
-├── homepage/             # Interactive Vite demo app
-├── docs/                 # Storybook stories & MDX documentation
-├── .storybook/           # Storybook configuration
+├── apps/                 # Workspace applications (homepage)
+├── packages/             # Workspace packages (react-zeugma)
 ├── .changeset/           # Changeset configuration
 ├── .github/workflows/    # CI and release workflows
 ├── dist/                 # Build output (gitignored)

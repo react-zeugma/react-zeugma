@@ -14,12 +14,11 @@ interface SidebarWrapperProps {
   onMinSplitPercentageChange: (val: number) => void
   maxSplitPercentage: number
   onMaxSplitPercentageChange: (val: number) => void
-  resizableHeight: boolean
-  onResizableHeightChange: (val: boolean) => void
   layoutLocked: boolean
   onLayoutLockedChange: (val: boolean) => void
+  resizableHeight: boolean
+  onResizableHeightChange: (val: boolean) => void
   logs: LogEntry[]
-  onPresetChange?: (presetKey: string) => void
   contentRef?: React.RefObject<HTMLDivElement | null>
 }
 
@@ -31,12 +30,11 @@ export function SidebarWrapper({
   onMinSplitPercentageChange,
   maxSplitPercentage,
   onMaxSplitPercentageChange,
-  resizableHeight,
-  onResizableHeightChange,
   layoutLocked,
   onLayoutLockedChange,
+  resizableHeight,
+  onResizableHeightChange,
   logs,
-  onPresetChange,
   contentRef,
 }: SidebarWrapperProps) {
   const { layout, setLayout, addPane } = useZeugmaContext()
@@ -45,16 +43,11 @@ export function SidebarWrapper({
   const handleApplyPreset = (presetKey: string) => {
     setActivePreset(presetKey)
     setLayout(PRESETS[presetKey].layout)
-    onPresetChange?.(presetKey)
-    if (presetKey === 'tall-stress') {
-      onResizableHeightChange(true)
-    }
   }
 
   const handleReset = () => {
     const targetPreset = PRESETS[activePreset] ? activePreset : 'default'
     setLayout(PRESETS[targetPreset].layout)
-    onPresetChange?.(targetPreset)
   }
 
   const handleAddRandomWidget = () => {

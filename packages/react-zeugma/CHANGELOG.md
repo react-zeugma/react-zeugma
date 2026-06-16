@@ -1,5 +1,13 @@
 # react-zeugma
 
+## 5.7.0
+
+### Minor Changes
+
+- Introduced the tab separator/divider line feature (`tabSeparator` option in `classNames` configuration), rendering separator indicators between adjacent tabs with smart layout rules (hidden on the first, active, and immediate right-of-active tabs) to cleanly divide tabs.
+- Simplified the tab drop preview splitter rendering by using a single `tabDropPreview` class name, positioning the element automatically at left/right boundaries without default inline colors/styles, allowing full custom CSS styling.
+- Removed unused default fallback classes (`zeugma-resizable-container`, `disabled`, and `zeugma-resizable-handle`) from the `<ResizableContainer>` and its resize handle.
+
 ## 5.6.0
 
 ### Minor Changes

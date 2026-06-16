@@ -51,6 +51,7 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
     // Actions
     removePane,
     addPane,
+    addTab,
     updateTabMetadata,
     updatePaneLock,
     selectTab,
@@ -158,13 +159,23 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
     () => ({
       removePane,
       addPane,
+      addTab,
       updateTabMetadata,
       updatePaneLock,
       selectTab,
       mergeTab,
       removeTab,
     }),
-    [removePane, addPane, updateTabMetadata, updatePaneLock, selectTab, mergeTab, removeTab],
+    [
+      removePane,
+      addPane,
+      addTab,
+      updateTabMetadata,
+      updatePaneLock,
+      selectTab,
+      mergeTab,
+      removeTab,
+    ],
   )
 
   // Collect all tab IDs in the current layout tree

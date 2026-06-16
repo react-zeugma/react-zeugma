@@ -12,6 +12,7 @@ import {
   Activity,
   Lock,
   Unlock,
+  Plus,
 } from 'lucide-react'
 
 // Render Counter Utility
@@ -372,6 +373,7 @@ export const TabbedPaneControls = ({
   toggleFullscreen,
   remove,
   updatePaneLock,
+  onAddTab,
 }: {
   activeTabId: string
   locked: boolean
@@ -380,9 +382,19 @@ export const TabbedPaneControls = ({
   toggleFullscreen: () => void
   remove: () => void
   updatePaneLock: (paneId: string, locked: boolean) => void
+  onAddTab?: () => void
 }) => {
   return (
     <div className="flex gap-1.5 items-center px-3 drag-cancel">
+      {onAddTab && !locked && (
+        <button
+          onClick={onAddTab}
+          className="w-5 h-5 shrink-0 flex items-center justify-center rounded text-text-muted hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
+          title="Add Tab to Pane"
+        >
+          <Plus className="w-3.5 h-3.5" />
+        </button>
+      )}
       {!globalLocked && (
         <button
           onClick={() => updatePaneLock(activeTabId, !locked)}

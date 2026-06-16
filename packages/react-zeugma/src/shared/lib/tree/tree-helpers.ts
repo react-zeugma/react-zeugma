@@ -217,6 +217,45 @@ export function updateTabMetadata(
 }
 
 /**
+ * Tree Helper: Add a tab directly to a specific target pane node.
+ */
+export function addTab(
+  tree: TreeNode | null,
+  targetPaneId: string,
+  tabId: string,
+  metadata?: Record<string, unknown>,
+): TreeNode | null {
+  if (tree === null) return null
+  if (tree.type === 'pane') {
+    if (tree.id === targetPaneId) {
+      const newTabs = [...tree.tabs]
+      if (!newTabs.includes(tabId)) {
+        newTabs.push(tabId)
+      }
+      let newTabsMetadata = tree.tabsMetadata
+      if (metadata) {
+        newTabsMetadata = {
+          ...tree.tabsMetadata,
+          [tabId]: metadata,
+        }
+      }
+      return {
+        ...tree,
+        tabs: newTabs,
+        activeTabId: tabId,
+        tabsMetadata: newTabsMetadata,
+      }
+    }
+    return tree
+  }
+  return {
+    ...tree,
+    first: addTab(tree.first, targetPaneId, tabId, metadata) || tree.first,
+    second: addTab(tree.second, targetPaneId, tabId, metadata) || tree.second,
+  }
+}
+
+/**
  * Update the locked status on a specific pane node in the layout tree.
  */
 export function updatePaneLock(

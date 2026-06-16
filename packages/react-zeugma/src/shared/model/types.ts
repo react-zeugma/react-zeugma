@@ -100,6 +100,8 @@ export interface ZeugmaController {
   removePane: (paneId: string) => void
   /** Appends/inserts a pane at the bottom-rightmost leaf of the layout tree. */
   addPane: (paneId: string) => void
+  /** Appends a tab into a target pane node. */
+  addTab: (paneId: string, tabId: string, metadata?: Record<string, unknown>) => void
   /** Stable callback to update metadata for a specific tab. */
   updateTabMetadata: (
     tabId: string,
@@ -266,6 +268,8 @@ export interface ZeugmaActionsValue {
   removePane: (paneId: string) => void
   /** Appends/inserts a pane at the bottom-rightmost leaf of the layout tree. */
   addPane: (paneId: string) => void
+  /** Appends a tab into a target pane node. */
+  addTab: (paneId: string, tabId: string, metadata?: Record<string, unknown>) => void
   /** Stable callback to update metadata for a specific tab. */
   updateTabMetadata: (
     tabId: string,

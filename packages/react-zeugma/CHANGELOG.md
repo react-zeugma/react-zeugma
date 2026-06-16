@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 5.3.0
+
+### Minor Changes
+
+- Added `<PaneContext>` and the context-aware, headless `<TabsList>` component. This allows rendering tab lists inside `<Pane>` with zero props, automatically retrieving tabs, active tab state, lock status, and exposing pre-bound actions (`select`, `remove`), metadata, and dragging/over indicators directly to the child render callback.
+
 ## 5.2.1
 
 ### Patch Changes

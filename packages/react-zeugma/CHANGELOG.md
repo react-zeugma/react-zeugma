@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 5.4.1
+
+### Patch Changes
+
+- Fixed tabs list rendering and update logic by improving internal event handling and state updates.
+
 ## 5.4.0
 
 ### Minor Changes

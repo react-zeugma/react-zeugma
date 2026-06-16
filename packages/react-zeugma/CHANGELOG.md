@@ -1,19 +1,5 @@
 # react-zeugma
 
-## 5.3.1
-
-### Patch Changes
-
-- Optimized `<Tab>` and `<TabsList>` components to prevent excessive re-renders during drag-and-drop operations.
-  - Subscriptions to active drag coordinates (`overTabId`, `overTabPosition`) are now isolated inside a conditionally rendered `<TabHovered>` subcomponent, preventing unhovered tabs from rendering.
-  - `<TabsListItem>` now memoizes child callbacks (`select`, `remove`) stably to allow standard `React.memo` optimization on the consumer side.
-
-## 5.3.0
-
-### Minor Changes
-
-- Added `<PaneContext>` and the context-aware, headless `<TabsList>` component. This allows rendering tab lists inside `<Pane>` with zero props, automatically retrieving tabs, active tab state, lock status, and exposing pre-bound actions (`select`, `remove`), metadata, and dragging/over indicators directly to the child render callback.
-
 ## 5.2.1
 
 ### Patch Changes

@@ -42,10 +42,23 @@ export interface TabsProps {
     selectTab: (id: string) => void
     removeTab: (id: string) => void
   }) => React.ReactNode
-  /** Custom CSS classes for Tabs container. */
-  className?: string
-  /** Custom inline CSS styles for Tabs container. */
-  style?: React.CSSProperties
+  /** Custom CSS classes for Tabs container and tab wrappers. */
+  classNames?: {
+    container?: string
+    tab?: string | ((tabId: string) => string)
+  }
+  /** Custom inline CSS styles for Tabs container and tab wrappers. */
+  styles?: {
+    container?: React.CSSProperties
+    tab?: React.CSSProperties | ((tabId: string) => React.CSSProperties)
+  }
+}
+
+const resolveDynamicProp = <T,>(
+  value: T | ((id: string) => T) | undefined,
+  id: string,
+): T | undefined => {
+  return typeof value === 'function' ? (value as (id: string) => T)(id) : value
 }
 
 export const Tabs: React.FC<TabsProps> = ({
@@ -56,8 +69,8 @@ export const Tabs: React.FC<TabsProps> = ({
   selectTab,
   removeTab,
   renderTab,
-  className,
-  style,
+  classNames,
+  styles,
 }) => {
   const contextValue = useMemo<TabsContextValue>(
     () => ({
@@ -73,19 +86,27 @@ export const Tabs: React.FC<TabsProps> = ({
   return (
     <TabsContext.Provider value={contextValue}>
       <div
-        className={className}
+        className={classNames?.container}
         style={{
           display: 'flex',
           alignItems: 'center',
           height: '100%',
-          ...style,
+          ...styles?.container,
         }}
       >
         {tabs.map((tabId) => {
           const metadata = tabsMetadata?.[tabId]
+          const resolvedClassName = resolveDynamicProp(classNames?.tab, tabId)
+          const resolvedStyle = resolveDynamicProp(styles?.tab, tabId)
 
           return (
-            <Tab key={tabId} id={tabId} locked={locked}>
+            <Tab
+              key={tabId}
+              id={tabId}
+              locked={locked}
+              className={resolvedClassName}
+              style={resolvedStyle}
+            >
               {({ isDragging, isOver }) =>
                 renderTab({
                   tabId,

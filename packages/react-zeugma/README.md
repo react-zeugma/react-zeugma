@@ -170,17 +170,17 @@ Wraps the individual pane components inside the renderer. Utilizes a render prop
 
 A helper component that renders a list of tab items for a pane, wrapping the internal drag-and-drop tab logic.
 
-| Prop           | Type                                                                                                                                 | Required | Description                                                         |
-| :------------- | :----------------------------------------------------------------------------------------------------------------------------------- | :------- | :------------------------------------------------------------------ |
-| `tabs`         | `string[]`                                                                                                                           | Yes      | The list of tab IDs in this pane.                                   |
-| `activeTabId`  | `string`                                                                                                                             | Yes      | The currently active tab ID.                                        |
-| `locked`       | `boolean`                                                                                                                            | No       | Whether dragging/reordering tabs is disabled (defaults to `false`). |
-| `tabsMetadata` | `Record<string, Record<string, any>>`                                                                                                | No       | Metadata associated with each tab.                                  |
-| `selectTab`    | `(id: string) => void`                                                                                                               | Yes      | Callback when a tab is selected.                                    |
-| `removeTab`    | `(id: string) => void`                                                                                                               | Yes      | Callback when a tab is closed/removed.                              |
-| `className`    | `string`                                                                                                                             | No       | Custom CSS class applied to the tabs container.                     |
-| `style`        | `CSSProperties`                                                                                                                      | No       | Custom inline CSS style applied to the tabs container.              |
-| `renderTab`    | `(props: { tabId: string; activeTabId: string; isDragging: boolean; isOver: boolean; metadata?: Record<string, any> }) => ReactNode` | Yes      | Render prop function called for each tab item.                      |
+| Prop           | Type                                                                                                                                 | Required | Description                                                          |
+| :------------- | :----------------------------------------------------------------------------------------------------------------------------------- | :------- | :------------------------------------------------------------------- |
+| `tabs`         | `string[]`                                                                                                                           | Yes      | The list of tab IDs in this pane.                                    |
+| `activeTabId`  | `string`                                                                                                                             | Yes      | The currently active tab ID.                                         |
+| `locked`       | `boolean`                                                                                                                            | No       | Whether dragging/reordering tabs is disabled (defaults to `false`).  |
+| `tabsMetadata` | `Record<string, Record<string, any>>`                                                                                                | No       | Metadata associated with each tab.                                   |
+| `selectTab`    | `(id: string) => void`                                                                                                               | Yes      | Callback when a tab is selected.                                     |
+| `removeTab`    | `(id: string) => void`                                                                                                               | Yes      | Callback when a tab is closed/removed.                               |
+| `classNames`   | `{ container?: string; tab?: string \| ((tabId: string) => string) }`                                                                | No       | Custom class names for the container and individual tab items.       |
+| `styles`       | `{ container?: CSSProperties; tab?: CSSProperties \| ((tabId: string) => CSSProperties) }`                                           | No       | Custom inline CSS styles for the container and individual tab items. |
+| `renderTab`    | `(props: { tabId: string; activeTabId: string; isDragging: boolean; isOver: boolean; metadata?: Record<string, any> }) => ReactNode` | Yes      | Render prop function called for each tab item.                       |
 
 ### `<DragHandle>`
 
@@ -455,9 +455,9 @@ Renders a list of tabs inside a pane, wrapping the internal drag-and-drop mechan
 - `tabsMetadata?: Record<string, Record<string, unknown>>` — Metadata for the tabs.
 - `selectTab: (id: string) => void` — Callback when a tab is selected.
 - `removeTab: (id: string) => void` — Callback when a tab is closed.
-- `className?: string` — Custom CSS class applied to the tabs container.
-- `style?: React.CSSProperties` — Custom inline CSS style applied to the tabs container.
-- `renderTab: (props: { tabId: string; activeTabId: string; isDragging: boolean; isOver: boolean; metadata?: Record<string, unknown>; selectTab: (id: string) => void; removeTab: (id: string) => void; }) => React.ReactNode` — Render prop function. The wrapper `<Tab>` component will automatically hoist the `className` and `style` from the element returned by `renderTab` onto the draggable tab wrapper.
+- `classNames?: { container?: string; tab?: string | ((tabId: string) => string) }` — Custom class names.
+- `styles?: { container?: React.CSSProperties; tab?: React.CSSProperties | ((tabId: string) => React.CSSProperties) }` — Custom styles.
+- `renderTab: (props: { tabId: string; activeTabId: string; isDragging: boolean; isOver: boolean; metadata?: Record<string, unknown>; selectTab: (id: string) => void; removeTab: (id: string) => void; }) => React.ReactNode` — Render prop function.
 
 ### `<DragHandle>`
 

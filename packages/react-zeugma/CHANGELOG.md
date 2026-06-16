@@ -1,5 +1,13 @@
 # react-zeugma
 
+## 5.6.0
+
+### Minor Changes
+
+- Introduced internal `TabsContext` and `TabContext` (accessed via `useTabContext` hook) for cleaner and decoupled tab management, completely eliminating prop-drilling for custom tab renderers.
+- Exposed active drag item (`activeId`, `activeType`) and dismiss intent ID (`dismissIntentId`) on the public state context and `ZeugmaController` APIs to simplify custom layout integration.
+- Refactored the `<Tabs>` component to use a mandatory `renderTab` prop and restored support for nested `classNames` and `styles` objects (supporting either static objects/strings or per-tab dynamic function callbacks), while removing the automatic class and style hoisting/cloning from custom child elements.
+
 ## 5.5.0
 
 ### Minor Changes

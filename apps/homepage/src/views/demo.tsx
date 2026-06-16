@@ -188,12 +188,12 @@ const TabbedPaneWrapper = ({
           tabsMetadata={tabsMetadata}
           selectTab={selectTab}
           removeTab={removeTab}
-          className="h-full"
-          renderTab={() => (
-            <div className="flex-1 min-w-[36px] max-w-[160px] h-full" style={{ display: 'flex' }}>
-              <TabHeaderContent />
-            </div>
-          )}
+          classNames={{
+            container: 'h-full',
+            tab: 'flex-1 min-w-[36px] max-w-[160px] h-full',
+          }}
+          styles={{ tab: { display: 'flex' } }}
+          renderTab={() => <TabHeaderContent />}
         />
       }
       dragHandle={

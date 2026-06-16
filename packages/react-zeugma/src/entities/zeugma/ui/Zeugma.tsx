@@ -93,6 +93,7 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
       classNames.dashboardLocked,
       classNames.lockedPreview,
       classNames.tabDropPreview,
+      classNames.tabSeparator,
     ],
   )
 

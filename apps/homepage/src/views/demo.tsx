@@ -573,6 +573,7 @@ export function Demo() {
             dashboardDismissActive: 'zeugma-dashboard-dismiss-active',
             resizer: 'zeugma-resizer',
             tabDropPreview: 'zeugma-tab-drop-preview',
+            tabSeparator: 'zeugma-tab-separator',
             dashboardLocked: 'zeugma-dashboard-locked',
             dropPreview:
               'bg-indigo-500/10 backdrop-blur-[2px] border-2 border-dashed border-indigo-400/50 shadow-[0_25px_50px_-12px_rgba(99,102,241,0.2)] rounded-lg transition-all duration-200',

@@ -212,6 +212,8 @@ export interface ZeugmaClassNames {
   lockedPreview?: string
   /** CSS class applied to tab drop preview splitter line. */
   tabDropPreview?: string
+  /** CSS class applied to the separator line between tabs. */
+  tabSeparator?: string
 }
 
 export interface ZeugmaProps extends ZeugmaController {

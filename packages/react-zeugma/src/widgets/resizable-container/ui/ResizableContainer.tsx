@@ -191,7 +191,7 @@ export const ResizableContainer: React.FC<ResizableContainerProps> = ({
   if (!active) {
     return (
       <div
-        className={`zeugma-resizable-container disabled ${className || ''}`.trim()}
+        className={className}
         style={{
           height: '100%',
           position: 'relative',
@@ -207,7 +207,7 @@ export const ResizableContainer: React.FC<ResizableContainerProps> = ({
   return (
     <div
       ref={containerRef}
-      className={`zeugma-resizable-container ${className || ''}`.trim()}
+      className={className}
       style={{
         height: `${effectiveHeight}px`,
         position: 'relative',
@@ -227,7 +227,7 @@ export const ResizableContainer: React.FC<ResizableContainerProps> = ({
 
       {/* Resizer handle */}
       <div
-        className={`zeugma-resizable-handle ${resizerClassName || ''}`.trim()}
+        className={resizerClassName}
         style={{
           height: `${resizerHeight}px`,
           cursor: 'row-resize',

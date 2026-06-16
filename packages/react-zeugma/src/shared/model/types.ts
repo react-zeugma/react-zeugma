@@ -99,7 +99,9 @@ export interface ZeugmaController {
   /** Removes the specified pane from the layout tree and collapses its parent split. */
   removePane: (paneId: string) => void
   /** Appends/inserts a pane at the bottom-rightmost leaf of the layout tree. */
-  addPane: (paneId: string) => void
+  addPane: (paneId: string, metadata?: Record<string, unknown>) => void
+  /** Appends a tab into a target pane node. */
+  addTab: (paneId: string, tabId: string, metadata?: Record<string, unknown>) => void
   /** Stable callback to update metadata for a specific tab. */
   updateTabMetadata: (
     tabId: string,
@@ -265,7 +267,9 @@ export interface ZeugmaActionsValue {
   /** Removes the specified pane from the layout tree and collapses its parent split. */
   removePane: (paneId: string) => void
   /** Appends/inserts a pane at the bottom-rightmost leaf of the layout tree. */
-  addPane: (paneId: string) => void
+  addPane: (paneId: string, metadata?: Record<string, unknown>) => void
+  /** Appends a tab into a target pane node. */
+  addTab: (paneId: string, tabId: string, metadata?: Record<string, unknown>) => void
   /** Stable callback to update metadata for a specific tab. */
   updateTabMetadata: (
     tabId: string,

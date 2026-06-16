@@ -10,6 +10,7 @@ import { DEFAULT_DRAG_ACTIVATION_DISTANCE, DEFAULT_SNAP_THRESHOLD } from '../../
 import {
   removePane,
   addPane,
+  addTab,
   splitPane,
   updateSplitPercentage,
   updateTabMetadata,
@@ -132,7 +133,21 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
   )
 
   const handleAddPane = useCallback(
-    wrapMutation((prev, paneId: string) => addPane(prev, paneId)),
+    wrapMutation((prev, paneId: string, metadata?: Record<string, unknown>) =>
+      addPane(prev, paneId, metadata),
+    ),
+    [wrapMutation],
+  )
+
+  const handleAddTab = useCallback(
+    wrapMutation(
+      (prev, targetPaneId: string, tabId: string, metadata?: Record<string, unknown>) => {
+        const targetPane =
+          findPaneById(prev, targetPaneId) ?? findPaneContainingTab(prev, targetPaneId)
+        if (!targetPane) return prev
+        return addTab(prev, targetPane.id, tabId, metadata)
+      },
+    ),
     [wrapMutation],
   )
 
@@ -222,20 +237,14 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
     [wrapMutation],
   )
 
-  const handleFindPaneById = useCallback(
-    (paneId: string) => findPaneById(layout, paneId),
-    [layout],
-  )
+  const handleFindPaneById = useCallback((paneId: string) => findPaneById(layout, paneId), [layout])
 
   const handleFindPaneContainingTab = useCallback(
     (tabId: string) => findPaneContainingTab(layout, tabId),
     [layout],
   )
 
-  const handleFindTabById = useCallback(
-    (tabId: string) => findTabById(layout, tabId),
-    [layout],
-  )
+  const handleFindTabById = useCallback((tabId: string) => findTabById(layout, tabId), [layout])
 
   return {
     layout,
@@ -273,6 +282,7 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
     // Actions
     removePane: handleRemovePane,
     addPane: handleAddPane,
+    addTab: handleAddTab,
     splitPane: handleSplitPane,
     updateSplitPercentage: handleUpdateSplitPercentage,
     updateTabMetadata: handleUpdateTabMetadata,

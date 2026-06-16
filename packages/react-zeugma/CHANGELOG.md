@@ -1,5 +1,13 @@
 # react-zeugma
 
+## 5.2.0
+
+### Minor Changes
+
+- Added the `addTab` action to `useZeugmaContext` / `ZeugmaController` actions to programmatically append a tab to a specific pane with optional custom metadata.
+- Added optional `metadata` argument to the `addPane` action to initialize newly added panes with custom tab metadata.
+- Updated the interactive workspace demo with an "Add Tab" button (+) inside pane control bars to easily test programmatic tab spawning with randomized titles, notes, and color metadata.
+
 ## 5.1.0
 
 ### Minor Changes

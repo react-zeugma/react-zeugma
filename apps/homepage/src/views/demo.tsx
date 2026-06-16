@@ -208,13 +208,17 @@ const TabHeader = ({
 
 const TabbedPaneWrapper = ({
   paneProps,
+  paneId,
   globalLocked,
   updatePaneLock,
+  onAddTab,
   children,
 }: {
   paneProps: PaneRenderProps
+  paneId: string
   globalLocked: boolean
   updatePaneLock: (paneId: string, locked: boolean) => void
+  onAddTab?: (paneId: string) => void
   children: React.ReactNode
 }) => {
   const { tabs, activeTabId, selectTab, removeTab, tabsMetadata, locked } = paneProps
@@ -248,6 +252,7 @@ const TabbedPaneWrapper = ({
           toggleFullscreen={paneProps.toggleFullscreen}
           remove={paneProps.remove}
           updatePaneLock={updatePaneLock}
+          onAddTab={onAddTab ? () => onAddTab(paneId) : undefined}
         />
       }
     >
@@ -550,11 +555,26 @@ export function Demo() {
         {(paneProps: PaneRenderProps) => {
           const isThisDraggedOut = paneProps.tabs.includes(localDismissIntentId || '')
 
+          const handleAddTabToPane = (pId: string) => {
+            const randomNum = Math.floor(100 + Math.random() * 900)
+            const randomId = `random-${randomNum}`
+            const colors = ['indigo', 'emerald', 'amber', 'rose', 'sky', 'violet']
+            const randomColor = colors[Math.floor(Math.random() * colors.length)]
+            zeugma.addTab(pId, randomId, {
+              title: `Widget #${randomNum}`,
+              color: randomColor,
+              notes: 'Programmatically added tab.',
+            })
+            addLog('drag', `Added new tab "${randomId}" to pane "${pId}"`)
+          }
+
           return (
             <TabbedPaneWrapper
               paneProps={paneProps}
+              paneId={paneId}
               globalLocked={zeugma.locked}
               updatePaneLock={zeugma.updatePaneLock}
+              onAddTab={handleAddTabToPane}
             >
               {paneProps.renderActiveTab()}
               {paneProps.isDragging && isThisDraggedOut && (

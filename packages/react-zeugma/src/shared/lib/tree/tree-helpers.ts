@@ -94,9 +94,19 @@ export function splitPane(
 /**
  * Tree Helper: Add a pane by recursively splitting the rightmost/bottommost pane in the tree.
  */
-export function addPane(tree: TreeNode | null, paneToAdd: string): TreeNode {
+export function addPane(
+  tree: TreeNode | null,
+  paneToAdd: string,
+  metadata?: Record<string, unknown>,
+): TreeNode {
   if (tree === null) {
-    return { type: 'pane', id: generateUniqueId(), tabs: [paneToAdd], activeTabId: paneToAdd }
+    return {
+      type: 'pane',
+      id: generateUniqueId(),
+      tabs: [paneToAdd],
+      activeTabId: paneToAdd,
+      tabsMetadata: metadata ? { [paneToAdd]: metadata } : undefined,
+    }
   }
 
   function insert(node: TreeNode, parentDirection: SplitDirection | null): TreeNode {
@@ -107,7 +117,13 @@ export function addPane(tree: TreeNode | null, paneToAdd: string): TreeNode {
         direction,
         splitPercentage: 50,
         first: node,
-        second: { type: 'pane', id: generateUniqueId(), tabs: [paneToAdd], activeTabId: paneToAdd },
+        second: {
+          type: 'pane',
+          id: generateUniqueId(),
+          tabs: [paneToAdd],
+          activeTabId: paneToAdd,
+          tabsMetadata: metadata ? { [paneToAdd]: metadata } : undefined,
+        },
       }
     }
 
@@ -213,6 +229,45 @@ export function updateTabMetadata(
     ...tree,
     first: updateTabMetadata(tree.first, tabId, updater) ?? tree.first,
     second: updateTabMetadata(tree.second, tabId, updater) ?? tree.second,
+  }
+}
+
+/**
+ * Tree Helper: Add a tab directly to a specific target pane node.
+ */
+export function addTab(
+  tree: TreeNode | null,
+  targetPaneId: string,
+  tabId: string,
+  metadata?: Record<string, unknown>,
+): TreeNode | null {
+  if (tree === null) return null
+  if (tree.type === 'pane') {
+    if (tree.id === targetPaneId) {
+      const newTabs = [...tree.tabs]
+      if (!newTabs.includes(tabId)) {
+        newTabs.push(tabId)
+      }
+      let newTabsMetadata = tree.tabsMetadata
+      if (metadata) {
+        newTabsMetadata = {
+          ...tree.tabsMetadata,
+          [tabId]: metadata,
+        }
+      }
+      return {
+        ...tree,
+        tabs: newTabs,
+        activeTabId: tabId,
+        tabsMetadata: newTabsMetadata,
+      }
+    }
+    return tree
+  }
+  return {
+    ...tree,
+    first: addTab(tree.first, targetPaneId, tabId, metadata) || tree.first,
+    second: addTab(tree.second, targetPaneId, tabId, metadata) || tree.second,
   }
 }
 

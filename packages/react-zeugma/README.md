@@ -132,10 +132,10 @@ A custom state hook that initializes and manages the recursive layout tree and h
 
 A custom React context hook that returns the unified layout controller properties and state actions. Must be used within a `<Zeugma>` provider component.
 
-Provides direct access to the current layout state (e.g., `layout`, `locked`) and mutation actions (e.g., `addPane`, `removePane`, `updateTabMetadata`, `removeTab`, `selectTab`, etc.).
+Provides direct access to the current layout state (e.g., `layout`, `locked`), state setters (e.g., `setLocked`), queries (e.g., `findTabById`, `findPaneContainingTab`, `findPaneById`), and mutation actions (e.g., `addPane`, `removePane`, `updateTabMetadata`, `removeTab`, `selectTab`, etc.).
 
 ```ts
-const { layout, locked, addPane, removeTab } = useZeugmaContext()
+const { layout, locked, findTabById, setLocked } = useZeugmaContext()
 ```
 
 ### `<PaneTree>`
@@ -196,7 +196,7 @@ A vertical-resize container wrapper that wraps any node (typically `<PaneTree />
 
 ## Tree Utilities
 
-react-zeugma exposes serializable tree utility functions for programmatically mutating layout schemas.
+Import these serializable tree utility functions from `react-zeugma/utils` for programmatically mutating or querying layout schemas.
 
 #### `removePane(tree: TreeNode | null, id: string): TreeNode | null`
 
@@ -210,9 +210,17 @@ Recursively matches the bottommost/rightmost pane leaf in the tree, splits it, a
 
 Splits the targeted `targetId` pane inside the tree with `direction` (_row_ / _column_) and type (_left_, _right_, _top_, _bottom_) to insert `paneToAdd`.
 
-#### `findPane(tree: TreeNode | null, paneId: string): PaneNode | null`
+#### `findPaneById(tree: TreeNode | null, paneId: string): PaneNode | null`
 
 Recursively searches the layout tree and returns the target `PaneNode` if found, or `null` otherwise.
+
+#### `findPaneContainingTab(tree: TreeNode | null, tabId: string): PaneNode | null`
+
+Recursively searches the layout tree and returns the `PaneNode` containing the specified `tabId`.
+
+#### `findTabById(tree: TreeNode | null, tabId: string): TabDetails | null`
+
+Searches the layout tree for the given `tabId` and returns computed details (parent `paneId`, `isActive`, `index`, and custom `metadata`).
 
 ---
 
@@ -262,6 +270,14 @@ export interface PaneNode {
 }
 
 export type TreeNode = SplitNode | PaneNode
+
+export interface TabDetails {
+  id: string
+  paneId: string
+  isActive: boolean
+  index: number
+  metadata: Record<string, unknown> | undefined
+}
 ```
 
 ---
@@ -309,6 +325,14 @@ export interface PaneNode {
 }
 
 export type TreeNode = SplitNode | PaneNode
+
+export interface TabDetails {
+  id: string
+  paneId: string
+  isActive: boolean
+  index: number
+  metadata: Record<string, unknown> | undefined
+}
 ```
 
 - **`PaneNode` (Leaf):** Represents a single content pane. It must have a unique `paneId`.
@@ -433,7 +457,7 @@ A vertical-resize container wrapper that wraps any node (typically `<PaneTree />
 
 ## 3. Programmatic State Utilities
 
-Import these helpers from `react-zeugma` to manipulate the tree layout programmatically in your state handlers:
+Import these helpers from `react-zeugma/utils` to manipulate or query the tree layout programmatically in your state handlers:
 
 - **`removePane(tree: TreeNode | null, idToRemove: string): TreeNode | null`**
   Removes a pane from the tree and collapses the leftover sibling split node.
@@ -441,8 +465,12 @@ Import these helpers from `react-zeugma` to manipulate the tree layout programma
   Splits a specific target pane by nesting it under a new `SplitNode` along with a new pane.
 - **`updateTabMetadata(tree: TreeNode | null, tabId: string, updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined): TreeNode | null`**
   Updates the metadata of a specific tab.
-- **`findPane(tree: TreeNode | null, paneId: string): PaneNode | null`**
+- **`findPaneById(tree: TreeNode | null, paneId: string): PaneNode | null`**
   Recursively searches the layout tree and returns the target `PaneNode` if found, or `null` otherwise.
+- **`findPaneContainingTab(tree: TreeNode | null, tabId: string): PaneNode | null`**
+  Recursively searches the layout tree and returns the `PaneNode` containing the specified `tabId`.
+- **`findTabById(tree: TreeNode | null, tabId: string): TabDetails | null`**
+  Searches the layout tree for the given `tabId` and returns computed details (parent `paneId`, `isActive`, `index`, and custom `metadata`).
 
 ---
 

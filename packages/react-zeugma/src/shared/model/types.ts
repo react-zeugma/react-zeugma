@@ -95,6 +95,14 @@ export interface ZeugmaController {
   /** Programmatically updates the global locked status. */
   setLocked: Dispatch<SetStateAction<boolean>>
 
+  // Drag-and-drop orchestration state exposed publicly
+  /** The ID of the active dragged item (pane or tab). */
+  activeId: string | null
+  /** The type of the active dragged item ('pane' | 'tab'). */
+  activeType: 'pane' | 'tab' | null
+  /** The ID of the item with active dismiss intent, or null. */
+  dismissIntentId: string | null
+
   // Public Actions
   /** Removes the specified pane from the layout tree and collapses its parent split. */
   removePane: (paneId: string) => void
@@ -139,11 +147,8 @@ export interface ZeugmaController {
 /** @internal */
 export interface ZeugmaInternalController extends ZeugmaController {
   // Internal State
-  activeId: string | null
   setActiveId: Dispatch<SetStateAction<string | null>>
-  activeType: 'pane' | 'tab' | null
   setActiveType: Dispatch<SetStateAction<'pane' | 'tab' | null>>
-  dismissIntentId: string | null
   setDismissIntentId: Dispatch<SetStateAction<string | null>>
   containerRef: RefObject<HTMLElement | null>
   setContainerRef: (element: HTMLElement | null) => void
@@ -247,6 +252,14 @@ export interface ZeugmaStateValue {
   findPaneContainingTab: (tabId: string) => PaneNode | null
   /** Find the details of a tab by its ID in the layout tree. */
   findTabById: (tabId: string) => TabDetails | null
+
+  // Drag-and-drop orchestration state exposed publicly
+  /** The ID of the active dragged item (pane or tab). */
+  activeId: string | null
+  /** The type of the active dragged item ('pane' | 'tab'). */
+  activeType: 'pane' | 'tab' | null
+  /** The ID of the item with active dismiss intent, or null. */
+  dismissIntentId: string | null
 }
 
 export interface ZeugmaDragStateValue {
@@ -259,8 +272,6 @@ export interface ZeugmaDragStateValue {
 /** @internal */
 export interface ZeugmaInternalStateValue extends ZeugmaStateValue {
   // Drag-and-drop orchestration state
-  activeId: string | null
-  dismissIntentId: string | null
   setContainerRef: (element: HTMLElement | null) => void
   onRemove?: (paneId: string) => void
   onFullscreenChange?: (paneId: string | null) => void

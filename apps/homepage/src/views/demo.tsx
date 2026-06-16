@@ -275,7 +275,6 @@ export function Demo() {
   const [minSplit, setMinSplit] = useState(10)
   const [maxSplit, setMaxSplit] = useState(90)
   const [logs, setLogs] = useState<LogEntry[]>([])
-  const [localDismissIntentId, setLocalDismissIntentId] = useState<string | null>(null)
   const [resizableHeight, setResizableHeight] = useState(false)
   const [containerHeight, setContainerHeight] = useState<number>(800)
   const [showResizeAlert, setShowResizeAlert] = useState(true)
@@ -343,7 +342,6 @@ export function Demo() {
 
   const handleDragStart = React.useCallback(
     (activeId: string) => {
-      setLocalDismissIntentId(null)
       addLog('drag', `Started dragging "${activeId}"`)
     },
     [addLog],
@@ -359,7 +357,6 @@ export function Demo() {
         position?: 'top' | 'bottom' | 'left' | 'right' | 'center'
       } | null,
     ) => {
-      setLocalDismissIntentId(null)
       if (!overId) {
         addLog('drag', `Released "${activeId}" without drop target`)
       } else if (dropAction) {
@@ -375,7 +372,6 @@ export function Demo() {
 
   const handleDismissIntentChange = React.useCallback(
     (paneId: string | null) => {
-      setLocalDismissIntentId(paneId)
       if (paneId) {
         addLog('drag', `Ready to close: Widget "${paneId}" dragged out`)
       } else {
@@ -403,8 +399,7 @@ export function Demo() {
 
   const handleRemove = React.useCallback(
     (id: string) => {
-      const isDragOut = localDismissIntentId === id
-      setLocalDismissIntentId(null)
+      const isDragOut = zeugmaRef.current?.dismissIntentId === id
       const pane = findPaneContainingTab(zeugmaRef.current?.layout ?? null, id)
       if (pane) {
         if (pane.tabs.length > 1 && pane.tabs.includes(id)) {
@@ -421,7 +416,7 @@ export function Demo() {
         addLog('drag', `Closed: Widget "${id}" removed`)
       }
     },
-    [localDismissIntentId, addLog],
+    [addLog],
   )
 
   const zeugma = useZeugma({
@@ -517,7 +512,7 @@ export function Demo() {
     return (
       <Pane id={paneId}>
         {(paneProps: PaneRenderProps) => {
-          const isThisDraggedOut = paneProps.tabs.includes(localDismissIntentId || '')
+          const isThisDraggedOut = paneProps.tabs.includes(zeugma.dismissIntentId || '')
 
           const handleAddTabToPane = (pId: string) => {
             const randomNum = Math.floor(100 + Math.random() * 900)
@@ -559,7 +554,7 @@ export function Demo() {
     const pane =
       type === 'tab' ? findPaneContainingTab(zeugma.layout, id) : findPaneById(zeugma.layout, id)
     const metadata = pane?.tabsMetadata?.[id]
-    const isDraggedOut = id === localDismissIntentId
+    const isDraggedOut = id === zeugma.dismissIntentId
     return <DemoDragOverlay id={id} type={type} isDraggedOut={isDraggedOut} metadata={metadata} />
   }
 

@@ -655,12 +655,8 @@ export function ZeugmaDemoIDE() {
                   locked={locked || outerZeugma.locked}
                   selectTab={(id) => paneProps.selectTab(id)}
                   removeTab={(id) => paneProps.removeTab(id)}
-                  classNames={{
-                    container: 'overflow-x-auto scrollbar-none min-w-0 h-full shrink',
-                    tab: 'h-full flex',
-                  }}
-                >
-                  {({ tabId, activeTabId, isDragging, isOver }) => {
+                  className="overflow-x-auto scrollbar-none min-w-0 h-full shrink"
+                  renderTab={({ tabId, activeTabId, isDragging, isOver }) => {
                     const isTabActive = activeTabId === tabId
 
                     let title = tabId
@@ -726,7 +722,7 @@ export function ZeugmaDemoIDE() {
                       </div>
                     )
                   }}
-                </Tabs>
+                />
 
                 {/* Free area = drag handle */}
                 <DragHandle className="flex-1 h-full cursor-grab active:cursor-grabbing self-stretch min-w-[20px]" />

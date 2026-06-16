@@ -52,20 +52,42 @@ export const Tab: React.FC<TabProps> = ({ id, locked = false, children, classNam
   const isTargetOver = isOver && overTabId === id
   const dropPosition = isTargetOver ? overTabPosition : null
 
+  const renderedChild = children({ isDragging, isOver: isTargetOver })
+
+  let hoistedClassName = className
+  let hoistedStyle = style
+  let cleanedChild = renderedChild
+
+  if (React.isValidElement(renderedChild)) {
+    const childProps = renderedChild.props as Record<string, unknown>
+    if (childProps && typeof childProps === 'object') {
+      if ('className' in childProps && typeof childProps.className === 'string') {
+        hoistedClassName = `${className || ''} ${childProps.className}`.trim()
+      }
+      if ('style' in childProps && childProps.style && typeof childProps.style === 'object') {
+        hoistedStyle = { ...style, ...childProps.style }
+      }
+    }
+    cleanedChild = React.cloneElement(renderedChild, {
+      className: undefined,
+      style: undefined,
+    } as React.Attributes)
+  }
+
   return (
     <div
       ref={handleRef}
-      className={className}
+      className={hoistedClassName}
       style={{
         display: 'inline-flex',
         position: 'relative',
         cursor: isLocked ? 'default' : 'grab',
-        ...style,
+        ...hoistedStyle,
       }}
       {...(isLocked ? {} : listeners)}
       {...(isLocked ? {} : attributes)}
     >
-      {children({ isDragging, isOver: isTargetOver })}
+      {cleanedChild}
 
       {isTargetOver && dropPosition && (
         <div

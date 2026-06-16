@@ -15,7 +15,7 @@ export interface TabsProps {
   /** Callback when a tab is closed/removed. */
   removeTab: (id: string) => void
   /** Render function for each individual tab content. */
-  children: (props: {
+  renderTab: (props: {
     tabId: string
     activeTabId: string
     isDragging: boolean
@@ -24,16 +24,10 @@ export interface TabsProps {
     selectTab: (id: string) => void
     removeTab: (id: string) => void
   }) => React.ReactNode
-  /** Custom CSS classes for Tabs container and tab wrappers. */
-  classNames?: {
-    container?: string
-    tab?: string | ((tabId: string) => string)
-  }
-  /** Custom inline CSS styles for Tabs container and tab wrappers. */
-  styles?: {
-    container?: React.CSSProperties
-    tab?: React.CSSProperties | ((tabId: string) => React.CSSProperties)
-  }
+  /** Custom CSS classes for Tabs container. */
+  className?: string
+  /** Custom inline CSS styles for Tabs container. */
+  style?: React.CSSProperties
 }
 
 export const Tabs: React.FC<TabsProps> = ({
@@ -43,38 +37,27 @@ export const Tabs: React.FC<TabsProps> = ({
   tabsMetadata,
   selectTab,
   removeTab,
-  children,
-  classNames,
-  styles,
+  renderTab,
+  className,
+  style,
 }) => {
   return (
     <div
-      className={classNames?.container}
+      className={className}
       style={{
         display: 'flex',
         alignItems: 'center',
         height: '100%',
-        ...styles?.container,
+        ...style,
       }}
     >
       {tabs.map((tabId) => {
         const metadata = tabsMetadata?.[tabId]
-        const tabClassName = classNames?.tab
-        const resolvedClassName =
-          typeof tabClassName === 'function' ? tabClassName(tabId) : tabClassName
-        const tabStyle = styles?.tab
-        const resolvedStyle = typeof tabStyle === 'function' ? tabStyle(tabId) : tabStyle
 
         return (
-          <Tab
-            key={tabId}
-            id={tabId}
-            locked={locked}
-            className={resolvedClassName}
-            style={resolvedStyle}
-          >
+          <Tab key={tabId} id={tabId} locked={locked}>
             {({ isDragging, isOver }) =>
-              children({
+              renderTab({
                 tabId,
                 activeTabId,
                 isDragging,

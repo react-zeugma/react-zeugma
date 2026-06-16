@@ -188,24 +188,21 @@ const TabbedPaneWrapper = ({
           tabsMetadata={tabsMetadata}
           selectTab={selectTab}
           removeTab={removeTab}
-          classNames={{
-            container: 'h-full',
-            tab: 'flex-1 min-w-[36px] max-w-[160px] h-full',
-          }}
-          styles={{ tab: { display: 'flex' } }}
-        >
-          {({ tabId, isDragging }) => (
-            <TabHeaderContent
-              tabId={tabId}
-              activeTabId={activeTabId}
-              locked={locked}
-              tabsMetadata={tabsMetadata}
-              selectTab={selectTab}
-              removeTab={removeTab}
-              isDragging={isDragging}
-            />
+          className="h-full"
+          renderTab={({ tabId, isDragging }) => (
+            <div className="flex-1 min-w-[36px] max-w-[160px] h-full" style={{ display: 'flex' }}>
+              <TabHeaderContent
+                tabId={tabId}
+                activeTabId={activeTabId}
+                locked={locked}
+                tabsMetadata={tabsMetadata}
+                selectTab={selectTab}
+                removeTab={removeTab}
+                isDragging={isDragging}
+              />
+            </div>
           )}
-        </Tabs>
+        />
       }
       dragHandle={
         <DragHandle className="flex-1 min-w-[48px] h-full min-h-[32px] cursor-grab active:cursor-grabbing self-stretch" />

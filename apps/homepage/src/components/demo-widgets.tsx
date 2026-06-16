@@ -1,18 +1,7 @@
 'use client'
 
 import { useContext, createContext, useRef } from 'react'
-import {
-  Box,
-  LineChart,
-  Table,
-  Gauge,
-  Image as ImageIcon,
-  BarChart2,
-  CheckCircle2,
-  Activity,
-  Lock,
-  Unlock,
-} from 'lucide-react'
+import { Box, Lock, Unlock } from 'lucide-react'
 
 // Render Counter Utility
 const globalMountCounts = new Map<string, number>()
@@ -46,17 +35,9 @@ export const WIDGET_ICON = <Box className="w-3.5 h-3.5 text-indigo-500" />
 export const PLACEHOLDER_ICON = <Box className="w-3.5 h-3.5 text-indigo-400" />
 export const CENTER_ICON = <Box className="w-8 h-8 text-indigo-500 opacity-80" />
 
-export const ANALYTICS_ICON = <LineChart className="w-3.5 h-3.5 text-indigo-500" />
-export const TRANSACTIONS_ICON = <Table className="w-3.5 h-3.5 text-emerald-500" />
-export const SYSTEM_ICON = <Gauge className="w-3.5 h-3.5 text-rose-500" />
-export const GALLERY_ICON = <ImageIcon className="w-3.5 h-3.5 text-sky-500" />
-export const CONVERSIONS_ICON = <BarChart2 className="w-3.5 h-3.5 text-violet-500" />
-export const TASKS_ICON = <CheckCircle2 className="w-3.5 h-3.5 text-amber-500" />
-export const PERFORMANCE_ICON = <Activity className="w-3.5 h-3.5 text-indigo-500" />
-
 export const getWidgetDetails = (id: string) => {
   let title = id
-  let icon = WIDGET_ICON
+  const icon = WIDGET_ICON
 
   if (id.startsWith('random-')) {
     title = `Widget #${id.substring(7)}`
@@ -68,27 +49,6 @@ export const getWidgetDetails = (id: string) => {
     title = 'Widget #2'
   } else if (id === 'preview') {
     title = 'Widget #3'
-  } else if (id === 'heavy-analytics') {
-    title = 'Analytics'
-    icon = ANALYTICS_ICON
-  } else if (id === 'heavy-transactions') {
-    title = 'Transactions'
-    icon = TRANSACTIONS_ICON
-  } else if (id === 'heavy-system') {
-    title = 'System Status'
-    icon = SYSTEM_ICON
-  } else if (id === 'heavy-gallery') {
-    title = 'Media Gallery'
-    icon = GALLERY_ICON
-  } else if (id === 'heavy-conversions') {
-    title = 'Conversions'
-    icon = CONVERSIONS_ICON
-  } else if (id === 'heavy-tasks') {
-    title = 'Tasks'
-    icon = TASKS_ICON
-  } else if (id === 'heavy-performance') {
-    title = 'Performance'
-    icon = PERFORMANCE_ICON
   }
 
   return {

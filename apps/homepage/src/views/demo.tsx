@@ -10,10 +10,7 @@ import {
   ResizableContainer,
   useZeugma,
 } from 'react-zeugma'
-import {
-  findPaneById,
-  findPaneContainingTab,
-} from 'react-zeugma/utils'
+import { findPaneById, findPaneContainingTab } from 'react-zeugma/utils'
 import type {
   TreeNode,
   PaneRenderProps,
@@ -22,15 +19,6 @@ import type {
   ZeugmaController,
 } from 'react-zeugma'
 import { SidebarWrapper, type LogEntry } from '../components/sidebar-wrapper'
-import {
-  AnalyticsWidget,
-  TransactionsWidget,
-  SystemWidget,
-  GalleryWidget,
-  ConversionsWidget,
-  TasksWidget,
-  PerformanceWidget,
-} from '../components/heavy-widgets'
 import { FpsProvider } from '../hooks/use-fps'
 import {
   getWidgetDetails,
@@ -302,11 +290,10 @@ export function Demo() {
       second: {
         type: 'pane',
         id: 'pane-right',
-        tabs: ['preview', 'heavy-system'],
+        tabs: ['preview'],
         activeTabId: 'preview',
         tabsMetadata: {
           preview: { title: 'Live Preview', color: 'amber', notes: 'Hot reloading active.' },
-          'heavy-system': { title: 'System Status', color: 'rose' },
         },
       },
     },
@@ -351,23 +338,19 @@ export function Demo() {
       }, 100)
 
       // Phase 2: Final scroll after the 500ms CSS transition completes
-      const timer2 = setTimeout(() => {
-        el.scrollTo({
-          top: el.scrollHeight,
-          behavior: 'smooth',
-        })
+      const timer3 = setTimeout(() => {
         setHighlightResizer(true)
       }, 600)
 
       // Phase 3: Remove highlight after 2.5 seconds
-      const timer3 = setTimeout(() => {
+      const timer4 = setTimeout(() => {
         setHighlightResizer(false)
       }, 3100)
 
       return () => {
         clearTimeout(timer1)
-        clearTimeout(timer2)
         clearTimeout(timer3)
+        clearTimeout(timer4)
       }
     } else {
       setHighlightResizer(false)
@@ -499,7 +482,7 @@ export function Demo() {
 
   const renderWidget = React.useCallback(
     (tabId: string) => {
-      const { title, icon } = getWidgetDetails(tabId)
+      const { title } = getWidgetDetails(tabId)
       const pane = findPaneContainingTab(zeugma.layout, tabId)
       const tabMetadata = pane?.tabsMetadata?.[tabId]
       const isFullscreen = zeugma.fullscreenPaneId !== null && zeugma.fullscreenPaneId === pane?.id
@@ -542,132 +525,6 @@ export function Demo() {
             hideHeader={true}
             {...commonProps}
           />
-        )
-      }
-      if (tabId === 'heavy-analytics') {
-        return (
-          <UIPlaceholder
-            id={tabId}
-            title={title}
-            icon={icon}
-            isFullscreen={isFullscreen}
-            toggleFullscreen={toggleFullscreen}
-            remove={remove}
-            metadata={tabMetadata}
-            locked={locked}
-            hideHeader={true}
-            {...commonProps}
-          >
-            <AnalyticsWidget />
-          </UIPlaceholder>
-        )
-      }
-      if (tabId === 'heavy-transactions') {
-        return (
-          <UIPlaceholder
-            id={tabId}
-            title={title}
-            icon={icon}
-            isFullscreen={isFullscreen}
-            toggleFullscreen={toggleFullscreen}
-            remove={remove}
-            metadata={tabMetadata}
-            locked={locked}
-            hideHeader={true}
-            {...commonProps}
-          >
-            <TransactionsWidget />
-          </UIPlaceholder>
-        )
-      }
-      if (tabId === 'heavy-system') {
-        return (
-          <UIPlaceholder
-            id={tabId}
-            title={title}
-            icon={icon}
-            isFullscreen={isFullscreen}
-            toggleFullscreen={toggleFullscreen}
-            remove={remove}
-            metadata={tabMetadata}
-            locked={locked}
-            hideHeader={true}
-            {...commonProps}
-          >
-            <SystemWidget />
-          </UIPlaceholder>
-        )
-      }
-      if (tabId === 'heavy-gallery') {
-        return (
-          <UIPlaceholder
-            id={tabId}
-            title={title}
-            icon={icon}
-            isFullscreen={isFullscreen}
-            toggleFullscreen={toggleFullscreen}
-            remove={remove}
-            metadata={tabMetadata}
-            locked={locked}
-            hideHeader={true}
-            {...commonProps}
-          >
-            <GalleryWidget />
-          </UIPlaceholder>
-        )
-      }
-      if (tabId === 'heavy-conversions') {
-        return (
-          <UIPlaceholder
-            id={tabId}
-            title={title}
-            icon={icon}
-            isFullscreen={isFullscreen}
-            toggleFullscreen={toggleFullscreen}
-            remove={remove}
-            metadata={tabMetadata}
-            locked={locked}
-            hideHeader={true}
-            {...commonProps}
-          >
-            <ConversionsWidget />
-          </UIPlaceholder>
-        )
-      }
-      if (tabId === 'heavy-tasks') {
-        return (
-          <UIPlaceholder
-            id={tabId}
-            title={title}
-            icon={icon}
-            isFullscreen={isFullscreen}
-            toggleFullscreen={toggleFullscreen}
-            remove={remove}
-            metadata={tabMetadata}
-            locked={locked}
-            hideHeader={true}
-            {...commonProps}
-          >
-            <TasksWidget />
-          </UIPlaceholder>
-        )
-      }
-      if (tabId === 'heavy-performance') {
-        return (
-          <UIPlaceholder
-            id={tabId}
-            title={title}
-            icon={icon}
-            isFullscreen={isFullscreen}
-            toggleFullscreen={toggleFullscreen}
-            remove={remove}
-            metadata={tabMetadata}
-            locked={locked}
-            hideHeader={true}
-            {...commonProps}
-          >
-            <PerformanceWidget />
-          </UIPlaceholder>
         )
       }
       return (
@@ -775,13 +632,6 @@ export function Demo() {
               logs={logs}
               resizableHeight={resizableHeight}
               onResizableHeightChange={setResizableHeight}
-              onPresetChange={(preset) => {
-                if (preset === 'tall-stress') {
-                  setContainerHeight(1600)
-                } else {
-                  setContainerHeight(800)
-                }
-              }}
             >
               <div
                 className={`w-full p-2 bg-bg-app transition-all duration-500 ease-in-out ${

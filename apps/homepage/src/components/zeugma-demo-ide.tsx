@@ -24,7 +24,7 @@ import {
   PaneTree,
   Pane,
   DragHandle,
-  Tab,
+  Tabs,
   useZeugma,
   TreeNode,
   PaneRenderProps,
@@ -87,7 +87,7 @@ function SyntaxCode({ tokens }: { tokens: Token[]; language: string }) {
   }, [tokens])
 
   return (
-    <div className="h-full w-full bg-[#1e1e1e] flex font-mono text-[12px] leading-[22px] text-[#abb2bf] overflow-auto select-text">
+    <div className="h-full w-full bg-[#1e1e1e] flex font-mono text-[12px] leading-[22px] text-[#abb2bf] select-text">
       {/* Gutter */}
       <div className="py-4 pr-3 pl-4 bg-[#1e1e1e] border-r border-[#2d2d30] text-right text-[#4e5066] select-none min-w-[44px] flex-shrink-0">
         {Array.from({ length: lines }, (_, i) => (
@@ -96,7 +96,7 @@ function SyntaxCode({ tokens }: { tokens: Token[]; language: string }) {
       </div>
       {/* Code */}
       <div
-        className="p-4 flex-1 whitespace-pre overflow-x-auto selection:bg-indigo-500/30"
+        className="p-4 flex-1 whitespace-pre overflow-auto selection:bg-indigo-500/30"
         dangerouslySetInnerHTML={{ __html: html }}
       />
     </div>
@@ -649,9 +649,19 @@ export function ZeugmaDemoIDE() {
             <div className="h-full w-full flex flex-col bg-[#1e1e1e] border border-[#2d2d30] overflow-hidden shadow-2xl">
               {/* Tab bar */}
               <div className="flex items-center justify-between bg-[#2d2d2d] border-b border-[#1e1e1e] h-9 select-none">
-                <div className="flex items-center overflow-x-auto scrollbar-none min-w-0 h-full shrink">
-                  {paneProps.tabs.map((tabId) => {
-                    const isTabActive = paneProps.activeTabId === tabId
+                <Tabs
+                  tabs={paneProps.tabs}
+                  activeTabId={paneProps.activeTabId}
+                  locked={locked || outerZeugma.locked}
+                  selectTab={(id) => paneProps.selectTab(id)}
+                  removeTab={(id) => paneProps.removeTab(id)}
+                  classNames={{
+                    container: 'overflow-x-auto scrollbar-none min-w-0 h-full shrink',
+                    tab: 'h-full flex',
+                  }}
+                >
+                  {({ tabId, activeTabId, isDragging, isOver }) => {
+                    const isTabActive = activeTabId === tabId
 
                     let title = tabId
                     let icon = <FileCode2 className="w-3.5 h-3.5 text-indigo-400" />
@@ -674,53 +684,49 @@ export function ZeugmaDemoIDE() {
                     }
 
                     return (
-                      <Tab key={tabId} id={tabId} className="h-full flex">
-                        {({ isDragging, isOver }) => (
-                          <div
-                            onClick={() => paneProps.selectTab(tabId)}
+                      <div
+                        onClick={() => paneProps.selectTab(tabId)}
+                        className={`
+                          px-3 flex items-center gap-1.5 border-r border-[#1e1e1e]
+                          text-[11px] font-mono tracking-wide transition-all cursor-pointer
+                          h-full relative group
+                          ${
+                            isTabActive
+                              ? 'bg-[#1e1e1e] text-white border-t-2 border-t-indigo-500'
+                              : 'bg-[#2d2d2d] text-[#858585] hover:text-[#cccccc] hover:bg-[#252526] border-t-2 border-t-transparent'
+                          }
+                          ${isOver ? 'bg-indigo-500/10 animate-pulse' : ''}
+                          ${isDragging ? 'opacity-40' : ''}
+                        `}
+                      >
+                        {icon}
+                        <span className="truncate max-w-[100px]">{title}</span>
+
+                        {/* Close button — shown on active tab always; on inactive on hover */}
+                        {closeable && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              paneProps.removeTab(tabId)
+                            }}
                             className={`
-                              px-3 flex items-center gap-1.5 border-r border-[#1e1e1e]
-                              text-[11px] font-mono tracking-wide transition-all cursor-pointer
-                              h-full relative group
+                              ml-0.5 w-4 h-4 rounded flex items-center justify-center
+                              transition-all shrink-0
                               ${
                                 isTabActive
-                                  ? 'bg-[#1e1e1e] text-white border-t-2 border-t-indigo-500'
-                                  : 'bg-[#2d2d2d] text-[#858585] hover:text-[#cccccc] hover:bg-[#252526] border-t-2 border-t-transparent'
+                                  ? 'text-[#858585] hover:text-white hover:bg-zinc-700'
+                                  : 'opacity-0 group-hover:opacity-100 text-[#858585] hover:text-white hover:bg-zinc-700'
                               }
-                              ${isOver ? 'bg-indigo-500/10 animate-pulse' : ''}
-                              ${isDragging ? 'opacity-40' : ''}
                             `}
+                            title={`Close ${title}`}
                           >
-                            {icon}
-                            <span className="truncate max-w-[100px]">{title}</span>
-
-                            {/* Close button — shown on active tab always; on inactive on hover */}
-                            {closeable && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  paneProps.removeTab(tabId)
-                                }}
-                                className={`
-                                  ml-0.5 w-4 h-4 rounded flex items-center justify-center
-                                  transition-all shrink-0
-                                  ${
-                                    isTabActive
-                                      ? 'text-[#858585] hover:text-white hover:bg-zinc-700'
-                                      : 'opacity-0 group-hover:opacity-100 text-[#858585] hover:text-white hover:bg-zinc-700'
-                                  }
-                                `}
-                                title={`Close ${title}`}
-                              >
-                                <X className="w-3 h-3" />
-                              </button>
-                            )}
-                          </div>
+                            <X className="w-3 h-3" />
+                          </button>
                         )}
-                      </Tab>
+                      </div>
                     )
-                  })}
-                </div>
+                  }}
+                </Tabs>
 
                 {/* Free area = drag handle */}
                 <DragHandle className="flex-1 h-full cursor-grab active:cursor-grabbing self-stretch min-w-[20px]" />

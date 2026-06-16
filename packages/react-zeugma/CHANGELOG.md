@@ -1,5 +1,13 @@
 # react-zeugma
 
+## 5.4.0
+
+### Minor Changes
+
+- Introduced the `<Tabs>` container component to handle tab rendering and encapsulate internal drag-and-drop mechanics.
+- Hidden `<Tab>` from public exports to simplify the API surface.
+- Updated documentation and internal demo usages to consume the new `<Tabs>` component.
+
 ## 5.3.2
 
 ### Minor Changes

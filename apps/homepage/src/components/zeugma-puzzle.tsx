@@ -19,7 +19,7 @@ import {
   DragHandle,
   TreeNode,
   PaneRenderProps,
-  Tab,
+  Tabs,
   useZeugma,
 } from 'react-zeugma'
 import { Fireworks } from './fireworks'
@@ -248,9 +248,20 @@ export function ZeugmaPuzzle({ onSuccess }: ZeugmaPuzzleProps) {
               {/* Custom Header Bar: hidden when mosaic is fully restored */}
               {!isSuccess && (
                 <div className="flex items-center bg-bg-sidebar border-b border-border-primary h-8 select-none">
-                  <div className="flex items-center overflow-x-auto scrollbar-none min-w-0 h-full shrink">
-                    {paneProps.tabs.map((tabId) => {
-                      const isActive = paneProps.activeTabId === tabId
+                  <Tabs
+                    tabs={paneProps.tabs}
+                    activeTabId={paneProps.activeTabId}
+                    locked={isSuccess}
+                    selectTab={(id) => paneProps.selectTab(id)}
+                    removeTab={(id) => paneProps.removeTab(id)}
+                    classNames={{
+                      container: 'overflow-x-auto scrollbar-none min-w-0 h-full shrink',
+                      tab: 'h-full flex',
+                    }}
+                    styles={{ tab: { display: 'flex' } }}
+                  >
+                    {({ tabId, activeTabId, isDragging, isOver }) => {
+                      const isActive = activeTabId === tabId
                       let title = 'Shard'
                       let icon = <Hammer className="w-3 h-3 text-text-muted" />
 
@@ -266,33 +277,24 @@ export function ZeugmaPuzzle({ onSuccess }: ZeugmaPuzzleProps) {
                       }
 
                       return (
-                        <Tab
-                          key={tabId}
-                          id={tabId}
-                          className="h-full flex"
-                          style={{ display: 'flex' }}
+                        <div
+                          onClick={() => paneProps.selectTab(tabId)}
+                          className={`px-3.5 flex items-center gap-1.5 border-b-2 font-medium text-[9px] transition-all relative cursor-pointer select-none h-full truncate ${
+                            isActive
+                              ? 'bg-bg-pane text-text-primary border-b-[#C29B47]'
+                              : 'bg-bg-sidebar/50 text-text-muted hover:text-text-secondary hover:bg-bg-sidebar/80 border-b-transparent'
+                          } ${isOver ? 'bg-[#C29B47]/10 border-l border-l-[#C29B47]/40 animate-pulse' : ''} ${
+                            isDragging ? 'opacity-40' : ''
+                          }`}
                         >
-                          {({ isDragging, isOver }) => (
-                            <div
-                              onClick={() => paneProps.selectTab(tabId)}
-                              className={`px-3.5 flex items-center gap-1.5 border-b-2 font-medium text-[9px] transition-all relative cursor-pointer select-none h-full truncate ${
-                                isActive
-                                  ? 'bg-bg-pane text-text-primary border-b-[#C29B47]'
-                                  : 'bg-bg-sidebar/50 text-text-muted hover:text-text-secondary hover:bg-bg-sidebar/80 border-b-transparent'
-                              } ${isOver ? 'bg-[#C29B47]/10 border-l border-l-[#C29B47]/40 animate-pulse' : ''} ${
-                                isDragging ? 'opacity-40' : ''
-                              }`}
-                            >
-                              {icon}
-                              <span className="truncate uppercase font-extrabold tracking-widest font-sans">
-                                {title}
-                              </span>
-                            </div>
-                          )}
-                        </Tab>
+                          {icon}
+                          <span className="truncate uppercase font-extrabold tracking-widest font-sans">
+                            {title}
+                          </span>
+                        </div>
                       )
-                    })}
-                  </div>
+                    }}
+                  </Tabs>
                   <DragHandle className="flex-1 h-full cursor-grab active:cursor-grabbing self-stretch min-w-[20px]" />
                 </div>
               )}

@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 5.1.0
+
+### Minor Changes
+
+- Added the `findTabById` helper function to search for and retrieve specific tab details from the layout tree.
+
 ## 5.0.0
 
 ### Major Changes

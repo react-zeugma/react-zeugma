@@ -21,6 +21,14 @@ export interface PaneNode {
 
 export type TreeNode = SplitNode | PaneNode
 
+export interface TabDetails {
+  id: string
+  paneId: string
+  isActive: boolean
+  index: number
+  metadata: Record<string, unknown> | undefined
+}
+
 export interface UseZeugmaOptions {
   /** Initial layout tree model defining pane organization for uncontrolled mode. Only used on initial mount. */
   initialLayout?: TreeNode | null

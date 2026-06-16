@@ -1,4 +1,4 @@
-import { TreeNode, SplitNode, SplitDirection, PaneNode } from '../../model'
+import { TreeNode, SplitNode, SplitDirection, PaneNode, TabDetails } from '../../model'
 
 export function generateUniqueId(): string {
   return 'pane-' + Math.random().toString(36).substring(2, 11)
@@ -162,6 +162,22 @@ export function findPaneContainingTab(tree: TreeNode | null, tabId: string): Pan
     return tree.tabs.includes(tabId) ? tree : null
   }
   return findPaneContainingTab(tree.first, tabId) ?? findPaneContainingTab(tree.second, tabId)
+}
+
+/**
+ * Find the details of a tab by its ID.
+ */
+export function findTabById(tree: TreeNode | null, tabId: string): TabDetails | null {
+  const pane = findPaneContainingTab(tree, tabId)
+  if (!pane) return null
+  const index = pane.tabs.indexOf(tabId)
+  return {
+    id: tabId,
+    paneId: pane.id,
+    isActive: pane.activeTabId === tabId,
+    index,
+    metadata: pane.tabsMetadata?.[tabId],
+  }
 }
 
 /**

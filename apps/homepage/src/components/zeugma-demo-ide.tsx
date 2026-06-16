@@ -78,7 +78,7 @@ function tokensToHTML(tokens: Token[]): string {
 }
 
 // Highlighted code block component
-function SyntaxCode({ tokens, language }: { tokens: Token[]; language: string }) {
+function SyntaxCode({ tokens }: { tokens: Token[]; language: string }) {
   const html = useMemo(() => tokensToHTML(tokens), [tokens])
   const lines = useMemo(() => {
     // count newlines in the token stream

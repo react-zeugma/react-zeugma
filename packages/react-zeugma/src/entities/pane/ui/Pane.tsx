@@ -6,7 +6,7 @@ import {
   PortalRegistryContext,
   ZeugmaInternalStateValue,
 } from '../../../shared'
-import { DragListenersCtx, PaneContext } from '../model/context'
+import { DragListenersCtx } from '../model/context'
 import { PaneRenderProps } from '../model/types'
 import { findPaneById } from '../../../shared/lib/tree'
 
@@ -272,58 +272,56 @@ export const Pane: React.FC<PaneProps> = ({ id, children, style, locked: propLoc
 
   return (
     <DragListenersCtx.Provider value={contextValue}>
-      <PaneContext.Provider value={renderProps}>
-        <div
-          ref={setNodeRef}
-          className={paneClass}
-          style={{ position: 'relative', width: '100%', height: '100%', ...style }}
-        >
-          {children(renderProps)}
+      <div
+        ref={setNodeRef}
+        className={paneClass}
+        style={{ position: 'relative', width: '100%', height: '100%', ...style }}
+      >
+        {children(renderProps)}
 
-          {showDropZones && (
-            <div
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                zIndex: 15,
-                pointerEvents: 'none',
-              }}
-            >
-              {(['top', 'bottom', 'left', 'right'] as const).map((pos) => (
-                <DropZone
-                  key={pos}
-                  id={`drop-${pos}-${id}`}
-                  position={pos}
-                  activeClassName={classNames.dropPreview}
-                />
-              ))}
-            </div>
-          )}
-
-          {activeId !== null && activeId !== id && isDroppableDisabled && (
-            <div
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                zIndex: 15,
-                pointerEvents: 'none',
-              }}
-            >
+        {showDropZones && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 15,
+              pointerEvents: 'none',
+            }}
+          >
+            {(['top', 'bottom', 'left', 'right'] as const).map((pos) => (
               <DropZone
-                id={`drop-locked-${id}`}
-                position="full"
-                activeClassName={classNames.lockedPreview || ''}
+                key={pos}
+                id={`drop-${pos}-${id}`}
+                position={pos}
+                activeClassName={classNames.dropPreview}
               />
-            </div>
-          )}
-        </div>
-      </PaneContext.Provider>
+            ))}
+          </div>
+        )}
+
+        {activeId !== null && activeId !== id && isDroppableDisabled && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 15,
+              pointerEvents: 'none',
+            }}
+          >
+            <DropZone
+              id={`drop-locked-${id}`}
+              position="full"
+              activeClassName={classNames.lockedPreview || ''}
+            />
+          </div>
+        )}
+      </div>
     </DragListenersCtx.Provider>
   )
 }

@@ -6,12 +6,18 @@ import {
   PaneTree,
   Pane,
   DragHandle,
-  TabsList,
+  Tab,
   ResizableContainer,
   useZeugma,
 } from 'react-zeugma'
 import { findPaneById, findPaneContainingTab } from 'react-zeugma/utils'
-import type { TreeNode, PaneRenderProps, SplitNode, ZeugmaController } from 'react-zeugma'
+import type {
+  TreeNode,
+  PaneRenderProps,
+  SplitNode,
+  TabRenderProps,
+  ZeugmaController,
+} from 'react-zeugma'
 import { SidebarWrapper, type LogEntry } from '../components/sidebar-wrapper'
 import { FpsProvider } from '../hooks/use-fps'
 import {
@@ -161,6 +167,45 @@ const MetadataWidget = ({
   )
 }
 
+interface TabHeaderProps {
+  tabId: string
+  activeTabId: string
+  locked: boolean
+  tabsMetadata: Record<string, Record<string, unknown>> | undefined
+  selectTab: (id: string) => void
+  removeTab: (id: string) => void
+}
+
+const TabHeader = ({
+  tabId,
+  activeTabId,
+  locked,
+  tabsMetadata,
+  selectTab,
+  removeTab,
+}: TabHeaderProps) => {
+  return (
+    <Tab
+      id={tabId}
+      locked={locked}
+      className="flex-1 min-w-[36px] max-w-[160px] h-full"
+      style={{ display: 'flex' }}
+    >
+      {({ isDragging }: TabRenderProps) => (
+        <TabHeaderContent
+          tabId={tabId}
+          activeTabId={activeTabId}
+          locked={locked}
+          tabsMetadata={tabsMetadata}
+          selectTab={selectTab}
+          removeTab={removeTab}
+          isDragging={isDragging}
+        />
+      )}
+    </Tab>
+  )
+}
+
 const TabbedPaneWrapper = ({
   paneProps,
   paneId,
@@ -176,24 +221,24 @@ const TabbedPaneWrapper = ({
   onAddTab?: (paneId: string) => void
   children: React.ReactNode
 }) => {
-  const { tabsMetadata, locked } = paneProps
+  const { tabs, activeTabId, selectTab, removeTab, tabsMetadata, locked } = paneProps
 
   return (
     <TabbedPaneLayout
       tabs={
-        <TabsList className="flex-1 min-w-[36px] max-w-[160px] h-full" style={{ display: 'flex' }}>
-          {({ tabId, isDragging }) => (
-            <TabHeaderContent
+        <>
+          {tabs.map((tabId) => (
+            <TabHeader
+              key={tabId}
               tabId={tabId}
-              activeTabId={paneProps.activeTabId}
+              activeTabId={activeTabId}
               locked={locked}
               tabsMetadata={tabsMetadata}
-              selectTab={paneProps.selectTab}
-              removeTab={paneProps.removeTab}
-              isDragging={isDragging}
+              selectTab={selectTab}
+              removeTab={removeTab}
             />
-          )}
-        </TabsList>
+          ))}
+        </>
       }
       dragHandle={
         <DragHandle className="flex-1 min-w-[48px] h-full min-h-[32px] cursor-grab active:cursor-grabbing self-stretch" />

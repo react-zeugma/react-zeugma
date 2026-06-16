@@ -133,7 +133,7 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
     const { over } = event
     const overIdStr = over?.id.toString() || ''
     const isOverLockedPane = overIdStr.startsWith('drop-locked-')
-    setIsOverLocked(isOverLockedPane)
+    setIsOverLocked((prev) => (prev === isOverLockedPane ? prev : isOverLockedPane))
 
     // Handle tab drop hover location
     const tabDropMatch = overIdStr.match(/^tab-drop-(.+)$/)
@@ -164,15 +164,15 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
           }
         }
 
-        setOverTabId(targetTabId)
-        setOverTabPosition(position)
+        setOverTabId((prev) => (prev === targetTabId ? prev : targetTabId))
+        setOverTabPosition((prev) => (prev === position ? prev : position))
       } else {
-        setOverTabId(null)
-        setOverTabPosition(null)
+        setOverTabId((prev) => (prev === null ? prev : null))
+        setOverTabPosition((prev) => (prev === null ? prev : null))
       }
     } else {
-      setOverTabId(null)
-      setOverTabPosition(null)
+      setOverTabId((prev) => (prev === null ? prev : null))
+      setOverTabPosition((prev) => (prev === null ? prev : null))
     }
 
     if (!enableDragToDismiss) return

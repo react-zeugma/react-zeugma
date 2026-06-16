@@ -4,11 +4,13 @@ import {
   ZeugmaInternalStateValue,
   ZeugmaActionsValue,
   PortalRegistryValue,
+  ZeugmaDragStateValue,
 } from '../model/types'
 
 export const ZeugmaStateContext = createContext<ZeugmaInternalStateValue | undefined>(undefined)
 export const ZeugmaActionsContext = createContext<ZeugmaActionsValue | undefined>(undefined)
 export const PortalRegistryContext = createContext<PortalRegistryValue | undefined>(undefined)
+export const ZeugmaDragContext = createContext<ZeugmaDragStateValue | undefined>(undefined)
 
 export const useZeugmaState = (): ZeugmaStateValue => {
   const state = useContext(ZeugmaStateContext)
@@ -24,4 +26,12 @@ export const useZeugmaActions = (): ZeugmaActionsValue => {
     throw new Error('useZeugmaActions must be used within a Zeugma provider')
   }
   return actions
+}
+
+export const useZeugmaDrag = (): ZeugmaDragStateValue => {
+  const drag = useContext(ZeugmaDragContext)
+  if (!drag) {
+    throw new Error('useZeugmaDrag must be used within a Zeugma provider')
+  }
+  return drag
 }

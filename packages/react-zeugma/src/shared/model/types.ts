@@ -249,13 +249,15 @@ export interface ZeugmaStateValue {
   findTabById: (tabId: string) => TabDetails | null
 }
 
-/** @internal */
-export interface ZeugmaInternalStateValue extends ZeugmaStateValue {
+export interface ZeugmaDragStateValue {
   /** The ID of the tab currently hovered over during a tab drag, or null. */
   overTabId: string | null
   /** The position of the tab drop preview relative to the hovered tab ('before' | 'after'). */
   overTabPosition: 'before' | 'after' | null
+}
 
+/** @internal */
+export interface ZeugmaInternalStateValue extends ZeugmaStateValue {
   // Drag-and-drop orchestration state
   activeId: string | null
   dismissIntentId: string | null

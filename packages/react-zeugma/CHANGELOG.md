@@ -1,5 +1,14 @@
 # react-zeugma
 
+## 5.2.1
+
+### Patch Changes
+
+- Fixed stale closures and layout state overwriting in programmatic actions by introducing ref-based layout tracking (`layoutRef`).
+- Resolved context actions identity instability by memoizing all mutations and query methods with ref-based layout dependencies.
+- Added programmatic tab uniqueness checks to `addTab` preventing duplicate tab IDs across panes.
+- Exposed remaining helper/setter actions (`setFullscreenPaneId`, `setLocked`, `splitPane`, `updateSplitPercentage`, `moveTab`) in public context actions.
+
 ## 5.2.0
 
 ### Minor Changes

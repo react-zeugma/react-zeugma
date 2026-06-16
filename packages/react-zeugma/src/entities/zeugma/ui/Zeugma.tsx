@@ -57,6 +57,9 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
     selectTab,
     mergeTab,
     removeTab,
+    splitPane,
+    updateSplitPercentage,
+    moveTab,
   } = internalProps
 
   const { portalTargets, registerPortalTarget } = usePortalRegistry()
@@ -165,6 +168,11 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
       selectTab,
       mergeTab,
       removeTab,
+      setFullscreenPaneId,
+      setLocked,
+      splitPane,
+      updateSplitPercentage,
+      moveTab,
     }),
     [
       removePane,
@@ -175,6 +183,11 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
       selectTab,
       mergeTab,
       removeTab,
+      setFullscreenPaneId,
+      setLocked,
+      splitPane,
+      updateSplitPercentage,
+      moveTab,
     ],
   )
 

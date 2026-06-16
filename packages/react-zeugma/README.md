@@ -176,6 +176,28 @@ Defines the interactive drag region inside a `<Pane>`. **Must be placed inside a
 | `className` | `string`              | No       | Custom CSS class for the drag handle wrapper.                    |
 | `style`     | `React.CSSProperties` | No       | Inline styles for the drag handle wrapper.                       |
 
+### `<Tab>`
+
+Defines an interactive draggable and droppable tab area inside a `<Pane>`. **Must be placed inside a `<Pane>` component.**
+
+| Prop        | Type                                   | Required | Description                                                    |
+| ----------- | -------------------------------------- | -------- | -------------------------------------------------------------- |
+| `id`        | `string`                               | Yes      | The unique ID of the tab (matching the tab layout schema).     |
+| `locked`    | `boolean`                              | No       | If true, disables drag reordering on this tab.                 |
+| `children`  | `(props: TabRenderProps) => ReactNode` | Yes      | Render prop function exposing tab states (isDragging, isOver). |
+| `className` | `string`                               | No       | Custom CSS class for the tab wrapper.                          |
+| `style`     | `React.CSSProperties`                  | No       | Inline styles for the tab wrapper.                             |
+
+### `<TabsList>`
+
+A context-aware, prop-less helper that automatically loops over the parent pane's `tabs` array and renders a draggable `<Tab>` component for each. **Must be placed inside a `<Pane>` component.** It does not render any wrapping container element (renders as a Fragment).
+
+| Prop        | Type                                        | Required | Description                                                                                            |
+| ----------- | ------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------ |
+| `children`  | `(props: TabsListRenderProps) => ReactNode` | Yes      | Render prop function exposing individual tab details and pre-bound actions (select, remove, metadata). |
+| `className` | `string`                                    | No       | Custom CSS class applied to individual tab wrappers.                                                   |
+| `style`     | `React.CSSProperties`                       | No       | Inline styles applied to individual tab wrappers.                                                      |
+
 ### `<ResizableContainer>`
 
 A vertical-resize container wrapper that wraps any node (typically `<PaneTree />` or a dashboard component) and allows the user to resize its height by dragging a handle at the bottom edge. Includes smooth scroll parent propagation and drag-to-scroll infinite scrolling behavior.
@@ -431,9 +453,33 @@ interface PaneRenderProps {
 
 Defines the interactive drag region inside a `<Pane>`. **Must be placed inside a `<Pane>` component.**
 
+- `children: React.ReactNode` — Element(s) that function as the drag handle (e.g., pane header).
+- `className?: string`
+- `style?: React.CSSProperties`
+
+---
+
+### `<Tab>`
+
+Defines an interactive draggable and droppable tab area inside a `<Pane>`. **Must be placed inside a `<Pane>` component.**
+
 #### Props
 
-- `children: React.ReactNode` — Element(s) that function as the drag handle (e.g., pane header).
+- `id: string` — The unique ID of the tab (matching the tab layout schema).
+- `locked?: boolean` — If true, disables drag reordering on this tab.
+- `children: (props: TabRenderProps) => React.ReactNode` — Render prop function.
+- `className?: string`
+- `style?: React.CSSProperties`
+
+---
+
+### `<TabsList>`
+
+A context-aware helper that automatically loops over the parent pane's `tabs` array and renders a draggable `<Tab>` component for each. **Must be placed inside a `<Pane>` component.**
+
+#### Props
+
+- `children: (props: TabsListRenderProps) => React.ReactNode` — Render prop function exposing tab states and pre-bound handlers (`select`, `remove`, `metadata`).
 - `className?: string`
 - `style?: React.CSSProperties`
 

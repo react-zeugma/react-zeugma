@@ -113,6 +113,14 @@ export interface ZeugmaController {
   mergeTab: (draggedTabId: string, targetPaneId: string) => void
   /** Stable callback to remove/close a specific tab from the layout. */
   removeTab: (tabId: string) => void
+
+  // Public Queries
+  /** Find a PaneNode by its ID in the layout tree. */
+  findPaneById: (paneId: string) => PaneNode | null
+  /** Find the PaneNode containing the given tab ID in the layout tree. */
+  findPaneContainingTab: (tabId: string) => PaneNode | null
+  /** Find the details of a tab by its ID in the layout tree. */
+  findTabById: (tabId: string) => TabDetails | null
 }
 
 /** @internal */

@@ -20,6 +20,7 @@ import {
   removeTab,
   findPaneById,
   findPaneContainingTab,
+  findTabById,
 } from '../../../shared/lib/tree'
 import { safeJsonStringify } from '../../../shared/lib/json'
 
@@ -221,6 +222,21 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
     [wrapMutation],
   )
 
+  const handleFindPaneById = useCallback(
+    (paneId: string) => findPaneById(layout, paneId),
+    [layout],
+  )
+
+  const handleFindPaneContainingTab = useCallback(
+    (tabId: string) => findPaneContainingTab(layout, tabId),
+    [layout],
+  )
+
+  const handleFindTabById = useCallback(
+    (tabId: string) => findTabById(layout, tabId),
+    [layout],
+  )
+
   return {
     layout,
     setLayout,
@@ -265,5 +281,10 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
     mergeTab: handleMergeTab,
     moveTab: handleMoveTab,
     removeTab: handleRemoveTab,
+
+    // Queries
+    findPaneById: handleFindPaneById,
+    findPaneContainingTab: handleFindPaneContainingTab,
+    findTabById: handleFindTabById,
   } as unknown as ZeugmaController
 }

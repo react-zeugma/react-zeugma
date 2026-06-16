@@ -86,11 +86,18 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
   )
 
   const customCollisionDetection = useCallback<CollisionDetection>((args) => {
-    const pointerCollisions = pointerWithin(args)
-    if (pointerCollisions.length > 0) return pointerCollisions
-
     const activeIdStr = args.active.id.toString()
-    if (activeIdStr.startsWith('tab-header-')) {
+    const isTabDrag = activeIdStr.startsWith('tab-header-')
+
+    const pointerCollisions = pointerWithin(args)
+    // If we're dragging a pane, filter out any tab-drop colliders
+    const filteredCollisions = isTabDrag
+      ? pointerCollisions
+      : pointerCollisions.filter((collision) => !collision.id.toString().startsWith('tab-drop-'))
+
+    if (filteredCollisions.length > 0) return filteredCollisions
+
+    if (isTabDrag) {
       const tabDroppables = args.droppableContainers.filter((container: DroppableContainer) =>
         container.id.toString().startsWith('tab-drop-'),
       )
@@ -135,13 +142,14 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
     const isOverLockedPane = overIdStr.startsWith('drop-locked-')
     setIsOverLocked((prev) => (prev === isOverLockedPane ? prev : isOverLockedPane))
 
+    const rawId = event.active.id.toString()
+    const isTabDrag = rawId.startsWith('tab-header-')
+    const draggingId = isTabDrag ? rawId.substring(11) : rawId
+
     // Handle tab drop hover location
     const tabDropMatch = overIdStr.match(/^tab-drop-(.+)$/)
-    if (tabDropMatch && over) {
+    if (tabDropMatch && over && isTabDrag) {
       const [, targetTabId] = tabDropMatch
-      const rawId = event.active.id.toString()
-      const isTabDrag = rawId.startsWith('tab-header-')
-      const draggingId = isTabDrag ? rawId.substring(11) : rawId
 
       if (draggingId !== targetTabId) {
         let position: 'before' | 'after' = 'before'
@@ -177,9 +185,6 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
 
     if (!enableDragToDismiss) return
 
-    const rawId = event.active.id.toString()
-    const isTabDrag = rawId.startsWith('tab-header-')
-    const draggingId = isTabDrag ? rawId.substring(11) : rawId
     const containerRect = containerRectRef.current
 
     if (!containerRect) {
@@ -310,6 +315,12 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
     // Check for tab reorder drop
     const tabDropMatch = overIdStr.match(/^tab-drop-(.+)$/)
     if (tabDropMatch) {
+      if (!isTabDrag) {
+        if (onDragEnd) {
+          onDragEnd(draggingId, null, null)
+        }
+        return
+      }
       const [, targetTabId] = tabDropMatch
       if (draggingId !== targetTabId) {
         let position: 'before' | 'after' = 'before'

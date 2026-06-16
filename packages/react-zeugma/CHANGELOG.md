@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 5.7.1
+
+### Patch Changes
+
+- Fixed a bug where a pane could be incorrectly dragged and placed inside tab containers by disabling tab droppables and filtering out tab collision detectors when dragging a pane.
+
 ## 5.7.0
 
 ### Minor Changes

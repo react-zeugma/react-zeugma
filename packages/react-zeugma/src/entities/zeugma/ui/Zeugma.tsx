@@ -28,6 +28,10 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
     fullscreenPaneId,
     setFullscreenPaneId,
     locked,
+    setLocked,
+    findPaneById,
+    findPaneContainingTab,
+    findTabById,
     activeId,
     activeType,
     dismissIntentId,
@@ -117,6 +121,10 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
       minSplitPercentage,
       maxSplitPercentage,
       locked,
+      setLocked,
+      findPaneById,
+      findPaneContainingTab,
+      findTabById,
     }),
     [
       layout,
@@ -138,6 +146,10 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
       stableRenderPane,
       handleResizeEnd,
       locked,
+      setLocked,
+      findPaneById,
+      findPaneContainingTab,
+      findTabById,
     ],
   )
 

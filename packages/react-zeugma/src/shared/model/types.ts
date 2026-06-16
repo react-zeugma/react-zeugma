@@ -21,6 +21,14 @@ export interface PaneNode {
 
 export type TreeNode = SplitNode | PaneNode
 
+export interface TabDetails {
+  id: string
+  paneId: string
+  isActive: boolean
+  index: number
+  metadata: Record<string, unknown> | undefined
+}
+
 export interface UseZeugmaOptions {
   /** Initial layout tree model defining pane organization for uncontrolled mode. Only used on initial mount. */
   initialLayout?: TreeNode | null
@@ -105,6 +113,14 @@ export interface ZeugmaController {
   mergeTab: (draggedTabId: string, targetPaneId: string) => void
   /** Stable callback to remove/close a specific tab from the layout. */
   removeTab: (tabId: string) => void
+
+  // Public Queries
+  /** Find a PaneNode by its ID in the layout tree. */
+  findPaneById: (paneId: string) => PaneNode | null
+  /** Find the PaneNode containing the given tab ID in the layout tree. */
+  findPaneContainingTab: (tabId: string) => PaneNode | null
+  /** Find the details of a tab by its ID in the layout tree. */
+  findTabById: (tabId: string) => TabDetails | null
 }
 
 /** @internal */
@@ -210,6 +226,14 @@ export interface ZeugmaStateValue {
   classNames: ZeugmaClassNames
   /** Whether the layout is globally locked. */
   locked: boolean
+  /** Programmatically updates the global locked status. */
+  setLocked: Dispatch<SetStateAction<boolean>>
+  /** Find a PaneNode by its ID in the layout tree. */
+  findPaneById: (paneId: string) => PaneNode | null
+  /** Find the PaneNode containing the given tab ID in the layout tree. */
+  findPaneContainingTab: (tabId: string) => PaneNode | null
+  /** Find the details of a tab by its ID in the layout tree. */
+  findTabById: (tabId: string) => TabDetails | null
 }
 
 /** @internal */

@@ -1,0 +1,22 @@
+export {
+  generateUniqueId,
+  removePane,
+  removeTab,
+  splitPane,
+  addPane,
+  updateSplitPercentage,
+  findPaneById,
+  findPaneContainingTab,
+  findTabById,
+  updateTabMetadata,
+  updatePaneLock,
+  selectTab,
+  mergeTab,
+  moveTab,
+  computeLayout,
+} from './shared/lib/tree/tree-helpers'
+
+export type {
+  ComputedPane,
+  ComputedSplitter,
+} from './shared/lib/tree/tree-helpers'

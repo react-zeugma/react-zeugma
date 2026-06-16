@@ -350,3 +350,13 @@ body {
   z-index: 10;
   pointer-events: none;
 }
+
+/* Tab separator line customization */
+.zeugma-tab-separator {
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 1px;
+  background-color: var(--border-primary);
+}

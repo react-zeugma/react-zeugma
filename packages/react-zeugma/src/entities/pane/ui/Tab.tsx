@@ -72,7 +72,7 @@ export const Tab: React.FC<TabProps> = ({ id, locked = false, children, classNam
   const isTargetOver = isOver && overTabId === id
   const dropPosition = isTargetOver ? overTabPosition : null
 
-  const splitter =
+  const dropIndicator =
     isTargetOver && dropPosition ? (
       <div
         className={classNames.tabDropPreview}
@@ -82,6 +82,14 @@ export const Tab: React.FC<TabProps> = ({ id, locked = false, children, classNam
         }}
       />
     ) : null
+
+  const tabs = tabsContext?.tabs || []
+  const index = tabs.indexOf(id)
+  const activeTabId = tabsContext?.activeTabId
+
+  const showSeparator = index > 0 && id !== activeTabId && tabs[index - 1] !== activeTabId
+
+  const separator = showSeparator ? <div className={classNames.tabSeparator} /> : null
 
   const isActive = tabsContext ? tabsContext.activeTabId === id : false
   const metadata = tabsContext?.tabsMetadata?.[id]
@@ -122,11 +130,12 @@ export const Tab: React.FC<TabProps> = ({ id, locked = false, children, classNam
         {...(isLocked ? {} : listeners)}
         {...(isLocked ? {} : attributes)}
       >
+        {separator}
         {children({
           isDragging,
           isOver: isTargetOver,
         })}
-        {splitter}
+        {dropIndicator}
       </div>
     </TabContext.Provider>
   )

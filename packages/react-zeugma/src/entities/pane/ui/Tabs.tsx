@@ -2,6 +2,7 @@ import React, { createContext, useContext, useMemo } from 'react'
 import { Tab } from './Tab'
 
 export interface TabsContextValue {
+  tabs: string[]
   activeTabId: string
   locked: boolean
   tabsMetadata?: Record<string, Record<string, unknown>>
@@ -74,13 +75,14 @@ export const Tabs: React.FC<TabsProps> = ({
 }) => {
   const contextValue = useMemo<TabsContextValue>(
     () => ({
+      tabs,
       activeTabId,
       locked,
       tabsMetadata,
       selectTab,
       removeTab,
     }),
-    [activeTabId, locked, tabsMetadata, selectTab, removeTab],
+    [tabs, activeTabId, locked, tabsMetadata, selectTab, removeTab],
   )
 
   return (

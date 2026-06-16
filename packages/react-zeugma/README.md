@@ -166,6 +166,22 @@ Wraps the individual pane components inside the renderer. Utilizes a render prop
 | `remove`           | `() => void`      | Triggers removal of this pane from the layout tree.                              |
 | `renderActiveTab`  | `() => ReactNode` | Renders the target placeholder element for the currently active tab in the pane. |
 
+### `<Tabs>`
+
+A helper component that renders a list of tab items for a pane, wrapping the internal drag-and-drop tab logic.
+
+| Prop           | Type                                                                                                                                 | Required | Description                                                          |
+| :------------- | :----------------------------------------------------------------------------------------------------------------------------------- | :------- | :------------------------------------------------------------------- |
+| `tabs`         | `string[]`                                                                                                                           | Yes      | The list of tab IDs in this pane.                                    |
+| `activeTabId`  | `string`                                                                                                                             | Yes      | The currently active tab ID.                                         |
+| `locked`       | `boolean`                                                                                                                            | No       | Whether dragging/reordering tabs is disabled (defaults to `false`).  |
+| `tabsMetadata` | `Record<string, Record<string, any>>`                                                                                                | No       | Metadata associated with each tab.                                   |
+| `selectTab`    | `(id: string) => void`                                                                                                               | Yes      | Callback when a tab is selected.                                     |
+| `removeTab`    | `(id: string) => void`                                                                                                               | Yes      | Callback when a tab is closed/removed.                               |
+| `classNames`   | `{ container?: string; tab?: string \| ((tabId: string) => string) }`                                                                | No       | Custom class names for the container and individual tab items.       |
+| `styles`       | `{ container?: CSSProperties; tab?: CSSProperties \| ((tabId: string) => CSSProperties) }`                                           | No       | Custom inline CSS styles for the container and individual tab items. |
+| `children`     | `(props: { tabId: string; activeTabId: string; isDragging: boolean; isOver: boolean; metadata?: Record<string, any> }) => ReactNode` | Yes      | Render prop function called for each tab item.                       |
+
 ### `<DragHandle>`
 
 Defines the interactive drag region inside a `<Pane>`. **Must be placed inside a `<Pane>` component.**
@@ -426,6 +442,22 @@ interface PaneRenderProps {
   renderActiveTab: () => ReactNode
 }
 ```
+
+### `<Tabs>`
+
+Renders a list of tabs inside a pane, wrapping the internal drag-and-drop mechanics.
+
+#### Props
+
+- `tabs: string[]` — The list of tab IDs.
+- `activeTabId: string` — The currently active tab ID.
+- `locked?: boolean` — Whether dragging is disabled (defaults to `false`).
+- `tabsMetadata?: Record<string, Record<string, unknown>>` — Metadata for the tabs.
+- `selectTab: (id: string) => void` — Callback when a tab is selected.
+- `removeTab: (id: string) => void` — Callback when a tab is closed.
+- `classNames?: { container?: string; tab?: string | ((tabId: string) => string) }` — Custom class names.
+- `styles?: { container?: React.CSSProperties; tab?: React.CSSProperties | ((tabId: string) => React.CSSProperties) }` — Custom styles.
+- `children: (props: { tabId: string; activeTabId: string; isDragging: boolean; isOver: boolean; metadata?: Record<string, unknown> }) => React.ReactNode` — Render prop function.
 
 ### `<DragHandle>`
 

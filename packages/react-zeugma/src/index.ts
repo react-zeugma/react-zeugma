@@ -18,5 +18,6 @@ export type {
   PaneRenderProps,
   TabsProps,
   TabContextValue,
+  TabRenderProps,
 } from './entities/pane'
 export * from './shared'

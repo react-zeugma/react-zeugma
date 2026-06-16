@@ -210,7 +210,7 @@ export interface ZeugmaClassNames {
   dashboardLocked?: string
   /** CSS class applied to drop zone indicator when hovering over a locked pane. */
   lockedPreview?: string
-  /** CSS class applied to tab container when dragging a tab over it. */
+  /** CSS class applied to tab drop preview splitter line. */
   tabDropPreview?: string
 }
 

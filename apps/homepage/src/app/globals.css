@@ -342,6 +342,11 @@ body {
 
 /* Tab drop preview indicator customization */
 .zeugma-tab-drop-preview {
-  background-color: #6366f1 !important;
-  width: 2px !important;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background-color: #6366f1;
+  z-index: 10;
+  pointer-events: none;
 }

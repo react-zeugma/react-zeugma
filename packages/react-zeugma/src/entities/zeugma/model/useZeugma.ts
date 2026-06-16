@@ -20,8 +20,8 @@ import {
   removeTab,
   findPaneById,
   findPaneContainingTab,
-  safeJsonStringify,
-} from '../../../shared/lib'
+} from '../../../shared/lib/tree'
+import { safeJsonStringify } from '../../../shared/lib/json'
 
 export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
   const {

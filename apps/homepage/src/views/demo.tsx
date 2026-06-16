@@ -7,11 +7,13 @@ import {
   Pane,
   DragHandle,
   Tab,
-  findPaneById,
-  findPaneContainingTab,
   ResizableContainer,
   useZeugma,
 } from 'react-zeugma'
+import {
+  findPaneById,
+  findPaneContainingTab,
+} from 'react-zeugma/utils'
 import type {
   TreeNode,
   PaneRenderProps,

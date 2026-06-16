@@ -1,5 +1,23 @@
-import React from 'react'
+import React, { createContext, useContext, useMemo } from 'react'
 import { Tab } from './Tab'
+
+export interface TabsContextValue {
+  activeTabId: string
+  locked: boolean
+  tabsMetadata?: Record<string, Record<string, unknown>>
+  selectTab: (id: string) => void
+  removeTab: (id: string) => void
+}
+
+export const TabsContext = createContext<TabsContextValue | undefined>(undefined)
+
+export const useTabsContext = () => {
+  const context = useContext(TabsContext)
+  if (!context) {
+    throw new Error('useTabsContext must be used within a Tabs component')
+  }
+  return context
+}
 
 export interface TabsProps {
   /** The list of tab IDs in this pane. */
@@ -24,10 +42,23 @@ export interface TabsProps {
     selectTab: (id: string) => void
     removeTab: (id: string) => void
   }) => React.ReactNode
-  /** Custom CSS classes for Tabs container. */
-  className?: string
-  /** Custom inline CSS styles for Tabs container. */
-  style?: React.CSSProperties
+  /** Custom CSS classes for Tabs container and tab wrappers. */
+  classNames?: {
+    container?: string
+    tab?: string | ((tabId: string) => string)
+  }
+  /** Custom inline CSS styles for Tabs container and tab wrappers. */
+  styles?: {
+    container?: React.CSSProperties
+    tab?: React.CSSProperties | ((tabId: string) => React.CSSProperties)
+  }
+}
+
+const resolveDynamicProp = <T,>(
+  value: T | ((id: string) => T) | undefined,
+  id: string,
+): T | undefined => {
+  return typeof value === 'function' ? (value as (id: string) => T)(id) : value
 }
 
 export const Tabs: React.FC<TabsProps> = ({
@@ -38,38 +69,59 @@ export const Tabs: React.FC<TabsProps> = ({
   selectTab,
   removeTab,
   renderTab,
-  className,
-  style,
+  classNames,
+  styles,
 }) => {
-  return (
-    <div
-      className={className}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        height: '100%',
-        ...style,
-      }}
-    >
-      {tabs.map((tabId) => {
-        const metadata = tabsMetadata?.[tabId]
+  const contextValue = useMemo<TabsContextValue>(
+    () => ({
+      activeTabId,
+      locked,
+      tabsMetadata,
+      selectTab,
+      removeTab,
+    }),
+    [activeTabId, locked, tabsMetadata, selectTab, removeTab],
+  )
 
-        return (
-          <Tab key={tabId} id={tabId} locked={locked}>
-            {({ isDragging, isOver }) =>
-              renderTab({
-                tabId,
-                activeTabId,
-                isDragging,
-                isOver,
-                metadata,
-                selectTab,
-                removeTab,
-              })
-            }
-          </Tab>
-        )
-      })}
-    </div>
+  return (
+    <TabsContext.Provider value={contextValue}>
+      <div
+        className={classNames?.container}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          height: '100%',
+          ...styles?.container,
+        }}
+      >
+        {tabs.map((tabId) => {
+          const metadata = tabsMetadata?.[tabId]
+          const resolvedClassName = resolveDynamicProp(classNames?.tab, tabId)
+          const resolvedStyle = resolveDynamicProp(styles?.tab, tabId)
+
+          return (
+            <Tab
+              key={tabId}
+              id={tabId}
+              locked={locked}
+              className={resolvedClassName}
+              style={resolvedStyle}
+            >
+              {({ isDragging, isOver }) =>
+                renderTab({
+                  tabId,
+                  activeTabId,
+                  isDragging,
+                  isOver,
+                  metadata,
+                  selectTab,
+                  removeTab,
+                })
+              }
+            </Tab>
+          )
+        })}
+      </div>
+    </TabsContext.Provider>
   )
 }

@@ -2,6 +2,7 @@
 
 import { useContext, createContext, useRef } from 'react'
 import { Box, Lock, Unlock, Plus } from 'lucide-react'
+import { useTabContext } from 'react-zeugma'
 
 // Render Counter Utility
 const globalMountCounts = new Map<string, number>()
@@ -219,27 +220,10 @@ export const MetadataWidgetContent = ({
   )
 }
 
-export const TabHeaderContent = ({
-  tabId,
-  activeTabId,
-  locked,
-  tabsMetadata,
-  selectTab,
-  removeTab,
-  isDragging,
-}: {
-  tabId: string
-  activeTabId: string
-  locked: boolean
-  tabsMetadata: Record<string, Record<string, unknown>> | undefined
-  selectTab: (id: string) => void
-  removeTab: (id: string) => void
-  isDragging: boolean
-}) => {
-  const isActive = tabId === activeTabId
-  const { title: defaultTitle, icon } = getWidgetDetails(tabId)
+export const TabHeaderContent = () => {
+  const { tabId, isActive, isDragging, locked, metadata, selectTab, removeTab } = useTabContext()
 
-  const metadata = tabsMetadata?.[tabId]
+  const { title: defaultTitle, icon } = getWidgetDetails(tabId)
   const title = (metadata?.title as string) || defaultTitle
   const color = (metadata?.color as string) || 'indigo'
 
@@ -257,7 +241,7 @@ export const TabHeaderContent = ({
 
   return (
     <div
-      onClick={() => selectTab(tabId)}
+      onClick={selectTab}
       className={`w-full px-2.5 py-1.5 flex items-center justify-between gap-1.5 border-b-2 font-medium text-xs transition-all relative select-none h-full min-w-0 group cursor-pointer ${
         isActive
           ? 'bg-bg-pane text-text-primary border-b-2 ' + activeColorClass
@@ -275,7 +259,7 @@ export const TabHeaderContent = ({
         <button
           onClick={(e) => {
             e.stopPropagation()
-            removeTab(tabId)
+            removeTab()
           }}
           className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-text-muted hover:text-rose-500 hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer text-[10px] shrink-0 ${
             isActive ? 'opacity-85 hover:opacity-100' : 'opacity-0 group-hover:opacity-100'

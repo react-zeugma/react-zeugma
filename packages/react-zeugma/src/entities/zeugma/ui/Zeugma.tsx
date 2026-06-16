@@ -112,6 +112,7 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
       setLayout,
       renderPane: stableRenderPane,
       activeId,
+      activeType,
       dismissIntentId,
       setContainerRef,
       fullscreenPaneId,
@@ -133,6 +134,7 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
     [
       layout,
       activeId,
+      activeType,
       dismissIntentId,
       setContainerRef,
       fullscreenPaneId,

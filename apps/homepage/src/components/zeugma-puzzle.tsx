@@ -254,7 +254,11 @@ export function ZeugmaPuzzle({ onSuccess }: ZeugmaPuzzleProps) {
                     locked={isSuccess}
                     selectTab={(id) => paneProps.selectTab(id)}
                     removeTab={(id) => paneProps.removeTab(id)}
-                    className="overflow-x-auto scrollbar-none min-w-0 h-full shrink"
+                    classNames={{
+                      container: 'overflow-x-auto scrollbar-none min-w-0 h-full shrink',
+                      tab: 'h-full flex',
+                    }}
+                    styles={{ tab: { display: 'flex' } }}
                     renderTab={({ tabId, activeTabId, isDragging, isOver }) => {
                       const isActive = activeTabId === tabId
                       let title = 'Shard'
@@ -281,7 +285,6 @@ export function ZeugmaPuzzle({ onSuccess }: ZeugmaPuzzleProps) {
                           } ${isOver ? 'bg-[#C29B47]/10 border-l border-l-[#C29B47]/40 animate-pulse' : ''} ${
                             isDragging ? 'opacity-40' : ''
                           }`}
-                          style={{ display: 'flex' }}
                         >
                           {icon}
                           <span className="truncate uppercase font-extrabold tracking-widest font-sans">

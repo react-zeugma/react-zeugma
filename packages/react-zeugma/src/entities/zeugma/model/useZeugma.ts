@@ -69,13 +69,20 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
     containerRef.current = element
   }, [])
 
-  const setFullscreenPaneId = useCallback(
-    (paneId: string | null) => {
-      setLocalFullscreenPaneId(paneId)
-      onFullscreenChange?.(paneId)
-    },
-    [onFullscreenChange],
-  )
+  // Keep layout and callback refs in sync to make actions and queries completely stable
+  const layoutRef = useRef<TreeNode | null>(layout)
+  layoutRef.current = layout
+
+  const onChangeRef = useRef(onChange)
+  onChangeRef.current = onChange
+
+  const onFullscreenChangeRef = useRef(onFullscreenChange)
+  onFullscreenChangeRef.current = onFullscreenChange
+
+  const setFullscreenPaneId = useCallback((paneId: string | null) => {
+    setLocalFullscreenPaneId(paneId)
+    onFullscreenChangeRef.current?.(paneId)
+  }, [])
 
   // Sync state if options change
   useEffect(() => {
@@ -103,16 +110,17 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
       mutationFn: (current: TreeNode | null, ...args: Args) => TreeNode | null,
     ) => {
       return (...args: Args) => {
-        const prev = layout
+        const prev = layoutRef.current
         const next = mutationFn(prev, ...args)
 
         if (safeJsonStringify(prev) !== safeJsonStringify(next)) {
+          layoutRef.current = next
           setLocalLayout(next)
-          onChange?.(next)
+          onChangeRef.current?.(next)
         }
       }
     },
-    [layout, onChange],
+    [],
   )
 
   const handleSetLayout = useCallback(
@@ -145,7 +153,12 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
         const targetPane =
           findPaneById(prev, targetPaneId) ?? findPaneContainingTab(prev, targetPaneId)
         if (!targetPane) return prev
-        return addTab(prev, targetPane.id, tabId, metadata)
+
+        const sourcePane = findPaneContainingTab(prev, tabId)
+        const isAlreadyInTarget = sourcePane && sourcePane.id === targetPane.id
+
+        const cleanedPrev = isAlreadyInTarget ? prev : (removeTab(prev, tabId) ?? prev)
+        return addTab(cleanedPrev, targetPane.id, tabId, metadata)
       },
     ),
     [wrapMutation],
@@ -237,14 +250,20 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
     [wrapMutation],
   )
 
-  const handleFindPaneById = useCallback((paneId: string) => findPaneById(layout, paneId), [layout])
-
-  const handleFindPaneContainingTab = useCallback(
-    (tabId: string) => findPaneContainingTab(layout, tabId),
-    [layout],
+  const handleFindPaneById = useCallback(
+    (paneId: string) => findPaneById(layoutRef.current, paneId),
+    [],
   )
 
-  const handleFindTabById = useCallback((tabId: string) => findTabById(layout, tabId), [layout])
+  const handleFindPaneContainingTab = useCallback(
+    (tabId: string) => findPaneContainingTab(layoutRef.current, tabId),
+    [],
+  )
+
+  const handleFindTabById = useCallback(
+    (tabId: string) => findTabById(layoutRef.current, tabId),
+    [],
+  )
 
   return {
     layout,

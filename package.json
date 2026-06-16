@@ -12,6 +12,8 @@
     "build:lib": "npm run build --workspace=react-zeugma",
     "build:homepage": "npm run build --workspace=homepage",
     "lint:lib": "npm run lint --workspace=react-zeugma",
+    "test": "npm run test --workspace=react-zeugma",
+    "test:lib": "npm run test --workspace=react-zeugma",
     "changeset": "changeset",
     "prepare": "husky"
   },

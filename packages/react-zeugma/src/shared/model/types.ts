@@ -115,6 +115,17 @@ export interface ZeugmaController {
   mergeTab: (draggedTabId: string, targetPaneId: string) => void
   /** Stable callback to remove/close a specific tab from the layout. */
   removeTab: (tabId: string) => void
+  /** Splits an existing pane and adds a new one. */
+  splitPane: (
+    targetId: string,
+    direction: SplitDirection,
+    splitType: 'left' | 'right' | 'top' | 'bottom',
+    paneToAdd: string,
+  ) => void
+  /** Updates the split percentage of a split node. */
+  updateSplitPercentage: (currentNode: SplitNode, percentage: number) => void
+  /** Moves/reorders a tab relative to another target tab. */
+  moveTab: (draggedTabId: string, targetTabId: string, position?: 'before' | 'after') => void
 
   // Public Queries
   /** Find a PaneNode by its ID in the layout tree. */
@@ -283,6 +294,21 @@ export interface ZeugmaActionsValue {
   mergeTab: (draggedTabId: string, targetPaneId: string) => void
   /** Stable callback to remove/close a specific tab from the layout. */
   removeTab: (tabId: string) => void
+  /** Programmatically sets the fullscreen pane ID. */
+  setFullscreenPaneId: (paneId: string | null) => void
+  /** Programmatically updates the global locked status. */
+  setLocked: Dispatch<SetStateAction<boolean>>
+  /** Splits an existing pane and adds a new one. */
+  splitPane: (
+    targetId: string,
+    direction: SplitDirection,
+    splitType: 'left' | 'right' | 'top' | 'bottom',
+    paneToAdd: string,
+  ) => void
+  /** Updates the split percentage of a split node. */
+  updateSplitPercentage: (currentNode: SplitNode, percentage: number) => void
+  /** Moves/reorders a tab relative to another target tab. */
+  moveTab: (draggedTabId: string, targetTabId: string, position?: 'before' | 'after') => void
 }
 
 export interface ZeugmaContextValue extends ZeugmaStateValue, ZeugmaActionsValue {}

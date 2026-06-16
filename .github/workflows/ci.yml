@@ -19,5 +19,6 @@ jobs:
       - run: npm ci
       - run: npm run lint --workspace=react-zeugma
       - run: npm run typecheck --workspace=react-zeugma
+      - run: npm run test --workspace=react-zeugma
       - run: npm run build --workspace=react-zeugma
       - run: npm run build --workspace=homepage

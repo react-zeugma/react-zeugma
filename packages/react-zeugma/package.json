@@ -1,6 +1,6 @@
 {
   "name": "react-zeugma",
-  "version": "5.2.1",
+  "version": "5.3.2",
   "description": "Recursive drag-and-drop dashboard layout engine for React — combining the tree-based splitting of react-mosaic with the declarative API of react-grid-layout.",
   "type": "module",
   "sideEffects": false,

@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 5.3.2
+
+### Minor Changes
+
+- Reverted TabsList component, PaneContext, and layout optimization changes, restoring the stable workspace demo.
+
 ## 5.2.1
 
 ### Patch Changes

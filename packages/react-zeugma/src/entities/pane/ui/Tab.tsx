@@ -43,7 +43,11 @@ export interface TabProps {
 }
 
 export const Tab: React.FC<TabProps> = ({ id, locked = false, children, className, style }) => {
-  const { locked: globalLocked, classNames = {} } = useZeugmaState() as ZeugmaInternalStateValue
+  const {
+    locked: globalLocked,
+    classNames = {},
+    activeType,
+  } = useZeugmaState() as ZeugmaInternalStateValue
   const { overTabId, overTabPosition } = useZeugmaDrag()
 
   const tabsContext = useContext(TabsContext)
@@ -61,7 +65,7 @@ export const Tab: React.FC<TabProps> = ({ id, locked = false, children, classNam
 
   const { setNodeRef: setDropRef, isOver } = useDroppable({
     id: `tab-drop-${id}`,
-    disabled: isLocked,
+    disabled: isLocked || activeType === 'pane',
   })
 
   const handleRef = (el: HTMLDivElement | null) => {

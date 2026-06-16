@@ -6,17 +6,16 @@ import { Boxes, MousePointer2, Focus, Layout, ArrowRight, Copy, Check } from 'lu
 import { useScrollAnchor } from '../lib/use-scroll-anchor'
 import dynamic from 'next/dynamic'
 
-const ZeugmaPuzzle = dynamic(
-  () => import('../components/zeugma-puzzle').then((mod) => ({ default: mod.ZeugmaPuzzle })),
+const ZeugmaDemoIDE = dynamic(
+  () => import('../components/zeugma-demo-ide').then((mod) => ({ default: mod.ZeugmaDemoIDE })),
   {
     ssr: false,
     loading: () => (
-      <div className="w-full min-h-[420px] bg-bg-pane border border-border-primary rounded-2xl animate-pulse" />
+      <div className="w-full min-h-[500px] bg-[#0c0c0e] border border-border-primary rounded-3xl animate-pulse" />
     ),
   },
 )
 
-import { CodeBlock } from '../components/code-block'
 import { Footer } from '../components/footer'
 
 const FEATURES = [
@@ -42,52 +41,6 @@ const FEATURES = [
   },
 ]
 
-const CODE = `import { Zeugma, PaneTree, Pane, DragHandle, useZeugma } from 'react-zeugma';
-
-export default function App() {
-  const zeugma = useZeugma({
-    initialLayout: {
-      type: 'split',
-      direction: 'row',
-      splitPercentage: 25,
-      first: {
-        type: 'pane',
-        id: 'sidebar',
-        tabs: ['sidebar'],
-        activeTabId: 'sidebar'
-      },
-      second: {
-        type: 'pane',
-        id: 'editor',
-        tabs: ['editor', 'terminal'],
-        activeTabId: 'editor'
-    }
-  });
-
-  return (
-    <Zeugma
-      {...zeugma}
-      renderPane={(id) => (
-        <Pane id={id}>
-          {({ remove }) => (
-            <div className="pane">
-              <DragHandle>
-                <div className="title-bar">
-                  <span>{id}</span>
-                  <button onClick={remove}>×</button>
-                </div>
-              </DragHandle>
-              <div className="pane-content">Content for {id}</div>
-            </div>
-          )}
-        </Pane>
-      )}
-    >
-      <PaneTree />
-    </Zeugma>
-  );
-}`
-
 export function Home() {
   const [copied, setCopied] = useState(false)
 
@@ -98,7 +51,7 @@ export function Home() {
   }
 
   const { scrollToSection } = useScrollAnchor({
-    sectionIds: ['designed-for-workspace-builders', 'zeugma-mosaic-challenge'],
+    sectionIds: ['designed-for-workspace-builders', 'zeugma-demo-ide'],
     offset: 80,
   })
 
@@ -152,13 +105,13 @@ export function Home() {
         </div>
       </section>
 
-      {/* Features & Code Showcase Section */}
+      {/* Features Showcase Section */}
       <section className="py-24 px-6 border-t border-border-primary bg-bg-app relative z-20">
-        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-16 items-start">
-          <div className="flex-1 w-full text-left">
+        <div className="max-w-4xl mx-auto text-center flex flex-col items-center">
+          <div className="w-full text-center">
             <h2
               id="designed-for-workspace-builders"
-              className="group flex items-center gap-2 text-3xl font-bold text-text-primary mb-6 scroll-mt-20"
+              className="group flex items-center justify-center gap-2 text-3xl font-bold text-text-primary mb-6 scroll-mt-20"
             >
               <span>Designed for Workspace Builders</span>
               <a
@@ -172,14 +125,14 @@ export function Home() {
                 #
               </a>
             </h2>
-            <p className="text-text-secondary text-base leading-relaxed mb-12 max-w-xl">
+            <p className="text-text-secondary text-base leading-relaxed mb-12 max-w-2xl mx-auto">
               Stop fighting with CSS Grid or wrestling absolute positioning math.{' '}
               <strong className="text-text-primary">react-zeugma</strong> manages the complexities
               of arbitrary window splitting, dragging, and resizing so you can focus on building
               your app.
             </p>
 
-            <div className="grid sm:grid-cols-2 gap-6">
+            <div className="grid sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
               {FEATURES.map((item, i) => (
                 <div
                   key={i}
@@ -194,29 +147,26 @@ export function Home() {
               ))}
             </div>
           </div>
-
-          <div className="flex-1 w-full max-w-xl shadow-2xl">
-            <CodeBlock code={CODE} />
-          </div>
         </div>
       </section>
 
-      {/* Zeugma Mosaic Challenge Section */}
-      <section className="py-20 px-6 border-t border-border-primary bg-bg-app relative overflow-hidden z-20">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-amber-500/2 blur-[120px] rounded-full pointer-events-none" />
+      {/* Composable nested workspace / IDE Demo */}
+      <section className="py-24 px-6 border-t border-border-primary bg-bg-app relative overflow-hidden z-20">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-indigo-500/2 blur-[120px] rounded-full pointer-events-none" />
         <div className="max-w-7xl mx-auto text-center relative z-10">
           <h2
-            id="zeugma-mosaic-challenge"
+            id="zeugma-demo-ide"
             className="text-3xl sm:text-4xl font-extrabold text-text-primary mb-4 tracking-tight"
           >
-            Restore the Ancient Mosaics
+            Build Next-Generation IDEs & Layouts
           </h2>
-          <p className="text-text-secondary text-sm max-w-xl mx-auto mb-12">
-            Zeugma means &ldquo;bridge&rdquo; or &ldquo;junction&rdquo; in Greek. Bring the ancient
-            Roman mosaics of Belkıs/Zeugma back to life by splitting and arranging their fragments
-            into a seamless frame.
+          <p className="text-text-secondary text-sm max-w-2xl mx-auto mb-12">
+            <strong className="text-text-primary">react-zeugma</strong> is completely headless,
+            context-isolated, and serialized to JSON. Below is a live interactive IDE built with
+            react-zeugma, running an app preview that also implements its own independent
+            react-zeugma workspace.
           </p>
-          <ZeugmaPuzzle />
+          <ZeugmaDemoIDE />
         </div>
       </section>
 

@@ -1,6 +1,6 @@
 import React from 'react'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
-import { useZeugmaState, ZeugmaInternalStateValue } from '../../../shared'
+import { useZeugmaState, useZeugmaDrag, ZeugmaInternalStateValue } from '../../../shared'
 
 export interface TabRenderProps {
   isDragging: boolean
@@ -21,12 +21,8 @@ export interface TabProps {
 }
 
 export const Tab: React.FC<TabProps> = ({ id, locked = false, children, className, style }) => {
-  const {
-    locked: globalLocked,
-    classNames = {},
-    overTabId,
-    overTabPosition,
-  } = useZeugmaState() as ZeugmaInternalStateValue
+  const { locked: globalLocked, classNames = {} } = useZeugmaState() as ZeugmaInternalStateValue
+  const { overTabId, overTabPosition } = useZeugmaDrag()
   const isLocked = locked || globalLocked
 
   const {

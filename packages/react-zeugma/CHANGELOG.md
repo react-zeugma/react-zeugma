@@ -1,5 +1,13 @@
 # react-zeugma
 
+## 5.5.0
+
+### Minor Changes
+
+- Optimised drag-and-drop performance by splitting volatile hover states (`overTabId`, `overTabPosition`) into a dedicated `ZeugmaDragContext` (accessed via `useZeugmaDrag`), reducing layout rendering waterfalls.
+- Wrapped `PortalHostItem` in `React.memo` to isolate widget rendering and prevent layout/widget thrashing during active dragging.
+- Configured functional comparison updates for drag states inside `useZeugmaDnd` to avoid redundant React render scheduling.
+
 ## 5.4.1
 
 ### Patch Changes

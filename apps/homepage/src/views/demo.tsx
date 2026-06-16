@@ -189,17 +189,9 @@ const TabbedPaneWrapper = ({
           selectTab={selectTab}
           removeTab={removeTab}
           className="h-full"
-          renderTab={({ tabId, isDragging }) => (
+          renderTab={() => (
             <div className="flex-1 min-w-[36px] max-w-[160px] h-full" style={{ display: 'flex' }}>
-              <TabHeaderContent
-                tabId={tabId}
-                activeTabId={activeTabId}
-                locked={locked}
-                tabsMetadata={tabsMetadata}
-                selectTab={selectTab}
-                removeTab={removeTab}
-                isDragging={isDragging}
-              />
+              <TabHeaderContent />
             </div>
           )}
         />

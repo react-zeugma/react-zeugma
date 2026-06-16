@@ -58,8 +58,15 @@ export function SidebarWrapper({
   }
 
   const handleAddRandomWidget = () => {
-    const randomId = `random-${Math.floor(100 + Math.random() * 900)}`
-    addPane(randomId)
+    const randomNum = Math.floor(100 + Math.random() * 900)
+    const randomId = `random-${randomNum}`
+    const colors = ['indigo', 'emerald', 'amber', 'rose', 'sky', 'violet']
+    const randomColor = colors[Math.floor(Math.random() * colors.length)]
+    addPane(randomId, {
+      title: `Widget #${randomNum}`,
+      color: randomColor,
+      notes: 'Dynamically added pane.',
+    })
   }
 
   return (

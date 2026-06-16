@@ -133,7 +133,9 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
   )
 
   const handleAddPane = useCallback(
-    wrapMutation((prev, paneId: string) => addPane(prev, paneId)),
+    wrapMutation((prev, paneId: string, metadata?: Record<string, unknown>) =>
+      addPane(prev, paneId, metadata),
+    ),
     [wrapMutation],
   )
 

@@ -94,9 +94,19 @@ export function splitPane(
 /**
  * Tree Helper: Add a pane by recursively splitting the rightmost/bottommost pane in the tree.
  */
-export function addPane(tree: TreeNode | null, paneToAdd: string): TreeNode {
+export function addPane(
+  tree: TreeNode | null,
+  paneToAdd: string,
+  metadata?: Record<string, unknown>,
+): TreeNode {
   if (tree === null) {
-    return { type: 'pane', id: generateUniqueId(), tabs: [paneToAdd], activeTabId: paneToAdd }
+    return {
+      type: 'pane',
+      id: generateUniqueId(),
+      tabs: [paneToAdd],
+      activeTabId: paneToAdd,
+      tabsMetadata: metadata ? { [paneToAdd]: metadata } : undefined,
+    }
   }
 
   function insert(node: TreeNode, parentDirection: SplitDirection | null): TreeNode {
@@ -107,7 +117,13 @@ export function addPane(tree: TreeNode | null, paneToAdd: string): TreeNode {
         direction,
         splitPercentage: 50,
         first: node,
-        second: { type: 'pane', id: generateUniqueId(), tabs: [paneToAdd], activeTabId: paneToAdd },
+        second: {
+          type: 'pane',
+          id: generateUniqueId(),
+          tabs: [paneToAdd],
+          activeTabId: paneToAdd,
+          tabsMetadata: metadata ? { [paneToAdd]: metadata } : undefined,
+        },
       }
     }
 

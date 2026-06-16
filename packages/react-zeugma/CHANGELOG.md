@@ -5,6 +5,7 @@
 ### Minor Changes
 
 - Added the `findTabById` helper function to search for and retrieve specific tab details from the layout tree.
+- Exposed tree query methods (`findPaneById`, `findPaneContainingTab`, `findTabById`) and the global lock state updater (`setLocked`) directly on the Zeugma state context for simplified consumption from child components.
 
 ## 5.0.0
 

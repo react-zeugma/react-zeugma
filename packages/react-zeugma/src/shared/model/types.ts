@@ -226,6 +226,14 @@ export interface ZeugmaStateValue {
   classNames: ZeugmaClassNames
   /** Whether the layout is globally locked. */
   locked: boolean
+  /** Programmatically updates the global locked status. */
+  setLocked: Dispatch<SetStateAction<boolean>>
+  /** Find a PaneNode by its ID in the layout tree. */
+  findPaneById: (paneId: string) => PaneNode | null
+  /** Find the PaneNode containing the given tab ID in the layout tree. */
+  findPaneContainingTab: (tabId: string) => PaneNode | null
+  /** Find the details of a tab by its ID in the layout tree. */
+  findTabById: (tabId: string) => TabDetails | null
 }
 
 /** @internal */

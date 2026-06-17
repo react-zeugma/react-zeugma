@@ -136,10 +136,10 @@ A custom state hook that initializes and manages the recursive layout tree and h
 
 A custom React context hook that returns the unified layout controller properties and state actions. Must be used within a `<Zeugma>` provider component.
 
-Provides direct access to the current layout state (e.g., `layout`, `locked`), state setters (e.g., `setLocked`), queries (e.g., `findTabById`, `findPaneContainingTab`, `findPaneById`), and mutation actions (e.g., `addPane`, `removePane`, `updateTabMetadata`, `removeTab`, `selectTab`, etc.).
+Provides direct access to the current layout state (e.g., `layout`, `layoutBeforeDrag`, `locked`), state setters (e.g., `setLocked`), queries (e.g., `findTabById`, `findPaneContainingTab`, `findPaneById`), and mutation actions (e.g., `addPane`, `removePane`, `updateTabMetadata`, `removeTab`, `selectTab`, etc.).
 
 ```ts
-const { layout, locked, findTabById, setLocked } = useZeugmaContext()
+const { layout, layoutBeforeDrag, locked, findTabById, setLocked } = useZeugmaContext()
 ```
 
 ### `<PaneTree>`
@@ -241,6 +241,10 @@ Recursively searches the layout tree and returns the `PaneNode` containing the s
 #### `findTabById(tree: TreeNode | null, tabId: string): TabDetails | null`
 
 Searches the layout tree for the given `tabId` and returns computed details (parent `paneId`, `isActive`, `index`, and custom `metadata`).
+
+#### `calculateTabDropIndex(tabs: string[], activeType: string | null, overTabId: string | null, overTabPosition: 'before' | 'after' | null): number`
+
+Calculates the target insertion index for a dragged tab within a list of tabs. Returns `-1` if the drop target is not in the list.
 
 ---
 
@@ -405,7 +409,7 @@ A custom hook to manage the dashboard layout state.
 A context consumer hook that retrieves the parent `<Zeugma>` controller state and actions.
 
 ```ts
-const { layout, addPane, removeTab } = useZeugmaContext()
+const { layout, layoutBeforeDrag, addPane, removeTab } = useZeugmaContext()
 ```
 
 ### `<PaneTree>`
@@ -511,6 +515,8 @@ Import these helpers from `react-zeugma/utils` to manipulate or query the tree l
   Recursively searches the layout tree and returns the `PaneNode` containing the specified `tabId`.
 - **`findTabById(tree: TreeNode | null, tabId: string): TabDetails | null`**
   Searches the layout tree for the given `tabId` and returns computed details (parent `paneId`, `isActive`, `index`, and custom `metadata`).
+- **`calculateTabDropIndex(tabs: string[], activeType: string | null, overTabId: string | null, overTabPosition: 'before' | 'after' | null): number`**
+  Calculates the target insertion index for a dragged tab within a list of tabs. Returns `-1` if the drop target is not in the list.
 
 ---
 
@@ -590,7 +596,7 @@ interface ZeugmaClassNames {
 
 ### Tab Drop Preview Customization
 
-When dragging a tab over another, the library automatically renders a placeholder indicator line absolute-positioned on the left or right edge of the target tab.
+When dragging a tab, the library automatically calculates the target insertion index and renders a placeholder indicator line at that position within the tabs list (between adjacent tabs or at the list boundaries).
 
 To style this indicator line, configure a custom CSS class name via `classNames.tabDropPreview`.
 

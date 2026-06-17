@@ -519,3 +519,22 @@ export function computeLayout(
     splitters: [currentSplitter, ...firstLayout.splitters, ...secondLayout.splitters],
   }
 }
+
+/**
+ * Calculates the target drop insertion index in a list of tabs during a drag.
+ * Returns -1 if the drop target is not in the list.
+ */
+export function calculateTabDropIndex(
+  tabs: string[],
+  activeType: string | null,
+  overTabId: string | null,
+  overTabPosition: 'before' | 'after' | null,
+): number {
+  const isDraggingTab = activeType === 'tab'
+  const isHoveredTabInThisPane = isDraggingTab && overTabId && tabs.includes(overTabId)
+  if (!isHoveredTabInThisPane || !overTabPosition) {
+    return -1
+  }
+  const index = tabs.indexOf(overTabId)
+  return overTabPosition === 'before' ? index : index + 1
+}

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useMemo, useCallback } from 'react'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
-import { useZeugmaState, useZeugmaDrag, ZeugmaInternalStateValue } from '../../../shared'
+import { useZeugmaState, useZeugmaDrag } from '../../../shared'
 import { TabsContext } from './Tabs'
 
 export interface TabContextValue {
@@ -43,11 +43,7 @@ export interface TabProps {
 }
 
 export const Tab: React.FC<TabProps> = ({ id, locked = false, children, className, style }) => {
-  const {
-    locked: globalLocked,
-    classNames = {},
-    activeType,
-  } = useZeugmaState() as ZeugmaInternalStateValue
+  const { locked: globalLocked, classNames = {}, activeType } = useZeugmaState()
   const { overTabId } = useZeugmaDrag()
 
   const tabsContext = useContext(TabsContext)

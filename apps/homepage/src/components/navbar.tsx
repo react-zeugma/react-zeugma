@@ -18,10 +18,9 @@ const NAV_ITEMS: {
   { label: 'Docs', to: '/docs' },
   { label: 'Changelog', to: '/changelog' },
 ]
-
 export function Navbar() {
-  const { theme, toggleTheme } = useTheme()
   const pathname = usePathname()
+  const { theme, toggleTheme } = useTheme()
   const router = useRouter()
   const prefetched = useRef<Set<string>>(new Set())
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -41,7 +40,7 @@ export function Navbar() {
   )
 
   return (
-    <>
+    <div className={pathname === '/demo' ? 'hidden' : ''}>
       <nav className="sticky top-0 z-50 bg-bg-app/80 backdrop-blur-md border-b border-border-primary px-4 sm:px-6 flex items-center justify-between h-14 transition-colors duration-200 select-none">
         <Link href="/" className="flex items-center gap-2 group">
           <img src={LOGO_URL} alt="react-zeugma logo" className="w-6 h-6 object-contain" />
@@ -162,6 +161,6 @@ export function Navbar() {
           </a>
         </div>
       </div>
-    </>
+    </div>
   )
 }

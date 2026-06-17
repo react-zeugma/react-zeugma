@@ -103,6 +103,40 @@ export interface ZeugmaController {
   /** The ID of the item with active dismiss intent, or null. */
   dismissIntentId: string | null
 
+  // State setters and refs
+  setActiveId: Dispatch<SetStateAction<string | null>>
+  setActiveType: Dispatch<SetStateAction<'pane' | 'tab' | null>>
+  setDismissIntentId: Dispatch<SetStateAction<string | null>>
+  containerRef: RefObject<HTMLElement | null>
+  setContainerRef: (element: HTMLElement | null) => void
+  layoutBeforeDrag: TreeNode | null
+  setLayoutBeforeDrag: Dispatch<SetStateAction<TreeNode | null>>
+
+  // Configuration settings (resolved/defaulted)
+  dragActivationDistance: number
+  snapThreshold: number
+  minSplitPercentage: number
+  maxSplitPercentage: number
+  enableDragToDismiss: boolean
+  dismissThreshold: number
+
+  // Callbacks
+  onRemove?: (paneId: string) => void
+  onDragStart?: (activeId: string) => void
+  onDragEnd?: (
+    activeId: string,
+    overId: string | null,
+    dropAction: {
+      type: 'split' | 'move'
+      direction?: SplitDirection
+      position?: 'top' | 'bottom' | 'left' | 'right' | 'center'
+    } | null,
+  ) => void
+  onResizeStart?: (currentNode: SplitNode) => void
+  onResize?: (currentNode: SplitNode, percentage: number) => void
+  onResizeEnd?: (currentNode: SplitNode, percentage: number) => void
+  onDismissIntentChange?: (paneId: string | null) => void
+
   // Public Actions
   /** Removes the specified pane from the layout tree and collapses its parent split. */
   removePane: (paneId: string) => void
@@ -142,53 +176,6 @@ export interface ZeugmaController {
   findPaneContainingTab: (tabId: string) => PaneNode | null
   /** Find the details of a tab by its ID in the layout tree. */
   findTabById: (tabId: string) => TabDetails | null
-}
-
-/** @internal */
-export interface ZeugmaInternalController extends ZeugmaController {
-  // Internal State
-  setActiveId: Dispatch<SetStateAction<string | null>>
-  setActiveType: Dispatch<SetStateAction<'pane' | 'tab' | null>>
-  setDismissIntentId: Dispatch<SetStateAction<string | null>>
-  containerRef: RefObject<HTMLElement | null>
-  setContainerRef: (element: HTMLElement | null) => void
-  layoutBeforeDrag: TreeNode | null
-  setLayoutBeforeDrag: Dispatch<SetStateAction<TreeNode | null>>
-
-  // Configuration settings (resolved/defaulted)
-  dragActivationDistance: number
-  snapThreshold: number
-  minSplitPercentage: number
-  maxSplitPercentage: number
-  enableDragToDismiss: boolean
-  dismissThreshold: number
-
-  // Callbacks
-  onRemove?: (paneId: string) => void
-  onDragStart?: (activeId: string) => void
-  onDragEnd?: (
-    activeId: string,
-    overId: string | null,
-    dropAction: {
-      type: 'split' | 'move'
-      direction?: SplitDirection
-      position?: 'top' | 'bottom' | 'left' | 'right' | 'center'
-    } | null,
-  ) => void
-  onResizeStart?: (currentNode: SplitNode) => void
-  onResize?: (currentNode: SplitNode, percentage: number) => void
-  onResizeEnd?: (currentNode: SplitNode, percentage: number) => void
-  onDismissIntentChange?: (paneId: string | null) => void
-
-  // Internal Actions
-  splitPane: (
-    targetId: string,
-    direction: SplitDirection,
-    splitType: 'left' | 'right' | 'top' | 'bottom',
-    paneToAdd: string,
-  ) => void
-  updateSplitPercentage: (currentNode: SplitNode, percentage: number) => void
-  moveTab: (draggedTabId: string, targetTabId: string, position?: 'before' | 'after') => void
 }
 
 export interface ZeugmaClassNames {
@@ -264,18 +251,8 @@ export interface ZeugmaStateValue {
   activeType: 'pane' | 'tab' | null
   /** The ID of the item with active dismiss intent, or null. */
   dismissIntentId: string | null
-}
 
-export interface ZeugmaDragStateValue {
-  /** The ID of the tab currently hovered over during a tab drag, or null. */
-  overTabId: string | null
-  /** The position of the tab drop preview relative to the hovered tab ('before' | 'after'). */
-  overTabPosition: 'before' | 'after' | null
-}
-
-/** @internal */
-export interface ZeugmaInternalStateValue extends ZeugmaStateValue {
-  // Drag-and-drop orchestration state
+  // Drag-and-drop orchestration state and refs
   setContainerRef: (element: HTMLElement | null) => void
   onRemove?: (paneId: string) => void
   onFullscreenChange?: (paneId: string | null) => void
@@ -285,6 +262,13 @@ export interface ZeugmaInternalStateValue extends ZeugmaStateValue {
   onResizeEnd?: (currentNode: SplitNode, percentage: number) => void
   minSplitPercentage?: number
   maxSplitPercentage?: number
+}
+
+export interface ZeugmaDragStateValue {
+  /** The ID of the tab currently hovered over during a tab drag, or null. */
+  overTabId: string | null
+  /** The position of the tab drop preview relative to the hovered tab ('before' | 'after'). */
+  overTabPosition: 'before' | 'after' | null
 }
 
 /**

@@ -1,11 +1,6 @@
 import React, { useMemo, useCallback, useEffect, useContext, useRef } from 'react'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
-import {
-  useZeugmaState,
-  useZeugmaActions,
-  PortalRegistryContext,
-  ZeugmaInternalStateValue,
-} from '../../../shared'
+import { useZeugmaState, useZeugmaActions, PortalRegistryContext } from '../../../shared'
 import { DragListenersCtx } from '../model/context'
 import { PaneRenderProps } from '../model/types'
 import { findPaneById } from '../../../shared/lib/tree'
@@ -148,7 +143,7 @@ export const Pane: React.FC<PaneProps> = ({ id, children, style, locked: propLoc
     fullscreenPaneId,
     onFullscreenChange,
     locked: globalLocked,
-  } = useZeugmaState() as ZeugmaInternalStateValue
+  } = useZeugmaState()
   const { removePane, updateTabMetadata, selectTab, removeTab } = useZeugmaActions()
   const portalRegistry = useContext(PortalRegistryContext)
   if (!portalRegistry) {

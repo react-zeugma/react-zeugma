@@ -318,5 +318,5 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
     findPaneById: handleFindPaneById,
     findPaneContainingTab: handleFindPaneContainingTab,
     findTabById: handleFindTabById,
-  } as unknown as ZeugmaController
+  } as ZeugmaController
 }

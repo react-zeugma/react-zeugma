@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { renderHook } from '@testing-library/react'
 import { useZeugmaDnd } from './useZeugmaDnd'
-import type { ZeugmaInternalController, TreeNode } from '../../../shared'
+import type { ZeugmaController, TreeNode } from '../../../shared'
 import * as dndKitCore from '@dnd-kit/core'
 
 vi.mock('@dnd-kit/core', async (importOriginal) => {
@@ -13,7 +13,7 @@ vi.mock('@dnd-kit/core', async (importOriginal) => {
 })
 
 describe('useZeugmaDnd Hook', () => {
-  const mockController = (): ZeugmaInternalController => ({
+  const mockController = (): ZeugmaController => ({
     layout: {
       type: 'pane',
       id: 'pane-1',
@@ -178,7 +178,7 @@ describe('useZeugmaDnd Hook', () => {
     })
   })
 
-  it('should remove the dragged tab/pane on drag start, and restore it on cancel or invalid drop', () => {
+  it('should remove the dragged tab/pane on drag start, and restore it on cancel or invalid drop', async () => {
     const controller = mockController()
     const setOverTabId = vi.fn()
     const setOverTabPosition = vi.fn()

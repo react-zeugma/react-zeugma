@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest'
 import { render, act } from '@testing-library/react'
-import { useZeugma, Zeugma } from '../../../index'
-import type { TreeNode, ZeugmaInternalController } from '../../../shared'
+import { useEffect } from 'react'
+import { useZeugma, Zeugma, Pane, PaneTree } from '../../../index'
+import type { TreeNode, ZeugmaController } from '../../../shared'
 
 describe('Zeugma Drag and Drop Widget Remounting', () => {
   it('should not remount widgets during tab move (reorder)', () => {
@@ -13,27 +14,34 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
     }
 
     let mountCount = 0
-    const unmountCount = 0
+    let unmountCount = 0
 
     const TestWidget = ({ tabId }: { tabId: string }) => {
-      mountCount++
-      // Simulate unmount hook via clean-up function
-      // (React runs clean-up functions on unmount or dependency updates, but since tabId is stable for this widget, it only runs on unmount)
+      useEffect(() => {
+        mountCount++
+        return () => {
+          unmountCount++
+        }
+      }, [])
       return <div data-testid={`widget-${tabId}`}>{tabId} Content</div>
     }
 
-    let controllerInstance: ZeugmaInternalController | null = null
+    let controllerInstance: ZeugmaController | null = null
 
     const TestWrapper = () => {
       const controller = useZeugma({ initialLayout })
-      controllerInstance = controller as unknown as ZeugmaInternalController
+      controllerInstance = controller
       return (
         <Zeugma
           {...controller}
-          renderPane={(id) => <div key={id} id={`pane-target-${id}`} />}
+          renderPane={(paneId) => (
+            <Pane id={paneId}>
+              {(paneProps) => <div id={`pane-target-${paneId}`}>{paneProps.renderActiveTab()}</div>}
+            </Pane>
+          )}
           renderWidget={(id) => <TestWidget tabId={id} />}
         >
-          <div>Workspace</div>
+          <PaneTree />
         </Zeugma>
       )
     }
@@ -41,10 +49,12 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
     render(<TestWrapper />)
 
     // Initially, both tabs are in the layout and registered.
-    // tab-1 should mount once.
-    // (Wait, since renderWidget is called for both tab-1 and tab-2 in the portal host, mountCount runs for both)
+    // tab-1 and tab-2 should mount.
     expect(mountCount).toBe(2)
     expect(unmountCount).toBe(0)
+
+    // Reset mountCount before drag
+    mountCount = 0
 
     // Simulate drag start on tab-1
     act(() => {
@@ -64,6 +74,7 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
     })
 
     // During drag, no remounts of widgets should happen
+    expect(mountCount).toBe(0)
     expect(unmountCount).toBe(0)
 
     // Simulate drag end on tab-1 (dropping on the same pane, moving it)
@@ -84,6 +95,7 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
     })
 
     // After drop, tab-1 should NOT have remounted!
+    expect(mountCount).toBe(0)
     expect(unmountCount).toBe(0)
   })
 
@@ -95,17 +107,24 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
       activeTabId: 'tab-1',
     }
 
-    const unmountCount = 0
+    let mountCount = 0
+    let unmountCount = 0
 
     const TestWidget = ({ tabId }: { tabId: string }) => {
+      useEffect(() => {
+        mountCount++
+        return () => {
+          unmountCount++
+        }
+      }, [])
       return <div data-testid={`widget-${tabId}`}>{tabId} Content</div>
     }
 
-    let controllerInstance: ZeugmaInternalController | null = null
+    let controllerInstance: ZeugmaController | null = null
 
     const TestWrapper = () => {
       const controller = useZeugma({ initialLayout })
-      controllerInstance = controller as unknown as ZeugmaInternalController
+      controllerInstance = controller
       return (
         <Zeugma
           {...controller}
@@ -118,6 +137,9 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
     }
 
     render(<TestWrapper />)
+
+    // Reset mountCount before drag
+    mountCount = 0
 
     // Simulate drag start on tab-1
     act(() => {
@@ -136,6 +158,7 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
       }
     })
 
+    expect(mountCount).toBe(0)
     expect(unmountCount).toBe(0)
 
     // Simulate split drop (creating pane-2 and moving tab-1 there)
@@ -166,7 +189,8 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
       }
     })
 
-    // Expect no remount (no unmounts of target tab)
+    // Expect no remount (no unmounts or additional mounts of target tab)
+    expect(mountCount).toBe(0)
     expect(unmountCount).toBe(0)
   })
 
@@ -184,11 +208,11 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
       return <div data-testid={`widget-${tabId}`}>{tabId} Content</div>
     }
 
-    let controllerInstance: ZeugmaInternalController | null = null
+    let controllerInstance: ZeugmaController | null = null
 
     const TestWrapper = () => {
       const controller = useZeugma({ initialLayout })
-      controllerInstance = controller as unknown as ZeugmaInternalController
+      controllerInstance = controller
       return (
         <Zeugma
           {...controller}

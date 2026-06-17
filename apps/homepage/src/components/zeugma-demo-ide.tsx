@@ -290,9 +290,7 @@ export function ZeugmaDemoIDE({
               </div>
 
               <div className="flex-1 flex flex-col min-h-0 bg-[#1e1e1e] relative h-full overflow-hidden">
-                <TabContentWrapper tabId={paneProps.activeTabId}>
-                  {paneProps.renderActiveTab()}
-                </TabContentWrapper>
+                {paneProps.renderActiveTab()}
               </div>
             </div>
           )
@@ -303,159 +301,173 @@ export function ZeugmaDemoIDE({
   )
 
   // ── Tab content ─────────────────────────────────────────────────────────────
-  const renderWidget = useCallback((tabId: string) => {
-    if (tabId === 'explorer') {
-      const renderTreeNode = (entry: TreeEntry, depth: number = 0): React.ReactNode => {
-        const indent = depth * 12
-        if (entry.isFolder) {
-          const isCollapsed = entry.collapsed
-          return (
-            <div key={entry.name}>
-              <div
-                className={`flex items-center gap-1.5 py-1 px-2 rounded text-left transition-all select-none ${
-                  isCollapsed
-                    ? 'text-[#6e6e6e] cursor-default'
-                    : 'text-[#cccccc] hover:bg-[#2d2d2d] cursor-pointer'
-                }`}
-                style={{ paddingLeft: `${indent + 8}px` }}
+  const renderWidget = useCallback(
+    (tabId: string) => {
+      const getContent = () => {
+        if (tabId === 'explorer') {
+          const renderTreeNode = (entry: TreeEntry, depth: number = 0): React.ReactNode => {
+            const indent = depth * 12
+            if (entry.isFolder) {
+              const isCollapsed = entry.collapsed
+              return (
+                <div key={entry.name}>
+                  <div
+                    className={`flex items-center gap-1.5 py-1 px-2 rounded text-left transition-all select-none ${
+                      isCollapsed
+                        ? 'text-[#6e6e6e] cursor-default'
+                        : 'text-[#cccccc] hover:bg-[#2d2d2d] cursor-pointer'
+                    }`}
+                    style={{ paddingLeft: `${indent + 8}px` }}
+                  >
+                    <ChevronDown
+                      className={`w-3 h-3 shrink-0 transition-transform ${
+                        isCollapsed ? '-rotate-90 text-[#4e4e4e]' : ''
+                      }`}
+                    />
+                    <Folder
+                      className={`w-3.5 h-3.5 shrink-0 ${
+                        isCollapsed ? 'text-[#4e4e4e]' : 'text-[#dcb67a]'
+                      }`}
+                    />
+                    <span
+                      className={`font-mono text-[11px] truncate ${
+                        isCollapsed ? 'text-[#4e4e4e]' : ''
+                      }`}
+                    >
+                      {entry.name}
+                    </span>
+                  </div>
+                  {!isCollapsed && entry.children?.map((child) => renderTreeNode(child, depth + 1))}
+                </div>
+              )
+            }
+
+            const fileKey = entry.fileKey
+            const fileEntry = fileKey ? FILES[fileKey] : null
+            const icon = fileEntry?.icon ?? <FileCode2 className="w-3.5 h-3.5 text-zinc-500" />
+
+            return (
+              <button
+                key={entry.name}
+                onClick={() => fileKey && stableHandleOpenFile(fileKey)}
+                className="flex items-center gap-1.5 py-1 px-2 rounded text-left transition-all hover:bg-[#2d2d2d] hover:text-white cursor-pointer w-full"
+                style={{ paddingLeft: `${indent + 20}px` }}
               >
-                <ChevronDown
-                  className={`w-3 h-3 shrink-0 transition-transform ${
-                    isCollapsed ? '-rotate-90 text-[#4e4e4e]' : ''
-                  }`}
-                />
-                <Folder
-                  className={`w-3.5 h-3.5 shrink-0 ${
-                    isCollapsed ? 'text-[#4e4e4e]' : 'text-[#dcb67a]'
-                  }`}
-                />
-                <span
-                  className={`font-mono text-[11px] truncate ${
-                    isCollapsed ? 'text-[#4e4e4e]' : ''
-                  }`}
-                >
-                  {entry.name}
-                </span>
+                {icon}
+                <span className="font-mono text-[11px] truncate">{entry.name}</span>
+              </button>
+            )
+          }
+
+          return (
+            <div className="h-full w-full bg-[#252526] py-3 flex flex-col gap-1 text-xs font-semibold text-[#cccccc] overflow-y-auto">
+              <div className="flex items-center gap-1.5 uppercase tracking-wider text-[9px] text-[#858585] font-black select-none px-4 pb-2">
+                <ChevronDown className="w-3.5 h-3.5" />
+                <span>MY-ZEUGMA-APP</span>
               </div>
-              {!isCollapsed && entry.children?.map((child) => renderTreeNode(child, depth + 1))}
+              <div className="flex flex-col">
+                {FILE_TREE.map((entry) => renderTreeNode(entry, 0))}
+              </div>
             </div>
           )
         }
 
-        const fileKey = entry.fileKey
-        const fileEntry = fileKey ? FILES[fileKey] : null
-        const icon = fileEntry?.icon ?? <FileCode2 className="w-3.5 h-3.5 text-zinc-500" />
+        if (tabId === 'terminal') {
+          return (
+            <div className="h-full w-full bg-[#1e1e1e] overflow-auto p-4 font-mono text-[11px] leading-relaxed text-[#858585] select-text">
+              <div className="flex justify-between items-center pb-2 border-b border-[#2d2d30] mb-3 text-zinc-500">
+                <span>bash (npm run dev)</span>
+                <span>~/my-zeugma-app</span>
+              </div>
+              <div className="text-[#abb2bf]">
+                <span className="text-emerald-400">user@dev:~/my-zeugma-app$</span> npm run dev
+                <br />
+                <span className="text-[#5c6370]">{`> my-zeugma-app@0.1.0 dev`}</span>
+                <br />
+                <span className="text-[#5c6370]">{`> vite`}</span>
+                <br />
+                <br />
+                <span className="text-cyan-400">{'  VITE v5.1.4  ready in 184 ms'}</span>
+                <br />
+                <br />
+                {'  ➜  '}Local:{' '}
+                <span className="text-indigo-400 underline cursor-pointer">
+                  http://localhost:5173/
+                </span>
+                <br />
+                {'  ➜  '}Network: use --host to expose
+                <br />
+                <br />
+                <span className="text-zinc-600 animate-pulse">▋</span>
+              </div>
+            </div>
+          )
+        }
 
-        return (
-          <button
-            key={entry.name}
-            onClick={() => fileKey && stableHandleOpenFile(fileKey)}
-            className="flex items-center gap-1.5 py-1 px-2 rounded text-left transition-all hover:bg-[#2d2d2d] hover:text-white cursor-pointer w-full"
-            style={{ paddingLeft: `${indent + 20}px` }}
-          >
-            {icon}
-            <span className="font-mono text-[11px] truncate">{entry.name}</span>
-          </button>
-        )
+        if (tabId === 'inspector') {
+          return <InspectorWidget />
+        }
+
+        if (tabId === 'README.md') {
+          return (
+            <div className="h-full w-full bg-[#1e1e1e] overflow-auto p-6 text-zinc-300 select-text font-sans">
+              <h1 className="text-lg font-black text-white mb-3 flex items-center gap-2">
+                <span>my-zeugma-app</span>
+              </h1>
+              <p className="text-xs text-zinc-400 mb-6 leading-relaxed">
+                A workspace layout demo built with{' '}
+                <code className="bg-zinc-800 text-indigo-300 px-1 py-0.5 rounded text-[10px]">
+                  react-zeugma
+                </code>{' '}
+                + Vite + React 19. Explore the drag-and-drop split layout engine interactively.
+              </p>
+              <div className="space-y-4">
+                {[
+                  {
+                    color: 'text-indigo-400',
+                    label: '1. Drag & Split',
+                    desc: 'Drag tabs (like App.tsx or WorkspacePane.tsx) toward the edge of another pane to split the view. Tabs reorder inline via sortable drag, and detach into floating overlays when pulled far enough — just like browser tabs.',
+                  },
+                  {
+                    color: 'text-emerald-400',
+                    label: '2. File Explorer',
+                    desc: 'Click any file in the sidebar to open it as a tab. The project uses a standard Vite + React structure with src/, components/, and styles/ directories.',
+                  },
+                  {
+                    color: 'text-violet-400',
+                    label: '3. Layout Inspector',
+                    desc: 'Switch to the Layout Inspector tab in the terminal pane to see the serialized JSON tree update live as you drag, resize, or reorder.',
+                  },
+                ].map(({ color, label, desc }) => (
+                  <div
+                    key={label}
+                    className="bg-[#252526] p-4 rounded-xl border border-zinc-800/80"
+                  >
+                    <span
+                      className={`text-[10px] uppercase font-bold tracking-wider ${color} block mb-1`}
+                    >
+                      {label}
+                    </span>
+                    <p className="text-[11px] text-zinc-400 leading-normal">{desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )
+        }
+
+        const file = FILES[tabId]
+        if (file?.tokens) {
+          return <SyntaxCode tokens={file.tokens} language={file.language} />
+        }
+
+        return null
       }
 
-      return (
-        <div className="h-full w-full bg-[#252526] py-3 flex flex-col gap-1 text-xs font-semibold text-[#cccccc] overflow-y-auto">
-          <div className="flex items-center gap-1.5 uppercase tracking-wider text-[9px] text-[#858585] font-black select-none px-4 pb-2">
-            <ChevronDown className="w-3.5 h-3.5" />
-            <span>MY-ZEUGMA-APP</span>
-          </div>
-          <div className="flex flex-col">{FILE_TREE.map((entry) => renderTreeNode(entry, 0))}</div>
-        </div>
-      )
-    }
-
-    if (tabId === 'terminal') {
-      return (
-        <div className="h-full w-full bg-[#1e1e1e] overflow-auto p-4 font-mono text-[11px] leading-relaxed text-[#858585] select-text">
-          <div className="flex justify-between items-center pb-2 border-b border-[#2d2d30] mb-3 text-zinc-500">
-            <span>bash (npm run dev)</span>
-            <span>~/my-zeugma-app</span>
-          </div>
-          <div className="text-[#abb2bf]">
-            <span className="text-emerald-400">user@dev:~/my-zeugma-app$</span> npm run dev
-            <br />
-            <span className="text-[#5c6370]">{`> my-zeugma-app@0.1.0 dev`}</span>
-            <br />
-            <span className="text-[#5c6370]">{`> vite`}</span>
-            <br />
-            <br />
-            <span className="text-cyan-400">{'  VITE v5.1.4  ready in 184 ms'}</span>
-            <br />
-            <br />
-            {'  ➜  '}Local:{' '}
-            <span className="text-indigo-400 underline cursor-pointer">http://localhost:5173/</span>
-            <br />
-            {'  ➜  '}Network: use --host to expose
-            <br />
-            <br />
-            <span className="text-zinc-600 animate-pulse">▋</span>
-          </div>
-        </div>
-      )
-    }
-
-    if (tabId === 'inspector') {
-      return <InspectorWidget />
-    }
-
-    if (tabId === 'README.md') {
-      return (
-        <div className="h-full w-full bg-[#1e1e1e] overflow-auto p-6 text-zinc-300 select-text font-sans">
-          <h1 className="text-lg font-black text-white mb-3 flex items-center gap-2">
-            <span>my-zeugma-app</span>
-          </h1>
-          <p className="text-xs text-zinc-400 mb-6 leading-relaxed">
-            A workspace layout demo built with{' '}
-            <code className="bg-zinc-800 text-indigo-300 px-1 py-0.5 rounded text-[10px]">
-              react-zeugma
-            </code>{' '}
-            + Vite + React 19. Explore the drag-and-drop split layout engine interactively.
-          </p>
-          <div className="space-y-4">
-            {[
-              {
-                color: 'text-indigo-400',
-                label: '1. Drag & Split',
-                desc: 'Drag tabs (like App.tsx or WorkspacePane.tsx) toward the edge of another pane to split the view. Tabs reorder inline via sortable drag, and detach into floating overlays when pulled far enough — just like browser tabs.',
-              },
-              {
-                color: 'text-emerald-400',
-                label: '2. File Explorer',
-                desc: 'Click any file in the sidebar to open it as a tab. The project uses a standard Vite + React structure with src/, components/, and styles/ directories.',
-              },
-              {
-                color: 'text-violet-400',
-                label: '3. Layout Inspector',
-                desc: 'Switch to the Layout Inspector tab in the terminal pane to see the serialized JSON tree update live as you drag, resize, or reorder.',
-              },
-            ].map(({ color, label, desc }) => (
-              <div key={label} className="bg-[#252526] p-4 rounded-xl border border-zinc-800/80">
-                <span
-                  className={`text-[10px] uppercase font-bold tracking-wider ${color} block mb-1`}
-                >
-                  {label}
-                </span>
-                <p className="text-[11px] text-zinc-400 leading-normal">{desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )
-    }
-
-    const file = FILES[tabId]
-    if (file?.tokens) {
-      return <SyntaxCode tokens={file.tokens} language={file.language} />
-    }
-
-    return null
-  }, [])
+      return <TabContentWrapper tabId={tabId}>{getContent()}</TabContentWrapper>
+    },
+    [stableHandleOpenFile],
+  )
 
   // ── Drag overlay ────────────────────────────────────────────────────────────
   const renderDragOverlay = useCallback((id: string) => {

@@ -110,18 +110,20 @@ export function SyntaxCode({ tokens }: { tokens: Token[]; language: string }) {
   }, [tokens])
 
   return (
-    <div className="h-full w-full bg-[#1e1e1e] flex font-mono text-[12px] leading-[22px] text-[#abb2bf] select-text">
-      {/* Gutter */}
-      <div className="py-4 pr-3 pl-4 bg-[#1e1e1e] border-r border-[#2d2d30] text-right text-[#4e5066] select-none min-w-[44px] shrink-0">
-        {Array.from({ length: lines }, (_, i) => (
-          <div key={i}>{i + 1}</div>
-        ))}
+    <div className="h-full w-full bg-[#1e1e1e] overflow-y-auto scrollbar-none select-text">
+      <div className="flex font-mono text-[12px] leading-[22px] text-[#abb2bf] min-h-full">
+        {/* Gutter */}
+        <div className="py-4 pr-3 pl-4 bg-[#1e1e1e] border-r border-[#2d2d30] text-right text-[#4e5066] select-none min-w-[44px] shrink-0">
+          {Array.from({ length: lines }, (_, i) => (
+            <div key={i}>{i + 1}</div>
+          ))}
+        </div>
+        {/* Code */}
+        <div
+          className="p-4 flex-1 whitespace-pre overflow-x-auto selection:bg-indigo-500/30"
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
       </div>
-      {/* Code */}
-      <div
-        className="p-4 flex-1 whitespace-pre overflow-auto selection:bg-indigo-500/30"
-        dangerouslySetInnerHTML={{ __html: html }}
-      />
     </div>
   )
 }

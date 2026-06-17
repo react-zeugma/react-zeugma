@@ -152,6 +152,8 @@ export interface ZeugmaInternalController extends ZeugmaController {
   setDismissIntentId: Dispatch<SetStateAction<string | null>>
   containerRef: RefObject<HTMLElement | null>
   setContainerRef: (element: HTMLElement | null) => void
+  layoutBeforeDrag: TreeNode | null
+  setLayoutBeforeDrag: Dispatch<SetStateAction<TreeNode | null>>
 
   // Configuration settings (resolved/defaulted)
   dragActivationDistance: number

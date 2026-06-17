@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { renderHook } from '@testing-library/react'
 import { useZeugmaDnd } from './useZeugmaDnd'
-import type { ZeugmaInternalController } from '../../../shared'
+import type { ZeugmaInternalController, TreeNode } from '../../../shared'
 import * as dndKitCore from '@dnd-kit/core'
 
 vi.mock('@dnd-kit/core', async (importOriginal) => {
@@ -21,6 +21,8 @@ describe('useZeugmaDnd Hook', () => {
       activeTabId: 'tab-1',
     },
     setLayout: vi.fn(),
+    layoutBeforeDrag: null,
+    setLayoutBeforeDrag: vi.fn(),
     activeId: null,
     setActiveId: vi.fn(),
     activeType: null,
@@ -162,11 +164,86 @@ describe('useZeugmaDnd Hook', () => {
 
     handleDragEnd(tabDragEndEvent)
 
-    // Verify moveTab IS called
-    expect(controller.moveTab).toHaveBeenCalledWith('tab-1', 'tab-2', 'before')
+    // Verify setLayout IS called with the expected layout
+    expect(controller.setLayout).toHaveBeenCalledWith({
+      type: 'pane',
+      id: 'pane-1',
+      tabs: ['tab-1', 'tab-2'],
+      activeTabId: 'tab-1',
+      tabsMetadata: undefined,
+    })
     expect(onDragEndMock).toHaveBeenCalledWith('tab-1', 'tab-2', {
       type: 'move',
       position: 'center',
     })
+  })
+
+  it('should remove the dragged tab/pane on drag start, and restore it on cancel or invalid drop', () => {
+    const controller = mockController()
+    const setOverTabId = vi.fn()
+    const setOverTabPosition = vi.fn()
+
+    const hookInstance = renderHook(() =>
+      useZeugmaDnd({
+        ...controller,
+        setOverTabId,
+        setOverTabPosition,
+      }),
+    )
+
+    // 1. Start drag for tab-1
+    const dragStartEvent = {
+      active: { id: 'tab-header-tab-1' },
+      activatorEvent: new MouseEvent('mousedown'),
+    } as unknown as dndKitCore.DragStartEvent
+
+    hookInstance.result.current.onDragStart(dragStartEvent)
+
+    // Verify setLayoutBeforeDrag was called with original layout
+    expect(controller.setLayoutBeforeDrag).toHaveBeenCalledWith(controller.layout)
+    // Verify setLayout was called with layout without tab-1
+    expect(controller.setLayout).toHaveBeenCalledWith({
+      type: 'pane',
+      id: 'pane-1',
+      tabs: ['tab-2'],
+      activeTabId: 'tab-2',
+      tabsMetadata: undefined,
+    })
+
+    // Update mocked controller state as if setLayout worked (layoutBeforeDrag has layout, layout has newLayout)
+    const newLayout: TreeNode = {
+      type: 'pane',
+      id: 'pane-1',
+      tabs: ['tab-2'],
+      activeTabId: 'tab-2',
+    }
+    const controllerWithDragState = {
+      ...controller,
+      layout: newLayout,
+      layoutBeforeDrag: controller.layout,
+    }
+
+    const hookWithDragState = renderHook(() =>
+      useZeugmaDnd({
+        ...controllerWithDragState,
+        setOverTabId,
+        setOverTabPosition,
+      }),
+    )
+
+    // 2. Drag cancel should restore layout
+    hookWithDragState.result.current.onDragCancel()
+    expect(controllerWithDragState.setLayout).toHaveBeenCalledWith(controller.layout)
+    expect(controllerWithDragState.setLayoutBeforeDrag).toHaveBeenCalledWith(null)
+
+    // 3. Invalid drop (no over target) should restore layout
+    const dragEndEventNoOver = {
+      active: { id: 'tab-header-tab-1' },
+      over: null,
+    } as unknown as dndKitCore.DragEndEvent
+
+    hookWithDragState.result.current.onDragEnd(dragEndEventNoOver)
+    expect(controllerWithDragState.setLayout).toHaveBeenCalledWith(controller.layout)
+    expect(controllerWithDragState.setLayoutBeforeDrag).toHaveBeenCalledWith(null)
   })
 })

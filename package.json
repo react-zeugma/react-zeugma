@@ -9,6 +9,7 @@
   "scripts": {
     "dev:lib": "npm run dev --workspace=react-zeugma",
     "dev:homepage": "npm run dev --workspace=homepage",
+    "preview:homepage": "npm run preview --workspace=homepage",
     "build:lib": "npm run build --workspace=react-zeugma",
     "build:homepage": "npm run build --workspace=homepage",
     "lint:lib": "npm run lint --workspace=react-zeugma",

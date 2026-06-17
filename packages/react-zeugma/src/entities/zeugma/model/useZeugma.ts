@@ -58,6 +58,7 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
     controlledFullscreenPaneId || null,
   )
   const [locked, setLocked] = useState(initialLocked)
+  const [layoutBeforeDrag, setLayoutBeforeDrag] = useState<TreeNode | null>(null)
 
   const [activeId, setActiveId] = useState<string | null>(null)
   const [activeType, setActiveType] = useState<'pane' | 'tab' | null>(null)
@@ -268,6 +269,8 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
   return {
     layout,
     setLayout,
+    layoutBeforeDrag,
+    setLayoutBeforeDrag,
     fullscreenPaneId,
     setFullscreenPaneId,
     locked,

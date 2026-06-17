@@ -38,6 +38,7 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
     activeType,
     dismissIntentId,
     setContainerRef,
+    layoutBeforeDrag,
 
     // Configuration settings
     snapThreshold,
@@ -212,9 +213,9 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
         traverse(node.second)
       }
     }
-    traverse(layout)
+    traverse(activeId ? layoutBeforeDrag : layout)
     return ids
-  }, [layout])
+  }, [layout, activeId, layoutBeforeDrag])
 
   const portalRegistryValue = useMemo(
     () => ({

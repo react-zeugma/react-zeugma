@@ -48,7 +48,7 @@ export const Tab: React.FC<TabProps> = ({ id, locked = false, children, classNam
     classNames = {},
     activeType,
   } = useZeugmaState() as ZeugmaInternalStateValue
-  const { overTabId, overTabPosition } = useZeugmaDrag()
+  const { overTabId } = useZeugmaDrag()
 
   const tabsContext = useContext(TabsContext)
   const isLocked = locked || globalLocked || (tabsContext?.locked ?? false)
@@ -74,18 +74,6 @@ export const Tab: React.FC<TabProps> = ({ id, locked = false, children, classNam
   }
 
   const isTargetOver = isOver && overTabId === id
-  const dropPosition = isTargetOver ? overTabPosition : null
-
-  const dropIndicator =
-    isTargetOver && dropPosition ? (
-      <div
-        className={classNames.tabDropPreview}
-        style={{
-          left: dropPosition === 'before' ? 0 : undefined,
-          right: dropPosition === 'after' ? 0 : undefined,
-        }}
-      />
-    ) : null
 
   const tabs = tabsContext?.tabs || []
   const index = tabs.indexOf(id)
@@ -139,7 +127,6 @@ export const Tab: React.FC<TabProps> = ({ id, locked = false, children, classNam
           isDragging,
           isOver: isTargetOver,
         })}
-        {dropIndicator}
       </div>
     </TabContext.Provider>
   )

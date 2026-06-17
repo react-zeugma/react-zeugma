@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useMemo } from 'react'
 import { Tab } from './Tab'
+import { useZeugmaState, useZeugmaDrag } from '../../../shared'
+import { calculateTabDropIndex } from '../../../shared/lib/tree'
 
 export interface TabsContextValue {
   tabs: string[]
@@ -73,6 +75,9 @@ export const Tabs: React.FC<TabsProps> = ({
   classNames,
   styles,
 }) => {
+  const { classNames: globalClassNames = {}, activeType } = useZeugmaState()
+  const { overTabId, overTabPosition } = useZeugmaDrag()
+
   const contextValue = useMemo<TabsContextValue>(
     () => ({
       tabs,
@@ -85,6 +90,8 @@ export const Tabs: React.FC<TabsProps> = ({
     [tabs, activeTabId, locked, tabsMetadata, selectTab, removeTab],
   )
 
+  const targetIndex = calculateTabDropIndex(tabs, activeType, overTabId, overTabPosition)
+
   return (
     <TabsContext.Provider value={contextValue}>
       <div
@@ -96,33 +103,58 @@ export const Tabs: React.FC<TabsProps> = ({
           ...styles?.container,
         }}
       >
-        {tabs.map((tabId) => {
+        {tabs.map((tabId, index) => {
           const metadata = tabsMetadata?.[tabId]
           const resolvedClassName = resolveDynamicProp(classNames?.tab, tabId)
           const resolvedStyle = resolveDynamicProp(styles?.tab, tabId)
 
+          const showPreviewHere = index === targetIndex
+
           return (
-            <Tab
-              key={tabId}
-              id={tabId}
-              locked={locked}
-              className={resolvedClassName}
-              style={resolvedStyle}
-            >
-              {({ isDragging, isOver }) =>
-                renderTab({
-                  tabId,
-                  activeTabId,
-                  isDragging,
-                  isOver,
-                  metadata,
-                  selectTab,
-                  removeTab,
-                })
-              }
-            </Tab>
+            <React.Fragment key={tabId}>
+              {showPreviewHere && globalClassNames.tabDropPreview && (
+                <div style={{ position: 'relative', height: '100%', width: 0, zIndex: 10 }}>
+                  <div
+                    className={globalClassNames.tabDropPreview}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      bottom: 0,
+                      transform: index === 0 ? 'none' : 'translateX(-50%)',
+                    }}
+                  />
+                </div>
+              )}
+              <Tab id={tabId} locked={locked} className={resolvedClassName} style={resolvedStyle}>
+                {({ isDragging, isOver }) =>
+                  renderTab({
+                    tabId,
+                    activeTabId,
+                    isDragging,
+                    isOver,
+                    metadata,
+                    selectTab,
+                    removeTab,
+                  })
+                }
+              </Tab>
+            </React.Fragment>
           )
         })}
+
+        {targetIndex === tabs.length && globalClassNames.tabDropPreview && (
+          <div style={{ position: 'relative', height: '100%', width: 0, zIndex: 10 }}>
+            <div
+              className={globalClassNames.tabDropPreview}
+              style={{
+                position: 'absolute',
+                top: 0,
+                bottom: 0,
+                transform: 'translateX(-100%)',
+              }}
+            />
+          </div>
+        )}
       </div>
     </TabsContext.Provider>
   )

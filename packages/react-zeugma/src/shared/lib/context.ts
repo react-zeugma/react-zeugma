@@ -1,13 +1,12 @@
 import { createContext, useContext } from 'react'
 import {
   ZeugmaStateValue,
-  ZeugmaInternalStateValue,
   ZeugmaActionsValue,
   PortalRegistryValue,
   ZeugmaDragStateValue,
 } from '../model/types'
 
-export const ZeugmaStateContext = createContext<ZeugmaInternalStateValue | undefined>(undefined)
+export const ZeugmaStateContext = createContext<ZeugmaStateValue | undefined>(undefined)
 export const ZeugmaActionsContext = createContext<ZeugmaActionsValue | undefined>(undefined)
 export const PortalRegistryContext = createContext<PortalRegistryValue | undefined>(undefined)
 export const ZeugmaDragContext = createContext<ZeugmaDragStateValue | undefined>(undefined)

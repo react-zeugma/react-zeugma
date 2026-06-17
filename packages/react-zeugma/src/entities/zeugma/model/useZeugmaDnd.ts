@@ -10,7 +10,7 @@ import {
   CollisionDetection,
   DroppableContainer,
 } from '@dnd-kit/core'
-import { SplitDirection, PaneNode, ZeugmaInternalController } from '../../../shared'
+import { SplitDirection, PaneNode, ZeugmaController } from '../../../shared'
 import {
   removePane as removePaneHelper,
   removeTab as removeTabHelper,
@@ -18,6 +18,8 @@ import {
   findPaneById,
   findPaneContainingTab,
   generateUniqueId,
+  moveTab as moveTabHelper,
+  selectTab as selectTabHelper,
 } from '../../../shared/lib/tree'
 import { SmartPointerSensor, SmartTouchSensor } from '../lib/sensors'
 import { useLatestPointer, useBodyCursorOverride } from './hooks'
@@ -35,7 +37,7 @@ function getPointerCoordinates(event: Event): { x: number; y: number } | null {
   return null
 }
 
-interface UseZeugmaDndProps extends ZeugmaInternalController {
+interface UseZeugmaDndProps extends ZeugmaController {
   setOverTabId: Dispatch<SetStateAction<string | null>>
   setOverTabPosition: Dispatch<SetStateAction<'before' | 'after' | null>>
 }
@@ -44,6 +46,8 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
   const {
     layout,
     setLayout,
+    layoutBeforeDrag,
+    setLayoutBeforeDrag,
     activeId,
     setActiveId,
     setActiveType,
@@ -66,8 +70,6 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
 
     // Actions
     removeTab,
-    moveTab,
-    selectTab,
   } = props
 
   const containerRectRef = useRef<DOMRect | null>(null)
@@ -124,12 +126,20 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
       containerRectRef.current = null
     }
 
+    let layoutAfterSelect = layout
     if (isTabDrag) {
       const parentPane = findPaneContainingTab(layout, draggingId)
       if (parentPane) {
-        selectTab(parentPane.id, draggingId)
+        layoutAfterSelect = selectTabHelper(layout, parentPane.id, draggingId) || layout
       }
     }
+
+    setLayoutBeforeDrag(layoutAfterSelect)
+
+    const newLayout = isTabDrag
+      ? removeTabHelper(layoutAfterSelect, draggingId)
+      : removePaneHelper(layoutAfterSelect, draggingId)
+    setLayout(newLayout)
 
     if (onDragStart) {
       onDragStart(draggingId)
@@ -283,6 +293,10 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
     onDismissIntentChange?.(null)
     containerRectRef.current = null
 
+    // Capture the original layout before drag
+    const originalLayout = layoutBeforeDrag || layout
+    setLayoutBeforeDrag(null)
+
     if (wasDismissIntent) {
       if (onRemove) {
         onRemove(draggingId)
@@ -297,6 +311,7 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
     }
 
     if (!over) {
+      setLayout(originalLayout)
       if (onDragEnd) {
         onDragEnd(draggingId, null, null)
       }
@@ -306,6 +321,7 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
     const overIdStr = over.id.toString()
 
     if (overIdStr.startsWith('drop-locked-')) {
+      setLayout(originalLayout)
       if (onDragEnd) {
         onDragEnd(draggingId, null, null)
       }
@@ -316,6 +332,7 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
     const tabDropMatch = overIdStr.match(/^tab-drop-(.+)$/)
     if (tabDropMatch) {
       if (!isTabDrag) {
+        setLayout(originalLayout)
         if (onDragEnd) {
           onDragEnd(draggingId, null, null)
         }
@@ -343,11 +360,13 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
           }
         }
 
-        moveTab(draggingId, targetTabId, position)
+        const newLayout = moveTabHelper(originalLayout, draggingId, targetTabId, position)
+        setLayout(newLayout)
         if (onDragEnd) {
           onDragEnd(draggingId, targetTabId, { type: 'move', position: 'center' })
         }
       } else {
+        setLayout(originalLayout)
         if (onDragEnd) {
           onDragEnd(draggingId, null, null)
         }
@@ -358,6 +377,7 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
     // Check for edge (split) drop
     const match = overIdStr.match(/^drop-(left|right|top|bottom)-(.+)$/)
     if (!match) {
+      setLayout(originalLayout)
       if (onDragEnd) {
         onDragEnd(draggingId, null, null)
       }
@@ -366,12 +386,13 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
 
     const [, dropZone, targetId] = match
     const parentPane = isTabDrag
-      ? findPaneContainingTab(layout, draggingId)
-      : findPaneById(layout, draggingId)
+      ? findPaneContainingTab(originalLayout, draggingId)
+      : findPaneById(originalLayout, draggingId)
     const isParentTarget = parentPane && parentPane.id === targetId
     const isOnlyTab = parentPane && parentPane.tabs.length === 1
 
     if (draggingId === targetId || (isParentTarget && isOnlyTab)) {
+      setLayout(originalLayout)
       if (onDragEnd) {
         onDragEnd(draggingId, null, null)
       }
@@ -382,7 +403,7 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
 
     let draggedPaneNode: PaneNode
     if (isTabDrag) {
-      const originalPane = findPaneContainingTab(layout, draggingId)
+      const originalPane = findPaneContainingTab(originalLayout, draggingId)
       const sourceMetadata = originalPane?.tabsMetadata?.[draggingId]
       draggedPaneNode = {
         type: 'pane',
@@ -392,7 +413,7 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
         tabsMetadata: sourceMetadata ? { [draggingId]: sourceMetadata } : undefined,
       }
     } else {
-      draggedPaneNode = findPaneById(layout, draggingId) ?? {
+      draggedPaneNode = findPaneById(originalLayout, draggingId) ?? {
         type: 'pane',
         id: generateUniqueId(),
         tabs: [draggingId],
@@ -400,12 +421,9 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
       }
     }
 
-    const treeWithoutDragging = isTabDrag
-      ? removeTabHelper(layout, draggingId)
-      : removePaneHelper(layout, draggingId)
-
+    // Since the item was already removed from layout on drag start, we split the current layout (which has the dragged item removed)
     const newLayout = splitPaneHelper(
-      treeWithoutDragging,
+      layout,
       targetId,
       direction,
       dropZone as 'left' | 'right' | 'top' | 'bottom',
@@ -430,6 +448,11 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
     setDismissIntentId(null)
     onDismissIntentChange?.(null)
     containerRectRef.current = null
+
+    if (layoutBeforeDrag !== null) {
+      setLayout(layoutBeforeDrag)
+      setLayoutBeforeDrag(null)
+    }
   }
 
   return {

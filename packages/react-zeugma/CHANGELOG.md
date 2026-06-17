@@ -1,5 +1,21 @@
 # react-zeugma
 
+## 6.0.0
+
+### Major Changes
+
+- **Tab Detachment & Live Layout Estimation during Drag**:
+  - The active dragged pane or tab is now immediately detached (removed) from the runtime `layout` tree when dragging starts, providing a live, accurate visual estimation of the final layout structure.
+  - Introduced the `layoutBeforeDrag` and `setLayoutBeforeDrag` properties to the public `ZeugmaController` interface and `useZeugma` hook to track the pre-drag layout state.
+  - Leveraged `layoutBeforeDrag` to preserve portal-based widget mount states (preventing unmounting during drag) and to safely restore the layout if the drag is canceled or dropped on invalid target zones.
+  - Consolidated internal types: removed `ZeugmaInternalController` and `ZeugmaInternalStateValue` in favor of unified public interfaces.
+- **Refactored Tab Drop Preview Indicator**:
+  - Moved tab drop preview rendering from individual `<Tab>` elements into the parent `<Tabs>` container.
+  - Tab drop previews are now dynamically rendered at the calculated insertion index exactly between adjacent tabs (or at list boundaries) using a zero-width flex placeholder container, avoiding layout shifting or overlap.
+  - Introduced `calculateTabDropIndex` utility helper exported from `react-zeugma/utils`.
+- **Expanded Pane Splitting Activation Zones**:
+  - Readjusted the interactive split-preview activation overlays within `<Pane>` to cover the entire container (100% width for top/bottom, 50% width for left/right), removing dead zones and making pane splitting gestures highly responsive.
+
 ## 5.7.1
 
 ### Patch Changes

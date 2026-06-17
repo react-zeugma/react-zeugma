@@ -1,11 +1,6 @@
 import React, { useMemo, useCallback, useEffect, useContext, useRef } from 'react'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
-import {
-  useZeugmaState,
-  useZeugmaActions,
-  PortalRegistryContext,
-  ZeugmaInternalStateValue,
-} from '../../../shared'
+import { useZeugmaState, useZeugmaActions, PortalRegistryContext } from '../../../shared'
 import { DragListenersCtx } from '../model/context'
 import { PaneRenderProps } from '../model/types'
 import { findPaneById } from '../../../shared/lib/tree'
@@ -20,8 +15,8 @@ const activationPositions: Record<string, React.CSSProperties> = {
   top: {
     position: 'absolute',
     top: 0,
-    left: '25%',
-    width: '50%',
+    left: 0,
+    width: '100%',
     height: '25%',
     zIndex: 20,
     pointerEvents: 'auto',
@@ -29,8 +24,8 @@ const activationPositions: Record<string, React.CSSProperties> = {
   bottom: {
     position: 'absolute',
     bottom: 0,
-    left: '25%',
-    width: '50%',
+    left: 0,
+    width: '100%',
     height: '25%',
     zIndex: 20,
     pointerEvents: 'auto',
@@ -39,7 +34,7 @@ const activationPositions: Record<string, React.CSSProperties> = {
     position: 'absolute',
     top: '25%',
     left: 0,
-    width: '25%',
+    width: '50%',
     height: '50%',
     zIndex: 20,
     pointerEvents: 'auto',
@@ -48,7 +43,7 @@ const activationPositions: Record<string, React.CSSProperties> = {
     position: 'absolute',
     top: '25%',
     right: 0,
-    width: '25%',
+    width: '50%',
     height: '50%',
     zIndex: 20,
     pointerEvents: 'auto',
@@ -148,7 +143,7 @@ export const Pane: React.FC<PaneProps> = ({ id, children, style, locked: propLoc
     fullscreenPaneId,
     onFullscreenChange,
     locked: globalLocked,
-  } = useZeugmaState() as ZeugmaInternalStateValue
+  } = useZeugmaState()
   const { removePane, updateTabMetadata, selectTab, removeTab } = useZeugmaActions()
   const portalRegistry = useContext(PortalRegistryContext)
   if (!portalRegistry) {

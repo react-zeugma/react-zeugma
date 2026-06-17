@@ -9,14 +9,13 @@ import {
   ZeugmaDragContext,
   ZeugmaDragStateValue,
   ZeugmaProps,
-  ZeugmaInternalController,
 } from '../../../shared'
 import { usePortalRegistry, useZeugmaDnd } from '../model'
 import { CursorOverlay } from './CursorOverlay'
 import { PortalHostItem } from './PortalHostItem'
 
 export const Zeugma: React.FC<ZeugmaProps> = (props) => {
-  const internalProps = props as unknown as ZeugmaInternalController & ZeugmaProps
+  const internalProps = props
   const {
     renderPane,
     renderWidget,
@@ -38,6 +37,7 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
     activeType,
     dismissIntentId,
     setContainerRef,
+    layoutBeforeDrag,
 
     // Configuration settings
     snapThreshold,
@@ -202,19 +202,24 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
 
   // Collect all tab IDs in the current layout tree
   const allTabIds = useMemo(() => {
-    const ids: string[] = []
+    const ids = new Set<string>()
     function traverse(node: TreeNode | null) {
       if (!node) return
       if (node.type === 'pane') {
-        ids.push(...node.tabs)
+        node.tabs.forEach((tabId) => {
+          ids.add(tabId)
+        })
       } else {
         traverse(node.first)
         traverse(node.second)
       }
     }
     traverse(layout)
-    return ids
-  }, [layout])
+    if (layoutBeforeDrag) {
+      traverse(layoutBeforeDrag)
+    }
+    return Array.from(ids).sort()
+  }, [layout, activeId, layoutBeforeDrag])
 
   const portalRegistryValue = useMemo(
     () => ({

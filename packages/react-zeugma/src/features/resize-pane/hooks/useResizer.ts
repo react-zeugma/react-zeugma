@@ -1,11 +1,5 @@
 import React, { useCallback } from 'react'
-import {
-  TreeNode,
-  SplitNode,
-  SplitDirection,
-  useZeugmaState,
-  ZeugmaInternalStateValue,
-} from '../../../shared'
+import { TreeNode, SplitNode, SplitDirection, useZeugmaState } from '../../../shared'
 import { updateSplitPercentage, computeLayout } from '../../../shared/lib/tree'
 import { createDragSession } from '../../../shared/lib/drag-session'
 
@@ -51,7 +45,7 @@ export function useResizer({
     minSplitPercentage = 5,
     maxSplitPercentage = 95,
     locked = false,
-  } = useZeugmaState() as ZeugmaInternalStateValue
+  } = useZeugmaState()
 
   return useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {

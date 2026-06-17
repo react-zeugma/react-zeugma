@@ -498,7 +498,7 @@ export function ZeugmaDemoIDE({
         <div className="flex-1 flex justify-center">
           <div className="bg-[#1e1e1e] border border-[#3a3a3a] rounded-md px-4 py-0.5 flex items-center gap-2 text-[11px] font-mono text-[#858585] min-w-[220px] justify-center select-none">
             <Code className="w-3 h-3 text-indigo-400" />
-            <span>my-zeugma-app — VS Code</span>
+            <span>my-zeugma-app — Zeugma Code</span>
           </div>
         </div>
         <div className="w-16" />

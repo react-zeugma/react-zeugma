@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Boxes, MousePointer2, Focus, Layout, ArrowRight, Copy, Check } from 'lucide-react'
 import { useScrollAnchor } from '../lib/use-scroll-anchor'
 import dynamic from 'next/dynamic'
@@ -43,6 +44,7 @@ const FEATURES = [
 
 export function Home() {
   const [copied, setCopied] = useState(false)
+  const router = useRouter()
 
   const handleCopy = () => {
     navigator.clipboard.writeText('npm i react-zeugma')
@@ -166,14 +168,14 @@ export function Home() {
             react-zeugma, running an app preview that also implements its own independent
             react-zeugma workspace.
           </p>
-          <Link
-            href="/demo"
+          <div
+            onClick={() => router.push('/demo')}
             className="block text-left rounded-2xl transition-all duration-500 hover:scale-[1.01] shadow-[0_50px_120px_-20px_rgba(99,102,241,0.15),0_30px_100px_-10px_rgba(0,0,0,0.95)] hover:shadow-[0_60px_150px_-10px_rgba(99,102,241,0.25),0_40px_120px_-5px_rgba(0,0,0,0.98)] cursor-pointer overflow-hidden"
           >
             <div className="pointer-events-none">
               <ZeugmaDemoIDE />
             </div>
-          </Link>
+          </div>
           <div className="mt-8 flex justify-center">
             <Link
               href="/demo"

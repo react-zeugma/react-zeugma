@@ -10,7 +10,7 @@ import {
   CollisionDetection,
   DroppableContainer,
 } from '@dnd-kit/core'
-import { SplitDirection, PaneNode, ZeugmaController } from '../../../shared'
+import { SplitDirection, PaneNode, TreeNode, ZeugmaController } from '../../../shared'
 import {
   removePane as removePaneHelper,
   removeTab as removeTabHelper,
@@ -97,7 +97,27 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
       ? pointerCollisions
       : pointerCollisions.filter((collision) => !collision.id.toString().startsWith('tab-drop-'))
 
-    if (filteredCollisions.length > 0) return filteredCollisions
+    if (filteredCollisions.length > 0) {
+      const sortedCollisions = [...filteredCollisions].sort((a, b) => {
+        const aId = a.id.toString()
+        const bId = b.id.toString()
+
+        if (isTabDrag) {
+          const aIsTab = aId.startsWith('tab-drop-')
+          const bIsTab = bId.startsWith('tab-drop-')
+          if (aIsTab && !bIsTab) return -1
+          if (!aIsTab && bIsTab) return 1
+        }
+
+        const aIsRoot = aId.startsWith('drop-root-')
+        const bIsRoot = bId.startsWith('drop-root-')
+        if (aIsRoot && !bIsRoot) return -1
+        if (!aIsRoot && bIsRoot) return 1
+
+        return 0
+      })
+      return sortedCollisions
+    }
 
     if (isTabDrag) {
       const tabDroppables = args.droppableContainers.filter((container: DroppableContainer) =>
@@ -368,6 +388,68 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
         if (onDragEnd) {
           onDragEnd(draggingId, null, null)
         }
+      }
+      return
+    }
+
+    // Check for root split drop
+    const rootMatch = overIdStr.match(/^drop-root-(1\/3|1\/2)-(top|bottom|left|right|start|end)$/)
+    if (rootMatch) {
+      const [, fraction, rawEdge] = rootMatch
+      let edge = rawEdge
+      if (edge === 'start') edge = 'left'
+      if (edge === 'end') edge = 'right'
+
+      const cleanLayout = isTabDrag
+        ? removeTabHelper(originalLayout, draggingId)
+        : removePaneHelper(originalLayout, draggingId)
+
+      let draggedPaneNode: PaneNode
+      if (isTabDrag) {
+        const originalPane = findPaneContainingTab(originalLayout, draggingId)
+        const sourceMetadata = originalPane?.tabsMetadata?.[draggingId]
+        draggedPaneNode = {
+          type: 'pane',
+          id: generateUniqueId(),
+          tabs: [draggingId],
+          activeTabId: draggingId,
+          tabsMetadata: sourceMetadata ? { [draggingId]: sourceMetadata } : undefined,
+        }
+      } else {
+        draggedPaneNode = findPaneById(originalLayout, draggingId) ?? {
+          type: 'pane',
+          id: generateUniqueId(),
+          tabs: [draggingId],
+          activeTabId: draggingId,
+        }
+      }
+
+      if (cleanLayout === null) {
+        setLayout(draggedPaneNode)
+      } else {
+        const isRow = edge === 'left' || edge === 'right'
+        const isFirst = edge === 'left' || edge === 'top'
+        let splitPercentage = 50
+        if (fraction === '1/3') {
+          splitPercentage = isFirst ? 100 / 3 : 200 / 3
+        }
+
+        const newLayout: TreeNode = {
+          type: 'split',
+          direction: isRow ? 'row' : 'column',
+          first: isFirst ? draggedPaneNode : cleanLayout,
+          second: isFirst ? cleanLayout : draggedPaneNode,
+          splitPercentage,
+        }
+        setLayout(newLayout)
+      }
+
+      if (onDragEnd) {
+        onDragEnd(draggingId, 'root', {
+          type: 'split',
+          direction: edge === 'left' || edge === 'right' ? 'row' : 'column',
+          position: edge as 'left' | 'right' | 'top' | 'bottom',
+        })
       }
       return
     }

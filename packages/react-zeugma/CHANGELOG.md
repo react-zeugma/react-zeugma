@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 6.0.4
+
+### Patch Changes
+
+- Support dropping dragging panes and tabs into root container boundaries.
+
 ## 6.0.3
 
 ### Patch Changes

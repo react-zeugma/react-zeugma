@@ -12,7 +12,8 @@ export function findActiveEditorPane(node: TreeNode | null): string | null {
     if (
       node.id !== 'pane-explorer' &&
       node.id !== 'pane-terminal' &&
-      node.id !== 'pane-performance'
+      node.id !== 'pane-performance' &&
+      node.id !== 'pane-inspector'
     )
       return node.id
     return null

@@ -94,7 +94,10 @@ export function ZeugmaDemoIDE({
     (paneId: string) => (
       <Pane id={paneId}>
         {(paneProps: PaneRenderProps) => {
-          const isSidebar = paneId === 'pane-explorer' || paneId === 'pane-performance'
+          const isSidebar =
+            paneId === 'pane-explorer' ||
+            paneId === 'pane-performance' ||
+            paneId === 'pane-inspector'
 
           return (
             <div className="h-full w-full flex flex-col bg-[#1e1e1e] border border-[#2d2d30] overflow-hidden shadow-2xl">

@@ -346,8 +346,13 @@ export const defaultOuterLayout: TreeNode = {
       first: {
         type: 'pane',
         id: 'pane-editor',
-        tabs: ['src/App.tsx', 'src/components/WorkspacePane.tsx', 'src/styles/App.css'],
-        activeTabId: 'src/App.tsx',
+        tabs: [
+          'README.md',
+          'src/App.tsx',
+          'src/components/WorkspacePane.tsx',
+          'src/styles/App.css',
+        ],
+        activeTabId: 'README.md',
       },
       second: {
         type: 'pane',

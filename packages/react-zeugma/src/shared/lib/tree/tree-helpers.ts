@@ -304,6 +304,7 @@ export function selectTab(tree: TreeNode | null, paneId: string, tabId: string):
   if (tree === null) return null
   if (tree.type === 'pane') {
     if (tree.id === paneId) {
+      if (tree.activeTabId === tabId) return tree
       return { ...tree, activeTabId: tabId }
     }
     return tree

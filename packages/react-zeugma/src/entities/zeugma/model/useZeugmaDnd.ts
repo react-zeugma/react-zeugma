@@ -135,6 +135,9 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
     }
 
     setLayoutBeforeDrag(layoutAfterSelect)
+    if (isTabDrag && layoutAfterSelect !== layout) {
+      setLayout(layoutAfterSelect)
+    }
 
     if (onDragStart) {
       onDragStart(draggingId)

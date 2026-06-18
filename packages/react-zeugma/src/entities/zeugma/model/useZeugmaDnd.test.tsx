@@ -241,4 +241,41 @@ describe('useZeugmaDnd Hook', () => {
     )
     expect(controllerWithDragState.setLayoutBeforeDrag).toHaveBeenCalledWith(null)
   })
+
+  it('should set an inactive tab as active on drag start', async () => {
+    const controller = mockController()
+    const setOverTabId = vi.fn()
+    const setOverTabPosition = vi.fn()
+
+    const hookInstance = renderHook(() =>
+      useZeugmaDnd({
+        ...controller,
+        setOverTabId,
+        setOverTabPosition,
+      }),
+    )
+
+    // Start drag for tab-2 (which is inactive, layout has activeTabId: 'tab-1')
+    const dragStartEvent = {
+      active: { id: 'tab-header-tab-2' },
+      activatorEvent: new MouseEvent('mousedown'),
+    } as unknown as dndKitCore.DragStartEvent
+
+    hookInstance.result.current.onDragStart(dragStartEvent)
+
+    // Verify setLayoutBeforeDrag was called with the selected layout (where tab-2 is active)
+    expect(controller.setLayoutBeforeDrag).toHaveBeenCalledWith({
+      type: 'pane',
+      id: 'pane-1',
+      tabs: ['tab-1', 'tab-2'],
+      activeTabId: 'tab-2',
+    })
+    // Verify setLayout was called to set it active
+    expect(controller.setLayout).toHaveBeenCalledWith({
+      type: 'pane',
+      id: 'pane-1',
+      tabs: ['tab-1', 'tab-2'],
+      activeTabId: 'tab-2',
+    })
+  })
 })

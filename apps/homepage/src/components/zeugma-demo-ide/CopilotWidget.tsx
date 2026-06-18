@@ -1,7 +1,20 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Send, Trash2, Bot, Sparkles, User, HelpCircle, Code } from 'lucide-react'
+import {
+  Trash2,
+  Bot,
+  Sparkles,
+  User,
+  HelpCircle,
+  Code,
+  Plus,
+  CircleSlash,
+  Settings2,
+  ArrowUp,
+  Laptop,
+  Shield,
+} from 'lucide-react'
 import { useZeugmaState } from 'react-zeugma'
 
 interface Message {
@@ -295,7 +308,7 @@ export function CopilotWidget() {
             e.preventDefault()
             handleSend(inputValue)
           }}
-          className="flex flex-col bg-[#252526] border border-[#2d2d30] rounded-md p-2 gap-1.5 focus-within:border-indigo-500/50 transition-colors"
+          className="flex flex-col bg-[#252526] border border-[#2d2d30] rounded-md p-2 gap-1.5 focus-within:border-zinc-550 transition-colors"
         >
           <div className="flex items-center gap-2">
             <input
@@ -303,27 +316,67 @@ export function CopilotWidget() {
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               disabled={isTyping}
-              placeholder="Ask Copilot a question..."
+              placeholder="Describe what to build"
               className="flex-1 bg-transparent border-none outline-none text-[11px] text-zinc-200 placeholder-zinc-500 font-mono disabled:opacity-50"
             />
-            <button
-              type="submit"
-              disabled={!inputValue.trim() || isTyping}
-              className="text-zinc-500 hover:text-indigo-400 disabled:text-zinc-700 disabled:hover:text-zinc-700 transition-colors cursor-pointer disabled:cursor-not-allowed p-1 rounded hover:bg-zinc-800 disabled:hover:bg-transparent"
-            >
-              <Send className="w-3.5 h-3.5" />
-            </button>
           </div>
 
           <div className="flex items-center justify-between border-t border-[#2d2d30] pt-1.5 mt-0.5 text-[9px] text-zinc-500">
-            <div className="flex items-center gap-1.5 bg-[#1e1e1e] border border-[#3c3c3d] px-2 py-0.5 rounded cursor-pointer hover:bg-zinc-800 hover:text-zinc-300 transition-all font-mono select-none">
-              <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Zeugma AI 3.5</span>
-              <span className="text-[6px] text-zinc-500">▼</span>
+            <div className="flex items-center gap-1.5 text-zinc-450">
+              <button
+                type="button"
+                className="hover:text-zinc-300 p-0.5 rounded transition-colors cursor-pointer"
+                title="Add Context"
+              >
+                <Plus className="w-3.5 h-3.5" />
+              </button>
+              <span className="text-zinc-700 font-light">|</span>
+              <button
+                type="button"
+                className="hover:text-zinc-300 p-0.5 rounded transition-colors cursor-pointer"
+                title="Clear Context"
+              >
+                <CircleSlash className="w-3 h-3" />
+              </button>
+              <span className="text-zinc-700 font-light">|</span>
+
+              <div className="flex items-center gap-1 hover:text-zinc-300 cursor-pointer transition-colors py-0.5 px-1 rounded hover:bg-zinc-800 font-mono">
+                <span>Zeugma AI 3.5</span>
+                <span className="text-[6px]">▼</span>
+              </div>
+
+              <span className="text-zinc-700 font-light">|</span>
+              <button
+                type="button"
+                className="hover:text-zinc-300 p-0.5 rounded transition-colors cursor-pointer"
+                title="Settings"
+              >
+                <Settings2 className="w-3.5 h-3.5" />
+              </button>
             </div>
-            <span>Press Enter to send</span>
+
+            <button
+              type="submit"
+              disabled={!inputValue.trim() || isTyping}
+              className="w-5 h-5 flex items-center justify-center rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white disabled:bg-zinc-900 disabled:text-zinc-700 disabled:cursor-not-allowed transition-all cursor-pointer"
+            >
+              <ArrowUp className="w-3.5 h-3.5" />
+            </button>
           </div>
         </form>
+
+        {/* Local | Default Approvals */}
+        <div className="flex items-center gap-2 text-[9px] text-zinc-500 px-1 pt-0.5">
+          <div className="flex items-center gap-1">
+            <Laptop className="w-3 h-3 text-zinc-500" />
+            <span>Local</span>
+          </div>
+          <span className="text-zinc-750">|</span>
+          <div className="flex items-center gap-1">
+            <Shield className="w-3 h-3 text-zinc-500" />
+            <span>Default Approvals</span>
+          </div>
+        </div>
       </div>
     </div>
   )

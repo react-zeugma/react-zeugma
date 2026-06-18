@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 6.0.2
+
+### Patch Changes
+
+- The dragged element selected as the active tab in its parent pane.
+
 ## 6.0.1
 
 ### Patch Changes

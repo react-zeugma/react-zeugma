@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 6.0.5
+
+### Patch Changes
+
+- Remove the deprecated `ResizableContainer` component and its exports.
+
 ## 6.0.4
 
 ### Patch Changes

@@ -9,8 +9,6 @@ export type {
 export { useZeugma, useZeugmaContext } from './entities/zeugma'
 export { useResizer } from './features/resize-pane'
 export { PaneTree } from './widgets/pane-tree'
-export { ResizableContainer } from './widgets/resizable-container'
-export type { ResizableContainerProps } from './widgets/resizable-container'
 export { Pane, DragHandle, Tabs, useTabContext } from './entities/pane'
 export type {
   PaneProps,

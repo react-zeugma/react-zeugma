@@ -229,24 +229,6 @@ Defines the interactive drag region inside a `<Pane>`. **Must be placed inside a
 | `className` | `string`              | No       | Custom CSS class for the drag handle wrapper.                    |
 | `style`     | `React.CSSProperties` | No       | Inline styles for the drag handle wrapper.                       |
 
-### `<ResizableContainer>`
-
-A vertical-resize container wrapper that wraps any node (typically `<PaneTree />` or a dashboard component) and allows the user to resize its height by dragging a handle at the bottom edge. Includes smooth scroll parent propagation and drag-to-scroll infinite scrolling behavior.
-
-| Prop               | Type                       | Required | Default          | Description                                                      |
-| :----------------- | :------------------------- | :------- | :--------------- | :--------------------------------------------------------------- |
-| `height`           | `number`                   | No       | `400`            | Controlled height in pixels (or initial height if uncontrolled). |
-| `onHeightChange`   | `(height: number) => void` | No       | —                | Callback function triggered during or after dragging to resize.  |
-| `minHeight`        | `number`                   | No       | `100`            | Minimum allowed height in pixels.                                |
-| `maxHeight`        | `number`                   | No       | `Infinity`       | Maximum allowed height in pixels.                                |
-| `persist`          | `boolean`                  | No       | —                | Whether to persist height changes in localStorage.               |
-| `localStorageKey`  | `string`                   | No       | `'default-pane'` | Custom localStorage key name (prefixed by `zeugma-height:`).     |
-| `resizerHeight`    | `number`                   | No       | `6`              | Height of the resizer drag handle in pixels.                     |
-| `className`        | `string`                   | No       | —                | Custom CSS class applied to the outer container.                 |
-| `resizerClassName` | `string`                   | No       | —                | Custom CSS class applied to the drag handle.                     |
-
----
-
 ## Tree Utilities
 
 Import these serializable tree utility functions from `react-zeugma/utils` for programmatically mutating or querying layout schemas.
@@ -400,7 +382,7 @@ export interface TabDetails {
 
 ### Component Props
 
-```ts
+````ts
 export interface PaneProps {
   id: string
   children: (props: PaneRenderProps) => React.ReactNode
@@ -440,21 +422,6 @@ export interface TabsProps {
   }
 }
 
-export interface ResizableContainerProps {
-  children: React.ReactNode
-  active?: boolean
-  height?: number
-  onHeightChange?: (height: number) => void
-  minHeight?: number
-  maxHeight?: number
-  persist?: boolean
-  localStorageKey?: string
-  resizerHeight?: number
-  className?: string
-  resizerClassName?: string
-}
-```
-
 ### Render Props
 
 ```ts
@@ -490,7 +457,7 @@ export interface TabContextValue {
   selectTab: () => void
   removeTab: () => void
 }
-```
+````
 
 ### Controller & Context
 
@@ -747,24 +714,6 @@ Defines the interactive drag region inside a `<Pane>`. **Must be placed inside a
 - `children: React.ReactNode` — Element(s) that function as the drag handle (e.g., pane header).
 - `className?: string`
 - `style?: React.CSSProperties`
-
----
-
-### `<ResizableContainer>`
-
-A vertical-resize container wrapper that wraps any node (typically `<PaneTree />` or a dashboard component) and allows the user to resize its height by dragging a handle at the bottom edge. Includes smooth scroll parent propagation and drag-to-scroll infinite scrolling behavior.
-
-#### Props
-
-- `height?: number` — Controlled height in pixels (or initial height if uncontrolled). Defaults to `400`.
-- `onHeightChange?: (height: number) => void` — Callback function triggered during or after dragging to resize.
-- `minHeight?: number` — Minimum allowed height in pixels (defaults to `100`).
-- `maxHeight?: number` — Maximum allowed height in pixels (defaults to `Infinity`).
-- `persist?: boolean` — Whether to persist height changes in localStorage.
-- `localStorageKey?: string` — Custom localStorage key name (defaults to `'default-pane'`).
-- `resizerHeight?: number` — Height of the resizer drag handle in pixels (defaults to `6`).
-- `className?: string` — Custom CSS class applied to the outer container.
-- `resizerClassName?: string` — Custom CSS class applied to the drag handle.
 
 ## 3. Programmatic State Utilities
 

@@ -6,9 +6,13 @@ import './globals.css'
 export const metadata: Metadata = globalMetadata
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const isDev = process.env.NODE_ENV === 'development'
+
   return (
     <html lang="en" suppressHydrationWarning>
-      <head suppressHydrationWarning />
+      <head suppressHydrationWarning>
+        {isDev && <script src="https://unpkg.com/react-scan/dist/auto.global.js" async />}
+      </head>
       <body>
         <AppShell>{children}</AppShell>
       </body>

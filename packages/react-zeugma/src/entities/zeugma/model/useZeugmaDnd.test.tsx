@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { renderHook } from '@testing-library/react'
 import { useZeugmaDnd } from './useZeugmaDnd'
-import type { ZeugmaController, TreeNode } from '../../../shared'
+import type { ZeugmaController } from '../../../shared'
 import * as dndKitCore from '@dnd-kit/core'
 
 vi.mock('@dnd-kit/core', async (importOriginal) => {
@@ -178,7 +178,7 @@ describe('useZeugmaDnd Hook', () => {
     })
   })
 
-  it('should remove the dragged tab/pane on drag start, and restore it on cancel or invalid drop', async () => {
+  it('should not change the layout on drag start, but set layoutBeforeDrag, and restore/clear state on cancel or invalid drop', async () => {
     const controller = mockController()
     const setOverTabId = vi.fn()
     const setOverTabPosition = vi.fn()
@@ -201,25 +201,12 @@ describe('useZeugmaDnd Hook', () => {
 
     // Verify setLayoutBeforeDrag was called with original layout
     expect(controller.setLayoutBeforeDrag).toHaveBeenCalledWith(controller.layout)
-    // Verify setLayout was called with layout without tab-1
-    expect(controller.setLayout).toHaveBeenCalledWith({
-      type: 'pane',
-      id: 'pane-1',
-      tabs: ['tab-2'],
-      activeTabId: 'tab-2',
-      tabsMetadata: undefined,
-    })
+    // Verify setLayout was NOT called
+    expect(controller.setLayout).not.toHaveBeenCalled()
 
-    // Update mocked controller state as if setLayout worked (layoutBeforeDrag has layout, layout has newLayout)
-    const newLayout: TreeNode = {
-      type: 'pane',
-      id: 'pane-1',
-      tabs: ['tab-2'],
-      activeTabId: 'tab-2',
-    }
+    // Mock controller state during drag (layoutBeforeDrag has original layout, layout is unchanged)
     const controllerWithDragState = {
       ...controller,
-      layout: newLayout,
       layoutBeforeDrag: controller.layout,
     }
 
@@ -233,8 +220,14 @@ describe('useZeugmaDnd Hook', () => {
 
     // 2. Drag cancel should restore layout
     hookWithDragState.result.current.onDragCancel()
-    expect(controllerWithDragState.setLayout).toHaveBeenCalledWith(controller.layout)
+    expect(controllerWithDragState.setLayout).toHaveBeenCalledWith(
+      controllerWithDragState.layoutBeforeDrag,
+    )
     expect(controllerWithDragState.setLayoutBeforeDrag).toHaveBeenCalledWith(null)
+
+    // Reset mocks for the next scenario
+    vi.mocked(controllerWithDragState.setLayout).mockClear()
+    vi.mocked(controllerWithDragState.setLayoutBeforeDrag).mockClear()
 
     // 3. Invalid drop (no over target) should restore layout
     const dragEndEventNoOver = {
@@ -243,7 +236,9 @@ describe('useZeugmaDnd Hook', () => {
     } as unknown as dndKitCore.DragEndEvent
 
     hookWithDragState.result.current.onDragEnd(dragEndEventNoOver)
-    expect(controllerWithDragState.setLayout).toHaveBeenCalledWith(controller.layout)
+    expect(controllerWithDragState.setLayout).toHaveBeenCalledWith(
+      controllerWithDragState.layoutBeforeDrag,
+    )
     expect(controllerWithDragState.setLayoutBeforeDrag).toHaveBeenCalledWith(null)
   })
 })

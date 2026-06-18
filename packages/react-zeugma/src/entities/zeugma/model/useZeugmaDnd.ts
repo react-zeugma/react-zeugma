@@ -136,11 +136,6 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
 
     setLayoutBeforeDrag(layoutAfterSelect)
 
-    const newLayout = isTabDrag
-      ? removeTabHelper(layoutAfterSelect, draggingId)
-      : removePaneHelper(layoutAfterSelect, draggingId)
-    setLayout(newLayout)
-
     if (onDragStart) {
       onDragStart(draggingId)
     }
@@ -421,9 +416,13 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
       }
     }
 
-    // Since the item was already removed from layout on drag start, we split the current layout (which has the dragged item removed)
+    // We need to first remove the dragged tab/pane from the original layout tree before splitting.
+    const cleanLayout = isTabDrag
+      ? removeTabHelper(originalLayout, draggingId)
+      : removePaneHelper(originalLayout, draggingId)
+
     const newLayout = splitPaneHelper(
-      layout,
+      cleanLayout,
       targetId,
       direction,
       dropZone as 'left' | 'right' | 'top' | 'bottom',

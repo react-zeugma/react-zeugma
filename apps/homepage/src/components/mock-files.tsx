@@ -319,10 +319,21 @@ export const defaultOuterLayout: TreeNode = {
   direction: 'row',
   splitPercentage: 20,
   first: {
-    type: 'pane',
-    id: 'pane-explorer',
-    tabs: ['explorer'],
-    activeTabId: 'explorer',
+    type: 'split',
+    direction: 'column',
+    splitPercentage: 75,
+    first: {
+      type: 'pane',
+      id: 'pane-explorer',
+      tabs: ['explorer'],
+      activeTabId: 'explorer',
+    },
+    second: {
+      type: 'pane',
+      id: 'pane-performance',
+      tabs: ['performance'],
+      activeTabId: 'performance',
+    },
   },
   second: {
     type: 'split',

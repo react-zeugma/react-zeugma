@@ -16,6 +16,7 @@ import {
   Maximize2,
   Minimize2,
   X,
+  Activity,
 } from 'lucide-react'
 import { Zeugma, PaneTree, Pane, DragHandle, Tabs, useZeugma, PaneRenderProps } from 'react-zeugma'
 
@@ -28,6 +29,7 @@ import { InspectorWidget } from './zeugma-demo-ide/InspectorWidget'
 import { FileExplorer } from './zeugma-demo-ide/FileExplorer'
 import { TerminalWidget } from './zeugma-demo-ide/TerminalWidget'
 import { ReadmeWidget } from './zeugma-demo-ide/ReadmeWidget'
+import { FpsMonitor } from './fps-monitor'
 
 export function ZeugmaDemoIDE({
   className = 'aspect-16/10 min-h-[580px]',
@@ -68,9 +70,13 @@ export function ZeugmaDemoIDE({
       const pane = outerZeugma.findPaneContainingTab(filename)
       if (pane) outerZeugma.selectTab(pane.id, filename)
     } else {
-      const targetPaneId = findActiveEditorPane(outerZeugma.layout) || 'pane-editor'
-      outerZeugma.addTab(targetPaneId, filename)
-      outerZeugma.selectTab(targetPaneId, filename)
+      const targetPaneId = findActiveEditorPane(outerZeugma.layout)
+      if (targetPaneId) {
+        outerZeugma.addTab(targetPaneId, filename)
+        outerZeugma.selectTab(targetPaneId, filename)
+      } else {
+        outerZeugma.addPane(filename)
+      }
     }
   }
 
@@ -88,7 +94,7 @@ export function ZeugmaDemoIDE({
     (paneId: string) => (
       <Pane id={paneId}>
         {(paneProps: PaneRenderProps) => {
-          const isSidebar = paneId === 'pane-explorer'
+          const isSidebar = paneId === 'pane-explorer' || paneId === 'pane-performance'
 
           return (
             <div className="h-full w-full flex flex-col bg-[#1e1e1e] border border-[#2d2d30] overflow-hidden shadow-2xl">
@@ -115,6 +121,10 @@ export function ZeugmaDemoIDE({
                     if (tabId === 'explorer') {
                       title = 'Explorer'
                       icon = <Folder className="w-3.5 h-3.5 text-indigo-400" />
+                      closeable = false
+                    } else if (tabId === 'performance') {
+                      title = 'Performance'
+                      icon = <Activity className="w-3.5 h-3.5 text-indigo-400" />
                       closeable = false
                     } else if (tabId === 'terminal') {
                       title = 'Terminal'
@@ -210,6 +220,10 @@ export function ZeugmaDemoIDE({
           return <FileExplorer onOpenFile={stableHandleOpenFile} />
         }
 
+        if (tabId === 'performance') {
+          return <FpsMonitor />
+        }
+
         if (tabId === 'terminal') {
           return <TerminalWidget />
         }
@@ -243,6 +257,9 @@ export function ZeugmaDemoIDE({
     if (id === 'explorer') {
       title = 'Explorer'
       icon = <Folder className="w-4 h-4 text-indigo-400" />
+    } else if (id === 'performance') {
+      title = 'Performance'
+      icon = <Activity className="w-4 h-4 text-indigo-400" />
     } else if (id === 'terminal') {
       title = 'Terminal'
       icon = <Terminal className="w-4 h-4 text-emerald-400" />

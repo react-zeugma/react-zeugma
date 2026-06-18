@@ -4,7 +4,7 @@ import React from 'react'
 import { Activity } from 'lucide-react'
 import { useSharedFps } from '@/hooks/use-fps'
 
-export function FpsMonitor() {
+export function FpsMonitor({ className = 'p-3 space-y-2' }: { className?: string }) {
   const { fps, history } = useSharedFps()
 
   // Determine status color based on FPS
@@ -12,18 +12,18 @@ export function FpsMonitor() {
   const isWarning = fps >= 30 && fps < 50
 
   const statusColorClass = isSlow
-    ? 'text-rose-500 bg-rose-500/10 border-rose-500/20'
+    ? 'text-rose-400 bg-rose-500/10 border-rose-500/20'
     : isWarning
-      ? 'text-amber-500 bg-amber-500/10 border-amber-500/20'
-      : 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20'
+      ? 'text-amber-400 bg-amber-500/10 border-amber-500/20'
+      : 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
 
   const dotColorClass = isSlow ? 'bg-rose-500' : isWarning ? 'bg-amber-500' : 'bg-emerald-500'
 
   const polylineColorClass = isSlow
-    ? 'text-rose-500'
+    ? 'text-rose-400'
     : isWarning
-      ? 'text-amber-500'
-      : 'text-indigo-500'
+      ? 'text-amber-400'
+      : 'text-indigo-400'
 
   // Pre-calculate line points for SVG sparkline
   const pointsString = React.useMemo(() => {
@@ -40,10 +40,10 @@ export function FpsMonitor() {
   }, [history])
 
   return (
-    <div className="border-t border-border-primary/80 pt-3 px-1 space-y-2">
-      <div className="text-text-secondary text-[10px] font-bold uppercase tracking-wider select-none flex items-center justify-between">
+    <div className={className}>
+      <div className="text-[#858585] text-[10px] font-bold uppercase tracking-wider select-none flex items-center justify-between">
         <div className="flex items-center gap-1.5">
-          <Activity className="w-3.5 h-3.5 text-indigo-500" />
+          <Activity className="w-3.5 h-3.5 text-indigo-400" />
           <span>Performance</span>
         </div>
         <span
@@ -54,10 +54,10 @@ export function FpsMonitor() {
         </span>
       </div>
 
-      <div className="bg-bg-pane-inner border border-border-primary rounded p-2.5 flex items-center justify-between gap-3 h-12 transition-colors duration-200">
+      <div className="bg-[#1e1e1e] border border-[#2d2d30] rounded p-2.5 flex items-center justify-between gap-3 h-12 transition-colors duration-200">
         <div className="flex flex-col">
-          <span className="text-[10px] text-text-secondary font-medium font-sans">Frame Rate</span>
-          <span className="text-[9px] text-text-muted font-sans">Real-time update</span>
+          <span className="text-[10px] text-[#cccccc] font-medium font-sans">Frame Rate</span>
+          <span className="text-[9px] text-[#858585] font-sans">Real-time update</span>
         </div>
         <div className="flex-1 max-w-[100px] h-6 flex items-center">
           <svg className="w-full h-full overflow-visible" viewBox="0 0 100 24">

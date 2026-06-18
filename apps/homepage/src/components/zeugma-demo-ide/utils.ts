@@ -9,7 +9,12 @@ export function isTabOpenInTree(node: TreeNode | null, tabId: string): boolean {
 export function findActiveEditorPane(node: TreeNode | null): string | null {
   if (!node) return null
   if (node.type === 'pane') {
-    if (node.id !== 'pane-explorer' && node.id !== 'pane-terminal') return node.id
+    if (
+      node.id !== 'pane-explorer' &&
+      node.id !== 'pane-terminal' &&
+      node.id !== 'pane-performance'
+    )
+      return node.id
     return null
   }
   return findActiveEditorPane(node.first) || findActiveEditorPane(node.second)

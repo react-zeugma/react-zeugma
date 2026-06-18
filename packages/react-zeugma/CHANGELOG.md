@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 6.0.3
+
+### Patch Changes
+
+- Implement style-agnostic root container drop zones for splitting the entire layout at the dashboard boundaries.
+
 ## 6.0.2
 
 ### Patch Changes

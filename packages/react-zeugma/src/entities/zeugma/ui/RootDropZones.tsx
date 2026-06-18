@@ -3,17 +3,17 @@ import { useDroppable } from '@dnd-kit/core'
 
 interface RootDropZoneProps {
   id: string
-  fraction: '1/4' | '1/3'
+  fraction: '1/3' | '1/2'
   edge: 'top' | 'bottom' | 'left' | 'right'
   activeClassName?: string
 }
 
 const activationPositions: Record<
   'top' | 'bottom' | 'left' | 'right',
-  Record<'1/4' | '1/3', React.CSSProperties>
+  Record<'1/3' | '1/2', React.CSSProperties>
 > = {
   top: {
-    '1/4': {
+    '1/3': {
       position: 'absolute',
       top: 0,
       left: 0,
@@ -22,7 +22,7 @@ const activationPositions: Record<
       zIndex: 100,
       pointerEvents: 'auto',
     },
-    '1/3': {
+    '1/2': {
       position: 'absolute',
       top: '24px',
       left: 0,
@@ -33,7 +33,7 @@ const activationPositions: Record<
     },
   },
   bottom: {
-    '1/4': {
+    '1/3': {
       position: 'absolute',
       bottom: 0,
       left: 0,
@@ -42,7 +42,7 @@ const activationPositions: Record<
       zIndex: 100,
       pointerEvents: 'auto',
     },
-    '1/3': {
+    '1/2': {
       position: 'absolute',
       bottom: '24px',
       left: 0,
@@ -53,7 +53,7 @@ const activationPositions: Record<
     },
   },
   left: {
-    '1/4': {
+    '1/3': {
       position: 'absolute',
       left: 0,
       top: '48px',
@@ -62,7 +62,7 @@ const activationPositions: Record<
       zIndex: 100,
       pointerEvents: 'auto',
     },
-    '1/3': {
+    '1/2': {
       position: 'absolute',
       left: '24px',
       top: '48px',
@@ -73,7 +73,7 @@ const activationPositions: Record<
     },
   },
   right: {
-    '1/4': {
+    '1/3': {
       position: 'absolute',
       right: 0,
       top: '48px',
@@ -82,7 +82,7 @@ const activationPositions: Record<
       zIndex: 100,
       pointerEvents: 'auto',
     },
-    '1/3': {
+    '1/2': {
       position: 'absolute',
       right: '24px',
       top: '48px',
@@ -96,23 +96,23 @@ const activationPositions: Record<
 
 const previewPositions: Record<
   'top' | 'bottom' | 'left' | 'right',
-  Record<'1/4' | '1/3', React.CSSProperties>
+  Record<'1/3' | '1/2', React.CSSProperties>
 > = {
   top: {
-    '1/4': { top: 0, left: 0, width: '100%', height: '25%' },
     '1/3': { top: 0, left: 0, width: '100%', height: '33.3333%' },
+    '1/2': { top: 0, left: 0, width: '100%', height: '50%' },
   },
   bottom: {
-    '1/4': { bottom: 0, left: 0, width: '100%', height: '25%' },
     '1/3': { bottom: 0, left: 0, width: '100%', height: '33.3333%' },
+    '1/2': { bottom: 0, left: 0, width: '100%', height: '50%' },
   },
   left: {
-    '1/4': { left: 0, top: 0, width: '25%', height: '100%' },
     '1/3': { left: 0, top: 0, width: '33.3333%', height: '100%' },
+    '1/2': { left: 0, top: 0, width: '50%', height: '100%' },
   },
   right: {
-    '1/4': { right: 0, top: 0, width: '25%', height: '100%' },
     '1/3': { right: 0, top: 0, width: '33.3333%', height: '100%' },
+    '1/2': { right: 0, top: 0, width: '50%', height: '100%' },
   },
 }
 
@@ -142,17 +142,15 @@ interface RootDropZonesProps {
 export const RootDropZones: React.FC<RootDropZonesProps> = ({ activeClassName }) => {
   const zones: Array<{
     id: string
-    fraction: '1/4' | '1/3'
+    fraction: '1/3' | '1/2'
     edge: 'top' | 'bottom' | 'left' | 'right'
   }> = [
-    { id: 'drop-root-1/4-top', fraction: '1/4', edge: 'top' },
     { id: 'drop-root-1/3-top', fraction: '1/3', edge: 'top' },
-    { id: 'drop-root-1/4-bottom', fraction: '1/4', edge: 'bottom' },
     { id: 'drop-root-1/3-bottom', fraction: '1/3', edge: 'bottom' },
-    { id: 'drop-root-1/4-left', fraction: '1/4', edge: 'left' },
     { id: 'drop-root-1/3-left', fraction: '1/3', edge: 'left' },
-    { id: 'drop-root-1/4-right', fraction: '1/4', edge: 'right' },
+    { id: 'drop-root-1/2-left', fraction: '1/2', edge: 'left' },
     { id: 'drop-root-1/3-right', fraction: '1/3', edge: 'right' },
+    { id: 'drop-root-1/2-right', fraction: '1/2', edge: 'right' },
   ]
 
   return (

@@ -12,8 +12,6 @@ import {
   CircleSlash,
   Settings2,
   ArrowUp,
-  Laptop,
-  Shield,
 } from 'lucide-react'
 import { useZeugmaState } from 'react-zeugma'
 

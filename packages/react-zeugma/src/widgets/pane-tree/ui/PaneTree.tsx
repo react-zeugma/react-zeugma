@@ -3,6 +3,7 @@ import { useZeugmaState } from '../../../shared'
 import { useResizer } from '../../../features/resize-pane'
 import { TreeNode } from '../../../shared'
 import { ComputedSplitter, computeLayout } from '../../../shared/lib/tree'
+import { RootDropZones } from '../../../entities/zeugma/ui'
 
 export interface PaneTreeProps {
   /** The layout subtree node to render. If not specified, defaults to the root layout tree from the Zeugma context. */
@@ -211,6 +212,7 @@ export const PaneTree: React.FC<PaneTreeProps> = ({
         }}
       >
         {renderContent()}
+        {activeId !== null && !locked && <RootDropZones activeClassName={classNames.dropPreview} />}
       </div>
     )
   }

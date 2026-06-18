@@ -278,4 +278,161 @@ describe('useZeugmaDnd Hook', () => {
       activeTabId: 'tab-2',
     })
   })
+
+  it('should prioritize root drop zones over pane drop zones, but prioritize tab drops over root drop zones when dragging a tab', () => {
+    const controller = mockController()
+    const setOverTabId = vi.fn()
+    const setOverTabPosition = vi.fn()
+
+    const { result } = renderHook(() =>
+      useZeugmaDnd({
+        ...controller,
+        setOverTabId,
+        setOverTabPosition,
+      }),
+    )
+
+    const collisionDetection = result.current.collisionDetection
+
+    // Hitting a root drop zone and a pane drop zone
+    const mockCollisions = [{ id: 'drop-left-pane-2' }, { id: 'drop-root-1/3-left' }]
+    vi.mocked(dndKitCore.pointerWithin).mockReturnValue(mockCollisions as dndKitCore.Collision[])
+
+    const paneArgs = {
+      active: { id: 'pane-1' },
+      droppableContainers: [],
+    } as unknown as Parameters<dndKitCore.CollisionDetection>[0]
+
+    const sortedPaneCollisions = collisionDetection(paneArgs)
+    // Root drop zone should be sorted first
+    expect(sortedPaneCollisions[0].id).toBe('drop-root-1/3-left')
+
+    // Scenario: Dragging a tab, hitting tab-drop-tab-2 and drop-root-1/3-top
+    const mockTabCollisions = [{ id: 'drop-root-1/3-top' }, { id: 'tab-drop-tab-2' }]
+    vi.mocked(dndKitCore.pointerWithin).mockReturnValue(mockTabCollisions as dndKitCore.Collision[])
+
+    const tabArgs = {
+      active: { id: 'tab-header-tab-1' },
+      droppableContainers: [],
+    } as unknown as Parameters<dndKitCore.CollisionDetection>[0]
+
+    const sortedTabCollisions = collisionDetection(tabArgs)
+    // Tab drop should be sorted first
+    expect(sortedTabCollisions[0].id).toBe('tab-drop-tab-2')
+  })
+
+  it('should handle dropping on root drop zones and split layout at root level', () => {
+    const controller = mockController()
+    const setOverTabId = vi.fn()
+    const setOverTabPosition = vi.fn()
+    const onDragEndMock = vi.fn()
+
+    const hookInstance = renderHook(() =>
+      useZeugmaDnd({
+        ...controller,
+        setOverTabId,
+        setOverTabPosition,
+        onDragEnd: onDragEndMock,
+      }),
+    )
+
+    // Simulate drag start for pane-1 to set layoutBeforeDrag
+    const dragStartEvent = {
+      active: { id: 'pane-1' },
+      activatorEvent: new MouseEvent('mousedown'),
+    } as unknown as dndKitCore.DragStartEvent
+    hookInstance.result.current.onDragStart(dragStartEvent)
+
+    // Simulate dropping on drop-root-1/3-left
+    const dragEndEvent = {
+      active: { id: 'pane-1' },
+      over: { id: 'drop-root-1/3-left' },
+    } as unknown as dndKitCore.DragEndEvent
+
+    hookInstance.result.current.onDragEnd(dragEndEvent)
+
+    // Layout had pane-1 with tabs tab-1, tab-2.
+    // Since pane-1 is the only pane in the layout (original layout is pane-1),
+    // removing pane-1 makes cleanLayout null.
+    // So the new layout is just pane-1 (draggedPaneNode).
+    expect(controller.setLayout).toHaveBeenCalledWith({
+      type: 'pane',
+      id: 'pane-1',
+      tabs: ['tab-1', 'tab-2'],
+      activeTabId: 'tab-1',
+    })
+    expect(onDragEndMock).toHaveBeenCalledWith('pane-1', 'root', {
+      type: 'split',
+      direction: 'row',
+      position: 'left',
+    })
+
+    // Now test split where original layout has multiple nodes (so cleanLayout is not null)
+    const complexController = mockController()
+    complexController.layout = {
+      type: 'split',
+      direction: 'row',
+      first: {
+        type: 'pane',
+        id: 'pane-1',
+        tabs: ['tab-1'],
+        activeTabId: 'tab-1',
+      },
+      second: {
+        type: 'pane',
+        id: 'pane-2',
+        tabs: ['tab-2'],
+        activeTabId: 'tab-2',
+      },
+      splitPercentage: 50,
+    }
+
+    const complexHook = renderHook(() =>
+      useZeugmaDnd({
+        ...complexController,
+        setOverTabId,
+        setOverTabPosition,
+        onDragEnd: onDragEndMock,
+      }),
+    )
+
+    // Drag start for pane-2
+    complexHook.result.current.onDragStart({
+      active: { id: 'pane-2' },
+      activatorEvent: new MouseEvent('mousedown'),
+    } as unknown as dndKitCore.DragStartEvent)
+
+    // Drop on drop-root-1/3-top
+    complexHook.result.current.onDragEnd({
+      active: { id: 'pane-2' },
+      over: { id: 'drop-root-1/3-top' },
+    } as unknown as dndKitCore.DragEndEvent)
+
+    // Clean layout (complex layout with pane-2 removed) is just pane-1.
+    // Dragged pane node is pane-2.
+    // Drop is top 1/3, which is column direction, top is first.
+    // So new layout is:
+    // type: 'split'
+    // direction: 'column'
+    // first: pane-2
+    // second: pane-1
+    // splitPercentage: 33.333333333333336
+    expect(complexController.setLayout).toHaveBeenCalledWith({
+      type: 'split',
+      direction: 'column',
+      first: {
+        type: 'pane',
+        id: 'pane-2',
+        tabs: ['tab-2'],
+        activeTabId: 'tab-2',
+      },
+      second: {
+        type: 'pane',
+        id: 'pane-1',
+        tabs: ['tab-1'],
+        activeTabId: 'tab-1',
+      },
+      splitPercentage: 100 / 3,
+    })
+  })
 })

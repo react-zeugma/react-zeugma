@@ -39,26 +39,10 @@ export function ZeugmaDemoIDE({
   hideChrome?: boolean
 }) {
   const [locked, setLocked] = useState(false)
-  const [isIDEFullscreen, setIsIDEFullscreen] = useState(false)
   const outerZeugma = useZeugma({ initialLayout: defaultOuterLayout })
 
-  useEffect(() => {
-    const handleFullscreenChange = () => setIsIDEFullscreen(!!document.fullscreenElement)
-    document.addEventListener('fullscreenchange', handleFullscreenChange)
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange)
-  }, [])
-
-  const handleToggleFullscreenIDE = () => {
-    const element = document.getElementById('workspace-frame')
-    if (!element) return
-    if (!document.fullscreenElement) {
-      element.requestFullscreen().catch(() => {})
-    } else {
-      document.exitFullscreen().catch(() => {})
-    }
-  }
-
   const handleReset = () => {
+    if (locked) return
     outerZeugma.setLayout(defaultOuterLayout)
     setLocked(false)
     outerZeugma.setLocked(false)
@@ -189,17 +173,26 @@ export function ZeugmaDemoIDE({
 
                 <div className="flex items-center gap-1.5 px-3 z-10 drag-cancel shrink-0">
                   {!isSidebar && (
-                    <button
-                      onClick={paneProps.toggleFullscreen}
-                      className="w-5 h-5 flex items-center justify-center rounded text-[#858585] hover:text-white hover:bg-zinc-800 transition-colors cursor-pointer"
-                      title={paneProps.isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
-                    >
-                      {paneProps.isFullscreen ? (
-                        <Minimize2 className="w-3 h-3" />
-                      ) : (
-                        <Maximize2 className="w-3 h-3" />
-                      )}
-                    </button>
+                    <>
+                      <button
+                        onClick={paneProps.toggleFullscreen}
+                        className="w-5 h-5 flex items-center justify-center rounded text-[#858585] hover:text-white hover:bg-zinc-800 transition-colors cursor-pointer"
+                        title={paneProps.isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+                      >
+                        {paneProps.isFullscreen ? (
+                          <Minimize2 className="w-3 h-3" />
+                        ) : (
+                          <Maximize2 className="w-3 h-3" />
+                        )}
+                      </button>
+                      <button
+                        onClick={paneProps.remove}
+                        className="w-5 h-5 flex items-center justify-center rounded text-[#858585] hover:text-rose-450 hover:bg-zinc-800 transition-colors cursor-pointer"
+                        title="Close Pane"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </>
                   )}
                 </div>
               </div>
@@ -352,28 +345,18 @@ export function ZeugmaDemoIDE({
         {/* Status bar */}
         <div className="h-6 bg-[#252526] border-t border-[#1e1e1e] text-zinc-400 flex items-center justify-between px-3 text-[10.5px] select-none font-mono shrink-0 z-30">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1 hover:text-white transition-colors cursor-default">
+            <a
+              href="https://github.com/react-zeugma/react-zeugma"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 hover:text-white transition-colors cursor-pointer"
+            >
               <GitBranch className="w-3 h-3 text-indigo-400" />
-              <span>main</span>
-            </div>
+              <span>master</span>
+            </a>
           </div>
 
           <div className="flex items-center gap-2 drag-cancel">
-            <button
-              onClick={handleToggleFullscreenIDE}
-              className="hover:text-white transition-colors cursor-pointer flex items-center gap-1"
-              title={isIDEFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
-            >
-              {isIDEFullscreen ? (
-                <Minimize2 className="w-3 h-3" />
-              ) : (
-                <Maximize2 className="w-3 h-3" />
-              )}
-              <span>Fullscreen</span>
-            </button>
-
-            <span className="text-zinc-600">|</span>
-
             <button
               onClick={() => {
                 const nextLock = !locked
@@ -394,7 +377,13 @@ export function ZeugmaDemoIDE({
 
             <button
               onClick={handleReset}
-              className="hover:text-white transition-colors cursor-pointer flex items-center gap-1"
+              disabled={locked}
+              className={`flex items-center gap-1 transition-colors ${
+                locked
+                  ? 'opacity-30 cursor-not-allowed text-zinc-550'
+                  : 'hover:text-white cursor-pointer text-zinc-400'
+              }`}
+              title={locked ? 'Unlock layout to reset' : 'Reset Layout'}
             >
               <RefreshCw className="w-3 h-3" />
               <span>Reset Layout</span>

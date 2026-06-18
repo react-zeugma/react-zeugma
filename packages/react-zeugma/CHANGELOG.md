@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 6.0.1
+
+### Patch Changes
+
+- Prevent layout object change/mutation when starting a drag operation. The layout is now only updated when a drag is successfully completed (dropped), ensuring consumer applications do not receive incomplete/deleted layouts in their `onChange` handlers mid-drag.
+
 ## 6.0.0
 
 ### Major Changes

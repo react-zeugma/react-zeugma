@@ -39,7 +39,7 @@ export function CopilotWidget() {
   const [streamingMsgId, setStreamingMsgId] = useState<string | null>(null)
   const [streamedText, setStreamedText] = useState('')
 
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
   const streamIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const streamingFullTextRef = useRef<string>('')
 
@@ -107,10 +107,12 @@ export function CopilotWidget() {
     }
   }, [layout])
 
-  // Scroll to bottom on new messages or typing state change
+  // Scroll to bottom on new messages or typing state change (internal scroll only)
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, isTyping])
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight
+    }
+  }, [messages, isTyping, streamedText])
 
   const handleSend = (text: string) => {
     if (!text.trim()) return
@@ -264,6 +266,7 @@ export function CopilotWidget() {
 
       {/* Messages area */}
       <div
+        ref={messagesContainerRef}
         className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin select-text min-h-0"
         onClick={stopStreaming}
       >
@@ -338,8 +341,6 @@ export function CopilotWidget() {
             50% { opacity: 0; }
           }
         `}</style>
-
-        <div ref={messagesEndRef} />
       </div>
 
       {/* Suggested prompts / Input area */}

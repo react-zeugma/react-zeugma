@@ -17,6 +17,7 @@ import {
   Minimize2,
   X,
   Activity,
+  Bot,
 } from 'lucide-react'
 import { Zeugma, PaneTree, Pane, DragHandle, Tabs, useZeugma, PaneRenderProps } from 'react-zeugma'
 
@@ -30,6 +31,7 @@ import { FileExplorer } from './zeugma-demo-ide/FileExplorer'
 import { TerminalWidget } from './zeugma-demo-ide/TerminalWidget'
 import { ReadmeWidget } from './zeugma-demo-ide/ReadmeWidget'
 import { FpsMonitor } from './fps-monitor'
+import { CopilotWidget } from './zeugma-demo-ide/CopilotWidget'
 
 export function ZeugmaDemoIDE({
   className = 'aspect-16/10 min-h-[580px]',
@@ -116,6 +118,10 @@ export function ZeugmaDemoIDE({
                     } else if (tabId === 'terminal') {
                       title = 'Terminal'
                       icon = <Terminal className="w-3.5 h-3.5 text-emerald-400" />
+                      closeable = false
+                    } else if (tabId === 'copilot') {
+                      title = 'Copilot'
+                      icon = <Bot className="w-3.5 h-3.5 text-indigo-400" />
                       closeable = false
                     } else if (tabId === 'inspector') {
                       title = 'Layout Inspector'
@@ -228,6 +234,10 @@ export function ZeugmaDemoIDE({
           return <InspectorWidget />
         }
 
+        if (tabId === 'copilot') {
+          return <CopilotWidget />
+        }
+
         if (tabId === 'README.md') {
           return <ReadmeWidget />
         }
@@ -259,6 +269,9 @@ export function ZeugmaDemoIDE({
     } else if (id === 'terminal') {
       title = 'Terminal'
       icon = <Terminal className="w-4 h-4 text-emerald-400" />
+    } else if (id === 'copilot') {
+      title = 'Copilot'
+      icon = <Bot className="w-4 h-4 text-indigo-400" />
     } else if (id === 'inspector') {
       title = 'Layout Inspector'
       icon = <Code className="w-4 h-4 text-violet-400" />

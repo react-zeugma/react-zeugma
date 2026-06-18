@@ -365,7 +365,7 @@ export const defaultOuterLayout: TreeNode = {
   second: {
     type: 'pane',
     id: 'pane-inspector',
-    tabs: ['inspector'],
-    activeTabId: 'inspector',
+    tabs: ['copilot', 'inspector'],
+    activeTabId: 'copilot',
   },
 }

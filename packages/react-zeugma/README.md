@@ -113,24 +113,26 @@ The context provider that sets up the drag-and-drop state machine, monitors acti
 
 A custom state hook that initializes and manages the recursive layout tree and handles drag-and-drop actions.
 
-| Option                   | Type                                                                  | Default | Description                                                                                               |
-| ------------------------ | --------------------------------------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------- |
-| `initialLayout`          | `TreeNode \| null`                                                    | —       | Initial layout tree structure for uncontrolled mode. Only used on initial mount.                          |
-| `layout`                 | `TreeNode \| null`                                                    | —       | Controlled layout tree structure. If provided, the hook runs in controlled mode and synchronizes with it. |
-| `locked`                 | `boolean`                                                             | `false` | If true, layout resizes and drags are disabled.                                                           |
-| `dragActivationDistance` | `number`                                                              | `8`     | Minimum pointer drag distance (in pixels) required to activate dragging.                                  |
-| `snapThreshold`          | `number`                                                              | `8`     | Threshold in pixels to snap layout resizers to adjacent edges.                                            |
-| `minSplitPercentage`     | `number`                                                              | `5`     | Minimum resizing limit percentage.                                                                        |
-| `maxSplitPercentage`     | `number`                                                              | `95`    | Maximum resizing limit percentage.                                                                        |
-| `enableDragToDismiss`    | `boolean`                                                             | `false` | If true, enables the drag-out-to-dismiss gesture to close widgets.                                        |
-| `dismissThreshold`       | `number`                                                              | `60`    | Distance in pixels outside container bounds required to trigger dismissal.                                |
-| `onRemove`               | `(paneId: string) => void`                                            | —       | Callback triggered when a pane is removed.                                                                |
-| `onDragStart`            | `(activeId: string) => void`                                          | —       | Callback triggered when dragging starts.                                                                  |
-| `onDragEnd`              | `(activeId: string, overId: string \| null, dropAction: any) => void` | —       | Callback triggered when dragging ends.                                                                    |
-| `onResizeStart`          | `(currentNode: SplitNode) => void`                                    | —       | Callback triggered when resizing starts.                                                                  |
-| `onResize`               | `(currentNode: SplitNode, percentage: number) => void`                | —       | Callback triggered during resizing.                                                                       |
-| `onResizeEnd`            | `(currentNode: SplitNode, percentage: number) => void`                | —       | Callback triggered when resizing ends.                                                                    |
-| `onDismissIntentChange`  | `(paneId: string \| null) => void`                                    | —       | Callback triggered when drag-out intent changes.                                                          |
+| Option                   | Type                                                                                                                                                 | Default | Description                                                                                               |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------- |
+| `initialLayout`          | `TreeNode \| null`                                                                                                                                   | —       | Initial layout tree structure for uncontrolled mode. Only used on initial mount.                          |
+| `layout`                 | `TreeNode \| null`                                                                                                                                   | —       | Controlled layout tree structure. If provided, the hook runs in controlled mode and synchronizes with it. |
+| `fullscreenPaneId`       | `string \| null`                                                                                                                                     | —       | Controlled fullscreen pane ID. Pass `null` for no fullscreen pane.                                        |
+| `onFullscreenChange`     | `(paneId: string \| null) => void`                                                                                                                   | —       | Callback triggered when a pane is toggled to/from fullscreen mode.                                        |
+| `locked`                 | `boolean`                                                                                                                                            | `false` | If true, layout resizes and drags are disabled.                                                           |
+| `dragActivationDistance` | `number`                                                                                                                                             | `8`     | Minimum pointer drag distance (in pixels) required to activate dragging.                                  |
+| `snapThreshold`          | `number`                                                                                                                                             | `8`     | Threshold in pixels to snap layout resizers to adjacent edges.                                            |
+| `minSplitPercentage`     | `number`                                                                                                                                             | `5`     | Minimum resizing limit percentage.                                                                        |
+| `maxSplitPercentage`     | `number`                                                                                                                                             | `95`    | Maximum resizing limit percentage.                                                                        |
+| `enableDragToDismiss`    | `boolean`                                                                                                                                            | `false` | If true, enables the drag-out-to-dismiss gesture to close widgets.                                        |
+| `dismissThreshold`       | `number`                                                                                                                                             | `60`    | Distance in pixels outside container bounds required to trigger dismissal.                                |
+| `onRemove`               | `(paneId: string) => void`                                                                                                                           | —       | Callback triggered when a pane is removed.                                                                |
+| `onDragStart`            | `(activeId: string) => void`                                                                                                                         | —       | Callback triggered when dragging starts.                                                                  |
+| `onDragEnd`              | `(activeId: string, overId: string \| null, dropAction: { type: 'split' \| 'move'; direction?: SplitDirection; position?: string } \| null) => void` | —       | Callback triggered when dragging ends, with drop target and action details.                               |
+| `onResizeStart`          | `(currentNode: SplitNode) => void`                                                                                                                   | —       | Callback triggered when resizing starts.                                                                  |
+| `onResize`               | `(currentNode: SplitNode, percentage: number) => void`                                                                                               | —       | Callback triggered during resizing.                                                                       |
+| `onResizeEnd`            | `(currentNode: SplitNode, percentage: number) => void`                                                                                               | —       | Callback triggered when resizing ends.                                                                    |
+| `onDismissIntentChange`  | `(paneId: string \| null) => void`                                                                                                                   | —       | Callback triggered when drag-out intent changes.                                                          |
 
 ### `useZeugmaContext()`
 
@@ -155,36 +157,67 @@ Recursively renders the split nodes and pane nodes. Must be placed inside `<Zeug
 
 Wraps the individual pane components inside the renderer. Utilizes a render prop passing active layout attributes.
 
-| Prop       | Type                                    | Required | Description                                             |
-| ---------- | --------------------------------------- | -------- | ------------------------------------------------------- |
-| `id`       | `string`                                | Yes      | The unique ID corresponding to a `PaneNode`'s `paneId`. |
-| `children` | `(props: PaneRenderProps) => ReactNode` | Yes      | Render prop function.                                   |
+| Prop       | Type                                    | Required | Description                                                            |
+| ---------- | --------------------------------------- | -------- | ---------------------------------------------------------------------- |
+| `id`       | `string`                                | Yes      | The unique ID corresponding to a `PaneNode`'s `paneId`.                |
+| `children` | `(props: PaneRenderProps) => ReactNode` | Yes      | Render prop function.                                                  |
+| `style`    | `React.CSSProperties`                   | No       | Optional inline CSS styles applied to the pane outer container.        |
+| `locked`   | `boolean`                               | No       | Optional override to lock this specific pane (disables drag and drop). |
 
 #### Render Props: `PaneRenderProps`
 
-| Parameter          | Type              | Description                                                                      |
-| ------------------ | ----------------- | -------------------------------------------------------------------------------- |
-| `isDragging`       | `boolean`         | Returns `true` if the node wrapper is actively being dragged.                    |
-| `isFullscreen`     | `boolean`         | Returns `true` if the pane is zoomed/fullscreen.                                 |
-| `toggleFullscreen` | `() => void`      | Callback to toggle fullscreen viewport coverage.                                 |
-| `remove`           | `() => void`      | Triggers removal of this pane from the layout tree.                              |
-| `renderActiveTab`  | `() => ReactNode` | Renders the target placeholder element for the currently active tab in the pane. |
+| Parameter           | Type                                                                                                                        | Description                                                              |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `isDragging`        | `boolean`                                                                                                                   | `true` if the pane is actively being dragged.                            |
+| `isFullscreen`      | `boolean`                                                                                                                   | `true` if the pane currently occupies the fullscreen view.               |
+| `toggleFullscreen`  | `() => void`                                                                                                                | Toggles the pane to and from fullscreen/zoomed mode.                     |
+| `remove`            | `() => void`                                                                                                                | Removes this pane (and its active tab) from the layout tree.             |
+| `metadata`          | `Record<string, unknown> \| undefined`                                                                                      | The metadata values associated with the active tab.                      |
+| `updateMetadata`    | `(updater: (current: Record<string, unknown> \| undefined) => Record<string, unknown> \| undefined) => void`                | Updates metadata of the active tab via an updater function.              |
+| `locked`            | `boolean`                                                                                                                   | `true` if this specific pane or the dashboard globally is locked.        |
+| `tabs`              | `string[]`                                                                                                                  | The array of tab IDs in this pane.                                       |
+| `activeTabId`       | `string`                                                                                                                    | The currently active tab ID.                                             |
+| `selectTab`         | `(tabId: string) => void`                                                                                                   | Selects a specific tab to make it active.                                |
+| `removeTab`         | `(tabId: string) => void`                                                                                                   | Removes/closes a specific tab.                                           |
+| `tabsMetadata`      | `Record<string, Record<string, unknown>> \| undefined`                                                                      | Metadata values associated with all tabs in this pane.                   |
+| `updateTabMetadata` | `(tabId: string, updater: (current: Record<string, unknown> \| undefined) => Record<string, unknown> \| undefined) => void` | Updates the metadata of a specific tab.                                  |
+| `renderActiveTab`   | `() => ReactNode`                                                                                                           | Renders the portal placeholder for the currently active tab in the pane. |
 
 ### `<Tabs>`
 
 A helper component that renders a list of tab items for a pane, wrapping the internal drag-and-drop tab logic.
 
-| Prop           | Type                                                                                                                                 | Required | Description                                                          |
-| :------------- | :----------------------------------------------------------------------------------------------------------------------------------- | :------- | :------------------------------------------------------------------- |
-| `tabs`         | `string[]`                                                                                                                           | Yes      | The list of tab IDs in this pane.                                    |
-| `activeTabId`  | `string`                                                                                                                             | Yes      | The currently active tab ID.                                         |
-| `locked`       | `boolean`                                                                                                                            | No       | Whether dragging/reordering tabs is disabled (defaults to `false`).  |
-| `tabsMetadata` | `Record<string, Record<string, any>>`                                                                                                | No       | Metadata associated with each tab.                                   |
-| `selectTab`    | `(id: string) => void`                                                                                                               | Yes      | Callback when a tab is selected.                                     |
-| `removeTab`    | `(id: string) => void`                                                                                                               | Yes      | Callback when a tab is closed/removed.                               |
-| `classNames`   | `{ container?: string; tab?: string \| ((tabId: string) => string) }`                                                                | No       | Custom class names for the container and individual tab items.       |
-| `styles`       | `{ container?: CSSProperties; tab?: CSSProperties \| ((tabId: string) => CSSProperties) }`                                           | No       | Custom inline CSS styles for the container and individual tab items. |
-| `renderTab`    | `(props: { tabId: string; activeTabId: string; isDragging: boolean; isOver: boolean; metadata?: Record<string, any> }) => ReactNode` | Yes      | Render prop function called for each tab item.                       |
+| Prop           | Type                                                                                                                                                                                                       | Required | Description                                                          |
+| :------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------- | :------------------------------------------------------------------- |
+| `tabs`         | `string[]`                                                                                                                                                                                                 | Yes      | The list of tab IDs in this pane.                                    |
+| `activeTabId`  | `string`                                                                                                                                                                                                   | Yes      | The currently active tab ID.                                         |
+| `locked`       | `boolean`                                                                                                                                                                                                  | No       | Whether dragging/reordering tabs is disabled (defaults to `false`).  |
+| `tabsMetadata` | `Record<string, Record<string, any>>`                                                                                                                                                                      | No       | Metadata associated with each tab.                                   |
+| `selectTab`    | `(id: string) => void`                                                                                                                                                                                     | Yes      | Callback when a tab is selected.                                     |
+| `removeTab`    | `(id: string) => void`                                                                                                                                                                                     | Yes      | Callback when a tab is closed/removed.                               |
+| `classNames`   | `{ container?: string; tab?: string \| ((tabId: string) => string) }`                                                                                                                                      | No       | Custom class names for the container and individual tab items.       |
+| `styles`       | `{ container?: CSSProperties; tab?: CSSProperties \| ((tabId: string) => CSSProperties) }`                                                                                                                 | No       | Custom inline CSS styles for the container and individual tab items. |
+| `renderTab`    | `(props: { tabId: string; activeTabId: string; isDragging: boolean; isOver: boolean; metadata?: Record<string, unknown>; selectTab: (id: string) => void; removeTab: (id: string) => void }) => ReactNode` | Yes      | Render prop function called for each tab item.                       |
+
+### `useTabContext()`
+
+A context hook that provides per-tab state from within a `<Tab>` component rendered inside `<Tabs>`. Must be used within a rendered tab child.
+
+```ts
+const { tabId, isActive, isDragging, isOver, metadata, locked, selectTab, removeTab } =
+  useTabContext()
+```
+
+| Property     | Type                                   | Description                                        |
+| ------------ | -------------------------------------- | -------------------------------------------------- |
+| `tabId`      | `string`                               | The ID of the tab this context belongs to.         |
+| `isActive`   | `boolean`                              | Whether this tab is the currently active tab.      |
+| `isDragging` | `boolean`                              | Whether this tab is currently being dragged.       |
+| `isOver`     | `boolean`                              | Whether a dragged item is currently over this tab. |
+| `metadata`   | `Record<string, unknown> \| undefined` | Custom metadata associated with this tab.          |
+| `locked`     | `boolean`                              | Whether this tab (or the dashboard) is locked.     |
+| `selectTab`  | `() => void`                           | Selects this tab (no argument needed).             |
+| `removeTab`  | `() => void`                           | Removes/closes this tab (no argument needed).      |
 
 ### `<DragHandle>`
 
@@ -218,17 +251,53 @@ A vertical-resize container wrapper that wraps any node (typically `<PaneTree />
 
 Import these serializable tree utility functions from `react-zeugma/utils` for programmatically mutating or querying layout schemas.
 
-#### `removePane(tree: TreeNode | null, id: string): TreeNode | null`
+#### `generateUniqueId(): string`
+
+Generates a unique pane ID string (e.g., `'pane-abc123xyz'`). Useful when creating new pane nodes programmatically.
+
+#### `removePane(tree: TreeNode | null, paneId: string): TreeNode | null`
 
 Recursively scans the layout tree, removes the targeted pane node, and collapses redundant split boundaries.
 
-#### `addPane(tree: TreeNode | null, paneToAdd: string): TreeNode`
+#### `removeTab(tree: TreeNode | null, tabId: string): TreeNode | null`
 
-Recursively matches the bottommost/rightmost pane leaf in the tree, splits it, and inserts the target `paneToAdd`.
+Removes a single tab from its parent pane. If the pane has no remaining tabs after removal, the pane itself is collapsed out of the tree.
+
+#### `addPane(tree: TreeNode | null, paneToAdd: string, metadata?: Record<string, unknown>): TreeNode`
+
+Recursively matches the bottommost/rightmost pane leaf in the tree, splits it, and inserts the target `paneToAdd`. Optionally sets initial metadata for the new pane's tab.
+
+#### `addTab(tree: TreeNode | null, targetPaneId: string, tabId: string, metadata?: Record<string, unknown>): TreeNode | null`
+
+Appends a tab directly into a specific target pane node by its ID. Sets the new tab as the active tab. Does nothing if `targetPaneId` is not found.
 
 #### `splitPane(tree, targetId, direction, splitType, paneToAdd)`
 
-Splits the targeted `targetId` pane inside the tree with `direction` (_row_ / _column_) and type (_left_, _right_, _top_, _bottom_) to insert `paneToAdd`.
+Splits the targeted `targetId` pane inside the tree with `direction` (_row_ / _column_) and type (_left_, _right_, _top_, _bottom_) to insert `paneToAdd`. `paneToAdd` may be a tab ID string or a full `PaneNode` object.
+
+#### `updateSplitPercentage(tree: TreeNode | null, target: SplitNode, newPercentage: number): TreeNode | null`
+
+Finds the target `SplitNode` by reference in the tree and updates its `splitPercentage`.
+
+#### `selectTab(tree: TreeNode | null, paneId: string, tabId: string): TreeNode | null`
+
+Activates the specified `tabId` within the `paneId` pane node. Returns the tree unchanged if the tab is already active or the pane is not found.
+
+#### `mergeTab(tree: TreeNode | null, draggedTabId: string, targetPaneId: string): TreeNode | null`
+
+Moves `draggedTabId` from its current pane into `targetPaneId`, preserving tab metadata. Collapses the source pane if it becomes empty. Sets the moved tab as the active tab in the target pane.
+
+#### `moveTab(tree: TreeNode | null, draggedTabId: string, targetTabId: string, position?: 'before' | 'after'): TreeNode | null`
+
+Reorders `draggedTabId` adjacent to `targetTabId` within the same pane (or moves it cross-pane). `position` defaults to `'before'`.
+
+#### `updateTabMetadata(tree: TreeNode | null, tabId: string, updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined): TreeNode | null`
+
+Updates the metadata of a specific tab using an updater function. Returning `undefined` from the updater removes the entry.
+
+#### `updatePaneLock(tree: TreeNode | null, paneId: string, locked: boolean): TreeNode | null`
+
+Sets the `locked` flag on the specified pane node. When `locked` is `false`, the field is removed from the node entirely to keep the tree clean.
 
 #### `findPaneById(tree: TreeNode | null, paneId: string): PaneNode | null`
 
@@ -241,6 +310,10 @@ Recursively searches the layout tree and returns the `PaneNode` containing the s
 #### `findTabById(tree: TreeNode | null, tabId: string): TabDetails | null`
 
 Searches the layout tree for the given `tabId` and returns computed details (parent `paneId`, `isActive`, `index`, and custom `metadata`).
+
+#### `computeLayout(node: TreeNode | null, left?, top?, width?, height?): { panes: ComputedPane[]; splitters: ComputedSplitter[] }`
+
+Recursively computes the absolute position and dimensions (as percentages relative to the container) for every pane and splitter in the tree. Useful for building custom render layers or analytics on top of the layout engine.
 
 #### `calculateTabDropIndex(tabs: string[], activeType: string | null, overTabId: string | null, overTabPosition: 'before' | 'after' | null): number`
 
@@ -261,17 +334,38 @@ Use custom CSS or styling rules to style resizers, dragging states, drop preview
       'bg-transparent hover:bg-indigo-500/50 active:bg-indigo-500 transition-colors duration-150',
     // split previews
     dropPreview: 'bg-indigo-500/10 border-2 border-dashed border-indigo-500/50 backdrop-blur-xs',
+    // tab separator line
+    tabSeparator: 'w-px h-4 bg-zinc-700',
   }}
 >
   <PaneTree />
 </Zeugma>
 ```
 
+### `ZeugmaClassNames` reference
+
+| Key                      | Applied to                                                                        |
+| ------------------------ | --------------------------------------------------------------------------------- |
+| `dashboard`              | Root dashboard container.                                                         |
+| `dashboardDismissActive` | Root container when a drag-out dismiss is active.                                 |
+| `dashboardLocked`        | Root container when the dashboard is globally locked.                             |
+| `pane`                   | Outer wrapper `<div>` of each `<Pane>`.                                           |
+| `paneLocked`             | Pane container when locked.                                                       |
+| `dropPreview`            | Drop zone preview box when hovering over a split-edge drop zone.                  |
+| `dragOverlay`            | Cursor-following drag preview portal wrapper.                                     |
+| `resizer`                | Drag-to-resize split bar handles.                                                 |
+| `dismissPreview`         | Background dismiss zone indicator during a drag-out dismiss gesture.              |
+| `lockedPreview`          | Drop zone indicator when hovering over a locked pane.                             |
+| `tabDropPreview`         | Placeholder line element rendered at the target insertion point during tab drags. |
+| `tabSeparator`           | Separator line rendered between non-active adjacent tabs in `<Tabs>`.             |
+
 ---
 
 ## Types Reference
 
-Full TypeScript type definitions utilized in the dashboard layout configuration.
+Full TypeScript type definitions exported from `react-zeugma`.
+
+### Layout Tree
 
 ```ts
 export type SplitDirection = 'row' | 'column'
@@ -281,7 +375,7 @@ export interface SplitNode {
   direction: SplitDirection
   first: TreeNode
   second: TreeNode
-  splitPercentage: number
+  splitPercentage: number // 0–100
 }
 
 export interface PaneNode {
@@ -301,6 +395,179 @@ export interface TabDetails {
   isActive: boolean
   index: number
   metadata: Record<string, unknown> | undefined
+}
+```
+
+### Component Props
+
+```ts
+export interface PaneProps {
+  id: string
+  children: (props: PaneRenderProps) => React.ReactNode
+  style?: React.CSSProperties
+  locked?: boolean
+}
+
+export interface DragHandleProps {
+  children?: React.ReactNode
+  className?: string
+  style?: React.CSSProperties
+}
+
+export interface TabsProps {
+  tabs: string[]
+  activeTabId: string
+  locked?: boolean
+  tabsMetadata?: Record<string, Record<string, unknown>>
+  selectTab: (id: string) => void
+  removeTab: (id: string) => void
+  renderTab: (props: {
+    tabId: string
+    activeTabId: string
+    isDragging: boolean
+    isOver: boolean
+    metadata?: Record<string, unknown>
+    selectTab: (id: string) => void
+    removeTab: (id: string) => void
+  }) => React.ReactNode
+  classNames?: {
+    container?: string
+    tab?: string | ((tabId: string) => string)
+  }
+  styles?: {
+    container?: React.CSSProperties
+    tab?: React.CSSProperties | ((tabId: string) => React.CSSProperties)
+  }
+}
+
+export interface ResizableContainerProps {
+  children: React.ReactNode
+  active?: boolean
+  height?: number
+  onHeightChange?: (height: number) => void
+  minHeight?: number
+  maxHeight?: number
+  persist?: boolean
+  localStorageKey?: string
+  resizerHeight?: number
+  className?: string
+  resizerClassName?: string
+}
+```
+
+### Render Props
+
+```ts
+export interface PaneRenderProps {
+  isDragging: boolean
+  isFullscreen: boolean
+  toggleFullscreen: () => void
+  remove: () => void
+  metadata: Record<string, unknown> | undefined
+  updateMetadata: (
+    updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined,
+  ) => void
+  locked: boolean
+  tabs: string[]
+  activeTabId: string
+  selectTab: (tabId: string) => void
+  removeTab: (tabId: string) => void
+  tabsMetadata: Record<string, Record<string, unknown>> | undefined
+  updateTabMetadata: (
+    tabId: string,
+    updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined,
+  ) => void
+  renderActiveTab: () => ReactNode
+}
+
+export interface TabContextValue {
+  tabId: string
+  isActive: boolean
+  isDragging: boolean
+  isOver: boolean
+  metadata?: Record<string, unknown>
+  locked: boolean
+  selectTab: () => void
+  removeTab: () => void
+}
+```
+
+### Controller & Context
+
+```ts
+export interface UseZeugmaOptions { /* see useZeugma() section above */ }
+
+export interface ZeugmaController {
+  // State
+  layout: TreeNode | null
+  setLayout: Dispatch<SetStateAction<TreeNode | null>>
+  fullscreenPaneId: string | null
+  setFullscreenPaneId: (paneId: string | null) => void
+  locked: boolean
+  setLocked: Dispatch<SetStateAction<boolean>>
+
+  // DnD state
+  activeId: string | null
+  activeType: 'pane' | 'tab' | null
+  dismissIntentId: string | null
+
+  // Config
+  dragActivationDistance: number
+  snapThreshold: number
+  minSplitPercentage: number
+  maxSplitPercentage: number
+  enableDragToDismiss: boolean
+  dismissThreshold: number
+
+  // Public actions
+  removePane: (paneId: string) => void
+  addPane: (paneId: string, metadata?: Record<string, unknown>) => void
+  addTab: (paneId: string, tabId: string, metadata?: Record<string, unknown>) => void
+  updateTabMetadata: (tabId: string, updater: ...) => void
+  updatePaneLock: (paneId: string, locked: boolean) => void
+  selectTab: (paneId: string, tabId: string) => void
+  mergeTab: (draggedTabId: string, targetPaneId: string) => void
+  removeTab: (tabId: string) => void
+  splitPane: (targetId: string, direction: SplitDirection, splitType: 'left' | 'right' | 'top' | 'bottom', paneToAdd: string) => void
+  updateSplitPercentage: (currentNode: SplitNode, percentage: number) => void
+  moveTab: (draggedTabId: string, targetTabId: string, position?: 'before' | 'after') => void
+
+  // Public queries
+  findPaneById: (paneId: string) => PaneNode | null
+  findPaneContainingTab: (tabId: string) => PaneNode | null
+  findTabById: (tabId: string) => TabDetails | null
+}
+
+// ZeugmaContextValue is the combined state + actions interface
+// exposed by useZeugmaContext(). It includes all of ZeugmaController
+// plus the renderPane and classNames configuration.
+export interface ZeugmaContextValue extends ZeugmaStateValue, ZeugmaActionsValue {}
+```
+
+### Computed Layout Types (from `react-zeugma/utils`)
+
+```ts
+export interface ComputedPane {
+  paneId: string
+  left: number // percentage
+  top: number // percentage
+  width: number // percentage
+  height: number // percentage
+  node: PaneNode
+}
+
+export interface ComputedSplitter {
+  id: string
+  currentNode: SplitNode
+  direction: SplitDirection
+  left: number
+  top: number
+  width: number
+  height: number
+  parentLeft: number
+  parentTop: number
+  parentWidth: number
+  parentHeight: number
 }
 ```
 
@@ -591,6 +858,7 @@ interface ZeugmaClassNames {
   dismissPreview?: string // Applied to the background dismiss zone indicator during a drag-out dismiss gesture
   lockedPreview?: string // Applied to drop zone indicator when hovering over a locked pane
   tabDropPreview?: string // Applied to the drop placeholder line element during tab drags
+  tabSeparator?: string // Applied to the separator line between non-active adjacent tabs
 }
 ```
 

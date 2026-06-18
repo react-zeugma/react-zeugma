@@ -393,7 +393,7 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
     }
 
     // Check for root split drop
-    const rootMatch = overIdStr.match(/^drop-root-(1\/3|1\/2)-(top|bottom|left|right|start|end)$/)
+    const rootMatch = overIdStr.match(/^drop-root-(1\/4|1\/3)-(top|bottom|left|right|start|end)$/)
     if (rootMatch) {
       const [, fraction, rawEdge] = rootMatch
       let edge = rawEdge
@@ -430,7 +430,9 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
         const isRow = edge === 'left' || edge === 'right'
         const isFirst = edge === 'left' || edge === 'top'
         let splitPercentage = 50
-        if (fraction === '1/3') {
+        if (fraction === '1/4') {
+          splitPercentage = isFirst ? 25 : 75
+        } else if (fraction === '1/3') {
           splitPercentage = isFirst ? 100 / 3 : 200 / 3
         }
 

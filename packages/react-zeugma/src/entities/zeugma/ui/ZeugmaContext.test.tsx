@@ -108,6 +108,7 @@ describe('Tab Drop Preview rendering', () => {
     },
     locked: false,
     setLocked: () => {},
+    popoutTabs: {},
     findPaneById: () => null,
     findPaneContainingTab: () => null,
     findTabById: () => null,

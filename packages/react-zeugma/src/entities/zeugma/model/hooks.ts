@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
+import { copyStyles } from '../../../shared/lib/dom'
 
 /**
  * Custom hook to track the latest pointer/touch coordinate relative to the viewport during dragging.
@@ -72,4 +73,84 @@ export function usePortalRegistry() {
   }, [])
 
   return { portalTargets, registerPortalTarget }
+}
+
+export interface UsePopupWindowOptions {
+  tabId: string
+  isOpenedInNewWindow: boolean
+  onClose: () => void
+}
+
+export function usePopupWindow({ tabId, isOpenedInNewWindow, onClose }: UsePopupWindowOptions) {
+  const popupRef = useRef<Window | null>(null)
+  const [popupContainer, setPopupContainer] = useState<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    let intervalId: ReturnType<typeof setTimeout> | null = null
+
+    if (isOpenedInNewWindow) {
+      if (!popupRef.current || popupRef.current.closed) {
+        const winName = `zeugma-tab-${tabId.replace(/[^a-zA-Z0-9]/g, '_')}`
+        const win = window.open(
+          '',
+          winName,
+          'width=800,height=600,menubar=no,toolbar=no,location=no,status=no,resizable=yes',
+        )
+
+        if (win) {
+          popupRef.current = win
+
+          // Set document title
+          const title = tabId.includes('/') ? tabId.split('/').pop()! : tabId
+          win.document.title = title
+
+          // Copy stylesheets from main window
+          copyStyles(document, win.document)
+
+          // Create container for React portal
+          const container = win.document.createElement('div')
+          container.id = 'zeugma-popup-root'
+          win.document.body.appendChild(container)
+
+          setPopupContainer(container)
+
+          win.addEventListener('beforeunload', onClose)
+
+          // Polling interval to detect close
+          intervalId = setInterval(() => {
+            if (win.closed) {
+              onClose()
+            }
+          }, 300)
+        } else {
+          console.warn('Popup window blocked or failed to open.')
+          onClose()
+        }
+      }
+    } else {
+      if (popupRef.current && !popupRef.current.closed) {
+        popupRef.current.close()
+      }
+      popupRef.current = null
+      setPopupContainer(null)
+    }
+
+    return () => {
+      if (intervalId) clearInterval(intervalId)
+      if (popupRef.current) {
+        popupRef.current.removeEventListener('beforeunload', onClose)
+      }
+    }
+  }, [isOpenedInNewWindow, tabId, onClose])
+
+  // Clean up popup on unmount
+  useEffect(() => {
+    return () => {
+      if (popupRef.current && !popupRef.current.closed) {
+        popupRef.current.close()
+      }
+    }
+  }, [])
+
+  return { popupWindow: popupRef.current, popupContainer }
 }

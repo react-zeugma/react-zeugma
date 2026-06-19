@@ -18,7 +18,6 @@ import {
   X,
   Activity,
   Bot,
-  ExternalLink,
 } from 'lucide-react'
 import { Zeugma, PaneTree, Pane, DragHandle, Tabs, useZeugma, PaneRenderProps } from 'react-zeugma'
 
@@ -182,23 +181,6 @@ export function ZeugmaDemoIDE({
                   {!isSidebar && (
                     <>
                       <button
-                        onClick={() => {
-                          const activeTabId = paneProps.activeTabId
-                          const isPopout = !!outerZeugma.popoutTabs[activeTabId]
-                          outerZeugma.setTabPopout(activeTabId, !isPopout)
-                        }}
-                        className={`w-5 h-5 flex items-center justify-center rounded text-[#858585] hover:text-white hover:bg-zinc-800 transition-colors cursor-pointer ${
-                          outerZeugma.popoutTabs[paneProps.activeTabId] ? 'text-indigo-400' : ''
-                        }`}
-                        title={
-                          outerZeugma.popoutTabs[paneProps.activeTabId]
-                            ? 'Restore Active Tab'
-                            : 'Open Active Tab in New Window'
-                        }
-                      >
-                        <ExternalLink className="w-3 h-3" />
-                      </button>
-                      <button
                         onClick={paneProps.toggleFullscreen}
                         className="w-5 h-5 flex items-center justify-center rounded text-[#858585] hover:text-white hover:bg-zinc-800 transition-colors cursor-pointer"
                         title={paneProps.isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
@@ -222,28 +204,14 @@ export function ZeugmaDemoIDE({
               </div>
 
               <div className="flex-1 flex flex-col min-h-0 bg-[#1e1e1e] relative h-full overflow-hidden">
-                {outerZeugma.popoutTabs[paneProps.activeTabId] ? (
-                  <div className="flex flex-col items-center justify-center h-full w-full bg-[#1e1e1e] text-[#858585] text-xs font-mono select-none p-4 text-center">
-                    <div className="mb-2">This tab is open in a separate window.</div>
-                    <button
-                      onClick={() => {
-                        outerZeugma.setTabPopout(paneProps.activeTabId, false)
-                      }}
-                      className="px-2 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-[10px] cursor-pointer transition-colors"
-                    >
-                      Restore Tab
-                    </button>
-                  </div>
-                ) : (
-                  paneProps.renderActiveTab()
-                )}
+                {paneProps.renderActiveTab()}
               </div>
             </div>
           )
         }}
       </Pane>
     ),
-    [locked, outerZeugma.popoutTabs, outerZeugma.setTabPopout],
+    [locked],
   )
 
   // ── Tab content ─────────────────────────────────────────────────────────────

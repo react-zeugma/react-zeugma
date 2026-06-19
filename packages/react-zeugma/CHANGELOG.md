@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 6.2.1
+
+### Patch Changes
+
+- Add rootDropPreview configuration and update drop zone styling and dimensions.
+
 ## 6.2.0
 
 ### Minor Changes

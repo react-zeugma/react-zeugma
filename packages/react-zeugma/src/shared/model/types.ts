@@ -189,6 +189,8 @@ export interface ZeugmaClassNames {
   paneLocked?: string
   /** CSS class applied to drop zone indicators when hovering over layout edges to split a pane. */
   dropPreview?: string
+  /** CSS class applied to root split drop zone preview. */
+  rootDropPreview?: string
   /** CSS class applied to the custom cursor-following drag preview portal wrapper. */
   dragOverlay?: string
   /** CSS class applied to the drag-to-resize split bar handles. */

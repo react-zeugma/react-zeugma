@@ -305,18 +305,16 @@ Calculates the target insertion index for a dragged tab within a list of tabs. R
 
 Retrieves or initializes a hidden container `div` appended to `document.body` for sheltering portal elements while they are inactive or popped out.
 
----
-
 ## Popping Out Tabs (Open in a New Window)
 
 `react-zeugma` includes built-in support for popping out tab panels into separate browser windows (popouts) with **zero React component unmounting or state loss**.
 
 ### How it Works
 
-1. **State-Driven**: The popped-out state is controlled via the tab's metadata under the `openInNewWindow` boolean key.
+1. **State-Driven**: The popped-out state of tabs is tracked in a dedicated `popoutTabs` state map (mapping tab IDs to booleans) on the controller.
 2. **Stable Portal target**: The React portal container reference is kept stable, and `document.adoptNode` is used to migrate the DOM container directly between parent and popup documents, keeping internal component state (like inputs, terminal histories, or connections) fully intact.
 3. **Style Syncing**: Active stylesheets and link tags are automatically copied from the parent workspace into the popup window on creation.
-4. **Auto-Restoration**: Close actions on the popup window automatically reset the metadata state to `openInNewWindow: false` and restore the tab wrapper back to the main document layout.
+4. **Auto-Restoration**: Close actions on the popup window automatically update the state via `setTabPopout(tabId, false)` and restore the tab wrapper back to the main document layout.
 
 ### Integration Recipe
 
@@ -330,15 +328,11 @@ Inside your pane header or controls, add a button to toggle the popout state of 
 <button
   onClick={() => {
     const activeTabId = paneProps.activeTabId
-    const isPopout = !!paneProps.tabsMetadata?.[activeTabId]?.openInNewWindow
-
-    paneProps.updateTabMetadata(activeTabId, (current) => ({
-      ...current,
-      openInNewWindow: !isPopout,
-    }))
+    const isPopout = !!zeugma.popoutTabs[activeTabId]
+    zeugma.setTabPopout(activeTabId, !isPopout)
   }}
 >
-  {paneProps.tabsMetadata?.[paneProps.activeTabId]?.openInNewWindow ? 'Restore' : 'Popout'}
+  {zeugma.popoutTabs[paneProps.activeTabId] ? 'Restore' : 'Popout'}
 </button>
 ```
 
@@ -348,15 +342,12 @@ When a tab is open in a separate window, render a custom placeholder inside the 
 
 ```tsx
 <div className="pane-body">
-  {paneProps.tabsMetadata?.[paneProps.activeTabId]?.openInNewWindow ? (
+  {zeugma.popoutTabs[paneProps.activeTabId] ? (
     <div className="popout-placeholder">
       <p>This tab is open in a separate window.</p>
       <button
         onClick={() => {
-          paneProps.updateTabMetadata(paneProps.activeTabId, (current) => ({
-            ...current,
-            openInNewWindow: false,
-          }))
+          zeugma.setTabPopout(paneProps.activeTabId, false)
         }}
       >
         Restore Tab

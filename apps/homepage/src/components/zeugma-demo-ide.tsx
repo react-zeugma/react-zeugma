@@ -184,19 +184,14 @@ export function ZeugmaDemoIDE({
                       <button
                         onClick={() => {
                           const activeTabId = paneProps.activeTabId
-                          const isPopout = !!paneProps.tabsMetadata?.[activeTabId]?.openInNewWindow
-                          paneProps.updateTabMetadata(activeTabId, (current) => ({
-                            ...current,
-                            openInNewWindow: !isPopout,
-                          }))
+                          const isPopout = !!outerZeugma.popoutTabs[activeTabId]
+                          outerZeugma.setTabPopout(activeTabId, !isPopout)
                         }}
                         className={`w-5 h-5 flex items-center justify-center rounded text-[#858585] hover:text-white hover:bg-zinc-800 transition-colors cursor-pointer ${
-                          paneProps.tabsMetadata?.[paneProps.activeTabId]?.openInNewWindow
-                            ? 'text-indigo-400'
-                            : ''
+                          outerZeugma.popoutTabs[paneProps.activeTabId] ? 'text-indigo-400' : ''
                         }`}
                         title={
-                          paneProps.tabsMetadata?.[paneProps.activeTabId]?.openInNewWindow
+                          outerZeugma.popoutTabs[paneProps.activeTabId]
                             ? 'Restore Active Tab'
                             : 'Open Active Tab in New Window'
                         }
@@ -227,15 +222,12 @@ export function ZeugmaDemoIDE({
               </div>
 
               <div className="flex-1 flex flex-col min-h-0 bg-[#1e1e1e] relative h-full overflow-hidden">
-                {paneProps.tabsMetadata?.[paneProps.activeTabId]?.openInNewWindow ? (
+                {outerZeugma.popoutTabs[paneProps.activeTabId] ? (
                   <div className="flex flex-col items-center justify-center h-full w-full bg-[#1e1e1e] text-[#858585] text-xs font-mono select-none p-4 text-center">
                     <div className="mb-2">This tab is open in a separate window.</div>
                     <button
                       onClick={() => {
-                        paneProps.updateTabMetadata(paneProps.activeTabId, (current) => ({
-                          ...current,
-                          openInNewWindow: false,
-                        }))
+                        outerZeugma.setTabPopout(paneProps.activeTabId, false)
                       }}
                       className="px-2 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-[10px] cursor-pointer transition-colors"
                     >
@@ -251,7 +243,7 @@ export function ZeugmaDemoIDE({
         }}
       </Pane>
     ),
-    [locked],
+    [locked, outerZeugma.popoutTabs, outerZeugma.setTabPopout],
   )
 
   // ── Tab content ─────────────────────────────────────────────────────────────

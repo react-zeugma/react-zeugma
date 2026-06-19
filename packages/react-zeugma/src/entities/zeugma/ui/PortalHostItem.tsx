@@ -14,11 +14,10 @@ export const PortalHostItem: React.FC<PortalHostItemProps> = React.memo(
     const [mounted, setMounted] = useState(false)
     const wrapperRef = useRef<HTMLDivElement | null>(null)
 
-    const { findTabById } = useZeugmaState()
-    const { updateTabMetadata } = useZeugmaActions()
+    const { popoutTabs } = useZeugmaState()
+    const { setTabPopout } = useZeugmaActions()
 
-    const tabDetails = findTabById(tabId)
-    const isOpenedInNewWindow = !!tabDetails?.metadata?.openInNewWindow
+    const isOpenedInNewWindow = !!popoutTabs[tabId]
 
     useEffect(() => {
       setMounted(true)
@@ -31,14 +30,8 @@ export const PortalHostItem: React.FC<PortalHostItemProps> = React.memo(
         const hiddenContainer = getOrCreateHiddenContainer('zeugma-hidden-portal-container')
         hiddenContainer.appendChild(wrapperRef.current)
       }
-      updateTabMetadata(tabId, (current) => {
-        if (!current) return undefined
-        return {
-          ...current,
-          openInNewWindow: false,
-        }
-      })
-    }, [tabId, updateTabMetadata])
+      setTabPopout(tabId, false)
+    }, [tabId, setTabPopout])
 
     const { popupWindow, popupContainer } = usePopupWindow({
       tabId,

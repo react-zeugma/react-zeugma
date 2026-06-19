@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 6.1.1
+
+### Patch Changes
+
+- Refactored popped-out tab state tracking: Migrated the ephemeral `openInNewWindow` window state out of the generic layout `tabsMetadata` tree into a dedicated `popoutTabs` state map and `setTabPopout` action directly on the `ZeugmaController` context.
+
 ## 6.1.0
 
 ### Minor Changes

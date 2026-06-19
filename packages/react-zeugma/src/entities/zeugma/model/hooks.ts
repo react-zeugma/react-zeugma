@@ -87,6 +87,7 @@ export function usePopupWindow({ tabId, isOpenedInNewWindow, onClose }: UsePopup
 
   useEffect(() => {
     let intervalId: ReturnType<typeof setTimeout> | null = null
+    let timeoutId: ReturnType<typeof setTimeout> | null = null
 
     if (isOpenedInNewWindow) {
       if (!popupRef.current || popupRef.current.closed) {
@@ -104,17 +105,30 @@ export function usePopupWindow({ tabId, isOpenedInNewWindow, onClose }: UsePopup
           const title = tabId.includes('/') ? tabId.split('/').pop()! : tabId
           win.document.title = title
 
-          // Copy stylesheets from main window
-          copyStyles(document, win.document)
-
-          // Create container for React portal
-          const container = win.document.createElement('div')
-          container.id = 'zeugma-popup-root'
-          win.document.body.appendChild(container)
-
-          setPopupContainer(container)
-
           win.addEventListener('beforeunload', onClose)
+
+          // 300ms delay to let the document paint and stabilize
+          timeoutId = setTimeout(() => {
+            // Copy stylesheets and document attributes from main window
+            copyStyles(document, win.document)
+
+            // Setup body layout
+            win.document.body.style.margin = '0'
+            win.document.body.style.padding = '0'
+
+            let container = win.document.getElementById(
+              'zeugma-popup-root',
+            ) as HTMLDivElement | null
+            if (!container) {
+              container = win.document.createElement('div')
+              container.id = 'zeugma-popup-root'
+              container.style.width = '100%'
+              container.style.height = '100vh'
+              win.document.body.appendChild(container)
+            }
+
+            setPopupContainer(container)
+          }, 300)
 
           // Polling interval to detect close
           intervalId = setInterval(() => {
@@ -137,6 +151,7 @@ export function usePopupWindow({ tabId, isOpenedInNewWindow, onClose }: UsePopup
 
     return () => {
       if (intervalId) clearInterval(intervalId)
+      if (timeoutId) clearTimeout(timeoutId)
       if (popupRef.current) {
         popupRef.current.removeEventListener('beforeunload', onClose)
       }

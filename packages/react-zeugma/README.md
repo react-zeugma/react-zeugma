@@ -359,6 +359,29 @@ When a tab is open in a separate window, render a custom placeholder inside the 
 </div>
 ```
 
+#### 3. Handling Portals, Popovers, and Dialogs in Popout Windows
+
+When widgets are popped out, they render in a separate window document. However, standard library portals (like Radix UI popovers, dropdowns, dialogs, or custom `createPortal` implementations) target `document.body` by default, which refers to the **main window's document**.
+
+##### Automatic Redirection (Zero Configuration)
+
+To make this transparent, `react-zeugma` automatically intercepts and redirects all DOM portal creation calls (like accesses to `document.body`, `document.documentElement`, and `document.createElement`) to the popped-out window's document during the tab's render phase. **Any standard dropdown, popover, or modal (e.g. Radix UI, shadcn/ui) will automatically open inside the correct window out of the box.**
+
+##### Manual DOM Operations (`useTabWindow`)
+
+If you are performing custom manual DOM manipulations outside React or want to access the correct window environment directly, `react-zeugma` wraps all widgets in a `TabWindowContext` and provides a `useTabWindow()` hook. The hook returns the correct `window` and `document` references corresponding to the tab's current location (main or popup window):
+
+```tsx
+import { useTabWindow } from 'react-zeugma'
+
+export function MyWidget() {
+  const { document: tabDoc, window: tabWin } = useTabWindow()
+
+  // Access the current active document or window context:
+  // e.g., tabDoc.body or adding event listeners to tabWin
+}
+```
+
 ---
 
 ## Custom Styling

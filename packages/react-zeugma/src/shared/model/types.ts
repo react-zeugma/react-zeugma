@@ -325,3 +325,8 @@ export interface ZeugmaContextValue extends ZeugmaStateValue, ZeugmaActionsValue
 export interface PortalRegistryValue {
   registerPortalTarget: (tabId: string, el: HTMLDivElement | null) => void
 }
+
+export interface TabWindowValue {
+  window: Window | null
+  document: Document | null
+}

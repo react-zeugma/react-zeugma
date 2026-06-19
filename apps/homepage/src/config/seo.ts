@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 
 export const globalMetadata: Metadata = {
-  metadataBase: new URL('https://react-zeugma.vercel.app'),
+  metadataBase: new URL('https://react-zeugma.com'),
   title: {
     default: 'react-zeugma - Recursive Drag-and-Drop Workspace Layout Engine for React',
     template: '%s | react-zeugma',
@@ -48,7 +48,7 @@ export const globalMetadata: Metadata = {
     description:
       'A flexible, headless, and completely unopinionated workspace layout engine for React. Split, drag, and resize panes recursively.',
     type: 'website',
-    url: 'https://react-zeugma.vercel.app',
+    url: 'https://react-zeugma.com',
     siteName: 'react-zeugma',
     images: [
       {
@@ -85,7 +85,7 @@ export const demoMetadata: Metadata = {
     title: 'Live Demo - react-zeugma',
     description:
       'Try react-zeugma layout manager in an interactive workspace with file explorer, code editor, and live preview panels.',
-    url: 'https://react-zeugma.vercel.app/demo',
+    url: 'https://react-zeugma.com/demo',
   },
   alternates: {
     canonical: '/demo',
@@ -100,7 +100,7 @@ export const docsMetadata: Metadata = {
     title: 'Documentation - react-zeugma',
     description:
       'Detailed API references, installation instructions, quick-start guide, custom styling, and tree mutation utility documentation for react-zeugma.',
-    url: 'https://react-zeugma.vercel.app/docs',
+    url: 'https://react-zeugma.com/docs',
   },
   alternates: {
     canonical: '/docs',
@@ -116,7 +116,7 @@ export const homeJsonLd = {
   applicationCategory: 'DeveloperApplication',
   operatingSystem: 'All',
   license: 'https://github.com/react-zeugma/react-zeugma/blob/main/LICENSE',
-  url: 'https://react-zeugma.vercel.app',
+  url: 'https://react-zeugma.com',
   repository: 'https://github.com/react-zeugma/react-zeugma',
   downloadUrl: 'https://www.npmjs.com/package/react-zeugma',
   author: {

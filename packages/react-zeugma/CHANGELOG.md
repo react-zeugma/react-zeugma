@@ -1,5 +1,17 @@
 # react-zeugma
 
+## 6.1.0
+
+### Minor Changes
+
+- **Open in a New Window Feature (Popout Tabs)**:
+  - Added support for popping out tabs into separate popup window views via the `openInNewWindow` metadata property.
+  - Implemented stable React portal target management using DOM-level `document.adoptNode` and `win.document.adoptNode` migration, preventing components from unmounting and keeping widget runtime states (like input fields, scroll offsets, etc.) completely intact when opening and closing popups.
+  - Implemented automatic styling synchronisation that copies stylesheets dynamically from the parent workspace document to the popped-out document context.
+  - Set up window monitoring via `beforeunload` events and polling to automatically restore popped-out tabs back to the main workspace layout when closed.
+  - Added the `getOrCreateHiddenContainer` DOM helper utility exported from `react-zeugma/utils`.
+  - Added the `usePopupWindow` custom lifecycle hook.
+
 ## 6.0.5
 
 ### Patch Changes

@@ -301,6 +301,73 @@ Recursively computes the absolute position and dimensions (as percentages relati
 
 Calculates the target insertion index for a dragged tab within a list of tabs. Returns `-1` if the drop target is not in the list.
 
+#### `getOrCreateHiddenContainer(id: string): HTMLElement`
+
+Retrieves or initializes a hidden container `div` appended to `document.body` for sheltering portal elements while they are inactive or popped out.
+
+---
+
+## Popping Out Tabs (Open in a New Window)
+
+`react-zeugma` includes built-in support for popping out tab panels into separate browser windows (popouts) with **zero React component unmounting or state loss**.
+
+### How it Works
+
+1. **State-Driven**: The popped-out state is controlled via the tab's metadata under the `openInNewWindow` boolean key.
+2. **Stable Portal target**: The React portal container reference is kept stable, and `document.adoptNode` is used to migrate the DOM container directly between parent and popup documents, keeping internal component state (like inputs, terminal histories, or connections) fully intact.
+3. **Style Syncing**: Active stylesheets and link tags are automatically copied from the parent workspace into the popup window on creation.
+4. **Auto-Restoration**: Close actions on the popup window automatically reset the metadata state to `openInNewWindow: false` and restore the tab wrapper back to the main document layout.
+
+### Integration Recipe
+
+To enable popping out tabs in your dashboard:
+
+#### 1. Add a Popout Toggle Button
+
+Inside your pane header or controls, add a button to toggle the popout state of the active tab:
+
+```tsx
+<button
+  onClick={() => {
+    const activeTabId = paneProps.activeTabId
+    const isPopout = !!paneProps.tabsMetadata?.[activeTabId]?.openInNewWindow
+
+    paneProps.updateTabMetadata(activeTabId, (current) => ({
+      ...current,
+      openInNewWindow: !isPopout,
+    }))
+  }}
+>
+  {paneProps.tabsMetadata?.[paneProps.activeTabId]?.openInNewWindow ? 'Restore' : 'Popout'}
+</button>
+```
+
+#### 2. Display a Placeholder in the Workspace Layout
+
+When a tab is open in a separate window, render a custom placeholder inside the main workspace pane instead of rendering the tab's active content:
+
+```tsx
+<div className="pane-body">
+  {paneProps.tabsMetadata?.[paneProps.activeTabId]?.openInNewWindow ? (
+    <div className="popout-placeholder">
+      <p>This tab is open in a separate window.</p>
+      <button
+        onClick={() => {
+          paneProps.updateTabMetadata(paneProps.activeTabId, (current) => ({
+            ...current,
+            openInNewWindow: false,
+          }))
+        }}
+      >
+        Restore Tab
+      </button>
+    </div>
+  ) : (
+    paneProps.renderActiveTab()
+  )}
+</div>
+```
+
 ---
 
 ## Custom Styling

@@ -1,5 +1,15 @@
 # react-zeugma
 
+## 6.2.0
+
+### Minor Changes
+
+- **Revert and Remove Popup Windows (Popout Tabs)**:
+  - Reverted and completely removed all code, utilities, state hooks, contexts, and helper APIs relating to the "Open in a New Window" (popout tabs) feature.
+  - Removed `popoutTabs` state map, `setTabPopout` actions, `TabWindowContext`, `useTabWindow` hook, `usePopupWindow` hook, `copyStyles` and `getOrCreateHiddenContainer` DOM helpers.
+  - Portal redirection logic (adopted node, intercepting of `document.body` overrides, etc.) has been completely cleaned up.
+  - Reverted the workspace homepage demo to exclude popout trigger buttons and active tab placeholder rendering.
+
 ## 6.1.3
 
 ### Patch Changes

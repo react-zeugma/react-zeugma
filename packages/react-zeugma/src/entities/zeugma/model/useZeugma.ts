@@ -59,14 +59,6 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
   )
   const [locked, setLocked] = useState(initialLocked)
   const [layoutBeforeDrag, setLayoutBeforeDrag] = useState<TreeNode | null>(null)
-  const [popoutTabs, setPopoutTabs] = useState<Record<string, boolean>>({})
-
-  const handleSetTabPopout = useCallback((tabId: string, popped: boolean) => {
-    setPopoutTabs((prev) => {
-      if (prev[tabId] === popped) return prev
-      return { ...prev, [tabId]: popped }
-    })
-  }, [])
 
   const [activeId, setActiveId] = useState<string | null>(null)
   const [activeType, setActiveType] = useState<'pane' | 'tab' | null>(null)
@@ -283,7 +275,6 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
     setFullscreenPaneId,
     locked,
     setLocked,
-    popoutTabs,
     activeId,
     setActiveId,
     activeType,
@@ -322,7 +313,6 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
     mergeTab: handleMergeTab,
     moveTab: handleMoveTab,
     removeTab: handleRemoveTab,
-    setTabPopout: handleSetTabPopout,
 
     // Queries
     findPaneById: handleFindPaneById,

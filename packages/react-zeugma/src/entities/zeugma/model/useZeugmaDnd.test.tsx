@@ -41,8 +41,6 @@ describe('useZeugmaDnd Hook', () => {
     maxSplitPercentage: 95,
     enableDragToDismiss: false,
     dismissThreshold: 60,
-    popoutTabs: {},
-    setTabPopout: vi.fn(),
     removePane: vi.fn(),
     addPane: vi.fn(),
     addTab: vi.fn(),

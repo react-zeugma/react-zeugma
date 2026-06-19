@@ -94,8 +94,6 @@ export interface ZeugmaController {
   locked: boolean
   /** Programmatically updates the global locked status. */
   setLocked: Dispatch<SetStateAction<boolean>>
-  /** Map of tab IDs to their popped-out state. */
-  popoutTabs: Record<string, boolean>
 
   // Drag-and-drop orchestration state exposed publicly
   /** The ID of the active dragged item (pane or tab). */
@@ -170,8 +168,6 @@ export interface ZeugmaController {
   updateSplitPercentage: (currentNode: SplitNode, percentage: number) => void
   /** Moves/reorders a tab relative to another target tab. */
   moveTab: (draggedTabId: string, targetTabId: string, position?: 'before' | 'after') => void
-  /** Sets the popped-out state of a tab. */
-  setTabPopout: (tabId: string, popped: boolean) => void
 
   // Public Queries
   /** Find a PaneNode by its ID in the layout tree. */
@@ -241,8 +237,6 @@ export interface ZeugmaStateValue {
   locked: boolean
   /** Programmatically updates the global locked status. */
   setLocked: Dispatch<SetStateAction<boolean>>
-  /** Map of tab IDs to their popped-out state. */
-  popoutTabs: Record<string, boolean>
   /** Find a PaneNode by its ID in the layout tree. */
   findPaneById: (paneId: string) => PaneNode | null
   /** Find the PaneNode containing the given tab ID in the layout tree. */
@@ -316,17 +310,10 @@ export interface ZeugmaActionsValue {
   updateSplitPercentage: (currentNode: SplitNode, percentage: number) => void
   /** Moves/reorders a tab relative to another target tab. */
   moveTab: (draggedTabId: string, targetTabId: string, position?: 'before' | 'after') => void
-  /** Sets the popped-out state of a tab. */
-  setTabPopout: (tabId: string, popped: boolean) => void
 }
 
 export interface ZeugmaContextValue extends ZeugmaStateValue, ZeugmaActionsValue {}
 
 export interface PortalRegistryValue {
   registerPortalTarget: (tabId: string, el: HTMLDivElement | null) => void
-}
-
-export interface TabWindowValue {
-  window: Window | null
-  document: Document | null
 }

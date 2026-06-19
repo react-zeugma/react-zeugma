@@ -30,7 +30,6 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
     setFullscreenPaneId,
     locked,
     setLocked,
-    popoutTabs,
     findPaneById,
     findPaneContainingTab,
     findTabById,
@@ -63,7 +62,6 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
     splitPane,
     updateSplitPercentage,
     moveTab,
-    setTabPopout,
   } = internalProps
 
   const { portalTargets, registerPortalTarget } = usePortalRegistry()
@@ -130,7 +128,6 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
       maxSplitPercentage,
       locked,
       setLocked,
-      popoutTabs,
       findPaneById,
       findPaneContainingTab,
       findTabById,
@@ -155,7 +152,6 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
       handleResizeEnd,
       locked,
       setLocked,
-      popoutTabs,
       findPaneById,
       findPaneContainingTab,
       findTabById,
@@ -186,7 +182,6 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
       splitPane,
       updateSplitPercentage,
       moveTab,
-      setTabPopout,
     }),
     [
       removePane,
@@ -202,7 +197,6 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
       splitPane,
       updateSplitPercentage,
       moveTab,
-      setTabPopout,
     ],
   )
 

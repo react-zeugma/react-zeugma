@@ -369,3 +369,130 @@ export const defaultOuterLayout: TreeNode = {
     activeTabId: 'copilot',
   },
 }
+
+// ─── Layout Presets ───────────────────────────────────────────────────────────
+
+export interface LayoutPreset {
+  key: string
+  label: string
+  layout: TreeNode
+}
+
+export const LAYOUT_PRESETS: LayoutPreset[] = [
+  {
+    key: 'default',
+    label: 'Default IDE',
+    layout: defaultOuterLayout,
+  },
+  {
+    key: 'focused',
+    label: 'Focused Editor',
+    layout: {
+      type: 'split',
+      direction: 'column',
+      splitPercentage: 75,
+      first: {
+        type: 'pane',
+        id: 'pane-editor',
+        tabs: [
+          'README.md',
+          'src/App.tsx',
+          'src/components/WorkspacePane.tsx',
+          'src/styles/App.css',
+        ],
+        activeTabId: 'src/App.tsx',
+      },
+      second: {
+        type: 'pane',
+        id: 'pane-terminal',
+        tabs: ['terminal'],
+        activeTabId: 'terminal',
+      },
+    },
+  },
+  {
+    key: 'side-by-side',
+    label: 'Side-by-Side',
+    layout: {
+      type: 'split',
+      direction: 'row',
+      splitPercentage: 50,
+      first: {
+        type: 'pane',
+        id: 'pane-editor-left',
+        tabs: ['src/App.tsx', 'README.md'],
+        activeTabId: 'src/App.tsx',
+      },
+      second: {
+        type: 'split',
+        direction: 'column',
+        splitPercentage: 70,
+        first: {
+          type: 'pane',
+          id: 'pane-editor-right',
+          tabs: ['src/components/WorkspacePane.tsx', 'src/styles/App.css'],
+          activeTabId: 'src/components/WorkspacePane.tsx',
+        },
+        second: {
+          type: 'pane',
+          id: 'pane-terminal',
+          tabs: ['terminal', 'copilot'],
+          activeTabId: 'terminal',
+        },
+      },
+    },
+  },
+  {
+    key: 'minimal',
+    label: 'Minimal',
+    layout: {
+      type: 'pane',
+      id: 'pane-editor',
+      tabs: ['src/App.tsx'],
+      activeTabId: 'src/App.tsx',
+    },
+  },
+  {
+    key: 'three-column',
+    label: 'Three Column',
+    layout: {
+      type: 'split',
+      direction: 'row',
+      splitPercentage: 25,
+      first: {
+        type: 'pane',
+        id: 'pane-explorer',
+        tabs: ['explorer'],
+        activeTabId: 'explorer',
+      },
+      second: {
+        type: 'split',
+        direction: 'row',
+        splitPercentage: 60,
+        first: {
+          type: 'split',
+          direction: 'column',
+          splitPercentage: 70,
+          first: {
+            type: 'pane',
+            id: 'pane-editor',
+            tabs: ['src/App.tsx', 'src/components/WorkspacePane.tsx'],
+            activeTabId: 'src/App.tsx',
+          },
+          second: {
+            type: 'pane',
+            id: 'pane-terminal',
+            tabs: ['terminal'],
+            activeTabId: 'terminal',
+          },
+        },
+        second: {
+          type: 'pane',
+          id: 'pane-inspector',
+          tabs: ['copilot', 'inspector'],
+          activeTabId: 'copilot',
+        },
+      },
+    },
+  },
+]

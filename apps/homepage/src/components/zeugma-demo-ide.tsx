@@ -19,10 +19,11 @@ import {
   Activity,
   Bot,
 } from 'lucide-react'
+import { LayoutPresetDropdown } from './zeugma-demo-ide/LayoutPresetDropdown'
 import { Zeugma, PaneTree, Pane, DragHandle, Tabs, useZeugma, PaneRenderProps } from 'react-zeugma'
 
 import { SyntaxCode } from './syntax-code'
-import { FILES, defaultOuterLayout } from './mock-files'
+import { FILES, defaultOuterLayout, LAYOUT_PRESETS } from './mock-files'
 
 import { isTabOpenInTree, findActiveEditorPane } from './zeugma-demo-ide/utils'
 import { TabContentWrapper } from './zeugma-demo-ide/TabContentWrapper'
@@ -41,6 +42,7 @@ export function ZeugmaDemoIDE({
   hideChrome?: boolean
 }) {
   const [locked, setLocked] = useState(false)
+  const [activePreset, setActivePreset] = useState('default')
   const outerZeugma = useZeugma({ initialLayout: defaultOuterLayout })
 
   const handleReset = () => {
@@ -48,6 +50,16 @@ export function ZeugmaDemoIDE({
     outerZeugma.setLayout(defaultOuterLayout)
     setLocked(false)
     outerZeugma.setLocked(false)
+    setActivePreset('default')
+  }
+
+  const handlePresetSelect = (presetKey: string) => {
+    if (locked) return
+    const preset = LAYOUT_PRESETS.find((p) => p.key === presetKey)
+    if (preset) {
+      outerZeugma.setLayout(preset.layout)
+      setActivePreset(presetKey)
+    }
   }
 
   const handleOpenFile = (filename: string) => {
@@ -371,6 +383,15 @@ export function ZeugmaDemoIDE({
           </div>
 
           <div className="flex items-center gap-2 drag-cancel">
+            {/* Layout Preset Switcher */}
+            <LayoutPresetDropdown
+              activePreset={activePreset}
+              onSelectPreset={handlePresetSelect}
+              disabled={locked}
+            />
+
+            <span className="text-zinc-600">|</span>
+
             <button
               onClick={() => {
                 const nextLock = !locked

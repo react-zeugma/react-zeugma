@@ -69,7 +69,7 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
           tabs: ['tab-2'],
           activeTabId: 'tab-2',
         }
-        controllerInstance.setLayout(newLayout)
+        controllerInstance._internalSetLayout!(newLayout)
       }
     })
 
@@ -90,7 +90,7 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
           tabs: ['tab-2', 'tab-1'],
           activeTabId: 'tab-1',
         }
-        controllerInstance.setLayout(finalLayout)
+        controllerInstance._internalSetLayout!(finalLayout)
       }
     })
 
@@ -154,7 +154,7 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
           tabs: ['tab-2'],
           activeTabId: 'tab-2',
         }
-        controllerInstance.setLayout(newLayout)
+        controllerInstance._internalSetLayout!(newLayout)
       }
     })
 
@@ -185,7 +185,7 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
             activeTabId: 'tab-1',
           },
         }
-        controllerInstance.setLayout(finalLayout)
+        controllerInstance._internalSetLayout!(finalLayout)
       }
     })
 

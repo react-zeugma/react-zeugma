@@ -45,7 +45,7 @@ interface UseZeugmaDndProps extends ZeugmaController {
 export function useZeugmaDnd(props: UseZeugmaDndProps) {
   const {
     layout,
-    setLayout,
+    _internalSetLayout: setLayout,
     layoutBeforeDrag,
     setLayoutBeforeDrag,
     activeId,

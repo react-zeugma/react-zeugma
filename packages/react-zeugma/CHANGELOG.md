@@ -1,5 +1,12 @@
 # react-zeugma
 
+## 6.2.2
+
+### Patch Changes
+
+- Ensure `setLayout` resets transient/drag state when called publicly.
+- Make internal layout setter `_internalSetLayout` required on the controller context.
+
 ## 6.2.1
 
 ### Patch Changes

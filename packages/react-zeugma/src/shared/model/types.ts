@@ -84,8 +84,10 @@ export interface ZeugmaController {
   // State
   /** The current active layout tree structure, or null if empty. */
   layout: TreeNode | null
-  /** Updates the layout tree. */
+  /** Updates the layout tree. Also resets transient states like fullscreenPaneId. */
   setLayout: Dispatch<SetStateAction<TreeNode | null>>
+  /** @internal Raw layout setter used by DnD internals — does NOT reset transient states. */
+  _internalSetLayout: Dispatch<SetStateAction<TreeNode | null>>
   /** The ID of the pane currently zoomed to fullscreen, or null. */
   fullscreenPaneId: string | null
   /** Programmatically sets the fullscreen pane ID. */

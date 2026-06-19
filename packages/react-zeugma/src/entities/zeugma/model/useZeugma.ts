@@ -133,7 +133,22 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
     [wrapMutation],
   )
 
-  const setLayout = handleSetLayout
+  // Internal setter used by DnD — does NOT reset transient states
+  const _internalSetLayout = handleSetLayout
+
+  // Public setter — resets transient states when layout is replaced programmatically
+  const setLayout = useCallback(
+    (nextLayoutOrUpdater: SetStateAction<TreeNode | null>) => {
+      setLocalFullscreenPaneId(null)
+      onFullscreenChangeRef.current?.(null)
+      setLayoutBeforeDrag(null)
+      setActiveId(null)
+      setActiveType(null)
+      setDismissIntentId(null)
+      handleSetLayout(nextLayoutOrUpdater)
+    },
+    [handleSetLayout],
+  )
 
   // Layout Modification Actions using wrapped mutation functions
   const handleRemovePane = useCallback(
@@ -269,6 +284,7 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
   return {
     layout,
     setLayout,
+    _internalSetLayout,
     layoutBeforeDrag,
     setLayoutBeforeDrag,
     fullscreenPaneId,

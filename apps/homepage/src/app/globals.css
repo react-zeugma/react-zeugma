@@ -360,3 +360,13 @@ body {
   width: 1px;
   background-color: var(--border-primary);
 }
+
+/* Custom Root Drop Preview styles for Zeugma Demo IDE */
+.zeugma-root-drop-preview {
+  background-color: rgba(39, 39, 42, 0.5);
+  border: 1px solid rgba(63, 63, 70, 0.5);
+  backdrop-filter: blur(12px);
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}

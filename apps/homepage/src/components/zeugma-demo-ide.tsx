@@ -345,6 +345,7 @@ export function ZeugmaDemoIDE({
                 classNames={{
                   dropPreview:
                     'bg-zinc-800/50 border border-zinc-700 transition-all duration-200 shadow-lg',
+                  rootDropPreview: 'zeugma-root-drop-preview',
                   resizer: 'zeugma-resizer',
                   tabDropPreview: 'zeugma-tab-drop-preview',
                 }}

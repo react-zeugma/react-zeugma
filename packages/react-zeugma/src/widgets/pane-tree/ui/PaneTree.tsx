@@ -212,7 +212,9 @@ export const PaneTree: React.FC<PaneTreeProps> = ({
         }}
       >
         {renderContent()}
-        {activeId !== null && !locked && <RootDropZones activeClassName={classNames.dropPreview} />}
+        {activeId !== null && !locked && (
+          <RootDropZones activeClassName={classNames.rootDropPreview ?? classNames.dropPreview} />
+        )}
       </div>
     )
   }

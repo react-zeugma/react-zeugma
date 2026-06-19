@@ -87,6 +87,7 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
       classNames.pane,
       classNames.paneLocked,
       classNames.dropPreview,
+      classNames.rootDropPreview,
       classNames.dragOverlay,
       classNames.resizer,
       classNames.dismissPreview,

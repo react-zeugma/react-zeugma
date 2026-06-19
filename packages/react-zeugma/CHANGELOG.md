@@ -1,5 +1,14 @@
 # react-zeugma
 
+## 6.1.2
+
+### Patch Changes
+
+- Fixed a bug where popped-out tab portal target registration was not updated when target element mounted/unmounted. Refactored the internal registration handler in `Pane.tsx` to track the element as state (`targetEl`) instead of a simple ref to support layout transitions (popout/restore) and Fast Refresh (HMR).
+- Improved popout window CSS theme synchronization by copying all HTML and Body attributes (classes, styling, dataset keys) in `dom.ts` to ensure CSS variables and theme styles (e.g. Tailwind v4 and Next.js dark mode) propagate correctly.
+- Synchronized initial popup window document initialization via synchronous `document.write` in `hooks.ts` to prevent asynchronous browser `about:blank` document reload from wiping custom styles/elements.
+- Resolved TypeScript compiler typecheck errors on testing mock instances in `useZeugmaDnd.test.tsx` and `ZeugmaContext.test.tsx`.
+
 ## 6.1.1
 
 ### Patch Changes

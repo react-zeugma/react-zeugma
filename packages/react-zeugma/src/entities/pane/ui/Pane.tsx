@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useEffect, useContext, useRef } from 'react'
+import React, { useMemo, useCallback, useContext, useState, useEffect } from 'react'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
 import { useZeugmaState, useZeugmaActions, PortalRegistryContext } from '../../../shared'
 import { DragListenersCtx } from '../model/context'
@@ -135,7 +135,6 @@ export interface PaneProps {
 }
 
 export const Pane: React.FC<PaneProps> = ({ id, children, style, locked: propLocked = false }) => {
-  const targetRef = useRef<HTMLDivElement | null>(null)
   const {
     layout,
     activeId,
@@ -178,10 +177,19 @@ export const Pane: React.FC<PaneProps> = ({ id, children, style, locked: propLoc
   const dragging = activeId !== null && tabs.includes(activeId)
   const isFullscreen = fullscreenPaneId === id
 
+  const [targetEl, setTargetEl] = useState<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    registerPortalTarget(activeTabId, targetEl)
+    return () => {
+      registerPortalTarget(activeTabId, null)
+    }
+  }, [activeTabId, targetEl, registerPortalTarget])
+
   const renderActiveTab = useCallback(() => {
     return (
       <div
-        ref={targetRef}
+        ref={setTargetEl}
         id={`zeugma-tab-target-${activeTabId}`}
         className="zeugma-tab-content-wrapper"
         style={{
@@ -191,15 +199,6 @@ export const Pane: React.FC<PaneProps> = ({ id, children, style, locked: propLoc
       />
     )
   }, [activeTabId])
-
-  // Register portal targets using targetRef to avoid race conditions during drag & layout changes
-  useEffect(() => {
-    const el = targetRef.current
-    registerPortalTarget(activeTabId, el)
-    return () => {
-      registerPortalTarget(activeTabId, null)
-    }
-  }, [activeTabId, registerPortalTarget])
 
   const renderProps: PaneRenderProps = useMemo(
     () => ({

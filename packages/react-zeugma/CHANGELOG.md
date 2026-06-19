@@ -1,5 +1,13 @@
 # react-zeugma
 
+## 6.1.3
+
+### Patch Changes
+
+- Implemented automatic, zero-configuration React Portal and popup window document redirection. Intercepted DOM prototype elements (`body`, `documentElement`, `createElement`) and Node insertions (`appendChild`, `insertBefore`) to automatically redirect standard portals/popovers (e.g. Radix UI, shadcn/ui, Ant Design) to the correct popped-out window document context without manual configuration.
+- Added `TabWindowContext` and `useTabWindow` hook to expose the tab's current active window and document context.
+- Fixed a bug where HMR (Hot Module Replacement) caused tab content to go blank until tab selection changed.
+
 ## 6.1.2
 
 ### Patch Changes

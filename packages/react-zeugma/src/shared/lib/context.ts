@@ -4,6 +4,7 @@ import {
   ZeugmaActionsValue,
   PortalRegistryValue,
   ZeugmaDragStateValue,
+  TabWindowValue,
 } from '../model/types'
 
 export const ZeugmaStateContext = createContext<ZeugmaStateValue | undefined>(undefined)
@@ -33,4 +34,13 @@ export const useZeugmaDrag = (): ZeugmaDragStateValue => {
     throw new Error('useZeugmaDrag must be used within a Zeugma provider')
   }
   return drag
+}
+
+export const TabWindowContext = createContext<TabWindowValue>({
+  window: typeof window !== 'undefined' ? window : null,
+  document: typeof document !== 'undefined' ? document : null,
+})
+
+export const useTabWindow = (): TabWindowValue => {
+  return useContext(TabWindowContext)
 }

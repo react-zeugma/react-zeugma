@@ -1,14 +1,14 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { renderHook } from '@testing-library/react'
-import { useZeugma, useZeugmaContext, Zeugma } from '../../../index'
+import { useZeugma, useZeugmaContext, Zeugma, Pane } from '../../../index'
 import {
   useZeugmaState,
   useZeugmaActions,
   ZeugmaStateContext,
   ZeugmaDragContext,
 } from '../../../shared'
-import type { TreeNode, ZeugmaContextValue } from '../../../shared'
+import type { TreeNode, ZeugmaController } from '../../../shared'
 import { Tabs } from '../../pane/ui/Tabs'
 import * as dndKitCore from '@dnd-kit/core'
 
@@ -37,7 +37,7 @@ describe('Zeugma Context Provider & Consumers', () => {
   })
 
   it('should successfully render children and provide context values', () => {
-    let contextValue = null as unknown as ZeugmaContextValue
+    let contextValue: ZeugmaController | null = null
     const ConsumerComponent = () => {
       contextValue = useZeugmaContext()
       return <div data-testid="child">Child Component</div>
@@ -45,28 +45,64 @@ describe('Zeugma Context Provider & Consumers', () => {
 
     const TestWrapper = () => {
       const controller = useZeugma({ initialLayout })
-      return (
-        <Zeugma {...controller} renderPane={(id) => <div key={id} />}>
+      const renderPane = (paneId: string) => (
+        <Pane id={paneId}>
           <ConsumerComponent />
-        </Zeugma>
+        </Pane>
       )
+      return <Zeugma controller={controller} renderPane={renderPane} />
     }
 
     render(<TestWrapper />)
 
     expect(screen.getByTestId('child')).toBeDefined()
     expect(contextValue).not.toBeNull()
-    expect(contextValue.layout).toEqual(initialLayout)
+    expect(contextValue!.layout).toEqual(initialLayout)
 
     // Actions should be present
-    expect(typeof contextValue.addTab).toBe('function')
-    expect(typeof contextValue.addWidget).toBe('function')
-    expect(typeof contextValue.removePane).toBe('function')
-    expect(typeof contextValue.setFullscreenPaneId).toBe('function')
-    expect(typeof contextValue.setLocked).toBe('function')
-    expect(typeof contextValue.splitPane).toBe('function')
-    expect(typeof contextValue.updateSplitPercentage).toBe('function')
-    expect(typeof contextValue.moveTab).toBe('function')
+    expect(typeof contextValue!.addTab).toBe('function')
+    expect(typeof contextValue!.removePane).toBe('function')
+    expect(typeof contextValue!.setFullscreenPaneId).toBe('function')
+    expect(typeof contextValue!.setLocked).toBe('function')
+    expect(typeof contextValue!.splitPane).toBe('function')
+    expect(typeof contextValue!.updateSplitPercentage).toBe('function')
+    expect(typeof contextValue!.moveTab).toBe('function')
+  })
+
+  it('should pass tab metadata to Pane.Content render callback', () => {
+    const initialLayout: TreeNode = {
+      type: 'pane',
+      id: 'pane-1',
+      tabs: ['tab-1'],
+      activeTabId: 'tab-1',
+      tabsMetadata: {
+        'tab-1': { title: 'My Tab Title', customProp: 42 },
+      },
+    }
+
+    let receivedMetadata: Record<string, unknown> | undefined = undefined
+
+    const TestWrapper = () => {
+      const controller = useZeugma({ initialLayout })
+      const renderPane = (paneId: string) => (
+        <Pane id={paneId}>
+          <div data-testid="pane-root">
+            <Pane.Content>
+              {(tab) => {
+                receivedMetadata = tab.metadata
+                return <div data-testid="tab-content">{tab.id} Content</div>
+              }}
+            </Pane.Content>
+          </div>
+        </Pane>
+      )
+      return <Zeugma controller={controller} renderPane={renderPane} />
+    }
+
+    render(<TestWrapper />)
+
+    expect(screen.getByTestId('tab-content')).toBeDefined()
+    expect(receivedMetadata).toEqual({ title: 'My Tab Title', customProp: 42 })
   })
 })
 
@@ -97,7 +133,6 @@ describe('Tab Drop Preview rendering', () => {
   const defaultState = {
     layout: null,
     setLayout: () => {},
-    renderPane: () => null,
     activeId: 'tab-1',
     activeType: 'tab' as const,
     dismissIntentId: null,
@@ -111,6 +146,9 @@ describe('Tab Drop Preview rendering', () => {
     findPaneById: () => null,
     findPaneContainingTab: () => null,
     findTabById: () => null,
+    getTabMetadata: () => undefined,
+    getActiveTabMetadata: () => undefined,
+    renderPane: () => null,
   }
 
   it('should render the drop preview indicator before the target tab when position is before', () => {

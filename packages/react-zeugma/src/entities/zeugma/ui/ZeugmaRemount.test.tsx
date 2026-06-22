@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest'
 import { render, act } from '@testing-library/react'
 import { useEffect } from 'react'
-import { useZeugma, Zeugma, Pane, PaneTree } from '../../../index'
-import type { TreeNode, ZeugmaController } from '../../../shared'
+import { useZeugma, Zeugma, Pane } from '../../../index'
+import type { TreeNode, ZeugmaControllerInternal } from '../../../shared'
 
 describe('Zeugma Drag and Drop Widget Remounting', () => {
   it('should not remount widgets during tab move (reorder)', () => {
@@ -26,35 +26,38 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
       return <div data-testid={`widget-${tabId}`}>{tabId} Content</div>
     }
 
-    let controllerInstance: ZeugmaController | null = null
+    let controllerInstance: ZeugmaControllerInternal | null = null
 
     const TestWrapper = () => {
       const controller = useZeugma({ initialLayout })
-      controllerInstance = controller
-      return (
-        <Zeugma
-          {...controller}
-          renderPane={(paneId) => (
-            <Pane id={paneId}>
-              {(paneProps) => <div id={`pane-target-${paneId}`}>{paneProps.renderActiveTab()}</div>}
-            </Pane>
-          )}
-          renderWidget={(id) => <TestWidget tabId={id} />}
-        >
-          <PaneTree />
-        </Zeugma>
+      controllerInstance = controller as ZeugmaControllerInternal
+      const renderPane = (paneId: string) => (
+        <Pane id={paneId}>
+          <div id={`pane-target-${paneId}`}>
+            <Pane.Content>{(tab) => <TestWidget tabId={tab.id} />}</Pane.Content>
+          </div>
+        </Pane>
       )
+      return <Zeugma controller={controller} renderPane={renderPane} />
     }
 
     render(<TestWrapper />)
 
-    // Initially, both tabs are in the layout and registered.
-    // tab-1 and tab-2 should mount.
+    // In the new API, only active tabs render immediately (lazy mounting).
+    // Let's make tab-2 active once so both get mounted and registered.
+    act(() => {
+      controllerInstance?.selectTab('pane-1', 'tab-2')
+    })
+    act(() => {
+      controllerInstance?.selectTab('pane-1', 'tab-1')
+    })
+
     expect(mountCount).toBe(2)
     expect(unmountCount).toBe(0)
 
-    // Reset mountCount before drag
+    // Reset counters before drag
     mountCount = 0
+    unmountCount = 0
 
     // Simulate drag start on tab-1
     act(() => {
@@ -120,26 +123,35 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
       return <div data-testid={`widget-${tabId}`}>{tabId} Content</div>
     }
 
-    let controllerInstance: ZeugmaController | null = null
+    let controllerInstance: ZeugmaControllerInternal | null = null
 
     const TestWrapper = () => {
       const controller = useZeugma({ initialLayout })
-      controllerInstance = controller
-      return (
-        <Zeugma
-          {...controller}
-          renderPane={(id) => <div key={id} id={`pane-target-${id}`} />}
-          renderWidget={(id) => <TestWidget tabId={id} />}
-        >
-          <div>Workspace</div>
-        </Zeugma>
+      controllerInstance = controller as ZeugmaControllerInternal
+      const renderPane = (paneId: string) => (
+        <Pane id={paneId}>
+          <div id={`pane-target-${paneId}`}>
+            <Pane.Content>{(tab) => <TestWidget tabId={tab.id} />}</Pane.Content>
+          </div>
+        </Pane>
       )
+      return <Zeugma controller={controller} renderPane={renderPane} />
     }
 
     render(<TestWrapper />)
 
-    // Reset mountCount before drag
+    // In the new API, only active tabs render immediately (lazy mounting).
+    // Let's make tab-2 active once so both get mounted and registered.
+    act(() => {
+      controllerInstance?.selectTab('pane-1', 'tab-2')
+    })
+    act(() => {
+      controllerInstance?.selectTab('pane-1', 'tab-1')
+    })
+
+    // Reset counters before drag
     mountCount = 0
+    unmountCount = 0
 
     // Simulate drag start on tab-1
     act(() => {
@@ -208,20 +220,19 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
       return <div data-testid={`widget-${tabId}`}>{tabId} Content</div>
     }
 
-    let controllerInstance: ZeugmaController | null = null
+    let controllerInstance: ZeugmaControllerInternal | null = null
 
     const TestWrapper = () => {
       const controller = useZeugma({ initialLayout })
-      controllerInstance = controller
-      return (
-        <Zeugma
-          {...controller}
-          renderPane={(id) => <div key={id} id={`pane-target-${id}`} />}
-          renderWidget={(id) => <TestWidget tabId={id} />}
-        >
-          <div>Workspace</div>
-        </Zeugma>
+      controllerInstance = controller as ZeugmaControllerInternal
+      const renderPane = (paneId: string) => (
+        <Pane id={paneId}>
+          <div id={`pane-target-${paneId}`}>
+            <Pane.Content>{(tab) => <TestWidget tabId={tab.id} />}</Pane.Content>
+          </div>
+        </Pane>
       )
+      return <Zeugma controller={controller} renderPane={renderPane} />
     }
 
     render(<TestWrapper />)

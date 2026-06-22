@@ -65,26 +65,17 @@ export interface TabDetails {
 
 ## 2. Core Components
 
-### `<Zeugma>`
+#### `<Zeugma>`
 
-The root context provider. It handles the drag-and-drop event loop and coordinates the layout state.
+The root context provider. It handles the drag-and-drop event loop, coordinates the layout state, and internally renders the layout tree.
 
 #### Props
 
-- `...controllerProps: ZeugmaController` — The controller properties returned by the `useZeugma` hook (typically passed via `{...zeugma}`).
+- `controller: ZeugmaController` — The controller object returned by the `useZeugma` hook.
 - `renderPane: (paneId: string) => ReactNode` — Callback to render the contents of a pane given its ID.
-- `renderDragOverlay?: (activeId: string, type: 'pane' | 'tab') => ReactNode` — (Optional) Renders a custom cursor-following drag preview.
+- `renderDragOverlay?: (active: DragOverlayActiveItem) => ReactNode` — (Optional) Renders a custom cursor-following drag preview.
 - `classNames?: ZeugmaClassNames` — (Optional) CSS class overrides for styling various layout elements.
-- `renderWidget?: (tabId: string) => ReactNode` — (Optional) Render function mapping tab IDs to React elements. Used to render tab widgets inside portals.
-
-### `useZeugma(options)`
-
-A custom hook to manage the dashboard layout state.
-
-#### Options
-
-- `initialLayout: TreeNode | null` — Initial layout tree structure.
-- `locked?: boolean` — Whether the layout is globally locked.
+- `resizerSize?: number` — Thickness of the split resizer bars in pixels (defaults to `4`).
 - `dragActivationDistance?: number` — Minimum pointer drag distance (in pixels) required to activate dragging (defaults to `8`).
 - `snapThreshold?: number` — Threshold in pixels to snap layout resizers to adjacent edges (defaults to `8`).
 - `minSplitPercentage?: number` — Minimum resizing limit percentage (defaults to `5`).
@@ -93,88 +84,100 @@ A custom hook to manage the dashboard layout state.
 - `dismissThreshold?: number` — Distance in pixels outside container bounds required to trigger dismissal (defaults to `60`).
 - `onRemove?: (paneId: string) => void` — Callback when a pane is removed.
 - `onDragStart?: (activeId: string) => void` — Callback when dragging starts.
-- `onDragEnd?: (activeId: string, overId: string | null, dropAction: any) => void` — Callback when dragging ends.
+- `onDragEnd?: (activeId: string, overId: string | null, dropAction: { type: 'split' | 'move'; direction?: SplitDirection; position?: string } | null) => void` — Callback when dragging ends.
 - `onResizeStart?: (currentNode: SplitNode) => void` — Callback when resizing starts.
 - `onResize?: (currentNode: SplitNode, percentage: number) => void` — Callback during resizing.
 - `onResizeEnd?: (currentNode: SplitNode, percentage: number) => void` — Callback when resizing ends.
 - `onDismissIntentChange?: (paneId: string | null) => void` — Callback when drag-out intent changes.
+
+### `useZeugma(options)`
+
+A custom hook to manage the dashboard layout state (layout tree, global lock status, and fullscreen mode).
+
+#### Options
+
+- `initialLayout: TreeNode | null` — Initial layout tree structure for uncontrolled mode.
+- `layout?: TreeNode | null` — Controlled layout tree structure.
+- `onChange?: (newLayout: TreeNode | null) => void` — Callback triggered when layout changes.
+- `fullscreenPaneId?: string | null` — Controlled fullscreen pane ID.
+- `onFullscreenChange?: (paneId: string | null) => void` — Callback when fullscreen state changes.
+- `locked?: boolean` — Whether the layout is globally locked.
 
 ### `useZeugmaContext()`
 
 A context consumer hook that retrieves the parent `<Zeugma>` controller state and actions.
 
 ```ts
-const { layout, layoutBeforeDrag, addPane, removeTab } = useZeugmaContext()
+const { layout, locked, addTab, selectTab } = useZeugmaContext()
 ```
 
 ### `<PaneTree>`
 
-Recursively renders the split nodes and pane nodes. Must be placed inside `<Zeugma>`.
-
-#### Props
-
-- `tree?: TreeNode | null` — (Optional) Custom subtree to render. Defaults to the provider's root `layout`.
-- `resizerSize?: number` — (Optional) Thickness of the split resizer bars in pixels. Defaults to `4`.
+An internal component that recursively renders the split nodes and pane nodes. It is automatically managed and rendered internally by `<Zeugma>`, so consumers do not need to import or render it manually.
 
 ### `<Pane>`
 
-Wraps the contents of an individual pane. It sets up draggable and droppable zones.
+Wraps the contents of an individual pane. It sets up draggable and droppable zones and provides a local context for its child components.
 
 #### Props
 
 - `id: string` — The unique ID corresponding to a `PaneNode`'s `paneId`.
-- `children: (props: PaneRenderProps) => ReactNode` — Render prop function.
+- `children: React.ReactNode` — Compound sub-components or child elements.
+- `style?: React.CSSProperties` — Optional inline style overrides.
+- `locked?: boolean` — Optional override to lock this specific pane.
 
-#### `PaneRenderProps`
+#### Compound Sub-components
+
+- **`<Pane.Content>`**: Renders the portal target for the active tab content. Takes a render function `(tab: TabDetails) => ReactNode` or static ReactNode.
+- **`<Pane.DragHandle>`**: Defines the interactive drag region.
+- **`<Pane.Tabs>`**: Renders the list of tab items for the pane.
+- **`<Pane.Controls>`**: A headless wrapper for pane control buttons (fullscreen, close, lock).
+
+#### Hook: `usePaneContext()`
+
+Provides direct access to the pane's state and action handlers from within any child component of `<Pane>`:
 
 ```ts
-interface PaneRenderProps {
-  isDragging: boolean
-  isFullscreen: boolean
-  toggleFullscreen: () => void
-  remove: () => void
-  metadata: Record<string, unknown> | undefined
-  updateMetadata: (
-    updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined,
-  ) => void
-  tabs: string[]
-  activeTabId: string
-  selectTab: (tabId: string) => void
-  removeTab: (tabId: string) => void
-  tabsMetadata: Record<string, Record<string, unknown>> | undefined
-  updateTabMetadata: (
-    tabId: string,
-    updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined,
-  ) => void
-  renderActiveTab: () => ReactNode
-}
+const {
+  id,
+  isDragging,
+  isFullscreen,
+  toggleFullscreen,
+  remove,
+  tabs,
+  activeTabId,
+  selectTab,
+  removeTab,
+} = usePaneContext()
 ```
 
 ### `<Tabs>`
 
-Renders a list of tabs inside a pane, wrapping the internal drag-and-drop mechanics.
+Renders a list of tabs inside a pane, wrapping the internal drag-and-drop mechanics. Can be used as `Pane.Tabs`.
 
 #### Props
 
-- `tabs: string[]` — The list of tab IDs.
-- `activeTabId: string` — The currently active tab ID.
-- `locked?: boolean` — Whether dragging is disabled (defaults to `false`).
+- `tabs?: string[]` — The list of tab IDs (defaults to pane context tabs).
+- `activeTabId?: string` — The currently active tab ID.
+- `locked?: boolean` — Whether dragging is disabled.
 - `tabsMetadata?: Record<string, Record<string, unknown>>` — Metadata for the tabs.
-- `selectTab: (id: string) => void` — Callback when a tab is selected.
-- `removeTab: (id: string) => void` — Callback when a tab is closed.
+- `selectTab?: (id: string) => void` — Callback when a tab is selected.
+- `removeTab?: (id: string) => void` — Callback when a tab is closed.
 - `classNames?: { container?: string; tab?: string | ((tabId: string) => string) }` — Custom class names.
 - `styles?: { container?: React.CSSProperties; tab?: React.CSSProperties | ((tabId: string) => React.CSSProperties) }` — Custom styles.
-- `renderTab: (props: { tabId: string; activeTabId: string; isDragging: boolean; isOver: boolean; metadata?: Record<string, unknown>; selectTab: (id: string) => void; removeTab: (id: string) => void; }) => React.ReactNode` — Render prop function.
+- `renderTab: (props: { tabId: string; activeTabId: string; isDragging: boolean; isOver: boolean; metadata?: Record<string, unknown>; onSelect: () => void; onRemove: () => void; }) => React.ReactNode` — Render prop function.
 
 ### `<DragHandle>`
 
-Defines the interactive drag region inside a `<Pane>`. **Must be placed inside a `<Pane>` component.**
+Defines the interactive drag region inside a `<Pane>`. Can be used as `Pane.DragHandle`.
 
 #### Props
 
-- `children: React.ReactNode` — Element(s) that function as the drag handle (e.g., pane header).
+- `children?: React.ReactNode` — Element(s) that function as the drag handle.
 - `className?: string`
 - `style?: React.CSSProperties`
+
+---
 
 ## 3. Programmatic State Utilities
 
@@ -184,7 +187,7 @@ Import these helpers from `react-zeugma/utils` to manipulate or query the tree l
   Removes a pane from the tree and collapses the leftover sibling split node.
 - **`splitPane(tree: TreeNode | null, targetId: string, direction: SplitDirection, splitType: 'left' | 'right' | 'top' | 'bottom', paneToAdd: string): TreeNode | null`**
   Splits a specific target pane by nesting it under a new `SplitNode` along with a new pane.
-- **`updateTabMetadata(tree: TreeNode | null, tabId: string, updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined): TreeNode | null`**
+- **`updateMetadata(tree: TreeNode | null, id: string, updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined): TreeNode | null`**
   Updates the metadata of a specific tab.
 - **`findPaneById(tree: TreeNode | null, paneId: string): PaneNode | null`**
   Recursively searches the layout tree and returns the target `PaneNode` if found, or `null` otherwise.
@@ -200,7 +203,7 @@ Import these helpers from `react-zeugma/utils` to manipulate or query the tree l
 ## 4. Basic Integration Recipe
 
 ```tsx
-import { useZeugma, Zeugma, PaneTree, Pane, DragHandle, TreeNode } from 'react-zeugma'
+import { useZeugma, Zeugma, Pane, TreeNode } from 'react-zeugma'
 
 const initialLayout: TreeNode = {
   type: 'split',
@@ -213,35 +216,30 @@ const initialLayout: TreeNode = {
 function CustomPane({ id }: { id: string }) {
   return (
     <Pane id={id}>
-      {({ isDragging, isFullscreen, toggleFullscreen, remove }) => (
-        <div style={{ height: '100%', border: '1px solid #ccc', opacity: isDragging ? 0.5 : 1 }}>
-          <div style={{ display: 'flex', background: '#eee', padding: 8 }}>
-            <DragHandle style={{ flex: 1 }}>
-              <strong>Header: {id}</strong>
-            </DragHandle>
-            <button onClick={toggleFullscreen}>
-              {isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
-            </button>
-            <button onClick={remove}>Close</button>
-          </div>
-          <div style={{ padding: 16 }}>Content for {id}</div>
+      <div style={{ height: '100%', border: '1px solid #ccc' }}>
+        <div style={{ display: 'flex', background: '#eee', padding: 8 }}>
+          <Pane.DragHandle style={{ flex: 1 }}>
+            <strong>Header: {id}</strong>
+          </Pane.DragHandle>
+          <Pane.Controls />
         </div>
-      )}
+        <Pane.Content style={{ padding: 16 }}>
+          {(tab) => <div>Content for {tab.id}</div>}
+        </Pane.Content>
+      </div>
     </Pane>
   )
 }
 
 export default function App() {
-  const zeugma = useZeugma({
+  const controller = useZeugma({
     initialLayout,
   })
 
   return (
-    <Zeugma {...zeugma} renderPane={(id) => <CustomPane id={id} />}>
-      <div style={{ width: '100vw', height: '100vh' }}>
-        <PaneTree />
-      </div>
-    </Zeugma>
+    <div style={{ width: '100vw', height: '100vh' }}>
+      <Zeugma controller={controller} renderPane={(id) => <CustomPane id={id} />} />
+    </div>
   )
 }
 ```

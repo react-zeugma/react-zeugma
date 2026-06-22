@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
+import { TabDetails } from '../../../shared'
 
 /**
  * Custom hook to track the latest pointer/touch coordinate relative to the viewport during dragging.
@@ -54,6 +55,7 @@ export function useBodyCursorOverride(isOverLocked: boolean) {
 
 export function usePortalRegistry() {
   const [portalTargets, setPortalTargets] = useState<Record<string, HTMLDivElement | null>>({})
+  const renderCallbacksRef = useRef<Record<string, (tab: TabDetails) => React.ReactNode>>({})
   const isMountedRef = useRef(true)
 
   useEffect(() => {
@@ -66,10 +68,23 @@ export function usePortalRegistry() {
   const registerPortalTarget = useCallback((tabId: string, el: HTMLDivElement | null) => {
     if (!isMountedRef.current) return
     setPortalTargets((prev) => {
+      if (!el) {
+        if (!prev[tabId]) return prev
+        const next = { ...prev }
+        delete next[tabId]
+        return next
+      }
       if (prev[tabId] === el) return prev
       return { ...prev, [tabId]: el }
     })
   }, [])
 
-  return { portalTargets, registerPortalTarget }
+  const registerRenderCallback = useCallback(
+    (tabId: string, render: (tab: TabDetails) => React.ReactNode) => {
+      renderCallbacksRef.current[tabId] = render
+    },
+    [],
+  )
+
+  return { portalTargets, registerPortalTarget, registerRenderCallback, renderCallbacksRef }
 }

@@ -1,5 +1,15 @@
 # react-zeugma
 
+## 6.4.0
+
+### Minor Changes
+
+- **Zeugma API Overhaul & Compound Pane Components**:
+  - Replaced the old render-prop pattern on `<Pane>` with a declarative, compound-component based API using subcomponents: `<Pane.Content>`, `<Pane.DragHandle>`, `<Pane.Tabs>`, `<Pane.Tab>`, and `<Pane.Controls>`.
+  - Introduced `PaneContext` and simplified state flow, making the `<PaneTree>` component internal and removing the need for developers to import or render it manually.
+  - Refactored `ZeugmaController` type architecture, segmenting it into `ZeugmaState`, `ZeugmaStateSetters`, `ZeugmaActions`, and `ZeugmaQueries` to eliminate duplicate state and action structures.
+  - Cleaned up type assertions, replacing redundant double-casts (`as unknown as`) and improving types in test suites (`useZeugmaDnd.test.tsx`, `ZeugmaContext.test.tsx`, `ZeugmaRemount.test.tsx`).
+
 ## 6.3.0
 
 ### Minor Changes

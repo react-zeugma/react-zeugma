@@ -9,14 +9,14 @@ import { useTheme } from './theme-provider'
 
 const LOGO_URL = '/logo.png'
 
-const NAV_ITEMS: {
+export const NAV_ITEMS: {
   label: string
-  to: '/' | '/demo' | '/docs' | '/changelog'
+  to: '/' | '/docs' | '/changelog' | '/blog'
 }[] = [
   { label: 'Home', to: '/' },
-  { label: 'Demo', to: '/demo' },
   { label: 'Docs', to: '/docs' },
   { label: 'Changelog', to: '/changelog' },
+  { label: 'Blog', to: '/blog' },
 ]
 export function Navbar() {
   const pathname = usePathname()
@@ -40,7 +40,7 @@ export function Navbar() {
   )
 
   return (
-    <div className={pathname === '/demo' ? 'hidden' : ''}>
+    <div>
       <nav className="sticky top-0 z-50 bg-bg-app/80 backdrop-blur-md border-b border-border-primary px-4 sm:px-6 flex items-center justify-between h-14 transition-colors duration-200 select-none">
         <Link href="/" className="flex items-center gap-2 group">
           <img src={LOGO_URL} alt="react-zeugma logo" className="w-6 h-6 object-contain" />
@@ -70,15 +70,13 @@ export function Navbar() {
 
         {/* Right Action Controls */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {pathname !== '/demo' && (
-            <button
-              onClick={toggleTheme}
-              className="p-1.5 rounded-md hover:bg-bg-sidebar border border-transparent hover:border-border-primary text-text-secondary hover:text-text-primary transition-all cursor-pointer"
-              title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-            >
-              {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-            </button>
-          )}
+          <button
+            onClick={toggleTheme}
+            className="p-1.5 rounded-md hover:bg-bg-sidebar border border-transparent hover:border-border-primary text-text-secondary hover:text-text-primary transition-all cursor-pointer"
+            title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+          >
+            {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+          </button>
 
           {/* Desktop External Links */}
           <div className="hidden sm:flex items-center gap-2">

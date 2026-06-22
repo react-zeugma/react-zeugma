@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { Boxes, MousePointer2, Focus, Layout, ArrowRight, Copy, Check } from 'lucide-react'
 import { useScrollAnchor } from '../lib/use-scroll-anchor'
 import dynamic from 'next/dynamic'
@@ -42,9 +41,12 @@ const FEATURES = [
   },
 ]
 
-export function Home() {
+interface HomeProps {
+  articles?: { slug: string; title: string; description: string }[]
+}
+
+export function Home({ articles = [] }: HomeProps) {
   const [copied, setCopied] = useState(false)
-  const router = useRouter()
 
   const handleCopy = () => {
     navigator.clipboard.writeText('npm i react-zeugma')
@@ -86,12 +88,12 @@ export function Home() {
         </p>
 
         <div className="flex flex-col sm:flex-row items-center gap-4 relative">
-          <Link
-            href="/demo"
+          <button
+            onClick={() => scrollToSection('zeugma-demo-ide')}
             className="w-full sm:w-auto px-8 py-3.5 bg-text-primary hover:bg-text-primary/90 text-bg-app rounded-lg font-bold flex items-center justify-center gap-2 transition-transform hover:scale-105 cursor-pointer"
           >
-            Open Live Demo <ArrowRight className="w-4 h-4" />
-          </Link>
+            Try Interactive IDE <ArrowRight className="w-4 h-4" />
+          </button>
 
           <code
             className="w-full sm:w-auto px-6 py-3.5 bg-bg-pane border border-border-primary hover:border-border-secondary rounded-lg text-sm font-mono text-text-primary flex items-center gap-3 transition-colors cursor-pointer group"
@@ -168,25 +170,65 @@ export function Home() {
             react-zeugma, running an app preview that also implements its own independent
             react-zeugma workspace.
           </p>
-          <div
-            onClick={() => router.push('/demo')}
-            className="block text-left rounded-2xl transition-all duration-500 hover:scale-[1.01] shadow-[0_50px_120px_-20px_rgba(99,102,241,0.15),0_30px_100px_-10px_rgba(0,0,0,0.95)] hover:shadow-[0_60px_150px_-10px_rgba(99,102,241,0.25),0_40px_120px_-5px_rgba(0,0,0,0.98)] cursor-pointer overflow-hidden"
-          >
-            <div className="pointer-events-none">
-              <ZeugmaDemoIDE />
-            </div>
+          <div className="block text-left rounded-2xl transition-all duration-500 shadow-[0_50px_120px_-20px_rgba(99,102,241,0.15),0_30px_100px_-10px_rgba(0,0,0,0.95)] hover:shadow-[0_60px_150px_-10px_rgba(99,102,241,0.25),0_40px_120px_-5px_rgba(0,0,0,0.98)] overflow-hidden">
+            <ZeugmaDemoIDE />
           </div>
           <div className="mt-8 flex justify-center">
             <Link
-              href="/demo"
+              href="/docs"
               className="inline-flex items-center gap-2 text-sm font-semibold text-indigo-400 hover:text-indigo-300 transition-colors group cursor-pointer"
             >
-              <span>Launch full interactive editor demo</span>
+              <span>Explore the documentation to build your own</span>
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </Link>
           </div>
         </div>
       </section>
+
+      {/* Blog Section */}
+      {articles.length > 0 && (
+        <section className="py-24 px-6 border-t border-border-primary bg-bg-app relative z-20">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-text-primary mb-4 tracking-tight">
+                Latest Insights & Deep Dives
+              </h2>
+              <p className="text-text-secondary text-sm max-w-2xl mx-auto">
+                Explore technical articles and engineering deep dives written by the creators of{' '}
+                <strong className="text-text-primary">react-zeugma</strong>.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8">
+              {articles.map((article) => (
+                <Link
+                  key={article.slug}
+                  href={`/blog/${article.slug}`}
+                  className="group block bg-bg-sidebar border border-border-primary hover:border-border-secondary p-6 rounded-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-indigo-500/5"
+                >
+                  <div className="flex flex-col h-full justify-between">
+                    <div>
+                      <span className="inline-block text-[10px] font-bold tracking-wider uppercase text-indigo-400 mb-3 bg-indigo-500/10 px-2.5 py-1 rounded-full">
+                        Engineering
+                      </span>
+                      <h3 className="text-lg font-bold text-text-primary mb-2 group-hover:text-indigo-400 transition-colors">
+                        {article.title}
+                      </h3>
+                      <p className="text-xs text-text-secondary line-clamp-3 leading-relaxed mb-4">
+                        {article.description}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-indigo-400 group-hover:text-indigo-300 transition-colors mt-auto">
+                      <span>Read article</span>
+                      <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       <Footer />
     </div>

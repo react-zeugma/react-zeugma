@@ -45,9 +45,7 @@ describe('useZeugmaDnd Hook', () => {
       enableDragToDismiss: false,
       dismissThreshold: 60,
       removePane: vi.fn(),
-      addPane: vi.fn(),
       addTab: vi.fn(),
-      updateTabMetadata: vi.fn(),
       updatePaneLock: vi.fn(),
       selectTab: vi.fn(),
       mergeTab: vi.fn(),
@@ -58,6 +56,8 @@ describe('useZeugmaDnd Hook', () => {
       findPaneById: vi.fn(),
       findPaneContainingTab: vi.fn(),
       findTabById: vi.fn(),
+      addWidget: vi.fn(),
+      updateMetadata: vi.fn(),
     }
   }
 

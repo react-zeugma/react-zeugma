@@ -16,7 +16,6 @@ import {
   Maximize2,
   Minimize2,
   X,
-  Activity,
 } from 'lucide-react'
 import { LayoutPresetDropdown } from './zeugma-demo-ide/LayoutPresetDropdown'
 import { Zeugma, PaneTree, Pane, DragHandle, Tabs, useZeugma, PaneRenderProps } from 'react-zeugma'

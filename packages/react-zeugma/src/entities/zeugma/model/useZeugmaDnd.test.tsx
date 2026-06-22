@@ -56,8 +56,9 @@ describe('useZeugmaDnd Hook', () => {
       findPaneById: vi.fn(),
       findPaneContainingTab: vi.fn(),
       findTabById: vi.fn(),
-      addWidget: vi.fn(),
       updateMetadata: vi.fn(),
+      getTabMetadata: vi.fn(),
+      getActiveTabMetadata: vi.fn(),
     }
   }
 

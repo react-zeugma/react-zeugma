@@ -1,10 +1,19 @@
-import React, { useMemo, useCallback, useEffect, useContext, useRef, createContext } from 'react'
+import React, { useMemo, useEffect, useContext, useRef, createContext } from 'react'
 import { useDraggable } from '@dnd-kit/core'
-import { useZeugmaState, useZeugmaActions, PortalRegistryContext, PaneNode } from '../../../shared'
+import {
+  useZeugmaState,
+  useZeugmaActions,
+  PortalRegistryContext,
+  PaneNode,
+  TabDetails,
+} from '../../../shared'
 import { DragListenersCtx } from '../model/context'
 import { PaneRenderProps } from '../model/types'
 import { findPaneById } from '../../../shared/lib/tree'
 import { DropZone } from './DropZone'
+import { DragHandle } from './DragHandle'
+import { Tabs } from './Tabs'
+import { PaneControls } from './PaneControls'
 
 export interface PaneContextValue extends PaneRenderProps {
   id: string
@@ -21,10 +30,15 @@ export const usePaneContext = () => {
 }
 
 export interface PaneContentProps {
-  children: (tabId: string, metadata: Record<string, unknown> | undefined) => React.ReactNode
+  /** A render callback (tab) => ReactNode or static ReactNode content to render for the active tab. */
+  children?: React.ReactNode | ((tab: TabDetails) => React.ReactNode)
+  /** Custom CSS class applied to the tab content wrapper. */
+  className?: string
+  /** Custom inline CSS style applied to the tab content wrapper. */
+  style?: React.CSSProperties
 }
 
-export const PaneContent: React.FC<PaneContentProps> = ({ children }) => {
+export const PaneContent: React.FC<PaneContentProps> = ({ children, className, style }) => {
   const { activeTabId } = usePaneContext()
   const { classNames } = useZeugmaState()
   const targetRef = useRef<HTMLDivElement | null>(null)
@@ -32,24 +46,35 @@ export const PaneContent: React.FC<PaneContentProps> = ({ children }) => {
   if (!portalRegistry) {
     throw new Error('PaneContent must be used within a Zeugma provider')
   }
-  const { registerPortalTarget } = portalRegistry
+  const { registerPortalTarget, registerRenderCallback } = portalRegistry
+
+  const renderCallback = useMemo(() => {
+    if (typeof children === 'function') {
+      return children as (tab: TabDetails) => React.ReactNode
+    }
+    return () => children
+  }, [children])
+
+  // Register render callback synchronously during the render phase
+  registerRenderCallback(activeTabId, renderCallback)
 
   useEffect(() => {
     const el = targetRef.current
-    registerPortalTarget(activeTabId, el, children)
+    registerPortalTarget(activeTabId, el)
     return () => {
       registerPortalTarget(activeTabId, null)
     }
-  }, [activeTabId, registerPortalTarget, children])
+  }, [activeTabId, registerPortalTarget])
 
   return (
     <div
       ref={targetRef}
       id={`zeugma-tab-target-${activeTabId}`}
-      className={classNames.tabContentWrapper || ''}
+      className={`${classNames.tabContentWrapper || ''} ${className || ''}`.trim()}
       style={{
         height: '100%',
         width: '100%',
+        ...style,
       }}
     />
   )
@@ -58,8 +83,8 @@ export const PaneContent: React.FC<PaneContentProps> = ({ children }) => {
 export interface PaneProps {
   /** The unique ID of the pane, matching a `paneId` in the layout tree schema. */
   id: string
-  /** Render prop function providing pane state (isDragging, isFullscreen, etc.) and handlers. */
-  children: (props: PaneRenderProps) => React.ReactNode
+  /** The children elements inside the pane (e.g. headers, tabs, content). */
+  children: React.ReactNode
   /** Optional inline CSS styles applied to the pane outer container. */
   style?: React.CSSProperties
   /** Optional override to lock this specific pane. */
@@ -68,11 +93,14 @@ export interface PaneProps {
 
 export const Pane: React.FC<PaneProps> & {
   Content: typeof PaneContent
+  DragHandle: typeof DragHandle
+  Tabs: typeof Tabs
+  Controls: typeof PaneControls
 } = ({ id, children, style, locked: propLocked = false }) => {
   const {
     layout,
     activeId,
-    classNames,
+    classNames: globalClassNames,
     fullscreenPaneId,
     onFullscreenChange,
     locked: globalLocked,
@@ -106,13 +134,6 @@ export const Pane: React.FC<PaneProps> & {
   const dragging = activeId !== null && tabs.includes(activeId)
   const isFullscreen = fullscreenPaneId === id
 
-  const renderActiveTab = useCallback(
-    (render: (tabId: string, metadata: Record<string, unknown> | undefined) => React.ReactNode) => {
-      return <PaneContent children={render} />
-    },
-    [],
-  )
-
   const renderProps: PaneRenderProps = useMemo(
     () => ({
       isDragging: dragging,
@@ -142,7 +163,6 @@ export const Pane: React.FC<PaneProps> & {
       updateTabMetadata: (tabId, updater) => {
         updateMetadata(tabId, updater)
       },
-      renderActiveTab,
     }),
     [
       dragging,
@@ -158,7 +178,6 @@ export const Pane: React.FC<PaneProps> & {
       selectTab,
       paneContainerId,
       tabsMetadata,
-      renderActiveTab,
     ],
   )
 
@@ -172,8 +191,8 @@ export const Pane: React.FC<PaneProps> & {
     }
   }, [listeners, attributes, isDraggableDisabled])
 
-  const paneClass = `${classNames.pane || ''} ${
-    isPaneLocked ? classNames.paneLocked || '' : ''
+  const paneClass = `${globalClassNames.pane || ''} ${
+    isPaneLocked ? globalClassNames.paneLocked || '' : ''
   }`.trim()
 
   return (
@@ -184,7 +203,7 @@ export const Pane: React.FC<PaneProps> & {
           className={paneClass}
           style={{ position: 'relative', width: '100%', height: '100%', ...style }}
         >
-          {children(renderProps)}
+          {children}
 
           {showDropZones && (
             <div
@@ -203,7 +222,7 @@ export const Pane: React.FC<PaneProps> & {
                   key={pos}
                   id={`drop-${pos}-${id}`}
                   position={pos}
-                  activeClassName={classNames.dropPreview}
+                  activeClassName={globalClassNames.dropPreview}
                 />
               ))}
             </div>
@@ -224,7 +243,7 @@ export const Pane: React.FC<PaneProps> & {
               <DropZone
                 id={`drop-locked-${id}`}
                 position="full"
-                activeClassName={classNames.lockedPreview || ''}
+                activeClassName={globalClassNames.lockedPreview || ''}
               />
             </div>
           )}
@@ -235,3 +254,6 @@ export const Pane: React.FC<PaneProps> & {
 }
 
 Pane.Content = PaneContent
+Pane.DragHandle = DragHandle
+Pane.Tabs = Tabs
+Pane.Controls = PaneControls

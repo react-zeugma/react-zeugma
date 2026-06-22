@@ -1,5 +1,3 @@
-import { ReactNode } from 'react'
-
 export interface BaseLeafRenderProps {
   /** True if the leaf is actively being dragged. */
   isDragging: boolean
@@ -36,8 +34,4 @@ export interface PaneRenderProps extends BaseLeafRenderProps {
     tabId: string,
     updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined,
   ) => void
-  /** Renders the target placeholder element for the currently active tab in the pane. */
-  renderActiveTab: (
-    render: (tabId: string, metadata: Record<string, unknown> | undefined) => ReactNode,
-  ) => ReactNode
 }

@@ -6,7 +6,7 @@ import { ComputedSplitter, computeLayout } from '../../../shared/lib/tree'
 import { RootDropZones } from '../../../entities/zeugma/ui'
 
 export interface PaneTreeProps {
-  /** Render function mapping unique pane IDs to React elements. Usually renders a <Pane> wrapper. */
+  /** Render function mapping unique pane nodes to React elements. Usually renders a <Pane> wrapper. */
   renderPane: (paneId: string) => React.ReactNode
   /** The layout subtree node to render. If not specified, defaults to the root layout tree from the Zeugma context. */
   tree?: TreeNode | null
@@ -109,7 +109,7 @@ const FlatSplitter: React.FC<FlatSplitterProps> = ({
 }
 
 const MemoizedPaneContent = React.memo(
-  ({ paneId, renderPane }: { paneId: string; renderPane: (id: string) => React.ReactNode }) => {
+  ({ paneId, renderPane }: { paneId: string; renderPane: (paneId: string) => React.ReactNode }) => {
     return <>{renderPane(paneId)}</>
   },
   (prev, next) => prev.paneId === next.paneId && prev.renderPane === next.renderPane,

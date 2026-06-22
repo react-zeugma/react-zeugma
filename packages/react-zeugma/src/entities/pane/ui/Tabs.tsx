@@ -43,8 +43,8 @@ export interface TabsProps {
     isDragging: boolean
     isOver: boolean
     metadata?: Record<string, unknown>
-    selectTab: (id: string) => void
-    removeTab: (id: string) => void
+    onSelect: () => void
+    onRemove: () => void
   }) => React.ReactNode
   /** Custom CSS classes for Tabs container and tab wrappers. */
   classNames?: {
@@ -145,8 +145,8 @@ export const Tabs: React.FC<TabsProps> & {
                     isDragging,
                     isOver,
                     metadata,
-                    selectTab,
-                    removeTab,
+                    onSelect: () => selectTab(tabId),
+                    onRemove: () => removeTab(tabId),
                   })
                 }
               </Tab>

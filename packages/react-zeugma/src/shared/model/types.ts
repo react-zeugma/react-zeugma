@@ -19,9 +19,7 @@ export interface PaneNode {
   tabsMetadata?: Record<string, Record<string, unknown>>
 }
 
-export type LeafNode = PaneNode
-
-export type TreeNode = SplitNode | LeafNode
+export type TreeNode = SplitNode | PaneNode
 
 export interface TabDetails {
   id: string
@@ -144,8 +142,6 @@ export interface ZeugmaController {
   // Public Actions
   /** Removes the specified pane or widget from the layout tree and collapses its parent split. */
   removePane: (paneId: string) => void
-  /** Appends/inserts a widget at the bottom-rightmost leaf of the layout tree. */
-  addWidget: (widgetId: string, metadata?: Record<string, unknown>) => void
   /** Appends a tab into a target pane node, or splits/creates a new pane if no target pane ID is provided. */
   addTab: (tabId: string, targetPaneId?: string, metadata?: Record<string, unknown>) => void
   /** Stable callback to update metadata for a specific tab or widget. */
@@ -175,11 +171,15 @@ export interface ZeugmaController {
 
   // Public Queries
   /** Find a PaneNode or WidgetNode by its ID in the layout tree. */
-  findPaneById: (paneId: string) => LeafNode | null
+  findPaneById: (paneId: string) => PaneNode | null
   /** Find the PaneNode containing the given tab ID in the layout tree. */
   findPaneContainingTab: (tabId: string) => PaneNode | null
   /** Find the details of a tab by its ID in the layout tree. */
   findTabById: (tabId: string) => TabDetails | null
+  /** Get the metadata for a specific tab by its ID. */
+  getTabMetadata: (tabId: string) => Record<string, unknown> | undefined
+  /** Get the metadata of the active tab in a specific pane by the pane ID. */
+  getActiveTabMetadata: (paneId: string) => Record<string, unknown> | undefined
 }
 
 export interface ZeugmaClassNames {
@@ -211,15 +211,39 @@ export interface ZeugmaClassNames {
   tabSeparator?: string
   /** CSS class applied to the wrapper element for a tab's contents. */
   tabContentWrapper?: string
+  /** CSS class applied to the tabs container div. */
+  tabsContainer?: string
+  /** CSS class applied to individual tabs (as static string or dynamic callback). */
+  tab?: string | ((tabId: string) => string)
+  /** CSS class applied to the pane inner container (containing header and content). */
+  paneContainer?: string
+  /** CSS class applied to the pane header bar. */
+  paneHeader?: string
+  /** CSS class applied to the pane controls wrapper. */
+  paneControls?: string
+  /** CSS class applied to the pane buttons (maximize/close). */
+  paneButton?: string
+  /** CSS class applied to the default tab close button. */
+  tabCloseButton?: string
+  /** CSS class applied to the drag handle. */
+  dragHandle?: string
+}
+
+export interface DragOverlayActiveItem {
+  type: 'tab' | 'pane'
+  id: string
 }
 
 export interface ZeugmaProps extends ZeugmaController {
   /** Custom overlay renderer function used to customize the cursor-following drag preview for an active pane or tab. */
-  renderDragOverlay?: (activeId: string, type: 'pane' | 'tab') => ReactNode
+  renderDragOverlay?: (active: DragOverlayActiveItem) => ReactNode
   /** Optional CSS class name mapping overrides for custom styles of components like panes, drop previews, overlays, etc. */
   classNames?: ZeugmaClassNames
   /** Child nodes nested inside the Zeugma context, usually containing a <PaneTree> or similar layout viewer. */
-  children: ReactNode
+  /** Render function mapping unique pane nodes to React elements. Usually renders a <Pane> wrapper. */
+  renderPane: (paneId: string) => ReactNode
+  /** Size/thickness of the split handle resizer bars in pixels. */
+  resizerSize?: number
 }
 
 /**
@@ -240,11 +264,17 @@ export interface ZeugmaStateValue {
   /** Programmatically updates the global locked status. */
   setLocked: Dispatch<SetStateAction<boolean>>
   /** Find a PaneNode or WidgetNode by its ID in the layout tree. */
-  findPaneById: (paneId: string) => LeafNode | null
+  findPaneById: (paneId: string) => PaneNode | null
   /** Find the PaneNode containing the given tab ID in the layout tree. */
   findPaneContainingTab: (tabId: string) => PaneNode | null
   /** Find the details of a tab by its ID in the layout tree. */
   findTabById: (tabId: string) => TabDetails | null
+  /** Get the metadata for a specific tab by its ID. */
+  getTabMetadata: (tabId: string) => Record<string, unknown> | undefined
+  /** Get the metadata of the active tab in a specific pane by the pane ID. */
+  getActiveTabMetadata: (paneId: string) => Record<string, unknown> | undefined
+  /** Render function mapping unique pane nodes to React elements. */
+  renderPane: (paneId: string) => ReactNode
 
   // Drag-and-drop orchestration state exposed publicly
   /** The ID of the active dragged item (pane or tab). */
@@ -280,8 +310,6 @@ export interface ZeugmaDragStateValue {
 export interface ZeugmaActionsValue {
   /** Removes the specified pane or widget from the layout tree and collapses its parent split. */
   removePane: (paneId: string) => void
-  /** Appends/inserts a widget at the bottom-rightmost leaf of the layout tree. */
-  addWidget: (widgetId: string, metadata?: Record<string, unknown>) => void
   /** Appends a tab into a target pane node, or splits/creates a new pane if no target pane ID is provided. */
   addTab: (tabId: string, targetPaneId?: string, metadata?: Record<string, unknown>) => void
   /** Stable callback to update metadata for a specific tab or widget. */
@@ -317,9 +345,7 @@ export interface ZeugmaActionsValue {
 export interface ZeugmaContextValue extends ZeugmaStateValue, ZeugmaActionsValue {}
 
 export interface PortalRegistryValue {
-  registerPortalTarget: (
-    tabId: string,
-    el: HTMLDivElement | null,
-    render?: (tabId: string, metadata?: Record<string, unknown>) => ReactNode,
-  ) => void
+  registerPortalTarget: (tabId: string, el: HTMLDivElement | null) => void
+  registerRenderCallback: (tabId: string, render: (tab: TabDetails) => ReactNode) => void
+  renderCallbacksRef: RefObject<Record<string, (tab: TabDetails) => ReactNode>>
 }

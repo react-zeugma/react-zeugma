@@ -13,13 +13,15 @@ import {
 import { usePortalRegistry, useZeugmaDnd } from '../model'
 import { CursorOverlay } from './CursorOverlay'
 import { PortalHostItem } from './PortalHostItem'
+import { PaneTree } from '../../../widgets/pane-tree'
 
 export const Zeugma: React.FC<ZeugmaProps> = (props) => {
   const internalProps = props
   const {
     renderDragOverlay,
     classNames = {},
-    children,
+    renderPane,
+    resizerSize,
 
     // Controller state
     layout,
@@ -31,6 +33,8 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
     findPaneById,
     findPaneContainingTab,
     findTabById,
+    getTabMetadata,
+    getActiveTabMetadata,
     activeId,
     activeType,
     dismissIntentId,
@@ -50,7 +54,6 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
 
     // Actions
     removePane,
-    addWidget,
     addTab,
     updateMetadata,
     updatePaneLock,
@@ -62,7 +65,8 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
     moveTab,
   } = internalProps
 
-  const { portalTargets, registerPortalTarget } = usePortalRegistry()
+  const { portalTargets, registerPortalTarget, registerRenderCallback, renderCallbacksRef } =
+    usePortalRegistry()
 
   const [overTabId, setOverTabId] = useState<string | null>(null)
   const [overTabPosition, setOverTabPosition] = useState<'before' | 'after' | null>(null)
@@ -90,6 +94,14 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
       classNames.lockedPreview,
       classNames.tabDropPreview,
       classNames.tabSeparator,
+      classNames.tabsContainer,
+      classNames.tab,
+      classNames.paneContainer,
+      classNames.paneHeader,
+      classNames.paneControls,
+      classNames.paneButton,
+      classNames.tabCloseButton,
+      classNames.dragHandle,
     ],
   )
 
@@ -126,6 +138,9 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
       findPaneById,
       findPaneContainingTab,
       findTabById,
+      getTabMetadata,
+      getActiveTabMetadata,
+      renderPane,
     }),
     [
       layout,
@@ -149,6 +164,9 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
       findPaneById,
       findPaneContainingTab,
       findTabById,
+      getTabMetadata,
+      getActiveTabMetadata,
+      renderPane,
     ],
   )
 
@@ -164,7 +182,6 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
   const actionsValue = useMemo(
     () => ({
       removePane,
-      addWidget,
       addTab,
       updateMetadata,
       updatePaneLock,
@@ -179,7 +196,6 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
     }),
     [
       removePane,
-      addWidget,
       addTab,
       updateMetadata,
       updatePaneLock,
@@ -218,8 +234,10 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
   const portalRegistryValue = useMemo(
     () => ({
       registerPortalTarget,
+      registerRenderCallback,
+      renderCallbacksRef,
     }),
-    [registerPortalTarget],
+    [registerPortalTarget, registerRenderCallback, renderCallbacksRef],
   )
 
   return (
@@ -228,12 +246,21 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
         <ZeugmaDragContext.Provider value={dragValue}>
           <PortalRegistryContext.Provider value={portalRegistryValue}>
             <DndContext id="zeugma-dnd-context" {...dnd}>
-              {children}
+              <PaneTree
+                renderPane={renderPane}
+                resizerSize={resizerSize}
+                snapThreshold={snapThreshold}
+              />
             </DndContext>
             {activeId && activeType && renderDragOverlay && (
               <CursorOverlay
                 activeId={activeId}
-                render={(id) => renderDragOverlay(id, activeType!)}
+                render={(id) => {
+                  return renderDragOverlay({
+                    type: activeType,
+                    id,
+                  })
+                }}
                 className={`${classNames.dragOverlay || ''} ${
                   activeId === dismissIntentId ? classNames.dismissPreview || '' : ''
                 }`.trim()}
@@ -243,14 +270,14 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
             <div id="zeugma-portal-host" style={{ display: 'none' }}>
               {allTabIds.map((tabId) => {
                 const target = portalTargets[tabId]
-                const tabMetadata = findTabById(tabId)?.metadata
+                const tabDetails = findTabById(tabId)
+                if (!tabDetails) return null
                 return (
                   <PortalHostItem
                     key={tabId}
-                    tabId={tabId}
-                    metadata={tabMetadata}
-                    target={target?.el || null}
-                    renderWidget={target?.render}
+                    tabDetails={tabDetails}
+                    target={target || null}
+                    renderWidget={renderCallbacksRef.current[tabId]}
                   />
                 )
               })}

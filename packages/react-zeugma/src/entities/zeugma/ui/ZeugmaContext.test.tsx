@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { renderHook } from '@testing-library/react'
-import { useZeugma, useZeugmaContext, Zeugma, Pane, PaneTree } from '../../../index'
+import { useZeugma, useZeugmaContext, Zeugma, Pane } from '../../../index'
 import {
   useZeugmaState,
   useZeugmaActions,
@@ -45,11 +45,12 @@ describe('Zeugma Context Provider & Consumers', () => {
 
     const TestWrapper = () => {
       const controller = useZeugma({ initialLayout })
-      return (
-        <Zeugma {...controller}>
+      const renderPane = (paneId: string) => (
+        <Pane id={paneId}>
           <ConsumerComponent />
-        </Zeugma>
+        </Pane>
       )
+      return <Zeugma {...controller} renderPane={renderPane} />
     }
 
     render(<TestWrapper />)
@@ -60,7 +61,6 @@ describe('Zeugma Context Provider & Consumers', () => {
 
     // Actions should be present
     expect(typeof contextValue.addTab).toBe('function')
-    expect(typeof contextValue.addWidget).toBe('function')
     expect(typeof contextValue.removePane).toBe('function')
     expect(typeof contextValue.setFullscreenPaneId).toBe('function')
     expect(typeof contextValue.setLocked).toBe('function')
@@ -86,21 +86,17 @@ describe('Zeugma Context Provider & Consumers', () => {
       const controller = useZeugma({ initialLayout })
       const renderPane = (paneId: string) => (
         <Pane id={paneId}>
-          {(paneProps) => (
-            <div data-testid="pane-root">
-              {paneProps.renderActiveTab((id, metadata) => {
-                receivedMetadata = metadata
-                return <div data-testid="tab-content">{id} Content</div>
-              })}
-            </div>
-          )}
+          <div data-testid="pane-root">
+            <Pane.Content>
+              {(tab) => {
+                receivedMetadata = tab.metadata
+                return <div data-testid="tab-content">{tab.id} Content</div>
+              }}
+            </Pane.Content>
+          </div>
         </Pane>
       )
-      return (
-        <Zeugma {...controller}>
-          <PaneTree renderPane={renderPane} />
-        </Zeugma>
-      )
+      return <Zeugma {...controller} renderPane={renderPane} />
     }
 
     render(<TestWrapper />)
@@ -150,6 +146,9 @@ describe('Tab Drop Preview rendering', () => {
     findPaneById: () => null,
     findPaneContainingTab: () => null,
     findTabById: () => null,
+    getTabMetadata: () => undefined,
+    getActiveTabMetadata: () => undefined,
+    renderPane: () => null,
   }
 
   it('should render the drop preview indicator before the target tab when position is before', () => {

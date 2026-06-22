@@ -10,7 +10,6 @@ import { DEFAULT_DRAG_ACTIVATION_DISTANCE, DEFAULT_SNAP_THRESHOLD } from '../../
 import {
   removePane,
   addTab,
-  addWidget,
   splitPane,
   updateSplitPercentage,
   updateMetadata,
@@ -22,6 +21,8 @@ import {
   findPaneById,
   findPaneContainingTab,
   findTabById,
+  getTabMetadata,
+  getActiveTabMetadata,
 } from '../../../shared/lib/tree'
 import { safeJsonStringify } from '../../../shared/lib/json'
 
@@ -73,6 +74,9 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
   // Keep layout and callback refs in sync to make actions and queries completely stable
   const layoutRef = useRef<TreeNode | null>(layout)
   layoutRef.current = layout
+
+  const layoutBeforeDragRef = useRef<TreeNode | null>(layoutBeforeDrag)
+  layoutBeforeDragRef.current = layoutBeforeDrag
 
   const onChangeRef = useRef(onChange)
   onChangeRef.current = onChange
@@ -153,13 +157,6 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
   // Layout Modification Actions using wrapped mutation functions
   const handleRemovePane = useCallback(
     wrapMutation((prev, paneId: string) => removePane(prev, paneId)),
-    [wrapMutation],
-  )
-
-  const handleAddWidget = useCallback(
-    wrapMutation((prev, widgetId: string, metadata?: Record<string, unknown>) =>
-      addWidget(prev, widgetId, metadata),
-    ),
     [wrapMutation],
   )
 
@@ -259,20 +256,45 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
     [wrapMutation],
   )
 
-  const handleFindPaneById = useCallback(
-    (paneId: string) => findPaneById(layoutRef.current, paneId),
-    [],
-  )
+  const handleFindPaneById = useCallback((paneId: string) => {
+    let pane = findPaneById(layoutRef.current, paneId)
+    if (!pane && layoutBeforeDragRef.current) {
+      pane = findPaneById(layoutBeforeDragRef.current, paneId)
+    }
+    return pane
+  }, [])
 
-  const handleFindPaneContainingTab = useCallback(
-    (tabId: string) => findPaneContainingTab(layoutRef.current, tabId),
-    [],
-  )
+  const handleFindPaneContainingTab = useCallback((tabId: string) => {
+    let pane = findPaneContainingTab(layoutRef.current, tabId)
+    if (!pane && layoutBeforeDragRef.current) {
+      pane = findPaneContainingTab(layoutBeforeDragRef.current, tabId)
+    }
+    return pane
+  }, [])
 
-  const handleFindTabById = useCallback(
-    (tabId: string) => findTabById(layoutRef.current, tabId),
-    [],
-  )
+  const handleFindTabById = useCallback((tabId: string) => {
+    let tab = findTabById(layoutRef.current, tabId)
+    if (!tab && layoutBeforeDragRef.current) {
+      tab = findTabById(layoutBeforeDragRef.current, tabId)
+    }
+    return tab
+  }, [])
+
+  const handleGetTabMetadata = useCallback((tabId: string) => {
+    let metadata = getTabMetadata(layoutRef.current, tabId)
+    if (!metadata && layoutBeforeDragRef.current) {
+      metadata = getTabMetadata(layoutBeforeDragRef.current, tabId)
+    }
+    return metadata
+  }, [])
+
+  const handleGetActiveTabMetadata = useCallback((paneId: string) => {
+    let metadata = getActiveTabMetadata(layoutRef.current, paneId)
+    if (!metadata && layoutBeforeDragRef.current) {
+      metadata = getActiveTabMetadata(layoutBeforeDragRef.current, paneId)
+    }
+    return metadata
+  }, [])
 
   return {
     layout,
@@ -312,7 +334,6 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
 
     // Actions
     removePane: handleRemovePane,
-    addWidget: handleAddWidget,
     addTab: handleAddTab,
     splitPane: handleSplitPane,
     updateSplitPercentage: handleUpdateSplitPercentage,
@@ -327,5 +348,7 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
     findPaneById: handleFindPaneById,
     findPaneContainingTab: handleFindPaneContainingTab,
     findTabById: handleFindTabById,
+    getTabMetadata: handleGetTabMetadata,
+    getActiveTabMetadata: handleGetActiveTabMetadata,
   } as ZeugmaController
 }

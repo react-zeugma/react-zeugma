@@ -185,7 +185,6 @@ describe('useZeugma Hook', () => {
     const { result } = renderHook(() => useZeugma({ initialLayout }))
 
     const initialAddTab = result.current.addTab
-    const initialAddWidget = result.current.addWidget
     const initialRemovePane = result.current.removePane
 
     act(() => {
@@ -193,7 +192,6 @@ describe('useZeugma Hook', () => {
     })
 
     expect(result.current.addTab).toBe(initialAddTab)
-    expect(result.current.addWidget).toBe(initialAddWidget)
     expect(result.current.removePane).toBe(initialRemovePane)
   })
 

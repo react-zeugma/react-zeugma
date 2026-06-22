@@ -1,4 +1,4 @@
-import { TreeNode, SplitNode, SplitDirection, PaneNode, TabDetails, LeafNode } from '../../model'
+import { TreeNode, SplitNode, SplitDirection, PaneNode, TabDetails } from '../../model'
 
 export function generateUniqueId(): string {
   return 'pane-' + Math.random().toString(36).substring(2, 11)
@@ -59,7 +59,7 @@ export function splitPane(
   targetId: string,
   direction: SplitDirection,
   splitType: 'left' | 'right' | 'top' | 'bottom',
-  paneToAdd: string | LeafNode,
+  paneToAdd: string | PaneNode,
 ): TreeNode | null {
   if (tree === null) {
     if (typeof paneToAdd === 'string') {
@@ -69,7 +69,7 @@ export function splitPane(
   }
   if (tree.type === 'pane') {
     if (tree.id === targetId) {
-      const addedNode: LeafNode =
+      const addedNode: PaneNode =
         typeof paneToAdd === 'string'
           ? { type: 'pane', id: generateUniqueId(), tabs: [paneToAdd], activeTabId: paneToAdd }
           : paneToAdd
@@ -94,7 +94,7 @@ export function splitPane(
 /**
  * Helper to insert a leaf node (PaneNode or WidgetNode) into the layout tree.
  */
-export function insertLeaf(tree: TreeNode | null, leafNode: LeafNode): TreeNode {
+export function insertLeaf(tree: TreeNode | null, leafNode: PaneNode): TreeNode {
   if (tree === null) {
     return leafNode
   }
@@ -118,23 +118,6 @@ export function insertLeaf(tree: TreeNode | null, leafNode: LeafNode): TreeNode 
   }
 
   return insert(tree, null)
-}
-
-/**
- * Tree Helper: Add a widget by splitting the rightmost/bottommost pane/widget.
- */
-export function addWidget(
-  tree: TreeNode | null,
-  widgetId: string,
-  metadata?: Record<string, unknown>,
-): TreeNode {
-  return insertLeaf(tree, {
-    type: 'pane',
-    id: generateUniqueId(),
-    tabs: [widgetId],
-    activeTabId: widgetId,
-    tabsMetadata: metadata ? { [widgetId]: metadata } : undefined,
-  })
 }
 
 /**
@@ -225,7 +208,7 @@ export function updateSplitPercentage(
 /**
  * Find a PaneNode or WidgetNode by its ID.
  */
-export function findPaneById(tree: TreeNode | null, paneId: string): LeafNode | null {
+export function findPaneById(tree: TreeNode | null, paneId: string): PaneNode | null {
   if (tree === null) return null
   if (tree.type === 'pane') {
     return tree.id === paneId ? tree : null
@@ -264,6 +247,31 @@ export function findTabById(tree: TreeNode | null, tabId: string): TabDetails | 
     index,
     metadata: pane.tabsMetadata?.[tabId],
   }
+}
+
+/**
+ * Get the metadata for a specific tab by its ID.
+ */
+export function getTabMetadata(
+  tree: TreeNode | null,
+  tabId: string,
+): Record<string, unknown> | undefined {
+  const pane = findPaneContainingTab(tree, tabId)
+  return pane?.tabsMetadata?.[tabId]
+}
+
+/**
+ * Get the metadata of the active item (either tab or pane).
+ */
+/**
+ * Get the metadata of the active tab in a specific pane.
+ */
+export function getActiveTabMetadata(
+  tree: TreeNode | null,
+  paneId: string,
+): Record<string, unknown> | undefined {
+  const pane = findPaneById(tree, paneId)
+  return pane?.tabsMetadata?.[pane.activeTabId]
 }
 
 /**
@@ -318,7 +326,7 @@ export function updatePaneLock(
     if (tree.id === paneId) {
       if (locked === false) {
         const { locked: _, ...rest } = tree
-        return rest as LeafNode
+        return rest as PaneNode
       }
       return { ...tree, locked }
     }
@@ -484,7 +492,7 @@ export interface ComputedPane {
   top: number
   width: number
   height: number
-  node: LeafNode
+  node: PaneNode
 }
 
 export interface ComputedSplitter {

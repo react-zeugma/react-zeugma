@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { render, act } from '@testing-library/react'
 import { useEffect } from 'react'
-import { useZeugma, Zeugma, Pane, PaneTree } from '../../../index'
+import { useZeugma, Zeugma, Pane } from '../../../index'
 import type { TreeNode, ZeugmaController } from '../../../shared'
 
 describe('Zeugma Drag and Drop Widget Remounting', () => {
@@ -33,31 +33,31 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
       controllerInstance = controller
       const renderPane = (paneId: string) => (
         <Pane id={paneId}>
-          {(paneProps) => (
-            <div id={`pane-target-${paneId}`}>
-              {paneProps.renderActiveTab((id) => (
-                <TestWidget tabId={id} />
-              ))}
-            </div>
-          )}
+          <div id={`pane-target-${paneId}`}>
+            <Pane.Content>{(tab) => <TestWidget tabId={tab.id} />}</Pane.Content>
+          </div>
         </Pane>
       )
-      return (
-        <Zeugma {...controller}>
-          <PaneTree renderPane={renderPane} />
-        </Zeugma>
-      )
+      return <Zeugma {...controller} renderPane={renderPane} />
     }
 
     render(<TestWrapper />)
 
-    // Initially, both tabs are in the layout and registered.
-    // tab-1 and tab-2 should mount.
+    // In the new API, only active tabs render immediately (lazy mounting).
+    // Let's make tab-2 active once so both get mounted and registered.
+    act(() => {
+      controllerInstance?.selectTab('pane-1', 'tab-2')
+    })
+    act(() => {
+      controllerInstance?.selectTab('pane-1', 'tab-1')
+    })
+
     expect(mountCount).toBe(2)
     expect(unmountCount).toBe(0)
 
-    // Reset mountCount before drag
+    // Reset counters before drag
     mountCount = 0
+    unmountCount = 0
 
     // Simulate drag start on tab-1
     act(() => {
@@ -130,26 +130,28 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
       controllerInstance = controller
       const renderPane = (paneId: string) => (
         <Pane id={paneId}>
-          {(paneProps) => (
-            <div id={`pane-target-${paneId}`}>
-              {paneProps.renderActiveTab((id) => (
-                <TestWidget tabId={id} />
-              ))}
-            </div>
-          )}
+          <div id={`pane-target-${paneId}`}>
+            <Pane.Content>{(tab) => <TestWidget tabId={tab.id} />}</Pane.Content>
+          </div>
         </Pane>
       )
-      return (
-        <Zeugma {...controller}>
-          <PaneTree renderPane={renderPane} />
-        </Zeugma>
-      )
+      return <Zeugma {...controller} renderPane={renderPane} />
     }
 
     render(<TestWrapper />)
 
-    // Reset mountCount before drag
+    // In the new API, only active tabs render immediately (lazy mounting).
+    // Let's make tab-2 active once so both get mounted and registered.
+    act(() => {
+      controllerInstance?.selectTab('pane-1', 'tab-2')
+    })
+    act(() => {
+      controllerInstance?.selectTab('pane-1', 'tab-1')
+    })
+
+    // Reset counters before drag
     mountCount = 0
+    unmountCount = 0
 
     // Simulate drag start on tab-1
     act(() => {
@@ -225,20 +227,12 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
       controllerInstance = controller
       const renderPane = (paneId: string) => (
         <Pane id={paneId}>
-          {(paneProps) => (
-            <div id={`pane-target-${paneId}`}>
-              {paneProps.renderActiveTab((id) => (
-                <TestWidget tabId={id} />
-              ))}
-            </div>
-          )}
+          <div id={`pane-target-${paneId}`}>
+            <Pane.Content>{(tab) => <TestWidget tabId={tab.id} />}</Pane.Content>
+          </div>
         </Pane>
       )
-      return (
-        <Zeugma {...controller}>
-          <PaneTree renderPane={renderPane} />
-        </Zeugma>
-      )
+      return <Zeugma {...controller} renderPane={renderPane} />
     }
 
     render(<TestWrapper />)

@@ -14,6 +14,7 @@ import {
   X,
 } from 'lucide-react'
 import { LayoutPresetDropdown } from './LayoutPresetDropdown'
+import { usePaneContext } from 'react-zeugma'
 
 // ── IDE Container & Main Panels ──────────────────────────────────────────────
 
@@ -192,24 +193,19 @@ export function PaneContent({ children }: { children: React.ReactNode }) {
   )
 }
 
-interface PaneControlsProps {
-  isFullscreen: boolean
-  onToggleFullscreen: () => void
-  onRemove: () => void
-}
-
-export function PaneControls({ isFullscreen, onToggleFullscreen, onRemove }: PaneControlsProps) {
+export function PaneControls() {
+  const { isFullscreen, toggleFullscreen, remove } = usePaneContext()
   return (
     <div className="flex items-center gap-1.5 px-3 z-10 drag-cancel shrink-0">
       <button
-        onClick={onToggleFullscreen}
+        onClick={toggleFullscreen}
         className="w-5 h-5 flex items-center justify-center rounded text-[#858585] hover:text-white hover:bg-zinc-800 transition-colors cursor-pointer"
         title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
       >
         {isFullscreen ? <Minimize2 className="w-3 h-3" /> : <Maximize2 className="w-3 h-3" />}
       </button>
       <button
-        onClick={onRemove}
+        onClick={remove}
         className="w-5 h-5 flex items-center justify-center rounded text-[#858585] hover:text-rose-450 hover:bg-zinc-800 transition-colors cursor-pointer"
         title="Close Pane"
       >

@@ -10,7 +10,7 @@ import {
   CollisionDetection,
   DroppableContainer,
 } from '@dnd-kit/core'
-import { SplitDirection, TreeNode, ZeugmaController, LeafNode } from '../../../shared'
+import { SplitDirection, TreeNode, ZeugmaController, PaneNode } from '../../../shared'
 import {
   removePane as removePaneHelper,
   removeTab as removeTabHelper,
@@ -404,7 +404,7 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
         ? removeTabHelper(originalLayout, draggingId)
         : removePaneHelper(originalLayout, draggingId)
 
-      let draggedPaneNode: LeafNode
+      let draggedPaneNode: PaneNode
       if (isTabDrag) {
         const originalPane = findPaneContainingTab(originalLayout, draggingId)
         const sourceMetadata = originalPane?.tabsMetadata?.[draggingId]
@@ -483,7 +483,7 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
 
     const direction: SplitDirection = dropZone === 'left' || dropZone === 'right' ? 'row' : 'column'
 
-    let draggedPaneNode: LeafNode
+    let draggedPaneNode: PaneNode
     if (isTabDrag) {
       const originalPane = findPaneContainingTab(originalLayout, draggingId)
       const sourceMetadata = originalPane?.tabsMetadata?.[draggingId]

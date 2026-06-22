@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect, useRef } from 'react'
-import { Zeugma, PaneTree, Pane, DragHandle, Tabs, useZeugma, PaneRenderProps } from 'react-zeugma'
+import { Zeugma, Pane, useZeugma, TabDetails, DragOverlayActiveItem } from 'react-zeugma'
 
 import { SyntaxCode } from './syntax-code'
 import { FILES, defaultOuterLayout, LAYOUT_PRESETS } from './mock-files'
@@ -25,7 +25,6 @@ import {
   StatusBar,
   PaneContainer,
   PaneHeader,
-  PaneContent,
   PaneControls,
 } from './zeugma-demo-ide/IDELayout'
 
@@ -84,7 +83,8 @@ export function ZeugmaDemoIDE({
 
   // ── Tab content resolution ──────────────────────────────────────────────────
   const renderWidget = useCallback(
-    (tabId: string) => {
+    (tab: TabDetails) => {
+      const tabId = tab.id
       const getContent = () => {
         if (tabId === 'explorer') {
           return <FileExplorer onOpenFile={stableHandleOpenFile} />
@@ -115,41 +115,40 @@ export function ZeugmaDemoIDE({
   const renderPane = useCallback(
     (paneId: string) => (
       <Pane id={paneId}>
-        {(paneProps: PaneRenderProps) => (
-          <PaneContainer>
-            <PaneHeader>
-              <Tabs
-                classNames={{
-                  container: 'overflow-x-auto scrollbar-none min-w-0 h-full shrink',
-                  tab: 'h-full flex',
-                }}
-                renderTab={(tabProps) => (
-                  <IDETab
-                    {...tabProps}
-                    onSelect={() => paneProps.selectTab(tabProps.tabId)}
-                    onRemove={() => paneProps.removeTab(tabProps.tabId)}
-                  />
-                )}
-              />
-
-              <DragHandle className="flex-1 h-full cursor-grab active:cursor-grabbing self-stretch min-w-[20px]" />
-
-              <PaneControls
-                isFullscreen={paneProps.isFullscreen}
-                onToggleFullscreen={paneProps.toggleFullscreen}
-                onRemove={paneProps.remove}
-              />
-            </PaneHeader>
-
-            <PaneContent>{paneProps.renderActiveTab(renderWidget)}</PaneContent>
-          </PaneContainer>
-        )}
+        <PaneContainer>
+          <PaneHeader>
+            <Pane.Tabs
+              classNames={{
+                container: 'overflow-x-auto scrollbar-none min-w-0 h-full shrink',
+                tab: 'h-full flex',
+              }}
+              renderTab={(tabProps) => <IDETab {...tabProps} />}
+            />
+            <Pane.DragHandle className="flex-1 h-full min-w-[20px]" />
+            <PaneControls />
+          </PaneHeader>
+          <Pane.Content className="flex-1 flex flex-col min-h-0 bg-[#1e1e1e] relative h-full overflow-hidden">
+            {renderWidget}
+          </Pane.Content>
+        </PaneContainer>
       </Pane>
     ),
-    [locked, renderWidget],
+    [renderWidget],
   )
 
-  const renderDragOverlay = useCallback((id: string) => <IDEDragOverlay id={id} />, [])
+  const renderDragOverlay = useCallback(
+    (active: DragOverlayActiveItem) => {
+      let id = ''
+      if (active.type === 'tab') {
+        id = active.id
+      } else if (active.type === 'pane') {
+        const pane = outerZeugma.findPaneById(active.id)
+        id = pane?.activeTabId ?? ''
+      }
+      return <IDEDragOverlay id={id} />
+    },
+    [outerZeugma],
+  )
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
@@ -164,6 +163,8 @@ export function ZeugmaDemoIDE({
             {outerZeugma.layout && (
               <Zeugma
                 {...outerZeugma}
+                resizerSize={4}
+                renderPane={renderPane}
                 renderDragOverlay={renderDragOverlay}
                 classNames={{
                   dropPreview:
@@ -172,9 +173,7 @@ export function ZeugmaDemoIDE({
                   resizer: 'zeugma-resizer',
                   tabDropPreview: 'zeugma-tab-drop-preview',
                 }}
-              >
-                <PaneTree resizerSize={4} renderPane={renderPane} />
-              </Zeugma>
+              />
             )}
           </WorkspaceZeugmaArea>
         </WorkspaceContent>

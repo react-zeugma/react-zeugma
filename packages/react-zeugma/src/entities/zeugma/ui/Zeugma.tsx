@@ -52,9 +52,9 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
 
     // Actions
     removePane,
-    addPane,
+    addWidget,
     addTab,
-    updateTabMetadata,
+    updateMetadata,
     updatePaneLock,
     selectTab,
     mergeTab,
@@ -171,9 +171,9 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
   const actionsValue = useMemo(
     () => ({
       removePane,
-      addPane,
+      addWidget,
       addTab,
-      updateTabMetadata,
+      updateMetadata,
       updatePaneLock,
       selectTab,
       mergeTab,
@@ -186,9 +186,9 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
     }),
     [
       removePane,
-      addPane,
+      addWidget,
       addTab,
-      updateTabMetadata,
+      updateMetadata,
       updatePaneLock,
       selectTab,
       mergeTab,
@@ -201,7 +201,7 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
     ],
   )
 
-  // Collect all tab IDs in the current layout tree
+  // Collect all tab IDs and widget IDs in the current layout tree
   const allTabIds = useMemo(() => {
     const ids = new Set<string>()
     function traverse(node: TreeNode | null) {
@@ -210,7 +210,9 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
         node.tabs.forEach((tabId) => {
           ids.add(tabId)
         })
-      } else {
+      } else if (node.type === 'widget') {
+        ids.add(node.id)
+      } else if (node.type === 'split') {
         traverse(node.first)
         traverse(node.second)
       }

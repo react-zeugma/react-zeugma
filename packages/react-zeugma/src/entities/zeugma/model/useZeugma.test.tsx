@@ -172,8 +172,8 @@ describe('useZeugma Hook', () => {
     const { result } = renderHook(() => useZeugma({ initialLayout }))
 
     act(() => {
-      result.current.addTab('pane-1', 'tab-2')
-      result.current.addTab('pane-1', 'tab-3')
+      result.current.addTab('tab-2', 'pane-1')
+      result.current.addTab('tab-3', 'pane-1')
     })
 
     const pane = result.current.layout as PaneNode
@@ -185,15 +185,15 @@ describe('useZeugma Hook', () => {
     const { result } = renderHook(() => useZeugma({ initialLayout }))
 
     const initialAddTab = result.current.addTab
-    const initialAddPane = result.current.addPane
+    const initialAddWidget = result.current.addWidget
     const initialRemovePane = result.current.removePane
 
     act(() => {
-      result.current.addTab('pane-1', 'tab-2')
+      result.current.addTab('tab-2', 'pane-1')
     })
 
     expect(result.current.addTab).toBe(initialAddTab)
-    expect(result.current.addPane).toBe(initialAddPane)
+    expect(result.current.addWidget).toBe(initialAddWidget)
     expect(result.current.removePane).toBe(initialRemovePane)
   })
 
@@ -201,7 +201,7 @@ describe('useZeugma Hook', () => {
     const { result } = renderHook(() => useZeugma({ initialLayout }))
 
     act(() => {
-      result.current.updateTabMetadata('tab-1', (current) => ({
+      result.current.updateMetadata('tab-1', (current) => ({
         ...current,
         title: 'My Custom Title',
       }))

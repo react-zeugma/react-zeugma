@@ -9,11 +9,11 @@ import {
 import { DEFAULT_DRAG_ACTIVATION_DISTANCE, DEFAULT_SNAP_THRESHOLD } from '../../../shared/config'
 import {
   removePane,
-  addPane,
   addTab,
+  addWidget,
   splitPane,
   updateSplitPercentage,
-  updateTabMetadata,
+  updateMetadata,
   updatePaneLock,
   selectTab,
   mergeTab,
@@ -156,25 +156,18 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
     [wrapMutation],
   )
 
-  const handleAddPane = useCallback(
-    wrapMutation((prev, paneId: string, metadata?: Record<string, unknown>) =>
-      addPane(prev, paneId, metadata),
+  const handleAddWidget = useCallback(
+    wrapMutation((prev, widgetId: string, metadata?: Record<string, unknown>) =>
+      addWidget(prev, widgetId, metadata),
     ),
     [wrapMutation],
   )
 
   const handleAddTab = useCallback(
     wrapMutation(
-      (prev, targetPaneId: string, tabId: string, metadata?: Record<string, unknown>) => {
-        const targetPane =
-          findPaneById(prev, targetPaneId) ?? findPaneContainingTab(prev, targetPaneId)
-        if (!targetPane) return prev
-
-        const sourcePane = findPaneContainingTab(prev, tabId)
-        const isAlreadyInTarget = sourcePane && sourcePane.id === targetPane.id
-
-        const cleanedPrev = isAlreadyInTarget ? prev : (removeTab(prev, tabId) ?? prev)
-        return addTab(cleanedPrev, targetPane.id, tabId, metadata)
+      (prev, tabId: string, targetPaneId?: string, metadata?: Record<string, unknown>) => {
+        const cleanedPrev = removeTab(prev, tabId) ?? prev
+        return addTab(cleanedPrev, targetPaneId, tabId, metadata)
       },
     ),
     [wrapMutation],
@@ -213,15 +206,15 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
     [wrapMutation],
   )
 
-  const handleUpdateTabMetadata = useCallback(
+  const handleUpdateMetadata = useCallback(
     wrapMutation(
       (
         prev,
-        tabId: string,
+        id: string,
         updater: (
           current: Record<string, unknown> | undefined,
         ) => Record<string, unknown> | undefined,
-      ) => updateTabMetadata(prev, tabId, updater),
+      ) => updateMetadata(prev, id, updater),
     ),
     [wrapMutation],
   )
@@ -319,11 +312,11 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
 
     // Actions
     removePane: handleRemovePane,
-    addPane: handleAddPane,
+    addWidget: handleAddWidget,
     addTab: handleAddTab,
     splitPane: handleSplitPane,
     updateSplitPercentage: handleUpdateSplitPercentage,
-    updateTabMetadata: handleUpdateTabMetadata,
+    updateMetadata: handleUpdateMetadata,
     updatePaneLock: handleUpdatePaneLock,
     selectTab: handleSelectTab,
     mergeTab: handleMergeTab,

@@ -118,7 +118,7 @@ export const defaultOuterLayout: TreeNode = {
   first: {
     type: 'split',
     direction: 'row',
-    splitPercentage: 25,
+    splitPercentage: 30,
     first: {
       type: 'pane',
       id: 'pane-explorer',

@@ -77,10 +77,6 @@ The root context provider. It handles the drag-and-drop event loop and coordinat
 - `classNames?: ZeugmaClassNames` — (Optional) CSS class overrides for styling various layout elements.
 - `renderWidget?: (tabId: string) => ReactNode` — (Optional) Render function mapping tab IDs to React elements. Used to render tab widgets inside portals.
 
-> [!IMPORTANT]
-> **State & Mount Preservation Rule:**
-> Stateful components must be returned by `renderWidget` to leverage the library's portal-based mount preservation. Do not wrap `paneProps.renderActiveTab()` with stateful components or pass active tab IDs as props inside `renderPane`, as this will cause those components and their hooks to unmount and remount when the pane's active tab changes.
-
 ### `useZeugma(options)`
 
 A custom hook to manage the dashboard layout state.

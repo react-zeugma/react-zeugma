@@ -60,7 +60,7 @@ describe('Zeugma Context Provider & Consumers', () => {
 
     // Actions should be present
     expect(typeof contextValue.addTab).toBe('function')
-    expect(typeof contextValue.addPane).toBe('function')
+    expect(typeof contextValue.addWidget).toBe('function')
     expect(typeof contextValue.removePane).toBe('function')
     expect(typeof contextValue.setFullscreenPaneId).toBe('function')
     expect(typeof contextValue.setLocked).toBe('function')

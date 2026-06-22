@@ -66,10 +66,10 @@ export function ZeugmaDemoIDE({
     } else {
       const targetPaneId = findActiveEditorPane(outerZeugma.layout)
       if (targetPaneId) {
-        outerZeugma.addTab(targetPaneId, filename)
+        outerZeugma.addTab(filename, targetPaneId)
         outerZeugma.selectTab(targetPaneId, filename)
       } else {
-        outerZeugma.addPane(filename)
+        outerZeugma.addTab(filename)
       }
     }
   }

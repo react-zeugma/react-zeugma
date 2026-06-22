@@ -105,10 +105,6 @@ The context provider that sets up the drag-and-drop state machine, monitors acti
 | `renderDragOverlay`  | `(activeId: string, type: 'pane' \| 'tab') => ReactNode` | No       | Renders a custom cursor-following drag preview overlay.                                                                   |
 | `renderWidget`       | `(tabId: string) => ReactNode`                           | No       | Render function mapping tab IDs to React elements. Used to render tab widgets inside portals.                             |
 
-> [!IMPORTANT]
-> **State & Mount Preservation Rule:**
-> Always render stateful components (like text editors, terminals, or any stateful views) inside the `renderWidget` callback. The `renderPane` callback is strictly for layout frame/chrome rendering and must render `paneProps.renderActiveTab()` directly. Wrapping `renderActiveTab()` with stateful components or passing active tab IDs as props inside `renderPane` will cause those wrappers to destroy and recreate their hooks/state when tabs are switched or dragged.
-
 ### `useZeugma(options)`
 
 A custom state hook that initializes and manages the recursive layout tree and handles drag-and-drop actions.

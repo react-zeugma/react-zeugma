@@ -13,6 +13,7 @@ import { findPaneById } from '../../../shared/lib/tree'
 import { DropZone } from './DropZone'
 import { DragHandle } from './DragHandle'
 import { Tabs } from './Tabs'
+import { Tab } from './Tab'
 import { PaneControls } from './PaneControls'
 
 export interface PaneContextValue extends PaneRenderProps {
@@ -95,6 +96,7 @@ export const Pane: React.FC<PaneProps> & {
   Content: typeof PaneContent
   DragHandle: typeof DragHandle
   Tabs: typeof Tabs
+  Tab: typeof Tab
   Controls: typeof PaneControls
 } = ({ id, children, style, locked: propLocked = false }) => {
   const {
@@ -256,4 +258,5 @@ export const Pane: React.FC<PaneProps> & {
 Pane.Content = PaneContent
 Pane.DragHandle = DragHandle
 Pane.Tabs = Tabs
+Pane.Tab = Tab
 Pane.Controls = PaneControls

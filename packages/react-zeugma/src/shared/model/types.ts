@@ -19,7 +19,16 @@ export interface PaneNode {
   tabsMetadata?: Record<string, Record<string, unknown>>
 }
 
-export type TreeNode = SplitNode | PaneNode
+export interface WidgetNode {
+  type: 'widget'
+  id: string
+  locked?: boolean
+  metadata?: Record<string, unknown>
+}
+
+export type LeafNode = PaneNode | WidgetNode
+
+export type TreeNode = SplitNode | LeafNode
 
 export interface TabDetails {
   id: string
@@ -140,15 +149,15 @@ export interface ZeugmaController {
   onDismissIntentChange?: (paneId: string | null) => void
 
   // Public Actions
-  /** Removes the specified pane from the layout tree and collapses its parent split. */
+  /** Removes the specified pane or widget from the layout tree and collapses its parent split. */
   removePane: (paneId: string) => void
-  /** Appends/inserts a pane at the bottom-rightmost leaf of the layout tree. */
-  addPane: (paneId: string, metadata?: Record<string, unknown>) => void
-  /** Appends a tab into a target pane node. */
-  addTab: (paneId: string, tabId: string, metadata?: Record<string, unknown>) => void
-  /** Stable callback to update metadata for a specific tab. */
-  updateTabMetadata: (
-    tabId: string,
+  /** Appends/inserts a widget at the bottom-rightmost leaf of the layout tree. */
+  addWidget: (widgetId: string, metadata?: Record<string, unknown>) => void
+  /** Appends a tab into a target pane node, or splits/creates a new pane if no target pane ID is provided. */
+  addTab: (tabId: string, targetPaneId?: string, metadata?: Record<string, unknown>) => void
+  /** Stable callback to update metadata for a specific tab or widget. */
+  updateMetadata: (
+    id: string,
     updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined,
   ) => void
   /** Stable callback to update the locked status of a specific pane in the layout tree. */
@@ -172,8 +181,8 @@ export interface ZeugmaController {
   moveTab: (draggedTabId: string, targetTabId: string, position?: 'before' | 'after') => void
 
   // Public Queries
-  /** Find a PaneNode by its ID in the layout tree. */
-  findPaneById: (paneId: string) => PaneNode | null
+  /** Find a PaneNode or WidgetNode by its ID in the layout tree. */
+  findPaneById: (paneId: string) => LeafNode | null
   /** Find the PaneNode containing the given tab ID in the layout tree. */
   findPaneContainingTab: (tabId: string) => PaneNode | null
   /** Find the details of a tab by its ID in the layout tree. */
@@ -241,8 +250,8 @@ export interface ZeugmaStateValue {
   locked: boolean
   /** Programmatically updates the global locked status. */
   setLocked: Dispatch<SetStateAction<boolean>>
-  /** Find a PaneNode by its ID in the layout tree. */
-  findPaneById: (paneId: string) => PaneNode | null
+  /** Find a PaneNode or WidgetNode by its ID in the layout tree. */
+  findPaneById: (paneId: string) => LeafNode | null
   /** Find the PaneNode containing the given tab ID in the layout tree. */
   findPaneContainingTab: (tabId: string) => PaneNode | null
   /** Find the details of a tab by its ID in the layout tree. */
@@ -280,15 +289,15 @@ export interface ZeugmaDragStateValue {
  * Consumers of only this context will never re-render from layout/drag state changes.
  */
 export interface ZeugmaActionsValue {
-  /** Removes the specified pane from the layout tree and collapses its parent split. */
+  /** Removes the specified pane or widget from the layout tree and collapses its parent split. */
   removePane: (paneId: string) => void
-  /** Appends/inserts a pane at the bottom-rightmost leaf of the layout tree. */
-  addPane: (paneId: string, metadata?: Record<string, unknown>) => void
-  /** Appends a tab into a target pane node. */
-  addTab: (paneId: string, tabId: string, metadata?: Record<string, unknown>) => void
-  /** Stable callback to update metadata for a specific tab. */
-  updateTabMetadata: (
-    tabId: string,
+  /** Appends/inserts a widget at the bottom-rightmost leaf of the layout tree. */
+  addWidget: (widgetId: string, metadata?: Record<string, unknown>) => void
+  /** Appends a tab into a target pane node, or splits/creates a new pane if no target pane ID is provided. */
+  addTab: (tabId: string, targetPaneId?: string, metadata?: Record<string, unknown>) => void
+  /** Stable callback to update metadata for a specific tab or widget. */
+  updateMetadata: (
+    id: string,
     updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined,
   ) => void
   /** Stable callback to update the locked status of a specific pane in the layout tree. */

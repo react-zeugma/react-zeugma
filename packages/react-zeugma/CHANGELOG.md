@@ -1,5 +1,17 @@
 # react-zeugma
 
+## 6.3.0
+
+### Minor Changes
+
+- **First-class Widget Support & Layout Tree Refactoring**:
+  - Introduced `WidgetNode` leaf type (`{ type: 'widget', id: string, locked?: boolean, metadata?: Record<string, unknown> }`) to support simple, non-tabbed widgets directly in the split tree.
+  - Replaced `PaneNode` as the exclusive leaf node type with `LeafNode`, representing `PaneNode | WidgetNode`. Updated `TreeNode` to be `SplitNode | LeafNode`.
+  - Refactored `addPane` and `updateTabMetadata` into `addWidget` and `updateMetadata` across the controller APIs and utility helpers.
+  - Updated `addTab` signature to take `(tabId, targetPaneId?, metadata?)` to optionally spawn new panes or append to existing ones.
+  - Updated `findPaneById` to return `LeafNode | null` instead of `PaneNode | null`.
+  - Integrated `Widget` rendering and layout support directly into `<PaneTree>`, DND collision detection, and drag-and-drop actions.
+
 ## 6.2.2
 
 ### Patch Changes

@@ -1,23 +1,25 @@
 import { ReactNode } from 'react'
 
-export interface PaneRenderProps {
-  /** True if the pane is actively being dragged. */
+export interface BaseLeafRenderProps {
+  /** True if the leaf is actively being dragged. */
   isDragging: boolean
-  /** True if the pane currently occupies the fullscreen view. */
+  /** True if the leaf currently occupies the fullscreen view. */
   isFullscreen: boolean
-  /** Toggles the pane to and from fullscreen/zoomed mode. */
+  /** Toggles the leaf to and from fullscreen/zoomed mode. */
   toggleFullscreen: () => void
-  /** Closes and removes the active tab from the layout tree. */
+  /** Closes and removes the leaf from the layout tree. */
   remove: () => void
-  /** The metadata values associated with the active tab, or undefined. */
+  /** The metadata values associated with this leaf, or undefined. */
   metadata: Record<string, unknown> | undefined
-  /** Updates the metadata of the active tab using an updater function. */
+  /** Updates the metadata of this leaf using an updater function. */
   updateMetadata: (
     updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined,
   ) => void
-  /** True if this specific pane or the dashboard globally is locked. */
+  /** True if this specific leaf or the dashboard globally is locked. */
   locked: boolean
+}
 
+export interface PaneRenderProps extends BaseLeafRenderProps {
   // Tabulation extensions:
   /** The array of tab IDs in this pane. */
   tabs: string[]
@@ -36,4 +38,9 @@ export interface PaneRenderProps {
   ) => void
   /** Renders the target placeholder element for the currently active tab in the pane. */
   renderActiveTab: () => ReactNode
+}
+
+export interface WidgetRenderProps extends BaseLeafRenderProps {
+  /** Renders the target placeholder element for the widget content. */
+  renderActiveWidget: () => ReactNode
 }

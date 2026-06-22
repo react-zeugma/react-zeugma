@@ -9,11 +9,13 @@ export type {
 export { useZeugma, useZeugmaContext } from './entities/zeugma'
 export { useResizer } from './features/resize-pane'
 export { PaneTree } from './widgets/pane-tree'
-export { Pane, DragHandle, Tabs, useTabContext } from './entities/pane'
+export { Pane, Widget, DragHandle, Tabs, useTabContext } from './entities/pane'
 export type {
   PaneProps,
+  WidgetProps,
   DragHandleProps,
   PaneRenderProps,
+  WidgetRenderProps,
   TabsProps,
   TabContextValue,
   TabRenderProps,

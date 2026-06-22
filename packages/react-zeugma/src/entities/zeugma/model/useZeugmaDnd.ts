@@ -10,7 +10,7 @@ import {
   CollisionDetection,
   DroppableContainer,
 } from '@dnd-kit/core'
-import { SplitDirection, PaneNode, TreeNode, ZeugmaController } from '../../../shared'
+import { SplitDirection, TreeNode, ZeugmaController, LeafNode } from '../../../shared'
 import {
   removePane as removePaneHelper,
   removeTab as removeTabHelper,
@@ -404,7 +404,7 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
         ? removeTabHelper(originalLayout, draggingId)
         : removePaneHelper(originalLayout, draggingId)
 
-      let draggedPaneNode: PaneNode
+      let draggedPaneNode: LeafNode
       if (isTabDrag) {
         const originalPane = findPaneContainingTab(originalLayout, draggingId)
         const sourceMetadata = originalPane?.tabsMetadata?.[draggingId]
@@ -471,7 +471,7 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
       ? findPaneContainingTab(originalLayout, draggingId)
       : findPaneById(originalLayout, draggingId)
     const isParentTarget = parentPane && parentPane.id === targetId
-    const isOnlyTab = parentPane && parentPane.tabs.length === 1
+    const isOnlyTab = parentPane && (parentPane.type === 'widget' || parentPane.tabs.length === 1)
 
     if (draggingId === targetId || (isParentTarget && isOnlyTab)) {
       setLayout(originalLayout)
@@ -483,7 +483,7 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
 
     const direction: SplitDirection = dropZone === 'left' || dropZone === 'right' ? 'row' : 'column'
 
-    let draggedPaneNode: PaneNode
+    let draggedPaneNode: LeafNode
     if (isTabDrag) {
       const originalPane = findPaneContainingTab(originalLayout, draggingId)
       const sourceMetadata = originalPane?.tabsMetadata?.[draggingId]

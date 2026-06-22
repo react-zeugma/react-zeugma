@@ -77,21 +77,6 @@ export const homeMetadata: Metadata = {
   },
 }
 
-export const demoMetadata: Metadata = {
-  title: 'Live Demo',
-  description:
-    'Try react-zeugma layout manager in an interactive workspace with file explorer, code editor, and live preview panels.',
-  openGraph: {
-    title: 'Live Demo - react-zeugma',
-    description:
-      'Try react-zeugma layout manager in an interactive workspace with file explorer, code editor, and live preview panels.',
-    url: 'https://react-zeugma.com/demo',
-  },
-  alternates: {
-    canonical: '/demo',
-  },
-}
-
 export const docsMetadata: Metadata = {
   title: 'Documentation',
   description:

@@ -9,6 +9,7 @@ import {
   ZeugmaDragContext,
   ZeugmaDragStateValue,
   ZeugmaProps,
+  ZeugmaControllerInternal,
 } from '../../../shared'
 import { usePortalRegistry, useZeugmaDnd } from '../model'
 import { CursorOverlay } from './CursorOverlay'
@@ -16,16 +17,36 @@ import { PortalHostItem } from './PortalHostItem'
 import { PaneTree } from '../../../widgets/pane-tree'
 
 export const Zeugma: React.FC<ZeugmaProps> = (props) => {
-  const internalProps = props
   const {
+    controller,
     renderDragOverlay,
     classNames = {},
     renderPane,
     resizerSize,
 
-    // Controller state
+    // Configuration settings
+    dragActivationDistance = 8,
+    snapThreshold = 8,
+    minSplitPercentage = 5,
+    maxSplitPercentage = 95,
+    enableDragToDismiss = false,
+    dismissThreshold = 60,
+
+    // Callbacks
+    onRemove,
+    onDragStart,
+    onDragEnd,
+    onResizeStart,
+    onResize,
+    onResizeEnd,
+    onDismissIntentChange,
+  } = props
+
+  const internalController = controller as ZeugmaControllerInternal
+  const {
     layout,
     setLayout,
+    _internalSetLayout,
     fullscreenPaneId,
     setFullscreenPaneId,
     locked,
@@ -36,23 +57,15 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
     getTabMetadata,
     getActiveTabMetadata,
     activeId,
+    setActiveId,
     activeType,
+    setActiveType,
     dismissIntentId,
+    setDismissIntentId,
+    containerRef,
     setContainerRef,
     layoutBeforeDrag,
-
-    // Configuration settings
-    snapThreshold,
-    minSplitPercentage,
-    maxSplitPercentage,
-
-    // Callbacks
-    onRemove,
-    onResizeStart,
-    onResize,
-    onResizeEnd,
-
-    // Actions
+    setLayoutBeforeDrag,
     removePane,
     addTab,
     updateMetadata,
@@ -63,7 +76,7 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
     splitPane,
     updateSplitPercentage,
     moveTab,
-  } = internalProps
+  } = internalController
 
   const { portalTargets, registerPortalTarget, registerRenderCallback, renderCallbacksRef } =
     usePortalRegistry()
@@ -72,9 +85,33 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
   const [overTabPosition, setOverTabPosition] = useState<'before' | 'after' | null>(null)
 
   const dnd = useZeugmaDnd({
-    ...internalProps,
+    layout,
+    _internalSetLayout,
+    layoutBeforeDrag,
+    setLayoutBeforeDrag,
+    activeId,
+    setActiveId,
+    activeType,
+    setActiveType,
+    dismissIntentId,
+    setDismissIntentId,
     setOverTabId,
     setOverTabPosition,
+    containerRef,
+
+    // Config
+    dragActivationDistance,
+    enableDragToDismiss,
+    dismissThreshold,
+
+    // Callbacks
+    onRemove,
+    onDragStart,
+    onDragEnd,
+    onDismissIntentChange,
+
+    // Actions
+    removeTab,
   })
 
   // Shallow-memoize classNames by individual fields to avoid identity busting from inline objects
@@ -259,6 +296,7 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
                   return renderDragOverlay({
                     type: activeType,
                     id,
+                    isDismissing: activeId === dismissIntentId,
                   })
                 }}
                 className={`${classNames.dragOverlay || ''} ${

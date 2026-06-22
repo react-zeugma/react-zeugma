@@ -10,7 +10,7 @@ import {
   CollisionDetection,
   DroppableContainer,
 } from '@dnd-kit/core'
-import { SplitDirection, TreeNode, ZeugmaController, PaneNode } from '../../../shared'
+import { SplitDirection, TreeNode, PaneNode } from '../../../shared'
 import {
   removePane as removePaneHelper,
   removeTab as removeTabHelper,
@@ -37,9 +37,42 @@ function getPointerCoordinates(event: Event): { x: number; y: number } | null {
   return null
 }
 
-interface UseZeugmaDndProps extends ZeugmaController {
+interface UseZeugmaDndProps {
+  layout: TreeNode | null
+  _internalSetLayout: Dispatch<SetStateAction<TreeNode | null>>
+  layoutBeforeDrag: TreeNode | null
+  setLayoutBeforeDrag: Dispatch<SetStateAction<TreeNode | null>>
+  activeId: string | null
+  setActiveId: Dispatch<SetStateAction<string | null>>
+  activeType: 'pane' | 'tab' | null
+  setActiveType: Dispatch<SetStateAction<'pane' | 'tab' | null>>
+  dismissIntentId: string | null
+  setDismissIntentId: Dispatch<SetStateAction<string | null>>
   setOverTabId: Dispatch<SetStateAction<string | null>>
   setOverTabPosition: Dispatch<SetStateAction<'before' | 'after' | null>>
+  containerRef: React.RefObject<HTMLElement | null>
+
+  // Config
+  dragActivationDistance: number
+  enableDragToDismiss: boolean
+  dismissThreshold: number
+
+  // Callbacks
+  onRemove?: (paneId: string) => void
+  onDragStart?: (activeId: string) => void
+  onDragEnd?: (
+    activeId: string,
+    overId: string | null,
+    dropAction: {
+      type: 'split' | 'move'
+      direction?: SplitDirection
+      position?: 'top' | 'bottom' | 'left' | 'right' | 'center'
+    } | null,
+  ) => void
+  onDismissIntentChange?: (paneId: string | null) => void
+
+  // Actions
+  removeTab: (tabId: string) => void
 }
 
 export function useZeugmaDnd(props: UseZeugmaDndProps) {

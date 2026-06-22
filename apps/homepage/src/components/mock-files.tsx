@@ -6,7 +6,17 @@ import { TreeNode } from 'react-zeugma'
 // ─── Code Strings ─────────────────────────────────────────────────────────────
 
 const APP_TSX_CODE = `import React from 'react'
-import { useZeugma, Zeugma, PaneTree, Pane, DragHandle, Tabs, TreeNode } from 'react-zeugma'
+import { useZeugma, Zeugma, Pane, TreeNode } from 'react-zeugma'
+
+// ─── Widget Registry ──────────────────────────────────────────────────────────
+
+const WIDGET_REGISTRY: Record<string, React.FC<{ tabId: string }>> = {
+  'explorer': () => <div>File Tree</div>,
+  'terminal': () => <div>Terminal Output</div>,
+  'README.md': () => <div>Hello react-zeugma!</div>,
+  'App.tsx': () => <div>Source Editor</div>,
+  'inspector': () => <div>Inspector Content</div>,
+}
 
 const initialLayout: TreeNode = {
   type: 'split',
@@ -17,60 +27,56 @@ const initialLayout: TreeNode = {
     type: 'split',
     direction: 'column',
     splitPercentage: 70,
-    first: { type: 'pane', id: 'pane-editor', tabs: ['README.md', 'src/App.tsx'], activeTabId: 'src/App.tsx' },
+    first: { type: 'pane', id: 'pane-editor', tabs: ['README.md', 'App.tsx'], activeTabId: 'App.tsx' },
     second: { type: 'pane', id: 'pane-terminal', tabs: ['terminal'], activeTabId: 'terminal' },
   },
 }
 
 function WorkspacePane({ id }: { id: string }) {
   return (
-    <Pane id={id}>
-      {(paneProps) => (
-        <div className="pane">
-          <div className="pane-header">
-            <Tabs
-              renderTab={({ tabId, selectTab, removeTab }) => (
-                <div key={tabId} onClick={() => selectTab(tabId)} className="tab">
-                  <span>{tabId}</span>
-                  <button onClick={(e) => { e.stopPropagation(); removeTab(tabId); }}>×</button>
-                </div>
-              )}
-            />
-            <DragHandle className="drag-handle" />
-          </div>
-          <div className="pane-content">
-            <Pane.Content>
-              {(tabId) => {
-                if (tabId === 'explorer') return <div>File Tree</div>
-                if (tabId === 'terminal') return <div>Terminal Output</div>
-                if (tabId === 'README.md') return <div>Hello react-zeugma!</div>
-                if (tabId === 'src/App.tsx') return <div>Source Editor</div>
-                return null
-              }}
-            </Pane.Content>
-          </div>
-        </div>
-      )}
+    <Pane id={id} className="pane">
+      <div className="pane-header">
+        <Pane.Tabs
+          renderTab={({ tabId, activeTabId, onSelect, onRemove }) => (
+            <div
+              key={tabId}
+              onClick={onSelect}
+            >
+              <span>{tabId}</span>
+              <button onClick={() => { onRemove(); }}/>
+            </div>
+          )}
+        />
+        <Pane.DragHandle className="drag-handle">
+          <div className="drag-indicator">⋮⋮</div>
+        </Pane.DragHandle>
+        <Pane.Controls />
+      </div>
+      <div className="pane-content">
+        <Pane.Content>
+          {(tab) => {
+            const Widget = WIDGET_REGISTRY[tab.id]
+            return Widget ? <Widget tabId={tab.id} /> : <div className="fallback">Unknown tab: {tab.id}</div>
+          }}
+        </Pane.Content>
+      </div>
     </Pane>
   )
 }
 
 export default function App() {
-  const zeugma = useZeugma({ initialLayout })
+  const controller = useZeugma({ initialLayout })
 
   return (
     <Zeugma
-      {...zeugma}
+      controller={controller}
+      renderPane={(id) => <WorkspacePane id={id} />}
       classNames={{
         resizer: 'resizer',
         dropPreview: 'drop-preview',
         tabDropPreview: 'tab-preview',
       }}
-    >
-      <div className="workspace">
-        <PaneTree renderPane={(id) => <WorkspacePane id={id} />} />
-      </div>
-    </Zeugma>
+    />
   )
 }`
 

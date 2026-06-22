@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { renderHook } from '@testing-library/react'
 import { useZeugmaDnd } from './useZeugmaDnd'
-import type { ZeugmaController } from '../../../shared'
+import type { ZeugmaControllerInternal } from '../../../shared'
 import * as dndKitCore from '@dnd-kit/core'
 
 vi.mock('@dnd-kit/core', async (importOriginal) => {
@@ -12,8 +12,14 @@ vi.mock('@dnd-kit/core', async (importOriginal) => {
   }
 })
 
+interface MockController extends ZeugmaControllerInternal {
+  dragActivationDistance: number
+  enableDragToDismiss: boolean
+  dismissThreshold: number
+}
+
 describe('useZeugmaDnd Hook', () => {
-  const mockController = (): ZeugmaController => {
+  const mockController = (): MockController => {
     const setLayoutMock = vi.fn()
     return {
       layout: {
@@ -39,9 +45,6 @@ describe('useZeugmaDnd Hook', () => {
       containerRef: { current: null },
       setContainerRef: vi.fn(),
       dragActivationDistance: 8,
-      snapThreshold: 8,
-      minSplitPercentage: 5,
-      maxSplitPercentage: 95,
       enableDragToDismiss: false,
       dismissThreshold: 60,
       removePane: vi.fn(),

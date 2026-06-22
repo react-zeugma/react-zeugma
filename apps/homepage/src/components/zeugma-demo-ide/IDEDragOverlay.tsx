@@ -3,9 +3,10 @@ import { getTabMetadata } from './IDETab'
 
 interface IDEDragOverlayProps {
   id: string
+  isDismissing?: boolean
 }
 
-export function IDEDragOverlay({ id }: IDEDragOverlayProps) {
+export function IDEDragOverlay({ id, isDismissing = false }: IDEDragOverlayProps) {
   const { title, icon } = getTabMetadata(id)
 
   let sizedIcon = icon
@@ -17,9 +18,17 @@ export function IDEDragOverlay({ id }: IDEDragOverlayProps) {
   }
 
   return (
-    <div className="px-4 py-2 bg-[#2d2d2d] border border-indigo-500/30 shadow-2xl flex items-center gap-2.5 opacity-95 text-xs text-white font-bold uppercase tracking-wider pointer-events-none font-mono">
-      {sizedIcon}
-      <span>{title}</span>
+    <div
+      className={`px-4 py-2 border shadow-2xl flex items-center gap-2.5 opacity-95 text-xs text-white font-bold uppercase tracking-wider pointer-events-none font-mono transition-all duration-150 ${
+        isDismissing
+          ? 'bg-rose-950 border-rose-500 scale-90 text-rose-200'
+          : 'bg-[#2d2d2d] border-indigo-500/30'
+      }`}
+    >
+      {isDismissing ? <span className="text-rose-400 font-bold">⚠️</span> : sizedIcon}
+      <span className={isDismissing ? 'line-through text-rose-300' : ''}>
+        {isDismissing ? `Remove ${title}` : title}
+      </span>
     </div>
   )
 }

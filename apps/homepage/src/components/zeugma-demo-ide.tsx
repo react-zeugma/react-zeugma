@@ -145,7 +145,7 @@ export function ZeugmaDemoIDE({
         const pane = outerZeugma.findPaneById(active.id)
         id = pane?.activeTabId ?? ''
       }
-      return <IDEDragOverlay id={id} />
+      return <IDEDragOverlay id={id} isDismissing={active.isDismissing} />
     },
     [outerZeugma],
   )
@@ -162,10 +162,12 @@ export function ZeugmaDemoIDE({
           <WorkspaceZeugmaArea>
             {outerZeugma.layout && (
               <Zeugma
-                {...outerZeugma}
+                controller={outerZeugma}
                 resizerSize={4}
                 renderPane={renderPane}
                 renderDragOverlay={renderDragOverlay}
+                enableDragToDismiss={true}
+                dismissThreshold={60}
                 classNames={{
                   dropPreview:
                     'bg-zinc-800/50 border border-zinc-700 transition-all duration-200 shadow-lg',

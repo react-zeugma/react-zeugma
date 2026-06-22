@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { render, act } from '@testing-library/react'
 import { useEffect } from 'react'
 import { useZeugma, Zeugma, Pane } from '../../../index'
-import type { TreeNode, ZeugmaController } from '../../../shared'
+import type { TreeNode, ZeugmaControllerInternal } from '../../../shared'
 
 describe('Zeugma Drag and Drop Widget Remounting', () => {
   it('should not remount widgets during tab move (reorder)', () => {
@@ -26,11 +26,11 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
       return <div data-testid={`widget-${tabId}`}>{tabId} Content</div>
     }
 
-    let controllerInstance: ZeugmaController | null = null
+    let controllerInstance: ZeugmaControllerInternal | null = null
 
     const TestWrapper = () => {
       const controller = useZeugma({ initialLayout })
-      controllerInstance = controller
+      controllerInstance = controller as ZeugmaControllerInternal
       const renderPane = (paneId: string) => (
         <Pane id={paneId}>
           <div id={`pane-target-${paneId}`}>
@@ -38,7 +38,7 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
           </div>
         </Pane>
       )
-      return <Zeugma {...controller} renderPane={renderPane} />
+      return <Zeugma controller={controller} renderPane={renderPane} />
     }
 
     render(<TestWrapper />)
@@ -123,11 +123,11 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
       return <div data-testid={`widget-${tabId}`}>{tabId} Content</div>
     }
 
-    let controllerInstance: ZeugmaController | null = null
+    let controllerInstance: ZeugmaControllerInternal | null = null
 
     const TestWrapper = () => {
       const controller = useZeugma({ initialLayout })
-      controllerInstance = controller
+      controllerInstance = controller as ZeugmaControllerInternal
       const renderPane = (paneId: string) => (
         <Pane id={paneId}>
           <div id={`pane-target-${paneId}`}>
@@ -135,7 +135,7 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
           </div>
         </Pane>
       )
-      return <Zeugma {...controller} renderPane={renderPane} />
+      return <Zeugma controller={controller} renderPane={renderPane} />
     }
 
     render(<TestWrapper />)
@@ -220,11 +220,11 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
       return <div data-testid={`widget-${tabId}`}>{tabId} Content</div>
     }
 
-    let controllerInstance: ZeugmaController | null = null
+    let controllerInstance: ZeugmaControllerInternal | null = null
 
     const TestWrapper = () => {
       const controller = useZeugma({ initialLayout })
-      controllerInstance = controller
+      controllerInstance = controller as ZeugmaControllerInternal
       const renderPane = (paneId: string) => (
         <Pane id={paneId}>
           <div id={`pane-target-${paneId}`}>
@@ -232,7 +232,7 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
           </div>
         </Pane>
       )
-      return <Zeugma {...controller} renderPane={renderPane} />
+      return <Zeugma controller={controller} renderPane={renderPane} />
     }
 
     render(<TestWrapper />)

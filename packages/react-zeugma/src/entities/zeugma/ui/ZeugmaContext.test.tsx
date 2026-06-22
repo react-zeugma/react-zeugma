@@ -8,7 +8,7 @@ import {
   ZeugmaStateContext,
   ZeugmaDragContext,
 } from '../../../shared'
-import type { TreeNode, ZeugmaContextValue } from '../../../shared'
+import type { TreeNode, ZeugmaController } from '../../../shared'
 import { Tabs } from '../../pane/ui/Tabs'
 import * as dndKitCore from '@dnd-kit/core'
 
@@ -37,7 +37,7 @@ describe('Zeugma Context Provider & Consumers', () => {
   })
 
   it('should successfully render children and provide context values', () => {
-    let contextValue = null as unknown as ZeugmaContextValue
+    let contextValue: ZeugmaController | null = null
     const ConsumerComponent = () => {
       contextValue = useZeugmaContext()
       return <div data-testid="child">Child Component</div>
@@ -50,23 +50,23 @@ describe('Zeugma Context Provider & Consumers', () => {
           <ConsumerComponent />
         </Pane>
       )
-      return <Zeugma {...controller} renderPane={renderPane} />
+      return <Zeugma controller={controller} renderPane={renderPane} />
     }
 
     render(<TestWrapper />)
 
     expect(screen.getByTestId('child')).toBeDefined()
     expect(contextValue).not.toBeNull()
-    expect(contextValue.layout).toEqual(initialLayout)
+    expect(contextValue!.layout).toEqual(initialLayout)
 
     // Actions should be present
-    expect(typeof contextValue.addTab).toBe('function')
-    expect(typeof contextValue.removePane).toBe('function')
-    expect(typeof contextValue.setFullscreenPaneId).toBe('function')
-    expect(typeof contextValue.setLocked).toBe('function')
-    expect(typeof contextValue.splitPane).toBe('function')
-    expect(typeof contextValue.updateSplitPercentage).toBe('function')
-    expect(typeof contextValue.moveTab).toBe('function')
+    expect(typeof contextValue!.addTab).toBe('function')
+    expect(typeof contextValue!.removePane).toBe('function')
+    expect(typeof contextValue!.setFullscreenPaneId).toBe('function')
+    expect(typeof contextValue!.setLocked).toBe('function')
+    expect(typeof contextValue!.splitPane).toBe('function')
+    expect(typeof contextValue!.updateSplitPercentage).toBe('function')
+    expect(typeof contextValue!.moveTab).toBe('function')
   })
 
   it('should pass tab metadata to Pane.Content render callback', () => {
@@ -96,7 +96,7 @@ describe('Zeugma Context Provider & Consumers', () => {
           </div>
         </Pane>
       )
-      return <Zeugma {...controller} renderPane={renderPane} />
+      return <Zeugma controller={controller} renderPane={renderPane} />
     }
 
     render(<TestWrapper />)

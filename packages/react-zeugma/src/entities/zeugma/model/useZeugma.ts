@@ -5,8 +5,8 @@ import {
   SplitNode,
   UseZeugmaOptions,
   ZeugmaController,
+  ZeugmaControllerInternal,
 } from '../../../shared'
-import { DEFAULT_DRAG_ACTIVATION_DISTANCE, DEFAULT_SNAP_THRESHOLD } from '../../../shared/config'
 import {
   removePane,
   addTab,
@@ -34,19 +34,6 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
     fullscreenPaneId: controlledFullscreenPaneId,
     onFullscreenChange,
     locked: initialLocked = false,
-    dragActivationDistance = DEFAULT_DRAG_ACTIVATION_DISTANCE,
-    snapThreshold = DEFAULT_SNAP_THRESHOLD,
-    minSplitPercentage = 5,
-    maxSplitPercentage = 95,
-    enableDragToDismiss = false,
-    dismissThreshold = 60,
-    onRemove,
-    onDragStart,
-    onDragEnd,
-    onResizeStart,
-    onResize,
-    onResizeEnd,
-    onDismissIntentChange,
   } = options
 
   const [layout, setLocalLayout] = useState<TreeNode | null>(() => {
@@ -296,7 +283,7 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
     return metadata
   }, [])
 
-  return {
+  const controller: ZeugmaControllerInternal = {
     layout,
     setLayout,
     _internalSetLayout,
@@ -315,34 +302,17 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
     containerRef,
     setContainerRef,
 
-    // Config options
-    dragActivationDistance,
-    snapThreshold,
-    minSplitPercentage,
-    maxSplitPercentage,
-    enableDragToDismiss,
-    dismissThreshold,
-
-    // Callbacks
-    onRemove,
-    onDragStart,
-    onDragEnd,
-    onResizeStart,
-    onResize,
-    onResizeEnd,
-    onDismissIntentChange,
-
     // Actions
     removePane: handleRemovePane,
     addTab: handleAddTab,
-    splitPane: handleSplitPane,
-    updateSplitPercentage: handleUpdateSplitPercentage,
     updateMetadata: handleUpdateMetadata,
     updatePaneLock: handleUpdatePaneLock,
     selectTab: handleSelectTab,
     mergeTab: handleMergeTab,
     moveTab: handleMoveTab,
     removeTab: handleRemoveTab,
+    splitPane: handleSplitPane,
+    updateSplitPercentage: handleUpdateSplitPercentage,
 
     // Queries
     findPaneById: handleFindPaneById,
@@ -350,5 +320,7 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
     findTabById: handleFindTabById,
     getTabMetadata: handleGetTabMetadata,
     getActiveTabMetadata: handleGetActiveTabMetadata,
-  } as ZeugmaController
+  }
+
+  return controller
 }

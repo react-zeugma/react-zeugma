@@ -3,12 +3,13 @@ import { createPortal } from 'react-dom'
 
 export interface PortalHostItemProps {
   tabId: string
+  metadata?: Record<string, unknown>
   target: HTMLDivElement | null
-  renderWidget?: (tabId: string) => React.ReactNode
+  renderWidget?: (tabId: string, metadata?: Record<string, unknown>) => React.ReactNode
 }
 
 export const PortalHostItem: React.FC<PortalHostItemProps> = React.memo(
-  ({ tabId, target, renderWidget }) => {
+  ({ tabId, metadata, target, renderWidget }) => {
     const [mounted, setMounted] = useState(false)
     const wrapperRef = useRef<HTMLDivElement | null>(null)
 
@@ -57,6 +58,6 @@ export const PortalHostItem: React.FC<PortalHostItemProps> = React.memo(
 
     if (!wrapper || !renderWidget) return null
 
-    return createPortal(renderWidget(tabId), wrapper)
+    return createPortal(renderWidget(tabId, metadata), wrapper)
   },
 )

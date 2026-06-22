@@ -53,7 +53,15 @@ export function useBodyCursorOverride(isOverLocked: boolean) {
 }
 
 export function usePortalRegistry() {
-  const [portalTargets, setPortalTargets] = useState<Record<string, HTMLDivElement | null>>({})
+  const [portalTargets, setPortalTargets] = useState<
+    Record<
+      string,
+      {
+        el: HTMLDivElement | null
+        render?: (tabId: string, metadata?: Record<string, unknown>) => React.ReactNode
+      }
+    >
+  >({})
   const isMountedRef = useRef(true)
 
   useEffect(() => {
@@ -63,13 +71,23 @@ export function usePortalRegistry() {
     }
   }, [])
 
-  const registerPortalTarget = useCallback((tabId: string, el: HTMLDivElement | null) => {
-    if (!isMountedRef.current) return
-    setPortalTargets((prev) => {
-      if (prev[tabId] === el) return prev
-      return { ...prev, [tabId]: el }
-    })
-  }, [])
+  const registerPortalTarget = useCallback(
+    (
+      tabId: string,
+      el: HTMLDivElement | null,
+      render?: (tabId: string, metadata?: Record<string, unknown>) => React.ReactNode,
+    ) => {
+      if (!isMountedRef.current) return
+      setPortalTargets((prev) => {
+        if (!el) {
+          if (!prev[tabId]) return prev
+          return { ...prev, [tabId]: { el: null, render: prev[tabId].render } }
+        }
+        return { ...prev, [tabId]: { el, render } }
+      })
+    },
+    [],
+  )
 
   return { portalTargets, registerPortalTarget }
 }

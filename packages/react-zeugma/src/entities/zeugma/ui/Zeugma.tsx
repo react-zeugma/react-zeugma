@@ -17,8 +17,6 @@ import { PortalHostItem } from './PortalHostItem'
 export const Zeugma: React.FC<ZeugmaProps> = (props) => {
   const internalProps = props
   const {
-    renderPane,
-    renderWidget,
     renderDragOverlay,
     classNames = {},
     children,
@@ -75,9 +73,6 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
     setOverTabPosition,
   })
 
-  // Stable renderPane wrapper — immune to consumer passing inline functions
-  const stableRenderPane = useCallback((paneId: string) => renderPane(paneId), [renderPane])
-
   // Shallow-memoize classNames by individual fields to avoid identity busting from inline objects
   const stableClassNames = useMemo(
     () => classNames,
@@ -112,7 +107,6 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
     () => ({
       layout,
       setLayout,
-      renderPane: stableRenderPane,
       activeId,
       activeType,
       dismissIntentId,
@@ -149,7 +143,6 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
       minSplitPercentage,
       maxSplitPercentage,
       setLayout,
-      stableRenderPane,
       handleResizeEnd,
       locked,
       setLocked,
@@ -210,8 +203,6 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
         node.tabs.forEach((tabId) => {
           ids.add(tabId)
         })
-      } else if (node.type === 'widget') {
-        ids.add(node.id)
       } else if (node.type === 'split') {
         traverse(node.first)
         traverse(node.second)
@@ -250,14 +241,19 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
             )}
             {/* Transparent Portal Host to preserve widget state across pane drags */}
             <div id="zeugma-portal-host" style={{ display: 'none' }}>
-              {allTabIds.map((tabId) => (
-                <PortalHostItem
-                  key={tabId}
-                  tabId={tabId}
-                  target={portalTargets[tabId] || null}
-                  renderWidget={renderWidget}
-                />
-              ))}
+              {allTabIds.map((tabId) => {
+                const target = portalTargets[tabId]
+                const tabMetadata = findTabById(tabId)?.metadata
+                return (
+                  <PortalHostItem
+                    key={tabId}
+                    tabId={tabId}
+                    metadata={tabMetadata}
+                    target={target?.el || null}
+                    renderWidget={target?.render}
+                  />
+                )
+              })}
             </div>
           </PortalRegistryContext.Provider>
         </ZeugmaDragContext.Provider>

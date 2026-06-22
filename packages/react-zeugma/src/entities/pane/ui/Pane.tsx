@@ -1,10 +1,59 @@
-import React, { useMemo, useCallback, useEffect, useContext, useRef } from 'react'
+import React, { useMemo, useCallback, useEffect, useContext, useRef, createContext } from 'react'
 import { useDraggable } from '@dnd-kit/core'
 import { useZeugmaState, useZeugmaActions, PortalRegistryContext, PaneNode } from '../../../shared'
 import { DragListenersCtx } from '../model/context'
 import { PaneRenderProps } from '../model/types'
 import { findPaneById } from '../../../shared/lib/tree'
 import { DropZone } from './DropZone'
+
+export interface PaneContextValue extends PaneRenderProps {
+  id: string
+}
+
+export const PaneContext = createContext<PaneContextValue | undefined>(undefined)
+
+export const usePaneContext = () => {
+  const context = useContext(PaneContext)
+  if (!context) {
+    throw new Error('usePaneContext must be used within a Pane component')
+  }
+  return context
+}
+
+export interface PaneContentProps {
+  children: (tabId: string, metadata: Record<string, unknown> | undefined) => React.ReactNode
+}
+
+export const PaneContent: React.FC<PaneContentProps> = ({ children }) => {
+  const { activeTabId } = usePaneContext()
+  const { classNames } = useZeugmaState()
+  const targetRef = useRef<HTMLDivElement | null>(null)
+  const portalRegistry = useContext(PortalRegistryContext)
+  if (!portalRegistry) {
+    throw new Error('PaneContent must be used within a Zeugma provider')
+  }
+  const { registerPortalTarget } = portalRegistry
+
+  useEffect(() => {
+    const el = targetRef.current
+    registerPortalTarget(activeTabId, el, children)
+    return () => {
+      registerPortalTarget(activeTabId, null)
+    }
+  }, [activeTabId, registerPortalTarget, children])
+
+  return (
+    <div
+      ref={targetRef}
+      id={`zeugma-tab-target-${activeTabId}`}
+      className={classNames.tabContentWrapper || ''}
+      style={{
+        height: '100%',
+        width: '100%',
+      }}
+    />
+  )
+}
 
 export interface PaneProps {
   /** The unique ID of the pane, matching a `paneId` in the layout tree schema. */
@@ -17,8 +66,9 @@ export interface PaneProps {
   locked?: boolean
 }
 
-export const Pane: React.FC<PaneProps> = ({ id, children, style, locked: propLocked = false }) => {
-  const targetRef = useRef<HTMLDivElement | null>(null)
+export const Pane: React.FC<PaneProps> & {
+  Content: typeof PaneContent
+} = ({ id, children, style, locked: propLocked = false }) => {
   const {
     layout,
     activeId,
@@ -28,11 +78,6 @@ export const Pane: React.FC<PaneProps> = ({ id, children, style, locked: propLoc
     locked: globalLocked,
   } = useZeugmaState()
   const { removePane, updateMetadata, selectTab, removeTab } = useZeugmaActions()
-  const portalRegistry = useContext(PortalRegistryContext)
-  if (!portalRegistry) {
-    throw new Error('Pane must be used within a Zeugma provider')
-  }
-  const { registerPortalTarget } = portalRegistry
 
   const paneNode = useMemo(() => findPaneById(layout, id) as PaneNode | null, [layout, id])
   const paneContainerId = paneNode?.id ?? id
@@ -61,28 +106,12 @@ export const Pane: React.FC<PaneProps> = ({ id, children, style, locked: propLoc
   const dragging = activeId !== null && tabs.includes(activeId)
   const isFullscreen = fullscreenPaneId === id
 
-  const renderActiveTab = useCallback(() => {
-    return (
-      <div
-        ref={targetRef}
-        id={`zeugma-tab-target-${activeTabId}`}
-        className="zeugma-tab-content-wrapper"
-        style={{
-          height: '100%',
-          width: '100%',
-        }}
-      />
-    )
-  }, [activeTabId])
-
-  // Register portal targets using targetRef to avoid race conditions during drag & layout changes
-  useEffect(() => {
-    const el = targetRef.current
-    registerPortalTarget(activeTabId, el)
-    return () => {
-      registerPortalTarget(activeTabId, null)
-    }
-  }, [activeTabId, registerPortalTarget])
+  const renderActiveTab = useCallback(
+    (render: (tabId: string, metadata: Record<string, unknown> | undefined) => React.ReactNode) => {
+      return <PaneContent children={render} />
+    },
+    [],
+  )
 
   const renderProps: PaneRenderProps = useMemo(
     () => ({
@@ -133,7 +162,6 @@ export const Pane: React.FC<PaneProps> = ({ id, children, style, locked: propLoc
     ],
   )
 
-  // Best practice: Memoize drag context value to prevent unnecessary re-renders of the drag handle.
   const contextValue = useMemo(() => {
     if (isDraggableDisabled) {
       return { disabled: true }
@@ -149,57 +177,61 @@ export const Pane: React.FC<PaneProps> = ({ id, children, style, locked: propLoc
   }`.trim()
 
   return (
-    <DragListenersCtx.Provider value={contextValue}>
-      <div
-        ref={setNodeRef}
-        className={paneClass}
-        style={{ position: 'relative', width: '100%', height: '100%', ...style }}
-      >
-        {children(renderProps)}
+    <PaneContext.Provider value={{ id, ...renderProps }}>
+      <DragListenersCtx.Provider value={contextValue}>
+        <div
+          ref={setNodeRef}
+          className={paneClass}
+          style={{ position: 'relative', width: '100%', height: '100%', ...style }}
+        >
+          {children(renderProps)}
 
-        {showDropZones && (
-          <div
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              zIndex: 15,
-              pointerEvents: 'none',
-            }}
-          >
-            {(['top', 'bottom', 'left', 'right'] as const).map((pos) => (
+          {showDropZones && (
+            <div
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                zIndex: 15,
+                pointerEvents: 'none',
+              }}
+            >
+              {(['top', 'bottom', 'left', 'right'] as const).map((pos) => (
+                <DropZone
+                  key={pos}
+                  id={`drop-${pos}-${id}`}
+                  position={pos}
+                  activeClassName={classNames.dropPreview}
+                />
+              ))}
+            </div>
+          )}
+
+          {activeId !== null && activeId !== id && isDroppableDisabled && (
+            <div
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                zIndex: 15,
+                pointerEvents: 'none',
+              }}
+            >
               <DropZone
-                key={pos}
-                id={`drop-${pos}-${id}`}
-                position={pos}
-                activeClassName={classNames.dropPreview}
+                id={`drop-locked-${id}`}
+                position="full"
+                activeClassName={classNames.lockedPreview || ''}
               />
-            ))}
-          </div>
-        )}
-
-        {activeId !== null && activeId !== id && isDroppableDisabled && (
-          <div
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              zIndex: 15,
-              pointerEvents: 'none',
-            }}
-          >
-            <DropZone
-              id={`drop-locked-${id}`}
-              position="full"
-              activeClassName={classNames.lockedPreview || ''}
-            />
-          </div>
-        )}
-      </div>
-    </DragListenersCtx.Provider>
+            </div>
+          )}
+        </div>
+      </DragListenersCtx.Provider>
+    </PaneContext.Provider>
   )
 }
+
+Pane.Content = PaneContent

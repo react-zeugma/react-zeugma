@@ -29,17 +29,26 @@ function WorkspacePane({ id }: { id: string }) {
         <div className="pane">
           <div className="pane-header">
             <Tabs
-              {...paneProps}
-              renderTab={({ tabId }) => (
-                <div key={tabId} onClick={() => paneProps.selectTab(tabId)} className="tab">
+              renderTab={({ tabId, selectTab, removeTab }) => (
+                <div key={tabId} onClick={() => selectTab(tabId)} className="tab">
                   <span>{tabId}</span>
-                  <button onClick={(e) => { e.stopPropagation(); paneProps.removeTab(tabId); }}>×</button>
+                  <button onClick={(e) => { e.stopPropagation(); removeTab(tabId); }}>×</button>
                 </div>
               )}
             />
             <DragHandle className="drag-handle" />
           </div>
-          <div className="pane-content">{paneProps.renderActiveTab()}</div>
+          <div className="pane-content">
+            <Pane.Content>
+              {(tabId) => {
+                if (tabId === 'explorer') return <div>File Tree</div>
+                if (tabId === 'terminal') return <div>Terminal Output</div>
+                if (tabId === 'README.md') return <div>Hello react-zeugma!</div>
+                if (tabId === 'src/App.tsx') return <div>Source Editor</div>
+                return null
+              }}
+            </Pane.Content>
+          </div>
         </div>
       )}
     </Pane>
@@ -49,19 +58,9 @@ function WorkspacePane({ id }: { id: string }) {
 export default function App() {
   const zeugma = useZeugma({ initialLayout })
 
-  const renderWidget = (tabId: string) => {
-    if (tabId === 'explorer') return <div>File Tree</div>
-    if (tabId === 'terminal') return <div>Terminal Output</div>
-    if (tabId === 'README.md') return <div>Hello react-zeugma!</div>
-    if (tabId === 'src/App.tsx') return <div>Source Editor</div>
-    return null
-  }
-
   return (
     <Zeugma
       {...zeugma}
-      renderPane={(id) => <WorkspacePane id={id} />}
-      renderWidget={renderWidget}
       classNames={{
         resizer: 'resizer',
         dropPreview: 'drop-preview',
@@ -69,7 +68,7 @@ export default function App() {
       }}
     >
       <div className="workspace">
-        <PaneTree />
+        <PaneTree renderPane={(id) => <WorkspacePane id={id} />} />
       </div>
     </Zeugma>
   )
@@ -84,7 +83,7 @@ interface FileEntry {
 }
 
 export const FILES: Record<string, FileEntry> = {
-  'src/App.tsx': {
+  'App.tsx': {
     language: 'tsx',
     icon: <FileCode2 className="w-3.5 h-3.5 text-indigo-400" />,
     tokens: tokenizeJS(APP_TSX_CODE),
@@ -107,7 +106,7 @@ export interface TreeEntry {
 }
 
 export const FILE_TREE: TreeEntry[] = [
-  { name: 'src/App.tsx', fileKey: 'src/App.tsx' },
+  { name: 'App.tsx', fileKey: 'App.tsx' },
   { name: 'README.md', fileKey: 'README.md' },
 ]
 
@@ -132,8 +131,8 @@ export const defaultOuterLayout: TreeNode = {
       first: {
         type: 'pane',
         id: 'pane-editor',
-        tabs: ['README.md', 'src/App.tsx'],
-        activeTabId: 'README.md',
+        tabs: ['README.md', 'App.tsx'],
+        activeTabId: 'App.tsx',
       },
       second: {
         type: 'pane',
@@ -175,8 +174,8 @@ export const LAYOUT_PRESETS: LayoutPreset[] = [
       first: {
         type: 'pane',
         id: 'pane-editor',
-        tabs: ['README.md', 'src/App.tsx'],
-        activeTabId: 'src/App.tsx',
+        tabs: ['README.md', 'App.tsx'],
+        activeTabId: 'App.tsx',
       },
       second: {
         type: 'pane',
@@ -196,8 +195,8 @@ export const LAYOUT_PRESETS: LayoutPreset[] = [
       first: {
         type: 'pane',
         id: 'pane-editor-left',
-        tabs: ['src/App.tsx', 'README.md'],
-        activeTabId: 'src/App.tsx',
+        tabs: ['App.tsx', 'README.md'],
+        activeTabId: 'App.tsx',
       },
       second: {
         type: 'split',
@@ -206,8 +205,8 @@ export const LAYOUT_PRESETS: LayoutPreset[] = [
         first: {
           type: 'pane',
           id: 'pane-editor-right',
-          tabs: ['src/App.tsx'],
-          activeTabId: 'src/App.tsx',
+          tabs: ['App.tsx'],
+          activeTabId: 'App.tsx',
         },
         second: {
           type: 'pane',
@@ -224,8 +223,8 @@ export const LAYOUT_PRESETS: LayoutPreset[] = [
     layout: {
       type: 'pane',
       id: 'pane-editor',
-      tabs: ['src/App.tsx'],
-      activeTabId: 'src/App.tsx',
+      tabs: ['App.tsx'],
+      activeTabId: 'App.tsx',
     },
   },
   {
@@ -252,8 +251,8 @@ export const LAYOUT_PRESETS: LayoutPreset[] = [
           first: {
             type: 'pane',
             id: 'pane-editor',
-            tabs: ['src/App.tsx'],
-            activeTabId: 'src/App.tsx',
+            tabs: ['App.tsx'],
+            activeTabId: 'App.tsx',
           },
           second: {
             type: 'pane',

@@ -37,10 +37,7 @@ export interface PaneRenderProps extends BaseLeafRenderProps {
     updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined,
   ) => void
   /** Renders the target placeholder element for the currently active tab in the pane. */
-  renderActiveTab: () => ReactNode
-}
-
-export interface WidgetRenderProps extends BaseLeafRenderProps {
-  /** Renders the target placeholder element for the widget content. */
-  renderActiveWidget: () => ReactNode
+  renderActiveTab: (
+    render: (tabId: string, metadata: Record<string, unknown> | undefined) => ReactNode,
+  ) => ReactNode
 }

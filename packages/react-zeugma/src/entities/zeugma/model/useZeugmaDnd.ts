@@ -471,7 +471,7 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
       ? findPaneContainingTab(originalLayout, draggingId)
       : findPaneById(originalLayout, draggingId)
     const isParentTarget = parentPane && parentPane.id === targetId
-    const isOnlyTab = parentPane && (parentPane.type === 'widget' || parentPane.tabs.length === 1)
+    const isOnlyTab = parentPane && parentPane.tabs.length === 1
 
     if (draggingId === targetId || (isParentTarget && isOnlyTab)) {
       setLayout(originalLayout)

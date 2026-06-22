@@ -3,7 +3,6 @@ import { TreeNode } from 'react-zeugma'
 export function isTabOpenInTree(node: TreeNode | null, tabId: string): boolean {
   if (!node) return false
   if (node.type === 'pane') return node.tabs.includes(tabId)
-  if (node.type === 'widget') return false
   return isTabOpenInTree(node.first, tabId) || isTabOpenInTree(node.second, tabId)
 }
 
@@ -19,6 +18,5 @@ export function findActiveEditorPane(node: TreeNode | null): string | null {
       return node.id
     return null
   }
-  if (node.type === 'widget') return null
   return findActiveEditorPane(node.first) || findActiveEditorPane(node.second)
 }

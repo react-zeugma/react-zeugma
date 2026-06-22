@@ -2,6 +2,7 @@ import React, { createContext, useContext, useMemo } from 'react'
 import { Tab } from './Tab'
 import { useZeugmaState, useZeugmaDrag } from '../../../shared'
 import { calculateTabDropIndex } from '../../../shared/lib/tree'
+import { PaneContext } from './Pane'
 
 export interface TabsContextValue {
   tabs: string[]
@@ -24,17 +25,17 @@ export const useTabsContext = () => {
 
 export interface TabsProps {
   /** The list of tab IDs in this pane. */
-  tabs: string[]
+  tabs?: string[]
   /** The currently active tab ID. */
-  activeTabId: string
+  activeTabId?: string
   /** Whether dragging is locked on these tabs. */
   locked?: boolean
   /** Metadata for the tabs. */
   tabsMetadata?: Record<string, Record<string, unknown>>
   /** Callback when a tab is selected. */
-  selectTab: (id: string) => void
+  selectTab?: (id: string) => void
   /** Callback when a tab is closed/removed. */
-  removeTab: (id: string) => void
+  removeTab?: (id: string) => void
   /** Render function for each individual tab content. */
   renderTab: (props: {
     tabId: string
@@ -64,17 +65,28 @@ const resolveDynamicProp = <T,>(
   return typeof value === 'function' ? (value as (id: string) => T)(id) : value
 }
 
-export const Tabs: React.FC<TabsProps> = ({
-  tabs,
-  activeTabId,
-  locked = false,
-  tabsMetadata,
-  selectTab,
-  removeTab,
+export const Tabs: React.FC<TabsProps> & {
+  Tab: typeof Tab
+} = ({
+  tabs: propTabs,
+  activeTabId: propActiveTabId,
+  locked: propLocked,
+  tabsMetadata: propTabsMetadata,
+  selectTab: propSelectTab,
+  removeTab: propRemoveTab,
   renderTab,
   classNames,
   styles,
 }) => {
+  const paneContext = useContext(PaneContext)
+
+  const tabs = propTabs ?? paneContext?.tabs ?? []
+  const activeTabId = propActiveTabId ?? paneContext?.activeTabId ?? ''
+  const locked = propLocked ?? paneContext?.locked ?? false
+  const tabsMetadata = propTabsMetadata ?? paneContext?.tabsMetadata
+  const selectTab = propSelectTab ?? paneContext?.selectTab ?? (() => {})
+  const removeTab = propRemoveTab ?? paneContext?.removeTab ?? (() => {})
+
   const { classNames: globalClassNames = {}, activeType } = useZeugmaState()
   const { overTabId, overTabPosition } = useZeugmaDrag()
 
@@ -159,3 +171,5 @@ export const Tabs: React.FC<TabsProps> = ({
     </TabsContext.Provider>
   )
 }
+
+Tabs.Tab = Tab

@@ -31,17 +31,20 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
     const TestWrapper = () => {
       const controller = useZeugma({ initialLayout })
       controllerInstance = controller
-      return (
-        <Zeugma
-          {...controller}
-          renderPane={(paneId) => (
-            <Pane id={paneId}>
-              {(paneProps) => <div id={`pane-target-${paneId}`}>{paneProps.renderActiveTab()}</div>}
-            </Pane>
+      const renderPane = (paneId: string) => (
+        <Pane id={paneId}>
+          {(paneProps) => (
+            <div id={`pane-target-${paneId}`}>
+              {paneProps.renderActiveTab((id) => (
+                <TestWidget tabId={id} />
+              ))}
+            </div>
           )}
-          renderWidget={(id) => <TestWidget tabId={id} />}
-        >
-          <PaneTree />
+        </Pane>
+      )
+      return (
+        <Zeugma {...controller}>
+          <PaneTree renderPane={renderPane} />
         </Zeugma>
       )
     }
@@ -125,13 +128,20 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
     const TestWrapper = () => {
       const controller = useZeugma({ initialLayout })
       controllerInstance = controller
+      const renderPane = (paneId: string) => (
+        <Pane id={paneId}>
+          {(paneProps) => (
+            <div id={`pane-target-${paneId}`}>
+              {paneProps.renderActiveTab((id) => (
+                <TestWidget tabId={id} />
+              ))}
+            </div>
+          )}
+        </Pane>
+      )
       return (
-        <Zeugma
-          {...controller}
-          renderPane={(id) => <div key={id} id={`pane-target-${id}`} />}
-          renderWidget={(id) => <TestWidget tabId={id} />}
-        >
-          <div>Workspace</div>
+        <Zeugma {...controller}>
+          <PaneTree renderPane={renderPane} />
         </Zeugma>
       )
     }
@@ -213,13 +223,20 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
     const TestWrapper = () => {
       const controller = useZeugma({ initialLayout })
       controllerInstance = controller
+      const renderPane = (paneId: string) => (
+        <Pane id={paneId}>
+          {(paneProps) => (
+            <div id={`pane-target-${paneId}`}>
+              {paneProps.renderActiveTab((id) => (
+                <TestWidget tabId={id} />
+              ))}
+            </div>
+          )}
+        </Pane>
+      )
       return (
-        <Zeugma
-          {...controller}
-          renderPane={(id) => <div key={id} id={`pane-target-${id}`} />}
-          renderWidget={(id) => <TestWidget tabId={id} />}
-        >
-          <div>Workspace</div>
+        <Zeugma {...controller}>
+          <PaneTree renderPane={renderPane} />
         </Zeugma>
       )
     }

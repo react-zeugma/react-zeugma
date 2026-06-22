@@ -19,14 +19,7 @@ export interface PaneNode {
   tabsMetadata?: Record<string, Record<string, unknown>>
 }
 
-export interface WidgetNode {
-  type: 'widget'
-  id: string
-  locked?: boolean
-  metadata?: Record<string, unknown>
-}
-
-export type LeafNode = PaneNode | WidgetNode
+export type LeafNode = PaneNode
 
 export type TreeNode = SplitNode | LeafNode
 
@@ -216,17 +209,15 @@ export interface ZeugmaClassNames {
   tabDropPreview?: string
   /** CSS class applied to the separator line between tabs. */
   tabSeparator?: string
+  /** CSS class applied to the wrapper element for a tab's contents. */
+  tabContentWrapper?: string
 }
 
 export interface ZeugmaProps extends ZeugmaController {
-  /** Render function mapping unique pane IDs to React elements. Usually renders a <Pane> wrapper. */
-  renderPane: (paneId: string) => ReactNode
   /** Custom overlay renderer function used to customize the cursor-following drag preview for an active pane or tab. */
   renderDragOverlay?: (activeId: string, type: 'pane' | 'tab') => ReactNode
   /** Optional CSS class name mapping overrides for custom styles of components like panes, drop previews, overlays, etc. */
   classNames?: ZeugmaClassNames
-  /** Render function mapping tab IDs to React elements. Used to render tab widgets inside portals. */
-  renderWidget?: (tabId: string) => ReactNode
   /** Child nodes nested inside the Zeugma context, usually containing a <PaneTree> or similar layout viewer. */
   children: ReactNode
 }
@@ -240,8 +231,6 @@ export interface ZeugmaStateValue {
   layout: TreeNode | null
   /** Callback to update the layout tree. */
   setLayout: Dispatch<SetStateAction<TreeNode | null>>
-  /** Renders the inner content of a pane given its unique ID. */
-  renderPane: (paneId: string) => ReactNode
   /** The ID of the pane currently zoomed to fullscreen, or null. */
   fullscreenPaneId: string | null
   /** Normalized or overridden CSS classes for custom layout styling. */
@@ -328,5 +317,9 @@ export interface ZeugmaActionsValue {
 export interface ZeugmaContextValue extends ZeugmaStateValue, ZeugmaActionsValue {}
 
 export interface PortalRegistryValue {
-  registerPortalTarget: (tabId: string, el: HTMLDivElement | null) => void
+  registerPortalTarget: (
+    tabId: string,
+    el: HTMLDivElement | null,
+    render?: (tabId: string, metadata?: Record<string, unknown>) => ReactNode,
+  ) => void
 }

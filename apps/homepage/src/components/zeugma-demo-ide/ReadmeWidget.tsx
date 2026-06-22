@@ -79,7 +79,7 @@ export function ReadmeWidget() {
         <p className="text-sm text-zinc-400">
           Refer to{' '}
           <code className="bg-zinc-800/80 text-zinc-200 font-mono px-1 py-0.5 rounded text-xs">
-            src/App.tsx
+            App.tsx
           </code>{' '}
           to see how to define the layout tree structure and initialize the controller.
         </p>

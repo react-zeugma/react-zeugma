@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { renderHook } from '@testing-library/react'
-import { useZeugma, useZeugmaContext, Zeugma, Pane, PaneTree } from '../../../index'
+import { useZeugma, useZeugmaContext, Zeugma, Pane, PaneTree, ZeugmaProps } from '../../../index'
 import {
   useZeugmaState,
   useZeugmaActions,
@@ -120,9 +120,9 @@ describe('Zeugma Context Provider & Consumers', () => {
         </Pane>
       )
       return (
-        <Zeugma controller={controller} renderPane={renderPane}>
+        <Zeugma controller={controller}>
           <div data-testid="toolbar">Toolbar</div>
-          <PaneTree />
+          <PaneTree renderPane={renderPane} />
         </Zeugma>
       )
     }
@@ -138,7 +138,7 @@ describe('Zeugma Context Provider & Consumers', () => {
   it('should throw error when Zeugma is used without controller', () => {
     const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
     expect(() => {
-      render(<Zeugma />)
+      render(<Zeugma {...({} as unknown as ZeugmaProps)} />)
     }).toThrow('Zeugma component requires a controller.')
     consoleErrorSpy.mockRestore()
   })

@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 6.5.2
+
+### Patch Changes
+
+- Required `controller` prop in `ZeugmaProps` and enforced `renderPane` placement directly on `<PaneTree>` component in provider mode, restricting `<Zeugma>` from accepting `renderPane` when nested children are present.
+
 ## 6.5.1
 
 ### Patch Changes

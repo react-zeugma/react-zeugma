@@ -65,14 +65,24 @@ export interface TabDetails {
 
 ## 2. Core Components
 
+#### `<ZeugmaProvider>`
+
+The headless context provider. It handles the drag-and-drop event loop and coordinates the layout state. Use this to wrap your dashboard workspace layout so sibling components (like toolbars and sidebars) can access the context.
+
+- `controller: ZeugmaController` — (Required) The controller object returned by the `useZeugma` hook.
+- `children: React.ReactNode` — (Required) Children components that will have access to the context.
+
 #### `<Zeugma>`
 
-The root context provider. It handles the drag-and-drop event loop, coordinates the layout state, and internally renders the layout tree.
+The main visual dashboard grid renderer.
+
+- **Standalone Mode**: If used standalone, `<Zeugma>` acts as the context provider itself. You must pass both `controller` and `renderPane` props to it.
+- **Provider-Wrapped Mode**: If nested within a `<ZeugmaProvider>`, you do not need to pass any props (it will read state and config directly from the context).
 
 #### Props
 
-- `controller: ZeugmaController` — The controller object returned by the `useZeugma` hook.
-- `renderPane: (paneId: string) => ReactNode` — Callback to render the contents of a pane given its ID.
+- `controller?: ZeugmaController` — (Standalone only) The controller object returned by the `useZeugma` hook.
+- `renderPane?: (paneId: string) => ReactNode` — (Standalone only) Callback to render the contents of a pane given its ID.
 - `renderDragOverlay?: (active: DragOverlayActiveItem) => ReactNode` — (Optional) Renders a custom cursor-following drag preview.
 - `classNames?: ZeugmaClassNames` — (Optional) CSS class overrides for styling various layout elements.
 - `resizerSize?: number` — Thickness of the split resizer bars in pixels (defaults to `4`).

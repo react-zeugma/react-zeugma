@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 6.5.1
+
+### Patch Changes
+
+- Refactored `<Zeugma>` component to behave strictly as a provider when `children` are supplied, requiring the user to explicitly render `<PaneTree />` inside the children. When no children are provided, it automatically renders `<PaneTree />` in standalone mode.
+
 ## 6.5.0
 
 ### Minor Changes

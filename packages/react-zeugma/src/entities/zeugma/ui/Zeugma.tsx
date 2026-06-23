@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useContext } from 'react'
+import React, { useState, useMemo, useCallback } from 'react'
 import { DndContext } from '@dnd-kit/core'
 import {
   TreeNode,
@@ -338,26 +338,16 @@ const ZeugmaRenderer: React.FC<Omit<ZeugmaProps, 'controller'>> = ({
 }
 
 export const Zeugma: React.FC<ZeugmaProps> = (props) => {
-  const context = useContext(ZeugmaStateContext)
-  const isNested = context !== undefined
-
   const { children, ...restProps } = props
 
-  if (!isNested) {
-    const { controller } = props
-    if (!controller) {
-      throw new Error('Zeugma component requires a controller when used standalone.')
-    }
-    return (
-      <ZeugmaProviderInternal {...props}>
-        {children !== undefined ? children : <ZeugmaRenderer {...restProps} />}
-      </ZeugmaProviderInternal>
-    )
+  const { controller } = props
+  if (!controller) {
+    throw new Error('Zeugma component requires a controller.')
   }
 
-  if (children !== undefined) {
-    return <>{children}</>
-  }
-
-  return <ZeugmaRenderer {...props} />
+  return (
+    <ZeugmaProviderInternal {...props}>
+      {children !== undefined ? children : <ZeugmaRenderer {...restProps} />}
+    </ZeugmaProviderInternal>
+  )
 }

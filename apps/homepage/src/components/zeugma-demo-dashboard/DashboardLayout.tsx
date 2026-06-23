@@ -16,43 +16,58 @@ export function PanelChrome({
   return <>{children}</>
 }
 
-// ── Dashboard Toolbar ────────────────────────────────────────────────────────
+import { useZeugmaContext, TreeNode } from 'react-zeugma'
+import { AVAILABLE_WIDGETS, PRESETS } from './constants'
 
-export interface WidgetToggleInfo {
-  id: string
-  label: string
-  color: string
-}
-
-export interface PresetInfo {
-  name: string
-  label: string
+function getActiveWidgets(node: TreeNode | null): string[] {
+  if (!node) return []
+  if (node.type === 'pane') {
+    return node.tabs
+  }
+  return [...getActiveWidgets(node.first), ...getActiveWidgets(node.second)]
 }
 
 export function DashboardToolbar({
   onRefresh,
   timeRange,
   onTimeRangeChange,
-  availableWidgets,
-  activeWidgets,
-  onToggleWidget,
-  presets,
-  activePreset,
-  onApplyPreset,
 }: {
   onRefresh?: () => void
   timeRange: string
   onTimeRangeChange?: (range: string) => void
-  availableWidgets: WidgetToggleInfo[]
-  activeWidgets: string[]
-  onToggleWidget: (widgetId: string) => void
-  presets: PresetInfo[]
-  activePreset: string
-  onApplyPreset: (presetName: string) => void
 }) {
+  const { layout, addTab, removeTab, setLayout } = useZeugmaContext()
+  const activeWidgets = getActiveWidgets(layout)
+
+  const [activePreset, setActivePreset] = useState('all')
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const ranges = ['5m', '15m', '30m', '1h', '6h', '24h']
+
+  const handleToggleWidget = (widgetId: string) => {
+    setActivePreset('')
+    if (activeWidgets.includes(widgetId)) {
+      if (activeWidgets.length <= 1) return
+      removeTab(widgetId)
+    } else {
+      addTab(widgetId)
+    }
+  }
+
+  const handleApplyPreset = (presetName: string) => {
+    setActivePreset(presetName)
+    const preset = PRESETS.find((p) => p.name === presetName)
+    if (preset) {
+      setLayout(preset.layout)
+    }
+  }
+
+  const handleRefresh = () => {
+    handleApplyPreset('all')
+    if (onRefresh) {
+      onRefresh()
+    }
+  }
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -78,13 +93,13 @@ export function DashboardToolbar({
           </span>
           <select
             value={activePreset}
-            onChange={(e) => onApplyPreset(e.target.value)}
+            onChange={(e) => handleApplyPreset(e.target.value)}
             className="grafana-select"
           >
             <option value="" disabled hidden>
               Custom Layout
             </option>
-            {presets.map((p) => (
+            {PRESETS.map((p) => (
               <option key={p.name} value={p.name}>
                 {p.label}
               </option>
@@ -103,19 +118,19 @@ export function DashboardToolbar({
               className="grafana-select flex items-center gap-1.5"
             >
               <span>
-                {activeWidgets.length} / {availableWidgets.length} Active
+                {activeWidgets.length} / {AVAILABLE_WIDGETS.length} Active
               </span>
               <ChevronDown className="w-3 h-3 opacity-60" />
             </button>
 
             {dropdownOpen && (
               <div className="grafana-dropdown-menu">
-                {availableWidgets.map((w) => {
+                {AVAILABLE_WIDGETS.map((w) => {
                   const isActive = activeWidgets.includes(w.id)
                   return (
                     <button
                       key={w.id}
-                      onClick={() => onToggleWidget(w.id)}
+                      onClick={() => handleToggleWidget(w.id)}
                       className="grafana-dropdown-item"
                     >
                       <span className={`grafana-dropdown-checkbox ${isActive ? 'checked' : ''}`} />
@@ -148,7 +163,7 @@ export function DashboardToolbar({
           ))}
         </div>
 
-        <button onClick={onRefresh} className="grafana-refresh-btn" title="Refresh">
+        <button onClick={handleRefresh} className="grafana-refresh-btn" title="Refresh">
           <RefreshCw className="w-3.5 h-3.5" />
         </button>
       </div>

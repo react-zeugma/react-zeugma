@@ -114,6 +114,7 @@ export const ZeugmaProvider: React.FC<ZeugmaProviderProps> = (props) => {
 
     // Actions
     removeTab,
+    removePane,
   })
 
   // Shallow-memoize classNames by individual fields to avoid identity busting from inline objects

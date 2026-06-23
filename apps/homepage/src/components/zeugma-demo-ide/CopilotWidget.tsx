@@ -13,7 +13,7 @@ import {
   Settings2,
   ArrowUp,
 } from 'lucide-react'
-import { useZeugmaState } from 'react-zeugma'
+import { useZeugmaContext } from 'react-zeugma'
 
 interface Message {
   id: string
@@ -32,7 +32,7 @@ const INITIAL_MESSAGES = (layoutInfo: string): Message[] => [
 ]
 
 export function CopilotWidget() {
-  const { layout, locked } = useZeugmaState()
+  const { layout, locked } = useZeugmaContext()
   const [messages, setMessages] = useState<Message[]>([])
   const [inputValue, setInputValue] = useState('')
   const [isTyping, setIsTyping] = useState(false)

@@ -2,8 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Boxes, MousePointer2, Focus, Layout, ArrowRight, Copy, Check } from 'lucide-react'
-import { useScrollAnchor } from '../lib/use-scroll-anchor'
+import { ArrowRight, Copy, Check } from 'lucide-react'
 import dynamic from 'next/dynamic'
 
 const ZeugmaDemoIDE = dynamic(
@@ -18,29 +17,6 @@ const ZeugmaDemoIDE = dynamic(
 
 import { Footer } from '../components/footer'
 
-const FEATURES = [
-  {
-    icon: <Boxes className="w-5 h-5 text-indigo-400" />,
-    title: 'Arbitrary Splits',
-    desc: 'Split horizontally or vertically without constraints. Create complex bento grids or simple side-by-side layouts instantly.',
-  },
-  {
-    icon: <MousePointer2 className="w-5 h-5 text-emerald-400" />,
-    title: 'Smooth Resizing',
-    desc: 'Fluid, non-blocking resize handles with snap-to-edge capabilities. Feels completely native to the browser.',
-  },
-  {
-    icon: <Focus className="w-5 h-5 text-amber-400" />,
-    title: 'Flexible & Unopinionated',
-    desc: 'Save and load layout trees via simple JSON serialization. Complete control over state management and persistence flows.',
-  },
-  {
-    icon: <Layout className="w-5 h-5 text-rose-400" />,
-    title: 'Headless Design',
-    desc: 'We handle the complex math, drop zones, and tree states. You bring your own CSS and components.',
-  },
-]
-
 interface HomeProps {
   articles?: { slug: string; title: string; description: string }[]
 }
@@ -53,11 +29,6 @@ export function Home({ articles = [] }: HomeProps) {
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
-
-  const { scrollToSection } = useScrollAnchor({
-    sectionIds: ['designed-for-workspace-builders', 'zeugma-demo-ide'],
-    offset: 80,
-  })
 
   return (
     <div className="flex flex-col min-h-screen bg-bg-app">
@@ -75,25 +46,25 @@ export function Home({ articles = [] }: HomeProps) {
         </div>
 
         <h1 className="text-5xl sm:text-7xl font-extrabold tracking-tight text-text-primary mb-6 max-w-4xl relative">
-          A modern building block for complex{' '}
+          Modern layouts for complex{' '}
           <span className="italic text-transparent bg-clip-text bg-linear-to-r from-indigo-400 to-emerald-400 px-2 box-decoration-clone">
-            workspace layouts
+            dashboards
           </span>
           .
         </h1>
 
         <p className="text-lg text-text-secondary max-w-2xl mb-10 leading-relaxed relative">
-          Headless, draggable, and resizable layout manager for React. Build IDEs, dashboards, and
-          advanced interfaces in minutes, not days.
+          Headless, draggable, and resizable layout manager for React. Build dynamic dashboards,
+          workspace layouts, and advanced interfaces in minutes, not days.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center gap-4 relative">
-          <button
-            onClick={() => scrollToSection('zeugma-demo-ide')}
-            className="w-full sm:w-auto px-8 py-3.5 bg-text-primary hover:bg-text-primary/90 text-bg-app rounded-lg font-bold flex items-center justify-center gap-2 transition-transform hover:scale-105 cursor-pointer"
+          <Link
+            href="/demo"
+            className="w-full sm:w-auto px-8 py-3.5 bg-text-primary hover:bg-text-primary/90 text-bg-app rounded-lg font-bold flex items-center justify-center gap-2 transition-transform hover:scale-105 cursor-pointer text-center"
           >
-            Try Interactive IDE <ArrowRight className="w-4 h-4" />
-          </button>
+            Try Interactive Demo <ArrowRight className="w-4 h-4" />
+          </Link>
 
           <code
             className="w-full sm:w-auto px-6 py-3.5 bg-bg-pane border border-border-primary hover:border-border-secondary rounded-lg text-sm font-mono text-text-primary flex items-center gap-3 transition-colors cursor-pointer group"
@@ -109,65 +80,20 @@ export function Home({ articles = [] }: HomeProps) {
         </div>
       </section>
 
-      {/* Features Showcase Section */}
-      <section className="py-24 px-6 border-t border-border-primary bg-bg-app relative z-20">
-        <div className="max-w-4xl mx-auto text-center flex flex-col items-center">
-          <div className="w-full text-center">
-            <h2
-              id="designed-for-workspace-builders"
-              className="group flex items-center justify-center gap-2 text-3xl font-bold text-text-primary mb-6 scroll-mt-20"
-            >
-              <span>Designed for Workspace Builders</span>
-              <a
-                href="#designed-for-workspace-builders"
-                onClick={(e) => {
-                  e.preventDefault()
-                  scrollToSection('designed-for-workspace-builders')
-                }}
-                className="text-text-muted hover:text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity font-mono text-xl select-none"
-              >
-                #
-              </a>
-            </h2>
-            <p className="text-text-secondary text-base leading-relaxed mb-12 max-w-2xl mx-auto">
-              Stop fighting with CSS Grid or wrestling absolute positioning math.{' '}
-              <strong className="text-text-primary">react-zeugma</strong> manages the complexities
-              of arbitrary window splitting, dragging, and resizing so you can focus on building
-              your app.
-            </p>
-
-            <div className="grid sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
-              {FEATURES.map((item, i) => (
-                <div
-                  key={i}
-                  className="bg-bg-sidebar border border-border-primary hover:border-border-secondary p-5 rounded-xl transition-all duration-300 hover:-translate-y-0.5 group text-left"
-                >
-                  <div className="w-10 h-10 bg-bg-pane border border-border-primary rounded-lg flex items-center justify-center mb-4 group-hover:scale-105 transition-all">
-                    {item.icon}
-                  </div>
-                  <h4 className="text-sm font-bold text-text-primary mb-1.5">{item.title}</h4>
-                  <p className="text-xs text-text-secondary m-0 leading-relaxed">{item.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Composable nested workspace / IDE Demo */}
+      {/* Composable nested workspace / Dashboard Demo */}
       <section className="py-24 px-6 border-t border-border-primary bg-bg-app relative overflow-hidden z-20">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-indigo-500/2 blur-[120px] rounded-full pointer-events-none" />
         <div className="max-w-7xl mx-auto text-center relative z-10">
           <h2
-            id="zeugma-demo-ide"
+            id="zeugma-demo-dashboard"
             className="text-3xl sm:text-4xl font-extrabold text-text-primary mb-4 tracking-tight"
           >
-            Build Next-Generation IDEs & Layouts
+            Build Next-Generation Dashboards & Layouts
           </h2>
           <p className="text-text-secondary text-sm max-w-2xl mx-auto mb-12">
             <strong className="text-text-primary">react-zeugma</strong> is completely headless,
-            context-isolated, and serialized to JSON. Below is a live interactive IDE built with
-            react-zeugma, running an app preview that also implements its own independent
+            context-isolated, and serialized to JSON. Below is a live interactive dashboard built
+            with react-zeugma, running an app preview that also implements its own independent
             react-zeugma workspace.
           </p>
           <div className="block text-left rounded-2xl transition-all duration-500 shadow-[0_50px_120px_-20px_rgba(99,102,241,0.15),0_30px_100px_-10px_rgba(0,0,0,0.95)] hover:shadow-[0_60px_150px_-10px_rgba(99,102,241,0.25),0_40px_120px_-5px_rgba(0,0,0,0.98)] overflow-hidden">
@@ -176,7 +102,7 @@ export function Home({ articles = [] }: HomeProps) {
           <div className="mt-8 flex justify-center">
             <Link
               href="/docs"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-indigo-400 hover:text-indigo-300 transition-colors group cursor-pointer"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors group cursor-pointer"
             >
               <span>Explore the documentation to build your own</span>
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
@@ -208,17 +134,17 @@ export function Home({ articles = [] }: HomeProps) {
                 >
                   <div className="flex flex-col h-full justify-between">
                     <div>
-                      <span className="inline-block text-[10px] font-bold tracking-wider uppercase text-indigo-400 mb-3 bg-indigo-500/10 px-2.5 py-1 rounded-full">
+                      <span className="inline-block text-[10px] font-bold tracking-wider uppercase text-indigo-600 dark:text-indigo-400 mb-3 bg-indigo-500/10 px-2.5 py-1 rounded-full">
                         Engineering
                       </span>
-                      <h3 className="text-lg font-bold text-text-primary mb-2 group-hover:text-indigo-400 transition-colors">
+                      <h3 className="text-lg font-bold text-text-primary mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                         {article.title}
                       </h3>
                       <p className="text-xs text-text-secondary line-clamp-3 leading-relaxed mb-4">
                         {article.description}
                       </p>
                     </div>
-                    <div className="flex items-center gap-1.5 text-xs font-semibold text-indigo-400 group-hover:text-indigo-300 transition-colors mt-auto">
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-indigo-600 dark:text-indigo-400 group-hover:text-indigo-800 dark:group-hover:text-indigo-300 transition-colors mt-auto">
                       <span>Read article</span>
                       <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
                     </div>

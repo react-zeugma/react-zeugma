@@ -4,66 +4,54 @@ export function ReadmeWidget() {
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-extrabold text-white mb-2 tracking-tight">my-zeugma-app</h1>
 
-        <p className="text-base text-zinc-400 mb-6 leading-relaxed">
-          Welcome to the official workspace layout demo built with{' '}
+        <p className="text-base text-zinc-400 mb-8 leading-relaxed">
+          Welcome to <strong className="text-white font-semibold">my-zeugma-app</strong>, an
+          interactive preview of a custom React layout powered by{' '}
           <code className="bg-zinc-800/80 text-indigo-400 font-mono px-1.5 py-0.5 rounded text-sm font-semibold">
             react-zeugma
           </code>{' '}
-          — a recursive, style-agnostic, and high-performance drag-and-drop dashboard layout engine
-          for React.
+          — a recursive, style-agnostic, and high-performance drag-and-drop dashboard layout engine.
+          This live editor is fully interactive: try dragging tabs to split panes horizontally or
+          vertically, resizing panels, and exploring the source files.
         </p>
 
-        <div className="border-l-4 border-indigo-500 bg-indigo-500/5 p-4 rounded-r-lg mb-8 text-sm text-zinc-300 leading-relaxed">
-          <strong className="text-indigo-400 font-semibold block mb-1">
-            💡 Interactive Playground
-          </strong>
-          Try dragging tabs to different edges of the workspace, resizing panels using the custom
-          handles, or reorganizing the layout dynamically.
-        </div>
-
+        {/* Core Layout Features */}
         <h2 className="text-xl font-bold text-white mt-8 mb-4 border-b border-zinc-800 pb-2">
-          Core Features
+          Core Layout Features
         </h2>
 
-        <ul className="space-y-4 list-none pl-0">
-          <li className="flex items-start gap-3">
-            <span className="text-indigo-400 font-extrabold text-lg select-none leading-none">
-              ✦
-            </span>
-            <div>
-              <strong className="text-zinc-100 text-sm block">Drag-to-Split Layouts</strong>
-              <p className="text-sm text-zinc-400 leading-relaxed mt-1">
-                Drag tabs toward any outer edge of a pane to split it. Tabs can be rearranged within
-                the same tab bar or detached entirely into new panes.
-              </p>
-            </div>
-          </li>
-          <li className="flex items-start gap-3">
-            <span className="text-emerald-400 font-extrabold text-lg select-none leading-none">
-              ✦
-            </span>
-            <div>
-              <strong className="text-zinc-100 text-sm block">Interactive File Explorer</strong>
-              <p className="text-sm text-zinc-400 leading-relaxed mt-1">
-                Browse the directory tree on the left sidebar and click files to open them in your
-                active editor.
-              </p>
-            </div>
-          </li>
-          <li className="flex items-start gap-3">
-            <span className="text-violet-400 font-extrabold text-lg select-none leading-none">
-              ✦
-            </span>
-            <div>
-              <strong className="text-zinc-100 text-sm block">Real-time Layout Inspector</strong>
-              <p className="text-sm text-zinc-400 leading-relaxed mt-1">
-                A dedicated right-hand side panel showing the serialized JSON state tree of your
-                workspace layout updating live as you make adjustments.
-              </p>
-            </div>
-          </li>
-        </ul>
+        <div className="grid sm:grid-cols-2 gap-4 mb-8">
+          <div className="bg-zinc-900/50 border border-zinc-800/50 p-4 rounded-lg">
+            <strong className="text-indigo-400 text-sm block mb-1">Arbitrary Splits</strong>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              Split horizontally or vertically without constraints. Create complex bento grids or
+              simple side-by-side layouts instantly.
+            </p>
+          </div>
+          <div className="bg-zinc-900/50 border border-zinc-800/50 p-4 rounded-lg">
+            <strong className="text-emerald-400 text-sm block mb-1">Smooth Resizing</strong>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              Fluid, non-blocking resize handles with snap-to-edge capabilities. Feels completely
+              native to the browser.
+            </p>
+          </div>
+          <div className="bg-zinc-900/50 border border-zinc-800/50 p-4 rounded-lg">
+            <strong className="text-amber-400 text-sm block mb-1">Flexible & Unopinionated</strong>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              Save and load layout trees via simple JSON serialization. Complete control over state
+              management and persistence flows.
+            </p>
+          </div>
+          <div className="bg-zinc-900/50 border border-zinc-800/50 p-4 rounded-lg">
+            <strong className="text-rose-400 text-sm block mb-1">Headless Design</strong>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              We handle the complex math, drop zones, and tree states. You bring your own CSS and
+              components.
+            </p>
+          </div>
+        </div>
 
+        {/* Getting Started */}
         <h2 className="text-xl font-bold text-white mt-8 mb-4 border-b border-zinc-800 pb-2">
           Getting Started
         </h2>
@@ -81,7 +69,8 @@ export function ReadmeWidget() {
           <code className="bg-zinc-800/80 text-zinc-200 font-mono px-1 py-0.5 rounded text-xs">
             App.tsx
           </code>{' '}
-          to see how to define the layout tree structure and initialize the controller.
+          (viewable in the editor tabs) to see how to define the layout tree structure and
+          initialize the controller.
         </p>
       </div>
     </div>

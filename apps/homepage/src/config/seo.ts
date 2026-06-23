@@ -92,6 +92,21 @@ export const docsMetadata: Metadata = {
   },
 }
 
+export const demoMetadata: Metadata = {
+  title: 'Live Demo — Interactive Dashboard',
+  description:
+    'Interactive Grafana-style monitoring dashboard powered by react-zeugma. Drag, resize, and rearrange live panels with real-time simulated metrics, charts, tables, and log streams.',
+  openGraph: {
+    title: 'Live Demo — react-zeugma Dashboard',
+    description:
+      'Interactive Grafana-style monitoring dashboard powered by react-zeugma. Drag, resize, and rearrange live panels.',
+    url: 'https://react-zeugma.com/demo',
+  },
+  alternates: {
+    canonical: '/demo',
+  },
+}
+
 export const homeJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'SoftwareApplication',

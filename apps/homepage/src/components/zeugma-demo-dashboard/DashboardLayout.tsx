@@ -39,8 +39,6 @@ export function DashboardToolbar({
   presets,
   activePreset,
   onApplyPreset,
-  isTabbed,
-  onToggleTabbed,
 }: {
   onRefresh?: () => void
   timeRange: string
@@ -51,8 +49,6 @@ export function DashboardToolbar({
   presets: PresetInfo[]
   activePreset: string
   onApplyPreset: (presetName: string) => void
-  isTabbed: boolean
-  onToggleTabbed: () => void
 }) {
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -135,17 +131,6 @@ export function DashboardToolbar({
             )}
           </div>
         </div>
-
-        {/* Tabbed View Button */}
-        <button
-          onClick={onToggleTabbed}
-          className={`grafana-select text-[10px] ${
-            isTabbed ? 'bg-[#5794F2]! text-white border-[#5794F2]!' : ''
-          }`}
-          title="Toggle tabs in the panes to allow drag-and-drop merging of panels"
-        >
-          Tabbed View
-        </button>
       </div>
 
       {/* Right: Time range + Refresh */}

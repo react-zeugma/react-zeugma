@@ -5,30 +5,54 @@ import { Activity, BarChart3, Zap, Table2, ScrollText, Gauge } from 'lucide-reac
 
 // ── Widget Registry ──────────────────────────────────────────────────────────
 
-export const WIDGET_META: Record<string, { title: string; icon: React.ReactNode }> = {
+export const WIDGET_META: Record<
+  string,
+  { title: string; icon: React.ReactNode; isTabbed?: boolean }
+> = {
   'time-series': {
     title: 'System Metrics',
     icon: <Activity className="w-3.5 h-3.5 text-[#5794F2]" />,
+    isTabbed: true,
   },
   'requests-rate': {
     title: 'Request Rate',
     icon: <Activity className="w-3.5 h-3.5 text-[#B877D9]" />,
+    isTabbed: true,
   },
   'service-health': {
     title: 'Service Health',
     icon: <BarChart3 className="w-3.5 h-3.5 text-[#73BF69]" />,
+    isTabbed: true,
   },
-  'key-metrics': { title: 'Key Metrics', icon: <Zap className="w-3.5 h-3.5 text-[#5794F2]" /> },
+  'key-metrics': {
+    title: 'Key Metrics',
+    icon: <Zap className="w-3.5 h-3.5 text-[#5794F2]" />,
+    isTabbed: false,
+  },
   'top-endpoints': {
     title: 'Top Endpoints',
     icon: <Table2 className="w-3.5 h-3.5 text-[#FF9830]" />,
+    isTabbed: true,
   },
-  'live-logs': { title: 'Live Logs', icon: <ScrollText className="w-3.5 h-3.5 text-[#73BF69]" /> },
-  'cpu-gauge': { title: 'CPU Usage', icon: <Gauge className="w-3.5 h-3.5 text-[#5794F2]" /> },
-  'mem-gauge': { title: 'Memory Usage', icon: <Gauge className="w-3.5 h-3.5 text-[#FF9830]" /> },
+  'live-logs': {
+    title: 'Live Logs',
+    icon: <ScrollText className="w-3.5 h-3.5 text-[#73BF69]" />,
+    isTabbed: true,
+  },
+  'cpu-gauge': {
+    title: 'CPU Usage',
+    icon: <Gauge className="w-3.5 h-3.5 text-[#5794F2]" />,
+    isTabbed: false,
+  },
+  'mem-gauge': {
+    title: 'Memory Usage',
+    icon: <Gauge className="w-3.5 h-3.5 text-[#FF9830]" />,
+    isTabbed: false,
+  },
   'fps-monitor': {
     title: 'FPS Monitor',
     icon: <Activity className="w-3.5 h-3.5 text-[#B877D9]" />,
+    isTabbed: false,
   },
 }
 

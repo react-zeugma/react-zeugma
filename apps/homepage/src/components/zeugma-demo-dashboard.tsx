@@ -46,9 +46,10 @@ function getActiveWidgets(node: TreeNode | null): string[] {
 
 // ── Custom Pane Header (Drag Handle, Fullscreen, Close) ──────────────────────
 
-function DashboardPaneHeader({ tabsEnabled }: { tabsEnabled: boolean }) {
+function DashboardPaneHeader() {
   const { tabs, activeTabId, toggleFullscreen, isFullscreen, remove } = usePaneContext()
-  const showTabs = tabsEnabled || tabs.length > 1
+  const activeWidgetMeta = WIDGET_META[activeTabId]
+  const showTabs = tabs.length > 1 || activeWidgetMeta?.isTabbed !== false
 
   return (
     <div className="grafana-panel-header flex items-center justify-between min-h-[30px] border-b border-[#1e2127] bg-[#111317]">
@@ -108,14 +109,9 @@ function DashboardPaneHeader({ tabsEnabled }: { tabsEnabled: boolean }) {
 function ZeugmaDemoDashboardInner() {
   const [timeRange, setTimeRange] = useState('15m')
   const [activePreset, setActivePreset] = useState('all')
-  const [isTabbed, setIsTabbed] = useState(false)
   const controller = useZeugma({ initialLayout: defaultDashboardLayout })
 
   const activeWidgets = getActiveWidgets(controller.layout)
-
-  const handleToggleTabbed = useCallback(() => {
-    setIsTabbed((prev) => !prev)
-  }, [])
 
   // ── Widget Toggling ───────────────────────────────────────────────────────
   const handleToggleWidget = useCallback(
@@ -206,7 +202,7 @@ function ZeugmaDemoDashboardInner() {
       return (
         <Pane id={paneId}>
           <div className="grafana-panel flex flex-col h-full w-full overflow-hidden">
-            <DashboardPaneHeader tabsEnabled={isTabbed} />
+            <DashboardPaneHeader />
 
             <Pane.Content className="grafana-panel-body flex-1 min-h-0 overflow-hidden">
               {renderWidget}
@@ -215,7 +211,7 @@ function ZeugmaDemoDashboardInner() {
         </Pane>
       )
     },
-    [renderWidget, isTabbed],
+    [renderWidget],
   )
 
   // ── Drag overlay ─────────────────────────────────────────────────────────
@@ -254,8 +250,6 @@ function ZeugmaDemoDashboardInner() {
         presets={PRESETS}
         activePreset={activePreset}
         onApplyPreset={handleApplyPreset}
-        isTabbed={isTabbed}
-        onToggleTabbed={handleToggleTabbed}
       />
 
       <div className="grafana-workspace">

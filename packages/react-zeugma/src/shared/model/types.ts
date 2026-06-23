@@ -178,17 +178,13 @@ export interface DragOverlayActiveItem {
   isDismissing: boolean
 }
 
-export interface ZeugmaProps {
+export interface BaseZeugmaProps {
   /** The Zeugma Controller returned by useZeugma() */
-  controller?: ZeugmaController
-  /** Children components that will have access to the Zeugma context */
-  children?: ReactNode
+  controller: ZeugmaController
   /** Custom overlay renderer function used to customize the cursor-following drag preview for an active pane or tab. */
   renderDragOverlay?: (active: DragOverlayActiveItem) => ReactNode
   /** Optional CSS class name mapping overrides for custom styles of components like panes, drop previews, overlays, etc. */
   classNames?: ZeugmaClassNames
-  /** Render function mapping unique pane nodes to React elements. Usually renders a <Pane> wrapper. */
-  renderPane?: (paneId: string) => ReactNode
   /** Size/thickness of the split handle resizer bars in pixels. */
   resizerSize?: number
 
@@ -228,6 +224,18 @@ export interface ZeugmaProps {
   /** Callback triggered when the drag-out/dismiss intent changes. */
   onDismissIntentChange?: (paneId: string | null) => void
 }
+
+export type ZeugmaProps =
+  | (BaseZeugmaProps & {
+      children?: never
+      /** Render function mapping unique pane nodes to React elements. Usually renders a <Pane> wrapper. */
+      renderPane: (paneId: string) => ReactNode
+    })
+  | (BaseZeugmaProps & {
+      children: ReactNode
+      /** In Provider Mode, renderPane is not accepted on <Zeugma> and MUST be passed directly to <PaneTree>. */
+      renderPane?: never
+    })
 
 /**
  * State context — holds reactive values that change during runtime.

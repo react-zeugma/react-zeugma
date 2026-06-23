@@ -9,6 +9,7 @@ import {
   ZeugmaDragContext,
   ZeugmaDragStateValue,
   ZeugmaProps,
+  BaseZeugmaProps,
   ZeugmaControllerInternal,
 } from '../../../shared'
 import { usePortalRegistry, useZeugmaDnd } from '../model'
@@ -16,7 +17,9 @@ import { CursorOverlay } from './CursorOverlay'
 import { PortalHostItem } from './PortalHostItem'
 import { PaneTree } from '../../../widgets/pane-tree'
 
-const ZeugmaProviderInternal: React.FC<ZeugmaProps> = (props) => {
+const ZeugmaProviderInternal: React.FC<
+  BaseZeugmaProps & { children?: React.ReactNode; renderPane?: (paneId: string) => React.ReactNode }
+> = (props) => {
   const {
     controller,
     children,
@@ -327,26 +330,39 @@ const ZeugmaProviderInternal: React.FC<ZeugmaProps> = (props) => {
   )
 }
 
-const ZeugmaRenderer: React.FC<Omit<ZeugmaProps, 'controller'>> = ({
-  renderPane,
-  resizerSize,
-  snapThreshold,
-}) => {
+const ZeugmaRenderer: React.FC<{
+  renderPane?: (paneId: string) => React.ReactNode
+  resizerSize?: number
+  snapThreshold?: number
+}> = ({ renderPane, resizerSize, snapThreshold }) => {
+  if (!renderPane) {
+    throw new Error(
+      'Zeugma component requires a renderPane prop when used as a standalone renderer.',
+    )
+  }
   return (
     <PaneTree renderPane={renderPane} resizerSize={resizerSize} snapThreshold={snapThreshold} />
   )
 }
 
 export const Zeugma: React.FC<ZeugmaProps> = (props) => {
-  const { children, ...restProps } = props
+  const { children, ...restProps } = props as unknown as {
+    children?: React.ReactNode
+    renderPane?: (paneId: string) => React.ReactNode
+  }
 
-  const { controller } = props
+  const { controller } = props as unknown as { controller?: ZeugmaControllerInternal }
   if (!controller) {
     throw new Error('Zeugma component requires a controller.')
   }
 
   return (
-    <ZeugmaProviderInternal {...props}>
+    <ZeugmaProviderInternal
+      {...(props as unknown as BaseZeugmaProps & {
+        children?: React.ReactNode
+        renderPane?: (paneId: string) => React.ReactNode
+      })}
+    >
       {children !== undefined ? children : <ZeugmaRenderer {...restProps} />}
     </ZeugmaProviderInternal>
   )

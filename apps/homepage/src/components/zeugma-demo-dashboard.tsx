@@ -178,7 +178,6 @@ function ZeugmaDemoDashboardInner() {
     <Zeugma
       controller={controller}
       resizerSize={4}
-      renderPane={renderPane}
       renderDragOverlay={renderDragOverlay}
       enableDragToDismiss={true}
       classNames={{
@@ -192,7 +191,7 @@ function ZeugmaDemoDashboardInner() {
       <DashboardContainer>
         <DashboardToolbar timeRange={timeRange} onTimeRangeChange={setTimeRange} />
 
-        <div className="grafana-workspace">{<PaneTree />}</div>
+        <div className="grafana-workspace">{<PaneTree renderPane={renderPane} />}</div>
       </DashboardContainer>
     </Zeugma>
   )

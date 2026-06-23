@@ -1,5 +1,12 @@
 # react-zeugma
 
+## 6.4.2
+
+### Patch Changes
+
+- Refactored the homepage dashboard demo to consume the `ZeugmaProvider` context directly, eliminating prop drilling for widget toggles and layout presets.
+- Fixed the drag-out-to-dismiss gesture ("drop to release") for pane-level drag inputs by passing the `removePane` action and checking whether the dragged node is a tab or a pane container.
+
 ## 6.4.1
 
 ### Patch Changes

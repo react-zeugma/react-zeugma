@@ -47,9 +47,7 @@ function WorkspacePane({ id }: { id: string }) {
             </div>
           )}
         />
-        <Pane.DragHandle className="drag-handle">
-          <div className="drag-indicator">⋮⋮</div>
-        </Pane.DragHandle>
+        <Pane.DragHandle className="drag-handle"/>
         <Pane.Controls />
       </div>
       <div className="pane-content">

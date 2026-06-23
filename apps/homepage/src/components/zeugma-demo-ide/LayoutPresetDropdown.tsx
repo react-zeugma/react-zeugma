@@ -42,12 +42,12 @@ export function LayoutPresetDropdown({
         disabled={disabled}
         className={`flex items-center gap-1 transition-colors ${
           disabled
-            ? 'opacity-30 cursor-not-allowed text-zinc-550'
-            : 'hover:text-white cursor-pointer text-zinc-400'
+            ? 'opacity-30 cursor-not-allowed'
+            : 'hover:text-white cursor-pointer text-white/80'
         }`}
         title={disabled ? 'Unlock layout to change preset' : 'Switch Layout Preset'}
       >
-        <LayoutGrid className="w-3 h-3 text-indigo-400" />
+        <LayoutGrid className="w-3 h-3 text-white" />
         <span>{activeLabel}</span>
         <ChevronDown className="w-2.5 h-2.5" />
       </button>

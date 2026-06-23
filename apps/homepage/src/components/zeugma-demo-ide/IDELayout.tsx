@@ -43,14 +43,14 @@ export function IDEContainer({
 export function WindowChrome({ hideChrome = false }: { hideChrome?: boolean }) {
   if (hideChrome) return null
   return (
-    <div className="w-full bg-[#2d2d2d] px-4 py-2 flex items-center gap-2 border-b border-b-[#1e1e1e]">
-      <div className="flex items-center gap-2">
-        <div className="w-3 h-3 rounded-full bg-[#ff5f57] border border-[#e0443e] cursor-pointer" />
-        <div className="w-3 h-3 rounded-full bg-[#febc2e] border border-[#d4a017] cursor-pointer" />
-        <div className="w-3 h-3 rounded-full bg-[#28c840] border border-[#1aab29] cursor-pointer" />
+    <div className="w-full bg-[#1e1e1e] px-4 py-1.5 flex items-center gap-2 border-b border-b-[#121212] select-none">
+      <div className="flex items-center gap-1.5">
+        <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f57] border border-[#e0443e] cursor-pointer" />
+        <div className="w-2.5 h-2.5 rounded-full bg-[#febc2e] border border-[#d4a017] cursor-pointer" />
+        <div className="w-2.5 h-2.5 rounded-full bg-[#28c840] border border-[#1aab29] cursor-pointer" />
       </div>
       <div className="flex-1 flex justify-center">
-        <div className="bg-[#1e1e1e] border border-[#3a3a3a] rounded-md px-4 py-0.5 flex items-center gap-2 text-[11px] font-mono text-[#858585] min-w-[220px] justify-center select-none">
+        <div className="bg-[#252526] border border-[#2d2d30] rounded px-3 py-0.5 flex items-center gap-2 text-[10px] font-mono text-[#858585] min-w-[200px] justify-center select-none">
           <Code className="w-3 h-3 text-indigo-400" />
           <span>my-zeugma-app — Zeugma Code</span>
         </div>
@@ -117,7 +117,7 @@ export function StatusBar({
   onReset,
 }: StatusBarProps) {
   return (
-    <div className="h-6 bg-[#252526] border-t border-[#1e1e1e] text-zinc-400 flex items-center justify-between px-3 text-[10.5px] select-none font-mono shrink-0 z-30">
+    <div className="h-5 bg-[#007acc] text-white flex items-center justify-between px-3 text-[10px] select-none font-mono shrink-0 z-30">
       <div className="flex items-center gap-3">
         <a
           href="https://github.com/react-zeugma/react-zeugma"
@@ -125,7 +125,7 @@ export function StatusBar({
           rel="noopener noreferrer"
           className="flex items-center gap-1 hover:text-white transition-colors cursor-pointer"
         >
-          <GitBranch className="w-3 h-3 text-indigo-400" />
+          <GitBranch className="w-3 h-3 text-white" />
           <span>master</span>
         </a>
       </div>
@@ -137,25 +137,29 @@ export function StatusBar({
           disabled={locked}
         />
 
-        <span className="text-zinc-600">|</span>
+        <span className="text-[#389ffd]">|</span>
 
         <button
           onClick={onToggleLock}
           className="hover:text-white transition-colors cursor-pointer flex items-center gap-1"
         >
-          {locked ? <Lock className="w-3 h-3 text-amber-500" /> : <Unlock className="w-3 h-3" />}
+          {locked ? (
+            <Lock className="w-3 h-3 text-amber-300 animate-pulse" />
+          ) : (
+            <Unlock className="w-3 h-3 text-white/80" />
+          )}
           <span>{locked ? 'Unlock Layout' : 'Lock Layout'}</span>
         </button>
 
-        <span className="text-zinc-600">|</span>
+        <span className="text-[#389ffd]">|</span>
 
         <button
           onClick={onReset}
           disabled={locked}
           className={`flex items-center gap-1 transition-colors ${
             locked
-              ? 'opacity-30 cursor-not-allowed text-zinc-550'
-              : 'hover:text-white cursor-pointer text-zinc-400'
+              ? 'opacity-30 cursor-not-allowed'
+              : 'hover:text-white cursor-pointer text-white/80'
           }`}
           title={locked ? 'Unlock layout to reset' : 'Reset Layout'}
         >
@@ -179,7 +183,7 @@ export function PaneContainer({ children }: { children: React.ReactNode }) {
 
 export function PaneHeader({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between bg-[#2d2d2d] border-b border-[#1e1e1e] h-9 select-none">
+    <div className="flex items-center justify-between bg-[#252526] border-b border-[#1e1e1e] h-8 select-none">
       {children}
     </div>
   )

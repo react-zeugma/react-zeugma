@@ -47,11 +47,11 @@ export function IDETab({
   const { title, icon, closeable } = getTabMetadata(tabId)
 
   const baseClass =
-    'px-3 flex items-center gap-1.5 border-r border-[#1e1e1e] text-[11px] font-mono tracking-wide transition-all cursor-pointer h-full relative group'
+    'px-2.5 flex items-center gap-1.5 border-r border-[#1e1e1e] text-[11px] font-mono tracking-wide transition-all cursor-pointer h-full relative group'
 
   const activeClass = isTabActive
     ? 'bg-[#1e1e1e] text-white border-t border-t-indigo-500'
-    : 'bg-[#2d2d2d] text-[#858585] hover:text-[#cccccc] hover:bg-[#252526] border-t border-t-transparent'
+    : 'bg-[#252526] text-[#858585] hover:text-[#cccccc] hover:bg-[#2d2d2d] border-t border-t-transparent'
 
   const dragClass = isDragging ? 'opacity-40' : ''
   const overClass = isOver ? 'bg-indigo-500/10 animate-pulse' : ''

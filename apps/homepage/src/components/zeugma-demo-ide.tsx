@@ -21,7 +21,6 @@ import {
   WorkspaceFrame,
   WorkspaceContent,
   WorkspaceZeugmaArea,
-  ActivityBar,
   StatusBar,
   PaneContainer,
   PaneHeader,
@@ -157,8 +156,6 @@ export function ZeugmaDemoIDE({
 
       <WorkspaceFrame>
         <WorkspaceContent>
-          <ActivityBar />
-
           <WorkspaceZeugmaArea>
             {outerZeugma.layout && (
               <Zeugma

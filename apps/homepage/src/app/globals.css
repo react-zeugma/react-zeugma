@@ -370,3 +370,682 @@ body {
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
   pointer-events: none;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Grafana Dashboard Styles
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Dashboard Container */
+.grafana-dashboard-container {
+  background-color: #0b0c0e;
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 600px;
+}
+
+.grafana-dashboard-shell {
+  border-radius: 16px;
+  overflow: hidden;
+  height: clamp(600px, 75vh, 900px);
+  box-shadow:
+    0 50px 120px -20px rgba(87, 148, 242, 0.1),
+    0 30px 100px -10px rgba(0, 0, 0, 0.85);
+  transition: box-shadow 0.5s ease;
+}
+
+.grafana-dashboard-shell:hover {
+  box-shadow:
+    0 60px 150px -10px rgba(87, 148, 242, 0.18),
+    0 40px 120px -5px rgba(0, 0, 0, 0.9);
+}
+
+/* Toolbar */
+.grafana-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  background-color: #111317;
+  border-bottom: 1px solid #1a1d21;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.grafana-toolbar-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #d8d9da;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.grafana-toolbar-badge {
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #73bf69;
+  background: rgba(115, 191, 105, 0.12);
+  border: 1px solid rgba(115, 191, 105, 0.2);
+  padding: 1px 6px;
+  border-radius: 999px;
+  animation: live-pulse 2s infinite;
+}
+
+@keyframes live-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.grafana-time-picker {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: #1a1d21;
+  border: 1px solid #252830;
+  border-radius: 6px;
+  padding: 2px 4px;
+}
+
+.grafana-time-pill {
+  font-size: 10px;
+  font-weight: 600;
+  color: #6b6b6b;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all 0.15s;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+}
+
+.grafana-time-pill:hover {
+  color: #d8d9da;
+  background: #252830;
+}
+
+.grafana-time-pill.active {
+  color: #5794f2;
+  background: rgba(87, 148, 242, 0.12);
+}
+
+.grafana-refresh-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid #252830;
+  background: #1a1d21;
+  color: #6b6b6b;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.grafana-refresh-btn:hover {
+  color: #d8d9da;
+  border-color: #3a3d42;
+  background: #252830;
+}
+
+.grafana-select {
+  background-color: #1a1d21;
+  border: 1px solid #252830;
+  border-radius: 4px;
+  color: #d8d9da;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 8px;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.grafana-select:hover {
+  border-color: #3a3d42;
+  color: #ffffff;
+}
+
+.grafana-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.grafana-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  background-color: #141619;
+  border: 1px solid #252830;
+  border-radius: 4px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+  padding: 4px 0;
+  z-index: 50;
+  min-width: 140px;
+}
+
+.grafana-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #d8d9da;
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.grafana-dropdown-item:hover {
+  background-color: #252830;
+  color: #ffffff;
+}
+
+.grafana-dropdown-checkbox {
+  width: 12px;
+  height: 12px;
+  border: 1px solid #3a3d42;
+  border-radius: 2px;
+  background-color: #1a1d21;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.grafana-dropdown-checkbox.checked {
+  background-color: #5794f2;
+  border-color: #5794f2;
+}
+
+.grafana-dropdown-checkbox.checked::after {
+  content: '';
+  width: 3px;
+  height: 6px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  margin-bottom: 2px;
+}
+
+/* Workspace area */
+.grafana-workspace {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Panel Chrome */
+.grafana-panel {
+  background-color: #141619;
+  border: 1px solid #1e2127;
+  border-radius: 0;
+}
+
+.grafana-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  border-bottom: 1px solid #1e2127;
+  min-height: 30px;
+}
+
+.grafana-pane-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: #6b6b6b;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.grafana-pane-btn:hover {
+  color: #d8d9da;
+  background: #252830;
+}
+
+.grafana-panel-icon {
+  display: flex;
+  align-items: center;
+}
+
+.grafana-panel-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #d8d9da;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.grafana-panel-body {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Pane Container */
+.grafana-pane-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background: #141619;
+  overflow: hidden;
+}
+
+.grafana-pane-header {
+  display: flex;
+  align-items: center;
+  height: 28px;
+  background: #111317;
+  border-bottom: 1px solid #1e2127;
+  cursor: grab;
+  user-select: none;
+  padding: 0 4px;
+}
+
+.grafana-tabs-container {
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none;
+  min-width: 0;
+  height: 100%;
+}
+
+.grafana-tabs-container::-webkit-scrollbar {
+  display: none;
+}
+
+.grafana-tab {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 10px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #6b6b6b;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  height: 100%;
+}
+
+.grafana-tab:hover {
+  color: #d8d9da;
+}
+
+.grafana-tab.active {
+  color: #5794f2;
+  border-bottom-color: #5794f2;
+}
+
+.grafana-pane-drag-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  color: #3a3d42;
+  transition: color 0.15s;
+}
+
+.grafana-panel-header:hover .grafana-pane-drag-icon {
+  color: #6b6b6b;
+}
+
+/* Widget Footer (mount/render counters) */
+.grafana-widget-footer {
+  background: #111317;
+  border-top: 1px solid #1e2127;
+  padding: 3px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: #4a4a4a;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+/* Demo Navbar */
+.grafana-demo-navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 14px;
+  background: #111317;
+  border-bottom: 1px solid #1a1d21;
+  flex-shrink: 0;
+  gap: 8px;
+}
+
+.grafana-demo-nav-active {
+  font-size: 11px;
+  font-weight: 700;
+  color: #5794f2;
+  position: relative;
+  padding: 2px 0;
+}
+
+.grafana-demo-nav-active::after {
+  content: '';
+  position: absolute;
+  bottom: -7px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #5794f2;
+  border-radius: 1px;
+}
+
+/* Table */
+.grafana-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10px;
+}
+
+.grafana-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.grafana-table th {
+  padding: 6px 8px;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #6b6b6b;
+  background: #111317;
+  border-bottom: 1px solid #1e2127;
+  white-space: nowrap;
+}
+
+.grafana-table td {
+  padding: 5px 8px;
+  border-bottom: 1px solid #1a1d21;
+  white-space: nowrap;
+}
+
+.grafana-table-row {
+  transition: background-color 0.1s;
+}
+
+.grafana-table-row:hover {
+  background-color: #1a1d21;
+}
+
+.grafana-method-badge {
+  font-size: 8px;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  padding: 1px 5px;
+  border-radius: 3px;
+  border: 1px solid;
+  letter-spacing: 0.02em;
+}
+
+.grafana-status-badge {
+  font-size: 9px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+
+/* Logs */
+.grafana-log-header {
+  display: flex;
+  gap: 8px;
+  padding: 4px 8px;
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #4a4a4a;
+  border-bottom: 1px solid #1e2127;
+  background: #111317;
+}
+
+.grafana-log-stream {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  font-family: var(--font-mono);
+  min-height: 0;
+}
+
+.grafana-log-line {
+  display: flex;
+  gap: 8px;
+  padding: 2px 8px;
+  font-size: 10px;
+  line-height: 1.6;
+  border-bottom: 1px solid #1a1d2108;
+  transition: background-color 0.1s;
+  align-items: flex-start;
+}
+
+.grafana-log-line:hover {
+  background-color: #1a1d21;
+}
+
+.grafana-log-time {
+  color: #4a4a4a;
+  font-size: 9px;
+  white-space: nowrap;
+  width: 62px;
+  flex-shrink: 0;
+}
+
+.grafana-log-level {
+  font-size: 8px;
+  font-weight: 800;
+  padding: 0px 4px;
+  border-radius: 2px;
+  width: 42px;
+  text-align: center;
+  flex-shrink: 0;
+  letter-spacing: 0.03em;
+}
+
+.grafana-log-service {
+  color: #5794f2;
+  font-size: 9px;
+  width: 90px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
+}
+
+.grafana-log-message {
+  color: #b0b0b0;
+  font-size: 10px;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Stat Cards */
+.grafana-stat-card {
+  background: #111317;
+  border: 1px solid #1e2127;
+  border-radius: 8px;
+  padding: 10px 12px;
+  transition: border-color 0.2s;
+}
+
+.grafana-stat-card:hover {
+  border-color: #2a2d32;
+}
+
+/* Tooltip */
+.grafana-tooltip {
+  background: #1a1d21;
+  border: 1px solid #2a2d32;
+  border-radius: 6px;
+  padding: 8px 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.grafana-tooltip-time {
+  font-size: 9px;
+  color: #6b6b6b;
+  margin-bottom: 4px;
+  font-family: var(--font-mono);
+}
+
+.grafana-tooltip-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 1px 0;
+}
+
+.grafana-tooltip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.grafana-tooltip-label {
+  font-size: 10px;
+  color: #b0b0b0;
+  flex: 1;
+}
+
+.grafana-tooltip-value {
+  font-size: 10px;
+  font-weight: 700;
+  color: #d8d9da;
+  font-family: var(--font-mono);
+}
+
+/* Drag Overlay */
+.grafana-drag-overlay {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: #1a1d21;
+  border: 1px solid #5794f2;
+  border-radius: 8px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
+  opacity: 0.95;
+  transform: scale(1);
+  transition: all 0.2s;
+}
+
+.grafana-drag-overlay.dismissing {
+  opacity: 0.4;
+  transform: scale(0.85);
+}
+
+/* Resizer */
+.grafana-resizer {
+  transition: background-color 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+}
+
+.grafana-resizer:hover {
+  background-color: rgba(87, 148, 242, 0.1);
+}
+
+.grafana-resizer[data-resizing='true'] {
+  background-color: #5794f2;
+}
+
+.grafana-resizer::after {
+  content: '';
+  background-color: #3a3d42;
+  border-radius: 9999px;
+  transition:
+    opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0.6;
+}
+
+.grafana-resizer:hover::after {
+  background-color: #5794f2;
+  opacity: 1;
+}
+
+.grafana-resizer[data-resizing='true']::after {
+  opacity: 0;
+  transform: scale(0.5);
+}
+
+.grafana-resizer[data-direction='row']::after {
+  width: 1.5px;
+  height: 14px;
+}
+
+.grafana-resizer[data-direction='column']::after {
+  width: 14px;
+  height: 1.5px;
+}
+
+/* Root Drop Preview */
+.grafana-root-drop-preview {
+  background-color: rgba(87, 148, 242, 0.08);
+  border: 1px solid rgba(87, 148, 242, 0.25);
+  backdrop-filter: blur(12px);
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+}
+
+/* Tab Drop Preview */
+.grafana-tab-drop-preview {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background-color: #5794f2;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* Shimmer animation for health bars */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}

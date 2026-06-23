@@ -11,9 +11,10 @@ const LOGO_URL = '/logo.png'
 
 export const NAV_ITEMS: {
   label: string
-  to: '/' | '/docs' | '/changelog' | '/blog'
+  to: '/' | '/demo' | '/docs' | '/changelog' | '/blog'
 }[] = [
   { label: 'Home', to: '/' },
+  { label: 'Demo', to: '/demo' },
   { label: 'Docs', to: '/docs' },
   { label: 'Changelog', to: '/changelog' },
   { label: 'Blog', to: '/blog' },

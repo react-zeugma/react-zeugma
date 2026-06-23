@@ -73,6 +73,7 @@ interface UseZeugmaDndProps {
 
   // Actions
   removeTab: (tabId: string) => void
+  removePane: (paneId: string) => void
 }
 
 export function useZeugmaDnd(props: UseZeugmaDndProps) {
@@ -103,6 +104,7 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
 
     // Actions
     removeTab,
+    removePane,
   } = props
 
   const containerRectRef = useRef<DOMRect | null>(null)
@@ -352,7 +354,11 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
       if (onRemove) {
         onRemove(draggingId)
       } else {
-        removeTab(draggingId)
+        if (isTabDrag) {
+          removeTab(draggingId)
+        } else {
+          removePane(draggingId)
+        }
       }
 
       if (onDragEnd) {

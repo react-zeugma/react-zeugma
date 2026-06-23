@@ -68,13 +68,6 @@ export const AVAILABLE_WIDGETS = [
   { id: 'fps-monitor', label: 'FPS', color: '#B877D9' },
 ]
 
-export const PRESETS = [
-  { name: 'all', label: 'Default Grid' },
-  { name: 'system', label: 'Infrastructure' },
-  { name: 'services', label: 'App Performance' },
-  { name: 'minimal', label: 'Minimal Stats' },
-]
-
 // ── Preset Layout Definitions ────────────────────────────────────────────────
 
 export const defaultDashboardLayout: TreeNode = {
@@ -294,3 +287,10 @@ export const minimalLayout: TreeNode = {
     activeTabId: 'live-logs',
   },
 }
+
+export const PRESETS = [
+  { name: 'all', label: 'Default Grid', layout: defaultDashboardLayout },
+  { name: 'system', label: 'Infrastructure', layout: systemFocusLayout },
+  { name: 'services', label: 'App Performance', layout: serviceFocusLayout },
+  { name: 'minimal', label: 'Minimal Stats', layout: minimalLayout },
+]

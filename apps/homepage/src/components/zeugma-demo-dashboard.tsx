@@ -3,11 +3,11 @@
 import { useState, useCallback } from 'react'
 import {
   Zeugma,
+  ZeugmaProvider,
   Pane,
   useZeugma,
   TabDetails,
   DragOverlayActiveItem,
-  TreeNode,
   usePaneContext,
 } from 'react-zeugma'
 import {
@@ -26,23 +26,7 @@ import { LiveDataProvider } from './zeugma-demo-dashboard/LiveDataProvider'
 import { FpsMonitor } from './fps-monitor'
 import { Maximize2, Minimize2, X } from 'lucide-react'
 
-import {
-  WIDGET_META,
-  AVAILABLE_WIDGETS,
-  PRESETS,
-  defaultDashboardLayout,
-  systemFocusLayout,
-  serviceFocusLayout,
-  minimalLayout,
-} from './zeugma-demo-dashboard/constants'
-
-function getActiveWidgets(node: TreeNode | null): string[] {
-  if (!node) return []
-  if (node.type === 'pane') {
-    return node.tabs
-  }
-  return [...getActiveWidgets(node.first), ...getActiveWidgets(node.second)]
-}
+import { WIDGET_META, defaultDashboardLayout } from './zeugma-demo-dashboard/constants'
 
 // ── Custom Pane Header (Drag Handle, Fullscreen, Close) ──────────────────────
 
@@ -108,55 +92,7 @@ function DashboardPaneHeader() {
 
 function ZeugmaDemoDashboardInner() {
   const [timeRange, setTimeRange] = useState('15m')
-  const [activePreset, setActivePreset] = useState('all')
   const controller = useZeugma({ initialLayout: defaultDashboardLayout })
-
-  const activeWidgets = getActiveWidgets(controller.layout)
-
-  // ── Widget Toggling ───────────────────────────────────────────────────────
-  const handleToggleWidget = useCallback(
-    (widgetId: string) => {
-      // Clear preset name highlight on toggle modifications
-      setActivePreset('')
-
-      if (activeWidgets.includes(widgetId)) {
-        // If it's the last widget, don't allow disabling it to avoid an empty dashboard
-        if (activeWidgets.length <= 1) {
-          return
-        }
-        controller.removeTab(widgetId)
-      } else {
-        controller.addTab(widgetId)
-      }
-    },
-    [activeWidgets, controller],
-  )
-
-  // ── Presets ───────────────────────────────────────────────────────────────
-  const handleApplyPreset = useCallback(
-    (presetName: string) => {
-      setActivePreset(presetName)
-      switch (presetName) {
-        case 'all':
-          controller.setLayout(defaultDashboardLayout)
-          break
-        case 'system':
-          controller.setLayout(systemFocusLayout)
-          break
-        case 'services':
-          controller.setLayout(serviceFocusLayout)
-          break
-        case 'minimal':
-          controller.setLayout(minimalLayout)
-          break
-      }
-    },
-    [controller],
-  )
-
-  const handleRefresh = useCallback(() => {
-    handleApplyPreset('all')
-  }, [handleApplyPreset])
 
   // ── Tab / Widget rendering ───────────────────────────────────────────────
 
@@ -239,38 +175,26 @@ function ZeugmaDemoDashboardInner() {
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <DashboardContainer>
-      <DashboardToolbar
-        timeRange={timeRange}
-        onTimeRangeChange={setTimeRange}
-        onRefresh={handleRefresh}
-        availableWidgets={AVAILABLE_WIDGETS}
-        activeWidgets={activeWidgets}
-        onToggleWidget={handleToggleWidget}
-        presets={PRESETS}
-        activePreset={activePreset}
-        onApplyPreset={handleApplyPreset}
-      />
+    <ZeugmaProvider
+      controller={controller}
+      resizerSize={4}
+      renderPane={renderPane}
+      renderDragOverlay={renderDragOverlay}
+      enableDragToDismiss={true}
+      classNames={{
+        dropPreview:
+          'bg-[#5794F2]/10 border border-[#5794F2]/30 transition-all duration-200 shadow-lg',
+        rootDropPreview: 'grafana-root-drop-preview',
+        resizer: 'grafana-resizer',
+        tabDropPreview: 'grafana-tab-drop-preview',
+      }}
+    >
+      <DashboardContainer>
+        <DashboardToolbar timeRange={timeRange} onTimeRangeChange={setTimeRange} />
 
-      <div className="grafana-workspace">
-        {controller.layout && (
-          <Zeugma
-            controller={controller}
-            resizerSize={4}
-            renderPane={renderPane}
-            renderDragOverlay={renderDragOverlay}
-            enableDragToDismiss={false}
-            classNames={{
-              dropPreview:
-                'bg-[#5794F2]/10 border border-[#5794F2]/30 transition-all duration-200 shadow-lg',
-              rootDropPreview: 'grafana-root-drop-preview',
-              resizer: 'grafana-resizer',
-              tabDropPreview: 'grafana-tab-drop-preview',
-            }}
-          />
-        )}
-      </div>
-    </DashboardContainer>
+        <div className="grafana-workspace">{controller.layout && <Zeugma />}</div>
+      </DashboardContainer>
+    </ZeugmaProvider>
   )
 }
 

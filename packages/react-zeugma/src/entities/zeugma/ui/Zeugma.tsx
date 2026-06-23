@@ -9,7 +9,6 @@ import {
   ZeugmaDragContext,
   ZeugmaDragStateValue,
   ZeugmaProps,
-  ZeugmaProviderProps,
   ZeugmaControllerInternal,
 } from '../../../shared'
 import { usePortalRegistry, useZeugmaDnd } from '../model'
@@ -17,7 +16,7 @@ import { CursorOverlay } from './CursorOverlay'
 import { PortalHostItem } from './PortalHostItem'
 import { PaneTree } from '../../../widgets/pane-tree'
 
-export const ZeugmaProvider: React.FC<ZeugmaProviderProps> = (props) => {
+const ZeugmaProviderInternal: React.FC<ZeugmaProps> = (props) => {
   const {
     controller,
     children,
@@ -342,16 +341,22 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
   const context = useContext(ZeugmaStateContext)
   const isNested = context !== undefined
 
+  const { children, ...restProps } = props
+
   if (!isNested) {
-    const { controller, renderPane, ...restProps } = props
+    const { controller } = props
     if (!controller) {
       throw new Error('Zeugma component requires a controller when used standalone.')
     }
     return (
-      <ZeugmaProvider controller={controller} renderPane={renderPane} {...restProps}>
-        <ZeugmaRenderer {...restProps} />
-      </ZeugmaProvider>
+      <ZeugmaProviderInternal {...props}>
+        {children !== undefined ? children : <ZeugmaRenderer {...restProps} />}
+      </ZeugmaProviderInternal>
     )
+  }
+
+  if (children !== undefined) {
+    return <>{children}</>
   }
 
   return <ZeugmaRenderer {...props} />

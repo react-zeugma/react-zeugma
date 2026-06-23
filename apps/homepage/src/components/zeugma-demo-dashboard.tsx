@@ -3,7 +3,6 @@
 import { useState, useCallback } from 'react'
 import {
   Zeugma,
-  ZeugmaProvider,
   Pane,
   useZeugma,
   TabDetails,
@@ -175,7 +174,7 @@ function ZeugmaDemoDashboardInner() {
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <ZeugmaProvider
+    <Zeugma
       controller={controller}
       resizerSize={4}
       renderPane={renderPane}
@@ -194,7 +193,7 @@ function ZeugmaDemoDashboardInner() {
 
         <div className="grafana-workspace">{controller.layout && <Zeugma />}</div>
       </DashboardContainer>
-    </ZeugmaProvider>
+    </Zeugma>
   )
 }
 

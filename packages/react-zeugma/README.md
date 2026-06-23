@@ -88,25 +88,12 @@ export default function Dashboard() {
 
 ## API Reference
 
-### `<ZeugmaProvider>`
-
-The context provider that sets up the drag-and-drop state machine, monitors active drags, and registers layout change notifications. This is a headless component that does not render any visual grid container. Wrap your custom dashboard structure (including sidebars, toolbars, and the `<Zeugma>` grid layout) with `<ZeugmaProvider>` to allow descendant components to consume the layout context.
-
-It accepts a required `controller` and `children` props:
-
-| Prop         | Type               | Required | Description                                                            |
-| :----------- | :----------------- | :------- | :--------------------------------------------------------------------- |
-| `controller` | `ZeugmaController` | Yes      | The Zeugma controller object returned by `useZeugma(options)`.         |
-| `children`   | `React.ReactNode`  | Yes      | Sibling or descendant components that will have access to the context. |
-
-Additionally, `<ZeugmaProvider>` accepts all configuration settings and lifecycle callbacks listed for `<Zeugma>` below (such as `classNames`, `resizerSize`, `renderPane`, `onDragStart`, etc.).
-
 ### `<Zeugma>`
 
-The main visual dashboard grid renderer.
+The main visual dashboard grid renderer and context provider.
 
-- **Standalone Mode**: If used standalone, `<Zeugma>` acts as the context provider itself. You must pass both `controller` and `renderPane` props to it.
-- **Provider-Wrapped Mode**: If nested within a `<ZeugmaProvider>`, you do not need to pass any props to `<Zeugma>` (it will automatically read the state, configuration, and callbacks directly from the parent context).
+- **With Children (Provider Mode)**: If `<Zeugma>` is rendered with children, it acts as the context provider. You must pass the `controller` prop to it, and the children will have access to the Zeugma context functions.
+- **Without Children (Renderer/Standalone Mode)**: If `<Zeugma>` is rendered without children, it acts as both the provider and the visual layout renderer. If it is nested within a parent `<Zeugma>` provider, it automatically reads the state, configuration, and callbacks directly from the parent context.
 
 | Prop                     | Type                                                                                                                                                 | Required        | Description                                                                                   |
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- | --------------------------------------------------------------------------------------------- |

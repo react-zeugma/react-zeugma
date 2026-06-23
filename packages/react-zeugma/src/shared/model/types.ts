@@ -181,6 +181,8 @@ export interface DragOverlayActiveItem {
 export interface ZeugmaProps {
   /** The Zeugma Controller returned by useZeugma() */
   controller?: ZeugmaController
+  /** Children components that will have access to the Zeugma context */
+  children?: ReactNode
   /** Custom overlay renderer function used to customize the cursor-following drag preview for an active pane or tab. */
   renderDragOverlay?: (active: DragOverlayActiveItem) => ReactNode
   /** Optional CSS class name mapping overrides for custom styles of components like panes, drop previews, overlays, etc. */
@@ -225,13 +227,6 @@ export interface ZeugmaProps {
   onResizeEnd?: (currentNode: SplitNode, percentage: number) => void
   /** Callback triggered when the drag-out/dismiss intent changes. */
   onDismissIntentChange?: (paneId: string | null) => void
-}
-
-export interface ZeugmaProviderProps extends Omit<ZeugmaProps, 'controller'> {
-  /** The Zeugma Controller returned by useZeugma() */
-  controller: ZeugmaController
-  /** Children components that will have access to the Zeugma context */
-  children: ReactNode
 }
 
 /**

@@ -65,19 +65,12 @@ export interface TabDetails {
 
 ## 2. Core Components
 
-#### `<ZeugmaProvider>`
-
-The headless context provider. It handles the drag-and-drop event loop and coordinates the layout state. Use this to wrap your dashboard workspace layout so sibling components (like toolbars and sidebars) can access the context.
-
-- `controller: ZeugmaController` — (Required) The controller object returned by the `useZeugma` hook.
-- `children: React.ReactNode` — (Required) Children components that will have access to the context.
-
 #### `<Zeugma>`
 
-The main visual dashboard grid renderer.
+The main visual dashboard grid renderer and context provider.
 
-- **Standalone Mode**: If used standalone, `<Zeugma>` acts as the context provider itself. You must pass both `controller` and `renderPane` props to it.
-- **Provider-Wrapped Mode**: If nested within a `<ZeugmaProvider>`, you do not need to pass any props (it will read state and config directly from the context).
+- **With Children (Provider Mode)**: If `<Zeugma>` is rendered with children, it acts as the context provider. You must pass the `controller` prop to it, and the children will have access to the Zeugma context functions.
+- **Without Children (Renderer/Standalone Mode)**: If `<Zeugma>` is rendered without children, it acts as both the provider and the visual layout renderer. If it is nested within a parent `<Zeugma>` provider, it automatically reads the state, configuration, and callbacks directly from the parent context.
 
 #### Props
 

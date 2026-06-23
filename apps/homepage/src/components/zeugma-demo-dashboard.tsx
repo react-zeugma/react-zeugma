@@ -8,6 +8,7 @@ import {
   TabDetails,
   DragOverlayActiveItem,
   usePaneContext,
+  PaneTree,
 } from 'react-zeugma'
 import {
   DashboardToolbar,
@@ -191,7 +192,7 @@ function ZeugmaDemoDashboardInner() {
       <DashboardContainer>
         <DashboardToolbar timeRange={timeRange} onTimeRangeChange={setTimeRange} />
 
-        <div className="grafana-workspace">{controller.layout && <Zeugma />}</div>
+        <div className="grafana-workspace">{<PaneTree />}</div>
       </DashboardContainer>
     </Zeugma>
   )

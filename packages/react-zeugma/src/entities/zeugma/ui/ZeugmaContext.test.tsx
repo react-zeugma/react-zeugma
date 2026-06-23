@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { renderHook } from '@testing-library/react'
-import { useZeugma, useZeugmaContext, Zeugma, Pane } from '../../../index'
+import { useZeugma, useZeugmaContext, Zeugma, Pane, PaneTree } from '../../../index'
 import {
   useZeugmaState,
   useZeugmaActions,
@@ -105,7 +105,7 @@ describe('Zeugma Context Provider & Consumers', () => {
     expect(receivedMetadata).toEqual({ title: 'My Tab Title', customProp: 42 })
   })
 
-  it('should successfully provide context using Zeugma and nested Zeugma component', () => {
+  it('should successfully provide context using Zeugma with children and explicit PaneTree', () => {
     let contextValue: ZeugmaController | null = null
     const ConsumerComponent = () => {
       contextValue = useZeugmaContext()
@@ -122,7 +122,7 @@ describe('Zeugma Context Provider & Consumers', () => {
       return (
         <Zeugma controller={controller} renderPane={renderPane}>
           <div data-testid="toolbar">Toolbar</div>
-          <Zeugma />
+          <PaneTree />
         </Zeugma>
       )
     }
@@ -135,11 +135,11 @@ describe('Zeugma Context Provider & Consumers', () => {
     expect(contextValue!.layout).toEqual(initialLayout)
   })
 
-  it('should throw error when Zeugma is used standalone without controller', () => {
+  it('should throw error when Zeugma is used without controller', () => {
     const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
     expect(() => {
       render(<Zeugma />)
-    }).toThrow('Zeugma component requires a controller when used standalone.')
+    }).toThrow('Zeugma component requires a controller.')
     consoleErrorSpy.mockRestore()
   })
 })

@@ -7,7 +7,7 @@ import { RootDropZones } from '../../../entities/zeugma/ui'
 
 export interface PaneTreeProps {
   /** Render function mapping unique pane nodes to React elements. Usually renders a <Pane> wrapper. */
-  renderPane: (paneId: string) => React.ReactNode
+  renderPane?: (paneId: string) => React.ReactNode
   /** The layout subtree node to render. If not specified, defaults to the root layout tree from the Zeugma context. */
   tree?: TreeNode | null
   /** Size/thickness of the split handle resizer bars in pixels (default 4). */
@@ -116,9 +116,9 @@ const MemoizedPaneContent = React.memo(
 )
 
 export const PaneTree: React.FC<PaneTreeProps> = ({
-  renderPane,
+  renderPane: propRenderPane,
   tree,
-  resizerSize = 4,
+  resizerSize: propResizerSize,
   snapThreshold: propSnapThreshold,
 }) => {
   const {
@@ -130,10 +130,22 @@ export const PaneTree: React.FC<PaneTreeProps> = ({
     snapThreshold: contextSnapThreshold,
     locked,
     classNames,
+    renderPane: contextRenderPane,
+    resizerSize: contextResizerSize,
   } = useZeugmaState()
 
   const snapThreshold =
     propSnapThreshold !== undefined ? propSnapThreshold : (contextSnapThreshold ?? 8)
+
+  const resizerSize = propResizerSize !== undefined ? propResizerSize : (contextResizerSize ?? 4)
+
+  const renderPane = propRenderPane !== undefined ? propRenderPane : contextRenderPane
+
+  if (!renderPane) {
+    throw new Error(
+      'PaneTree must be provided a renderPane prop or used within a Zeugma provider with renderPane.',
+    )
+  }
 
   const currentNode = tree !== undefined ? tree : layout
 

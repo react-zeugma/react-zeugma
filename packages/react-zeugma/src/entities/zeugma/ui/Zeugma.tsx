@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react'
+import React, { useState, useMemo, useCallback, useContext } from 'react'
 import { DndContext } from '@dnd-kit/core'
 import {
   TreeNode,
@@ -9,6 +9,7 @@ import {
   ZeugmaDragContext,
   ZeugmaDragStateValue,
   ZeugmaProps,
+  ZeugmaProviderProps,
   ZeugmaControllerInternal,
 } from '../../../shared'
 import { usePortalRegistry, useZeugmaDnd } from '../model'
@@ -16,9 +17,10 @@ import { CursorOverlay } from './CursorOverlay'
 import { PortalHostItem } from './PortalHostItem'
 import { PaneTree } from '../../../widgets/pane-tree'
 
-export const Zeugma: React.FC<ZeugmaProps> = (props) => {
+export const ZeugmaProvider: React.FC<ZeugmaProviderProps> = (props) => {
   const {
     controller,
+    children,
     renderDragOverlay,
     classNames = {},
     renderPane,
@@ -178,6 +180,7 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
       getTabMetadata,
       getActiveTabMetadata,
       renderPane,
+      resizerSize,
     }),
     [
       layout,
@@ -204,6 +207,7 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
       getTabMetadata,
       getActiveTabMetadata,
       renderPane,
+      resizerSize,
     ],
   )
 
@@ -283,11 +287,7 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
         <ZeugmaDragContext.Provider value={dragValue}>
           <PortalRegistryContext.Provider value={portalRegistryValue}>
             <DndContext id="zeugma-dnd-context" {...dnd}>
-              <PaneTree
-                renderPane={renderPane}
-                resizerSize={resizerSize}
-                snapThreshold={snapThreshold}
-              />
+              {children}
             </DndContext>
             {activeId && activeType && renderDragOverlay && (
               <CursorOverlay
@@ -325,4 +325,33 @@ export const Zeugma: React.FC<ZeugmaProps> = (props) => {
       </ZeugmaStateContext.Provider>
     </ZeugmaActionsContext.Provider>
   )
+}
+
+const ZeugmaRenderer: React.FC<Omit<ZeugmaProps, 'controller'>> = ({
+  renderPane,
+  resizerSize,
+  snapThreshold,
+}) => {
+  return (
+    <PaneTree renderPane={renderPane} resizerSize={resizerSize} snapThreshold={snapThreshold} />
+  )
+}
+
+export const Zeugma: React.FC<ZeugmaProps> = (props) => {
+  const context = useContext(ZeugmaStateContext)
+  const isNested = context !== undefined
+
+  if (!isNested) {
+    const { controller, renderPane, ...restProps } = props
+    if (!controller) {
+      throw new Error('Zeugma component requires a controller when used standalone.')
+    }
+    return (
+      <ZeugmaProvider controller={controller} renderPane={renderPane} {...restProps}>
+        <ZeugmaRenderer {...restProps} />
+      </ZeugmaProvider>
+    )
+  }
+
+  return <ZeugmaRenderer {...props} />
 }

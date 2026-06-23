@@ -1,5 +1,17 @@
-export { Zeugma } from './entities/zeugma'
-export type { ZeugmaProps, ZeugmaClassNames, UseZeugmaOptions, ZeugmaController } from './shared'
+export { Zeugma, ZeugmaProvider } from './entities/zeugma'
+export type {
+  ZeugmaProps,
+  ZeugmaProviderProps,
+  ZeugmaClassNames,
+  UseZeugmaOptions,
+  ZeugmaController,
+  TreeNode,
+  SplitNode,
+  PaneNode,
+  TabDetails,
+  SplitDirection,
+  DragOverlayActiveItem,
+} from './shared'
 export { useZeugma, useZeugmaContext } from './entities/zeugma'
 export { useResizer } from './features/resize-pane'
 export { PaneTree } from './widgets/pane-tree'
@@ -11,4 +23,3 @@ export type {
   TabsProps,
   PaneControlsProps,
 } from './entities/pane'
-export * from './shared'

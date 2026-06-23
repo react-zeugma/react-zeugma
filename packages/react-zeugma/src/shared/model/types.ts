@@ -180,13 +180,64 @@ export interface DragOverlayActiveItem {
 
 export interface ZeugmaProps {
   /** The Zeugma Controller returned by useZeugma() */
-  controller: ZeugmaController
+  controller?: ZeugmaController
   /** Custom overlay renderer function used to customize the cursor-following drag preview for an active pane or tab. */
   renderDragOverlay?: (active: DragOverlayActiveItem) => ReactNode
   /** Optional CSS class name mapping overrides for custom styles of components like panes, drop previews, overlays, etc. */
   classNames?: ZeugmaClassNames
   /** Render function mapping unique pane nodes to React elements. Usually renders a <Pane> wrapper. */
-  renderPane: (paneId: string) => ReactNode
+  renderPane?: (paneId: string) => ReactNode
+  /** Size/thickness of the split handle resizer bars in pixels. */
+  resizerSize?: number
+
+  /** Minimum pixel distance that a user must drag a pane handle before dragging triggers. Defaults to 8. */
+  dragActivationDistance?: number
+  /** Threshold value in pixels for snapping layout resizing handles to adjacent edges. Defaults to 8. */
+  snapThreshold?: number
+  /** Minimum split percentage allowed when resizing split panes. Defaults to 5. */
+  minSplitPercentage?: number
+  /** Maximum split percentage allowed when resizing split panes. Defaults to 95. */
+  maxSplitPercentage?: number
+  /** Whether dragging a pane far enough outside the container triggers a drag-out/dismiss action. Defaults to false. */
+  enableDragToDismiss?: boolean
+  /** The threshold in pixels beyond the container boundaries required to activate the drag-out/dismiss action. Defaults to 60. */
+  dismissThreshold?: number
+
+  /** Callback triggered when a pane is removed from the dashboard layout tree. */
+  onRemove?: (paneId: string) => void
+  /** Callback triggered when dragging starts for a pane. */
+  onDragStart?: (activeId: string) => void
+  /** Callback triggered when dragging ends, providing details on target pane and drop action (split or move). */
+  onDragEnd?: (
+    activeId: string,
+    overId: string | null,
+    dropAction: {
+      type: 'split' | 'move'
+      direction?: SplitDirection
+      position?: 'top' | 'bottom' | 'left' | 'right' | 'center'
+    } | null,
+  ) => void
+  /** Callback triggered when the user starts dragging a resizing handle between split panes. */
+  onResizeStart?: (currentNode: SplitNode) => void
+  /** Callback triggered continuously while the user is dragging a resizing handle. Passes the new split percentage. */
+  onResize?: (currentNode: SplitNode, percentage: number) => void
+  /** Callback triggered when the user stops dragging a resizing handle. Passes the final split percentage. */
+  onResizeEnd?: (currentNode: SplitNode, percentage: number) => void
+  /** Callback triggered when the drag-out/dismiss intent changes. */
+  onDismissIntentChange?: (paneId: string | null) => void
+}
+
+export interface ZeugmaProviderProps {
+  /** The Zeugma Controller returned by useZeugma() */
+  controller: ZeugmaController
+  /** Children components that will have access to the Zeugma context */
+  children: ReactNode
+  /** Render function mapping unique pane nodes to React elements. Usually renders a <Pane> wrapper. */
+  renderPane?: (paneId: string) => ReactNode
+  /** Custom overlay renderer function used to customize the cursor-following drag preview for an active pane or tab. */
+  renderDragOverlay?: (active: DragOverlayActiveItem) => ReactNode
+  /** Optional CSS class name mapping overrides for custom styles of components like panes, drop previews, overlays, etc. */
+  classNames?: ZeugmaClassNames
   /** Size/thickness of the split handle resizer bars in pixels. */
   resizerSize?: number
 
@@ -243,7 +294,9 @@ export interface ZeugmaStateValue extends ZeugmaState, ZeugmaQueries {
   /** Normalized or overridden CSS classes for custom layout styling. */
   classNames: ZeugmaClassNames
   /** Render function mapping unique pane nodes to React elements. */
-  renderPane: (paneId: string) => ReactNode
+  renderPane?: (paneId: string) => ReactNode
+  /** Size/thickness of the split handle resizer bars in pixels. */
+  resizerSize?: number
 
   // Drag-and-drop orchestration state exposed publicly
   /** The ID of the active dragged item (pane or tab). */

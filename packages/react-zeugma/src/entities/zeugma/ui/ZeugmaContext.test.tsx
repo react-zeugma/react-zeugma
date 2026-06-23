@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { renderHook } from '@testing-library/react'
-import { useZeugma, useZeugmaContext, Zeugma, ZeugmaProvider, Pane } from '../../../index'
+import { useZeugma, useZeugmaContext, Zeugma, Pane } from '../../../index'
 import {
   useZeugmaState,
   useZeugmaActions,
@@ -105,7 +105,7 @@ describe('Zeugma Context Provider & Consumers', () => {
     expect(receivedMetadata).toEqual({ title: 'My Tab Title', customProp: 42 })
   })
 
-  it('should successfully provide context using ZeugmaProvider and nested Zeugma component', () => {
+  it('should successfully provide context using Zeugma and nested Zeugma component', () => {
     let contextValue: ZeugmaController | null = null
     const ConsumerComponent = () => {
       contextValue = useZeugmaContext()
@@ -120,10 +120,10 @@ describe('Zeugma Context Provider & Consumers', () => {
         </Pane>
       )
       return (
-        <ZeugmaProvider controller={controller} renderPane={renderPane}>
+        <Zeugma controller={controller} renderPane={renderPane}>
           <div data-testid="toolbar">Toolbar</div>
           <Zeugma />
-        </ZeugmaProvider>
+        </Zeugma>
       )
     }
 

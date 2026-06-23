@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 6.5.0
+
+### Minor Changes
+
+- Consolidated ZeugmaProvider and Zeugma into a single `<Zeugma>` component that acts as a provider by default.
+
 ## 6.4.2
 
 ### Patch Changes

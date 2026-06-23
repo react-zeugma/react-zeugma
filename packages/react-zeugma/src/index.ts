@@ -1,7 +1,6 @@
-export { Zeugma, ZeugmaProvider } from './entities/zeugma'
+export { Zeugma } from './entities/zeugma'
 export type {
   ZeugmaProps,
-  ZeugmaProviderProps,
   ZeugmaClassNames,
   UseZeugmaOptions,
   ZeugmaController,

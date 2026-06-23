@@ -1,5 +1,13 @@
 # react-zeugma
 
+## 6.4.1
+
+### Patch Changes
+
+- Refactored `ZeugmaProviderProps` to extend `ZeugmaProps` using TypeScript Omit utility instead of duplicating all configuration/callback prop definitions.
+- Refactored `<Zeugma>` component into `<ZeugmaProvider>` and `<ZeugmaRenderer>` to support wrapping descendant layout/toolbar components in context while keeping `<PaneTree>` internal and backward-compatible.
+- Encapsulated and hid internal context objects (`ZeugmaStateContext`, `ZeugmaActionsContext`) and hooks (`useZeugmaState`, `useZeugmaActions`, `useZeugmaDrag`) from the package's public API surface exports.
+
 ## 6.4.0
 
 ### Minor Changes

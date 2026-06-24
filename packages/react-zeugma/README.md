@@ -73,7 +73,6 @@ The root provider and layout renderer. It configures the drag-and-drop context, 
 
 ```tsx
 import { Zeugma } from 'react-zeugma'
-
 ;<Zeugma
   controller={controller}
   renderPane={(paneId) => <MyPane id={paneId} />}
@@ -129,7 +128,6 @@ Recursively renders the dashboard grid hierarchy (resizers, split panels, and ac
 
 ```tsx
 import { Zeugma, PaneTree } from 'react-zeugma'
-
 ;<Zeugma controller={controller}>
   <div className="workspace">
     <PaneTree renderPane={(paneId) => <MyPane id={paneId} />} />
@@ -160,7 +158,6 @@ Wraps each individual pane/widget within the dashboard, establishing drag-and-dr
 
 ```tsx
 import { Pane } from 'react-zeugma'
-
 ;<Pane id="pane-1" locked={false}>
   <Pane.DragHandle className="p-2 cursor-grab bg-zinc-800">
     <span>Pane Title</span>
@@ -191,7 +188,6 @@ A helper component to render and reorder a list of tabs inside a pane.
 
 ```tsx
 import { Tabs } from 'react-zeugma'
-
 ;<Tabs
   tabs={['tab1', 'tab2']}
   activeTabId="tab1"
@@ -448,6 +444,8 @@ const parentPane = findPaneContainingTab(currentTree, 'new-file.js')
 | `dropPreview`            | Preview indicator box for edge layout splits.                       |
 | `rootDropPreview`        | Preview indicator for full layout splits.                           |
 | `dragOverlay`            | Absolute portal wrapper following the dragging cursor.              |
+| `paneDragPreview`        | Outer wrapper container of a pane drag preview node.                |
+| `tabDragPreview`         | Outer wrapper container of a tab drag preview node.                 |
 | `resizer`                | Pointer-drag splitter handle bars.                                  |
 | `dismissPreview`         | Background indicator showing visual drag-to-dismiss zones.          |
 | `lockedPreview`          | Hover visual feedback indicator for locked pane zones.              |

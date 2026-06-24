@@ -152,6 +152,8 @@ const ZeugmaProviderInternal: React.FC<
       classNames.dropPreview,
       classNames.rootDropPreview,
       classNames.dragOverlay,
+      classNames.paneDragPreview,
+      classNames.tabDragPreview,
       classNames.resizer,
       classNames.dismissPreview,
       classNames.dashboardLocked,
@@ -327,7 +329,7 @@ const ZeugmaProviderInternal: React.FC<
                     renderPaneRef={renderPaneRef}
                     renderPane={renderPane}
                     tabHeadersRef={tabHeadersRef}
-                    classNames={classNames}
+                    classNames={stableClassNames}
                   />
                 )}
                 className={`${classNames.dragOverlay || ''} ${

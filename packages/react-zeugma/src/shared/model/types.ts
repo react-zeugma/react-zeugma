@@ -140,6 +140,10 @@ export interface ZeugmaClassNames {
   rootDropPreview?: string
   /** CSS class applied to the custom cursor-following drag preview portal wrapper. */
   dragOverlay?: string
+  /** CSS class applied to the pane drag preview wrapper. */
+  paneDragPreview?: string
+  /** CSS class applied to the tab drag preview wrapper. */
+  tabDragPreview?: string
   /** CSS class applied to the drag-to-resize split bar handles. */
   resizer?: string
   /** CSS class applied to the background dismiss zone indicator during a drag-out dismiss gesture. */

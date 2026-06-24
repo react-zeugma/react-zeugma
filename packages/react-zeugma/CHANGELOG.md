@@ -1,5 +1,14 @@
 # react-zeugma
 
+## 6.6.1
+
+### Patch Changes
+
+- **Custom Drag Preview ClassNames**:
+  - Exposed `paneDragPreview` and `tabDragPreview` keys under `classNames` on `<Zeugma>` to allow styling cursor-following drag preview overlays without default or fallback class names.
+  - Updated `stableClassNames` shallow memoization list inside `<Zeugma>` to include the new preview class names.
+  - Updated API references in `README.md` and the `react-zeugma` documentation article.
+
 ## 6.6.0
 
 ### Minor Changes

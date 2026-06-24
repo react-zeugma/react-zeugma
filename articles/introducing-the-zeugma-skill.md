@@ -34,7 +34,7 @@ description: Rules, types, component composition, and programmatic manipulation 
 ## 1. Core AI Rules & Constraints
 
 - **Immutable State Rule**: Never mutate layout `TreeNode` objects directly in-place. You must treat them as immutable. Always use the pure utility functions exported by `react-zeugma/utils` to perform mutations and return fresh tree references.
-- **Headless Styling Rule**: `react-zeugma` is 100% style-agnostic and applies no default CSS. You MUST specify class names in the `classNames` configuration on `<Zeugma>` (specifically for `resizer`, `dropPreview`, and `tabDropPreview`) or the layout features will be invisible/non-functional.
+- **Headless Styling Rule**: `react-zeugma` is 100% style-agnostic and applies no default CSS. You MUST specify class names in the `classNames` configuration on `<Zeugma>` (specifically for `resizer`, `dropPreview`, `tabDropPreview`, `paneDragPreview`, and `tabDragPreview`) or the layout features will be invisible/non-functional.
 - **renderPane Placement Rule**: If using `<Zeugma>` with `children` (Context Provider Mode), you MUST pass the `renderPane` prop directly to `<PaneTree renderPane={renderPane} />`, and `renderPane` is forbidden on `<Zeugma>`. If using `<Zeugma>` in standalone mode (without `children`), you MUST pass `renderPane` directly to `<Zeugma renderPane={renderPane} />`.
 - **DragHandle Placement**: Draggable panes require a child `<Pane.DragHandle>` component to define the interactive drag region.
 

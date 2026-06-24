@@ -47,6 +47,7 @@ export const DragOverlayPreview: React.FC<DragOverlayPreviewProps> = ({
     if (paneRender) {
       return (
         <div
+          className={classNames.paneDragPreview || ''}
           style={{
             pointerEvents: 'none',
             width: draggedSize ? `${draggedSize.width}px` : 'auto',
@@ -63,6 +64,7 @@ export const DragOverlayPreview: React.FC<DragOverlayPreviewProps> = ({
     if (paneRender) {
       return (
         <div
+          className={classNames.tabDragPreview || ''}
           style={{
             pointerEvents: 'none',
             width: draggedSize ? `${draggedSize.width}px` : 'auto',
@@ -76,15 +78,14 @@ export const DragOverlayPreview: React.FC<DragOverlayPreviewProps> = ({
     }
     const tabHeaderRender = tabHeadersRef.current[activeId]
     if (tabHeaderRender) {
+      const tabClass = classNames.tab
+        ? typeof classNames.tab === 'function'
+          ? classNames.tab(activeId)
+          : classNames.tab
+        : ''
       return (
         <div
-          className={
-            classNames.tab
-              ? typeof classNames.tab === 'function'
-                ? classNames.tab(activeId)
-                : classNames.tab
-              : ''
-          }
+          className={`${classNames.tabDragPreview || ''} ${tabClass}`.trim()}
           style={{
             display: 'inline-flex',
             position: 'relative',

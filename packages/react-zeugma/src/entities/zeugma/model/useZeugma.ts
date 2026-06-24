@@ -124,8 +124,17 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
     [wrapMutation],
   )
 
-  // Internal setter used by DnD — does NOT reset transient states
-  const _internalSetLayout = handleSetLayout
+  // Internal setter used by DnD — does NOT trigger onChange or reset transient states
+  const _internalSetLayout = useCallback((nextLayoutOrUpdater: SetStateAction<TreeNode | null>) => {
+    setLocalLayout((prev) => {
+      const next =
+        typeof nextLayoutOrUpdater === 'function'
+          ? (nextLayoutOrUpdater as (prev: TreeNode | null) => TreeNode | null)(prev)
+          : nextLayoutOrUpdater
+      layoutRef.current = next
+      return next
+    })
+  }, [])
 
   // Public setter — resets transient states when layout is replaced programmatically
   const setLayout = useCallback(

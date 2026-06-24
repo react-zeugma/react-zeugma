@@ -1,5 +1,16 @@
 # react-zeugma
 
+## 6.6.0
+
+### Minor Changes
+
+- **Drag Actual Node Previews & Style-Agnostic Refactoring**:
+  - Implemented actual widget/pane content rendering inside the tab drag overlay by treating the dragged tab as a temporary single-tab pane, automatically portalling the live widget content.
+  - Sized the tab drag overlay container dynamically to match the parent pane it originated from.
+  - Prevented the tab header registration from being prematurely cleared on drag start by checking a shared `activeIdRef` in the portal registry during tab unmount.
+  - Refactored code by extracting large components and hooks into separate modules (`DragOverlayPreview`, `FlatSplitter`, `customCollisionDetection`, `useAllTabIds`, `useZeugmaDragMeasurement`, `useRegisterRenderPane`).
+  - Removed all non-positional inline styles (shadows, opacity, background, borders, border-radius) from default drag previews to keep the core library fully style-agnostic.
+
 ## 6.5.2
 
 ### Patch Changes

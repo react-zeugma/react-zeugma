@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
-import { TabDetails } from '../../../shared'
+import { useEffect, useRef, useState, useCallback, useMemo, useContext } from 'react'
+import { TabDetails, TreeNode, PaneNode, PortalRegistryContext } from '../../../shared'
 
 /**
  * Custom hook to track the latest pointer/touch coordinate relative to the viewport during dragging.
@@ -56,6 +56,11 @@ export function useBodyCursorOverride(isOverLocked: boolean) {
 export function usePortalRegistry() {
   const [portalTargets, setPortalTargets] = useState<Record<string, HTMLDivElement | null>>({})
   const renderCallbacksRef = useRef<Record<string, (tab: TabDetails) => React.ReactNode>>({})
+  const renderPaneRef = useRef<((paneId: string) => React.ReactNode) | null>(null)
+  const tabHeadersRef = useRef<
+    Record<string, (props: { isDragging: boolean; isOver: boolean }) => React.ReactNode>
+  >({})
+  const activeIdRef = useRef<string | null>(null)
   const isMountedRef = useRef(true)
 
   useEffect(() => {
@@ -86,5 +91,150 @@ export function usePortalRegistry() {
     [],
   )
 
-  return { portalTargets, registerPortalTarget, registerRenderCallback, renderCallbacksRef }
+  const registerRenderPane = useCallback((render: (paneId: string) => React.ReactNode) => {
+    renderPaneRef.current = render
+  }, [])
+
+  const registerTabHeader = useCallback(
+    (
+      tabId: string,
+      render: (props: { isDragging: boolean; isOver: boolean }) => React.ReactNode,
+    ) => {
+      tabHeadersRef.current[tabId] = render
+    },
+    [],
+  )
+
+  return {
+    portalTargets,
+    registerPortalTarget,
+    registerRenderCallback,
+    renderCallbacksRef,
+    registerRenderPane,
+    renderPaneRef,
+    registerTabHeader,
+    tabHeadersRef,
+    activeIdRef,
+  }
+}
+
+export function collectAllTabIds(
+  layout: TreeNode | null,
+  layoutBeforeDrag: TreeNode | null,
+): string[] {
+  const ids = new Set<string>()
+  function traverse(node: TreeNode | null) {
+    if (!node) return
+    if (node.type === 'pane') {
+      node.tabs.forEach((tabId) => {
+        ids.add(tabId)
+      })
+    } else if (node.type === 'split') {
+      traverse(node.first)
+      traverse(node.second)
+    }
+  }
+  traverse(layout)
+  if (layoutBeforeDrag) {
+    traverse(layoutBeforeDrag)
+  }
+  return Array.from(ids).sort()
+}
+
+export function useAllTabIds(layout: TreeNode | null, layoutBeforeDrag: TreeNode | null): string[] {
+  return useMemo(() => collectAllTabIds(layout, layoutBeforeDrag), [layout, layoutBeforeDrag])
+}
+
+interface UseZeugmaDragMeasurementProps {
+  activeId: string | null
+  findPaneContainingTab: (tabId: string) => PaneNode | null
+  onDragStart?: (activeId: string) => void
+  onDragEnd?: (
+    activeId: string,
+    overId: string | null,
+    dropAction: {
+      type: 'split' | 'move'
+      direction?: 'row' | 'column'
+      position?: 'top' | 'bottom' | 'left' | 'right' | 'center'
+    } | null,
+  ) => void
+}
+
+export function useZeugmaDragMeasurement(props: UseZeugmaDragMeasurementProps) {
+  const { activeId, findPaneContainingTab, onDragStart, onDragEnd } = props
+
+  const [overTabId, setOverTabId] = useState<string | null>(null)
+  const [overTabPosition, setOverTabPosition] = useState<'before' | 'after' | null>(null)
+  const [draggedSize, setDraggedSize] = useState<{ width: number; height: number } | null>(null)
+
+  const handleDragStartInternal = useCallback(
+    (draggingId: string) => {
+      const parentPane = findPaneContainingTab(draggingId)
+      let el: HTMLElement | null = null
+      if (parentPane) {
+        el = document.getElementById(parentPane.id)
+      } else {
+        el = document.getElementById(draggingId)
+      }
+
+      if (el) {
+        const rect = el.getBoundingClientRect()
+        setDraggedSize({ width: rect.width, height: rect.height })
+      } else {
+        setDraggedSize(null)
+      }
+      if (onDragStart) {
+        onDragStart(draggingId)
+      }
+    },
+    [onDragStart, findPaneContainingTab],
+  )
+
+  const handleDragEndInternal = useCallback(
+    (
+      actId: string,
+      ovId: string | null,
+      dropAction: {
+        type: 'split' | 'move'
+        direction?: 'row' | 'column'
+        position?: 'top' | 'bottom' | 'left' | 'right' | 'center'
+      } | null,
+    ) => {
+      setDraggedSize(null)
+      if (onDragEnd) {
+        onDragEnd(actId, ovId, dropAction)
+      }
+    },
+    [onDragEnd],
+  )
+
+  useEffect(() => {
+    if (!activeId) {
+      setDraggedSize(null)
+    }
+  }, [activeId])
+
+  return {
+    overTabId,
+    setOverTabId,
+    overTabPosition,
+    setOverTabPosition,
+    draggedSize,
+    setDraggedSize,
+    handleDragStartInternal,
+    handleDragEndInternal,
+  }
+}
+
+export function useRegisterRenderPane(
+  renderPane: ((paneId: string) => React.ReactNode) | undefined,
+) {
+  const portalRegistry = useContext(PortalRegistryContext)
+  const registerRenderPane = portalRegistry?.registerRenderPane
+
+  useEffect(() => {
+    if (registerRenderPane && renderPane) {
+      registerRenderPane(renderPane)
+    }
+  }, [registerRenderPane, renderPane])
 }

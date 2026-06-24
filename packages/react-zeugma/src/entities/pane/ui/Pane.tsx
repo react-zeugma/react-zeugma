@@ -9,7 +9,6 @@ import {
 } from '../../../shared'
 import { DragListenersCtx } from '../model/context'
 import { PaneRenderProps } from '../model/types'
-import { findPaneById } from '../../../shared/lib/tree'
 import { DropZone } from './DropZone'
 import { DragHandle } from './DragHandle'
 import { Tabs } from './Tabs'
@@ -106,10 +105,11 @@ export const Pane: React.FC<PaneProps> & {
     fullscreenPaneId,
     onFullscreenChange,
     locked: globalLocked,
+    findPaneById,
   } = useZeugmaState()
   const { removePane, updateMetadata, selectTab, removeTab } = useZeugmaActions()
 
-  const paneNode = useMemo(() => findPaneById(layout, id) as PaneNode | null, [layout, id])
+  const paneNode = useMemo(() => findPaneById(id) as PaneNode | null, [layout, id, findPaneById])
   const paneContainerId = paneNode?.id ?? id
   const tabs = paneNode?.tabs ?? [id]
   const activeTabId = paneNode?.activeTabId ?? id
@@ -202,6 +202,7 @@ export const Pane: React.FC<PaneProps> & {
       <DragListenersCtx.Provider value={contextValue}>
         <div
           ref={setNodeRef}
+          id={id}
           className={paneClass}
           style={{ position: 'relative', width: '100%', height: '100%', ...style }}
         >

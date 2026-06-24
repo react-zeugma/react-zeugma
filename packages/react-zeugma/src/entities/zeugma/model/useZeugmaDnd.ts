@@ -1,15 +1,5 @@
-import { useState, useRef, useCallback, Dispatch, SetStateAction } from 'react'
-import {
-  useSensor,
-  useSensors,
-  DragStartEvent,
-  DragMoveEvent,
-  DragEndEvent,
-  pointerWithin,
-  closestCenter,
-  CollisionDetection,
-  DroppableContainer,
-} from '@dnd-kit/core'
+import { useState, useRef, Dispatch, SetStateAction } from 'react'
+import { useSensor, useSensors, DragStartEvent, DragMoveEvent, DragEndEvent } from '@dnd-kit/core'
 import { SplitDirection, TreeNode, PaneNode } from '../../../shared'
 import {
   removePane as removePaneHelper,
@@ -23,6 +13,7 @@ import {
 } from '../../../shared/lib/tree'
 import { SmartPointerSensor, SmartTouchSensor } from '../lib/sensors'
 import { useLatestPointer, useBodyCursorOverride } from './hooks'
+import { customCollisionDetection } from '../lib/collisions'
 
 function getPointerCoordinates(event: Event): { x: number; y: number } | null {
   if (event instanceof MouseEvent || event instanceof PointerEvent) {
@@ -40,6 +31,7 @@ function getPointerCoordinates(event: Event): { x: number; y: number } | null {
 interface UseZeugmaDndProps {
   layout: TreeNode | null
   _internalSetLayout: Dispatch<SetStateAction<TreeNode | null>>
+  setLayout: (nextLayout: SetStateAction<TreeNode | null>) => void
   layoutBeforeDrag: TreeNode | null
   setLayoutBeforeDrag: Dispatch<SetStateAction<TreeNode | null>>
   activeId: string | null
@@ -79,7 +71,8 @@ interface UseZeugmaDndProps {
 export function useZeugmaDnd(props: UseZeugmaDndProps) {
   const {
     layout,
-    _internalSetLayout: setLayout,
+    _internalSetLayout,
+    setLayout,
     layoutBeforeDrag,
     setLayoutBeforeDrag,
     activeId,
@@ -122,47 +115,6 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
     }),
   )
 
-  const customCollisionDetection = useCallback<CollisionDetection>((args) => {
-    const activeIdStr = args.active.id.toString()
-    const isTabDrag = activeIdStr.startsWith('tab-header-')
-
-    const pointerCollisions = pointerWithin(args)
-    // If we're dragging a pane, filter out any tab-drop colliders
-    const filteredCollisions = isTabDrag
-      ? pointerCollisions
-      : pointerCollisions.filter((collision) => !collision.id.toString().startsWith('tab-drop-'))
-
-    if (filteredCollisions.length > 0) {
-      const sortedCollisions = [...filteredCollisions].sort((a, b) => {
-        const aId = a.id.toString()
-        const bId = b.id.toString()
-
-        if (isTabDrag) {
-          const aIsTab = aId.startsWith('tab-drop-')
-          const bIsTab = bId.startsWith('tab-drop-')
-          if (aIsTab && !bIsTab) return -1
-          if (!aIsTab && bIsTab) return 1
-        }
-
-        const aIsRoot = aId.startsWith('drop-root-')
-        const bIsRoot = bId.startsWith('drop-root-')
-        if (aIsRoot && !bIsRoot) return -1
-        if (!aIsRoot && bIsRoot) return 1
-
-        return 0
-      })
-      return sortedCollisions
-    }
-
-    if (isTabDrag) {
-      const tabDroppables = args.droppableContainers.filter((container: DroppableContainer) =>
-        container.id.toString().startsWith('tab-drop-'),
-      )
-      return closestCenter({ ...args, droppableContainers: tabDroppables })
-    }
-    return []
-  }, [])
-
   const handleDragStart = (event: DragStartEvent) => {
     const rawId = event.active.id.toString()
     const isTabDrag = rawId.startsWith('tab-header-')
@@ -190,9 +142,10 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
     }
 
     setLayoutBeforeDrag(layoutAfterSelect)
-    if (isTabDrag && layoutAfterSelect !== layout) {
-      setLayout(layoutAfterSelect)
-    }
+    const layoutAfterRemove = isTabDrag
+      ? removeTabHelper(layoutAfterSelect, draggingId)
+      : removePaneHelper(layoutAfterSelect, draggingId)
+    _internalSetLayout(layoutAfterRemove)
 
     if (onDragStart) {
       onDragStart(draggingId)
@@ -368,7 +321,7 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
     }
 
     if (!over) {
-      setLayout(originalLayout)
+      _internalSetLayout(originalLayout)
       if (onDragEnd) {
         onDragEnd(draggingId, null, null)
       }
@@ -378,7 +331,7 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
     const overIdStr = over.id.toString()
 
     if (overIdStr.startsWith('drop-locked-')) {
-      setLayout(originalLayout)
+      _internalSetLayout(originalLayout)
       if (onDragEnd) {
         onDragEnd(draggingId, null, null)
       }
@@ -389,7 +342,7 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
     const tabDropMatch = overIdStr.match(/^tab-drop-(.+)$/)
     if (tabDropMatch) {
       if (!isTabDrag) {
-        setLayout(originalLayout)
+        _internalSetLayout(originalLayout)
         if (onDragEnd) {
           onDragEnd(draggingId, null, null)
         }
@@ -423,7 +376,7 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
           onDragEnd(draggingId, targetTabId, { type: 'move', position: 'center' })
         }
       } else {
-        setLayout(originalLayout)
+        _internalSetLayout(originalLayout)
         if (onDragEnd) {
           onDragEnd(draggingId, null, null)
         }
@@ -498,7 +451,7 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
     // Check for edge (split) drop
     const match = overIdStr.match(/^drop-(left|right|top|bottom)-(.+)$/)
     if (!match) {
-      setLayout(originalLayout)
+      _internalSetLayout(originalLayout)
       if (onDragEnd) {
         onDragEnd(draggingId, null, null)
       }
@@ -513,7 +466,7 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
     const isOnlyTab = parentPane && parentPane.tabs.length === 1
 
     if (draggingId === targetId || (isParentTarget && isOnlyTab)) {
-      setLayout(originalLayout)
+      _internalSetLayout(originalLayout)
       if (onDragEnd) {
         onDragEnd(draggingId, null, null)
       }
@@ -575,7 +528,7 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
     containerRectRef.current = null
 
     if (layoutBeforeDrag !== null) {
-      setLayout(layoutBeforeDrag)
+      _internalSetLayout(layoutBeforeDrag)
       setLayoutBeforeDrag(null)
     }
   }

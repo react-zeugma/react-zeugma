@@ -1,15 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import {
-  Zeugma,
-  Pane,
-  useZeugma,
-  TabDetails,
-  DragOverlayActiveItem,
-  usePaneContext,
-  PaneTree,
-} from 'react-zeugma'
+import { Zeugma, Pane, useZeugma, TabDetails, usePaneContext, PaneTree } from 'react-zeugma'
 import {
   DashboardToolbar,
   DashboardContainer,
@@ -150,35 +142,12 @@ function ZeugmaDemoDashboardInner() {
     [renderWidget],
   )
 
-  // ── Drag overlay ─────────────────────────────────────────────────────────
-
-  const renderDragOverlay = useCallback(
-    (active: DragOverlayActiveItem) => {
-      let id = ''
-      if (active.type === 'tab') {
-        id = active.id
-      } else if (active.type === 'pane') {
-        const pane = controller.findPaneById(active.id)
-        id = pane?.activeTabId ?? ''
-      }
-      const meta = WIDGET_META[id]
-      return (
-        <div className={`grafana-drag-overlay ${active.isDismissing ? 'dismissing' : ''}`}>
-          {meta?.icon}
-          <span className="text-[11px] font-semibold text-[#D8D9DA]">{meta?.title || id}</span>
-        </div>
-      )
-    },
-    [controller],
-  )
-
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <Zeugma
       controller={controller}
       resizerSize={4}
-      renderDragOverlay={renderDragOverlay}
       enableDragToDismiss={true}
       classNames={{
         dropPreview:

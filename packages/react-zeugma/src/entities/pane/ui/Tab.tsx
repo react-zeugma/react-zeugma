@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useMemo, useCallback } from 'react'
+import React, { createContext, useContext, useMemo, useCallback, useEffect } from 'react'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
-import { useZeugmaState, useZeugmaDrag } from '../../../shared'
+import { useZeugmaState, useZeugmaDrag, PortalRegistryContext } from '../../../shared'
 import { TabsContext } from './Tabs'
 
 export interface TabContextValue {
@@ -45,6 +45,20 @@ export interface TabProps {
 export const Tab: React.FC<TabProps> = ({ id, locked = false, children, className, style }) => {
   const { locked: globalLocked, classNames = {}, activeType } = useZeugmaState()
   const { overTabId } = useZeugmaDrag()
+  const portalRegistry = useContext(PortalRegistryContext)
+
+  useEffect(() => {
+    if (portalRegistry?.registerTabHeader) {
+      portalRegistry.registerTabHeader(id, children)
+    }
+    return () => {
+      if (portalRegistry?.registerTabHeader) {
+        if (portalRegistry.activeIdRef?.current !== id) {
+          portalRegistry.registerTabHeader(id, () => null)
+        }
+      }
+    }
+  }, [id, children, portalRegistry])
 
   const tabsContext = useContext(TabsContext)
   const isLocked = locked || globalLocked || (tabsContext?.locked ?? false)
@@ -108,6 +122,7 @@ export const Tab: React.FC<TabProps> = ({ id, locked = false, children, classNam
     <TabContext.Provider value={tabContextValue}>
       <div
         ref={handleRef}
+        id={`tab-header-${id}`}
         className={className}
         style={{
           display: 'inline-flex',

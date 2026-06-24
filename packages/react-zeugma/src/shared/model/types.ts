@@ -299,4 +299,14 @@ export interface PortalRegistryValue {
   registerPortalTarget: (tabId: string, el: HTMLDivElement | null) => void
   registerRenderCallback: (tabId: string, render: (tab: TabDetails) => ReactNode) => void
   renderCallbacksRef: RefObject<Record<string, (tab: TabDetails) => ReactNode>>
+  registerRenderPane?: (render: (paneId: string) => ReactNode) => void
+  renderPaneRef?: RefObject<((paneId: string) => ReactNode) | null>
+  registerTabHeader?: (
+    tabId: string,
+    render: (props: { isDragging: boolean; isOver: boolean }) => ReactNode,
+  ) => void
+  tabHeadersRef?: RefObject<
+    Record<string, (props: { isDragging: boolean; isOver: boolean }) => ReactNode>
+  >
+  activeIdRef?: RefObject<string | null>
 }

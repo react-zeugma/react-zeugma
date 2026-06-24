@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect, useRef } from 'react'
-import { Zeugma, Pane, useZeugma, TabDetails, DragOverlayActiveItem } from 'react-zeugma'
+import { Zeugma, Pane, useZeugma, TabDetails } from 'react-zeugma'
 
 import { SyntaxCode } from './syntax-code'
 import { FILES, defaultOuterLayout, LAYOUT_PRESETS } from './mock-files'
@@ -14,7 +14,7 @@ import { TerminalWidget } from './zeugma-demo-ide/TerminalWidget'
 import { ReadmeWidget } from './zeugma-demo-ide/ReadmeWidget'
 
 import { IDETab } from './zeugma-demo-ide/IDETab'
-import { IDEDragOverlay } from './zeugma-demo-ide/IDEDragOverlay'
+
 import {
   IDEContainer,
   WindowChrome,
@@ -135,20 +135,6 @@ export function ZeugmaDemoIDE({
     [renderWidget],
   )
 
-  const renderDragOverlay = useCallback(
-    (active: DragOverlayActiveItem) => {
-      let id = ''
-      if (active.type === 'tab') {
-        id = active.id
-      } else if (active.type === 'pane') {
-        const pane = outerZeugma.findPaneById(active.id)
-        id = pane?.activeTabId ?? ''
-      }
-      return <IDEDragOverlay id={id} isDismissing={active.isDismissing} />
-    },
-    [outerZeugma],
-  )
-
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <IDEContainer className={className} hideChrome={hideChrome}>
@@ -162,7 +148,7 @@ export function ZeugmaDemoIDE({
                 controller={outerZeugma}
                 resizerSize={4}
                 renderPane={renderPane}
-                renderDragOverlay={renderDragOverlay}
+                renderDragOverlay={undefined}
                 enableDragToDismiss={true}
                 dismissThreshold={60}
                 classNames={{

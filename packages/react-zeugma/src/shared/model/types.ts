@@ -225,6 +225,16 @@ export interface BaseZeugmaProps {
   onResizeEnd?: (currentNode: SplitNode, percentage: number) => void
   /** Callback triggered when the drag-out/dismiss intent changes. */
   onDismissIntentChange?: (paneId: string | null) => void
+
+  /** Configuration for layout persistence in localStorage. */
+  persist?: boolean | ZeugmaPersistOptions
+}
+
+export interface ZeugmaPersistOptions {
+  /** Whether to enable persistence. Defaults to true if the object is provided. */
+  enabled?: boolean
+  /** The key used for localStorage persistence. Defaults to 'zeugma-layout'. */
+  key?: string
 }
 
 export type ZeugmaProps =

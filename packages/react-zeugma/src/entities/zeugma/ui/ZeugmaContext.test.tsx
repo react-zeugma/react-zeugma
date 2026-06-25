@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, act } from '@testing-library/react'
 import { renderHook } from '@testing-library/react'
 import { useZeugma, useZeugmaContext, Zeugma, Pane, PaneTree, ZeugmaProps } from '../../../index'
 import {
@@ -7,6 +7,7 @@ import {
   useZeugmaActions,
   ZeugmaStateContext,
   ZeugmaDragContext,
+  ZeugmaActionsContext,
 } from '../../../shared'
 import type { TreeNode, ZeugmaController } from '../../../shared'
 import { Tabs } from '../../pane/ui/Tabs'
@@ -318,5 +319,249 @@ describe('Tab Drop Preview rendering', () => {
 
     const indicator = container.querySelector('.custom-drop-preview')
     expect(indicator).toBeNull()
+  })
+
+  it('should resolve active tabs from renderingLayout during dragging', () => {
+    const layoutWithDragRemoved: TreeNode = {
+      type: 'pane',
+      id: 'pane-1',
+      tabs: ['tab-2'],
+      activeTabId: 'tab-2',
+    }
+
+    const stateWithDrag = {
+      ...defaultState,
+      renderingLayout: layoutWithDragRemoved,
+      activeId: 'tab-1',
+      activeType: 'tab' as const,
+    }
+
+    const mockActions = {
+      removePane: vi.fn(),
+      addTab: vi.fn(),
+      updateMetadata: vi.fn(),
+      updatePaneLock: vi.fn(),
+      selectTab: vi.fn(),
+      mergeTab: vi.fn(),
+      removeTab: vi.fn(),
+      setFullscreenPaneId: vi.fn(),
+      setLocked: vi.fn(),
+      splitPane: vi.fn(),
+      updateSplitPercentage: vi.fn(),
+      moveTab: vi.fn(),
+    }
+
+    const dragValue = {
+      overTabId: null,
+      overTabPosition: null,
+    }
+
+    const { queryByTestId } = render(
+      <ZeugmaDragContext.Provider value={dragValue}>
+        <ZeugmaActionsContext.Provider value={mockActions}>
+          <ZeugmaStateContext.Provider value={stateWithDrag}>
+            <Pane id="pane-1">
+              <Pane.Tabs renderTab={({ tabId }) => <span data-testid={tabId}>{tabId}</span>} />
+            </Pane>
+          </ZeugmaStateContext.Provider>
+        </ZeugmaActionsContext.Provider>
+      </ZeugmaDragContext.Provider>,
+    )
+
+    // The dragged tab "tab-1" should NOT be rendered in the tab list since it was removed in renderingLayout
+    expect(queryByTestId('tab-1')).toBeNull()
+    // The remaining tab "tab-2" should be rendered
+    expect(queryByTestId('tab-2')).not.toBeNull()
+  })
+
+  it('should resolve active tabs from logical layout if the pane itself is being dragged', () => {
+    const layoutWithDragRemoved = null // pane is completely removed from renderingLayout
+
+    const originalLayout: TreeNode = {
+      type: 'pane',
+      id: 'pane-1',
+      tabs: ['tab-1', 'tab-2'],
+      activeTabId: 'tab-1',
+    }
+
+    const stateWithDrag = {
+      ...defaultState,
+      layout: originalLayout,
+      renderingLayout: layoutWithDragRemoved,
+      activeId: 'pane-1',
+      activeType: 'pane' as const,
+    }
+
+    const mockActions = {
+      removePane: vi.fn(),
+      addTab: vi.fn(),
+      updateMetadata: vi.fn(),
+      updatePaneLock: vi.fn(),
+      selectTab: vi.fn(),
+      mergeTab: vi.fn(),
+      removeTab: vi.fn(),
+      setFullscreenPaneId: vi.fn(),
+      setLocked: vi.fn(),
+      splitPane: vi.fn(),
+      updateSplitPercentage: vi.fn(),
+      moveTab: vi.fn(),
+    }
+
+    const dragValue = {
+      overTabId: null,
+      overTabPosition: null,
+    }
+
+    const { queryByTestId } = render(
+      <ZeugmaDragContext.Provider value={dragValue}>
+        <ZeugmaActionsContext.Provider value={mockActions}>
+          <ZeugmaStateContext.Provider value={stateWithDrag}>
+            <Pane id="pane-1">
+              <Pane.Tabs renderTab={({ tabId }) => <span data-testid={tabId}>{tabId}</span>} />
+            </Pane>
+          </ZeugmaStateContext.Provider>
+        </ZeugmaActionsContext.Provider>
+      </ZeugmaDragContext.Provider>,
+    )
+
+    // Since pane-1 is being dragged (id === activeId), it resolves from layout
+    // rendering tab-1 and tab-2
+    expect(queryByTestId('tab-1')).not.toBeNull()
+    expect(queryByTestId('tab-2')).not.toBeNull()
+  })
+
+  describe('Persistence Behavior', () => {
+    beforeEach(() => {
+      localStorage.clear()
+      vi.restoreAllMocks()
+    })
+
+    afterEach(() => {
+      localStorage.clear()
+    })
+
+    it('should save layout to localStorage when layout changes and persist is true', () => {
+      const initialLayout: TreeNode = {
+        type: 'pane',
+        id: 'pane-1',
+        tabs: ['tab-1'],
+        activeTabId: 'tab-1',
+      }
+
+      let controllerInstance: ZeugmaController | null = null
+
+      const TestWrapper = () => {
+        const controller = useZeugma({ initialLayout })
+        controllerInstance = controller
+        return (
+          <Zeugma
+            controller={controller}
+            persist={true}
+            renderPane={(id) => <Pane id={id}>{id}</Pane>}
+          />
+        )
+      }
+
+      render(<TestWrapper />)
+
+      // Initial save should happen after mount/load phase
+      expect(localStorage.getItem('zeugma-layout')).not.toBeNull()
+      const savedLayout = JSON.parse(localStorage.getItem('zeugma-layout')!)
+      expect(savedLayout).toEqual(initialLayout)
+
+      // Modify layout (e.g. add a tab)
+      act(() => {
+        controllerInstance!.addTab('tab-2', 'pane-1')
+      })
+
+      const updatedSavedLayout = JSON.parse(localStorage.getItem('zeugma-layout')!)
+      expect(updatedSavedLayout.tabs).toContain('tab-2')
+    })
+
+    it('should load layout from localStorage on mount if persist is true', () => {
+      const savedLayout: TreeNode = {
+        type: 'pane',
+        id: 'pane-1',
+        tabs: ['tab-1', 'tab-2'],
+        activeTabId: 'tab-2',
+      }
+      localStorage.setItem('zeugma-layout', JSON.stringify(savedLayout))
+
+      const initialLayout: TreeNode = {
+        type: 'pane',
+        id: 'pane-1',
+        tabs: ['tab-1'],
+        activeTabId: 'tab-1',
+      }
+
+      let controllerInstance: ZeugmaController | null = null
+
+      const TestWrapper = () => {
+        const controller = useZeugma({ initialLayout })
+        controllerInstance = controller
+        return (
+          <Zeugma
+            controller={controller}
+            persist={true}
+            renderPane={(id) => <Pane id={id}>{id}</Pane>}
+          />
+        )
+      }
+
+      render(<TestWrapper />)
+
+      // It should load the layout from localStorage rather than using initialLayout
+      expect(controllerInstance!.layout).toEqual(savedLayout)
+    })
+
+    it('should use custom key if provided in persist object', () => {
+      const customKey = 'my-custom-layout-key'
+      const initialLayout: TreeNode = {
+        type: 'pane',
+        id: 'pane-1',
+        tabs: ['tab-1'],
+        activeTabId: 'tab-1',
+      }
+
+      const TestWrapper = () => {
+        const controller = useZeugma({ initialLayout })
+        return (
+          <Zeugma
+            controller={controller}
+            persist={{ key: customKey }}
+            renderPane={(id) => <Pane id={id}>{id}</Pane>}
+          />
+        )
+      }
+
+      render(<TestWrapper />)
+
+      expect(localStorage.getItem(customKey)).not.toBeNull()
+      expect(localStorage.getItem('zeugma-layout')).toBeNull()
+    })
+
+    it('should not persist if enabled is false in persist object', () => {
+      const initialLayout: TreeNode = {
+        type: 'pane',
+        id: 'pane-1',
+        tabs: ['tab-1'],
+        activeTabId: 'tab-1',
+      }
+
+      const TestWrapper = () => {
+        const controller = useZeugma({ initialLayout })
+        return (
+          <Zeugma
+            controller={controller}
+            persist={{ enabled: false }}
+            renderPane={(id) => <Pane id={id}>{id}</Pane>}
+          />
+        )
+      }
+
+      render(<TestWrapper />)
+
+      expect(localStorage.getItem('zeugma-layout')).toBeNull()
+    })
   })
 })

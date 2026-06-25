@@ -117,6 +117,18 @@ import { Zeugma } from 'react-zeugma'
 | `onResize`               | Callback triggered during pane resizing.                                                                                                                    | `(currentNode: SplitNode, percentage: number) => void`                                                                                                                                           | -       |
 | `onResizeEnd`            | Callback triggered when pane resizing completes.                                                                                                            | `(currentNode: SplitNode, percentage: number) => void`                                                                                                                                           | -       |
 | `onDismissIntentChange`  | Callback triggered when drag-out dismiss intent changes.                                                                                                    | `(paneId: string \| null) => void`                                                                                                                                                               | -       |
+| `persist`                | Layout persistence configuration in localStorage. If true, uses default options.                                                                            | `boolean \| ZeugmaPersistOptions`                                                                                                                                                                | `false` |
+
+##### `ZeugmaPersistOptions`
+
+```ts
+interface ZeugmaPersistOptions {
+  /** Whether layout persistence is enabled. Defaults to true if this configuration object is provided. */
+  enabled?: boolean
+  /** The key used for localStorage persistence. Defaults to 'zeugma-layout'. */
+  key?: string
+}
+```
 
 ---
 

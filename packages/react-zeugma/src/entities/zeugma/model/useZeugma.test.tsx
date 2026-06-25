@@ -291,4 +291,25 @@ describe('useZeugma Hook', () => {
       updatedLayout,
     )
   })
+
+  it('should force sync renderingLayout on setLayout even when the layout change is structurally identical (no-op for logical layout)', () => {
+    const { result } = renderHook(() => useZeugma({ initialLayout }))
+
+    act(() => {
+      ;(result.current as unknown as ZeugmaControllerInternal)._internalSetLayout(null)
+    })
+
+    expect((result.current as unknown as ZeugmaControllerInternal).renderingLayout).toBeNull()
+
+    // Call setLayout with the original layout (structurally identical, so a no-op for logical layout)
+    act(() => {
+      result.current.setLayout(initialLayout)
+    })
+
+    // Both should now be synced back to initialLayout
+    expect(result.current.layout).toEqual(initialLayout)
+    expect((result.current as unknown as ZeugmaControllerInternal).renderingLayout).toEqual(
+      initialLayout,
+    )
+  })
 })

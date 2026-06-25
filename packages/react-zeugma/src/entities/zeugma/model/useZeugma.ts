@@ -145,6 +145,14 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
       setActiveType(null)
       setDismissIntentId(null)
       handleSetLayout(nextLayoutOrUpdater)
+      // Force sync renderingLayout to clear any transient drag removals
+      setRenderingLayout(() => {
+        const next =
+          typeof nextLayoutOrUpdater === 'function'
+            ? (nextLayoutOrUpdater as (prev: TreeNode | null) => TreeNode | null)(layoutRef.current)
+            : nextLayoutOrUpdater
+        return next
+      })
     },
     [handleSetLayout],
   )

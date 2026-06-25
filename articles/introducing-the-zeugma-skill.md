@@ -37,6 +37,7 @@ description: Rules, types, component composition, and programmatic manipulation 
 - **Headless Styling Rule**: `react-zeugma` is 100% style-agnostic and applies no default CSS. You MUST specify class names in the `classNames` configuration on `<Zeugma>` (specifically for `resizer`, `dropPreview`, `tabDropPreview`, `paneDragPreview`, and `tabDragPreview`) or the layout features will be invisible/non-functional.
 - **renderPane Placement Rule**: If using `<Zeugma>` with `children` (Context Provider Mode), you MUST pass the `renderPane` prop directly to `<PaneTree renderPane={renderPane} />`, and `renderPane` is forbidden on `<Zeugma>`. If using `<Zeugma>` in standalone mode (without `children`), you MUST pass `renderPane` directly to `<Zeugma renderPane={renderPane} />`.
 - **DragHandle Placement**: Draggable panes require a child `<Pane.DragHandle>` component to define the interactive drag region.
+- **Stable Layout During Drag Rule**: The logical `layout` object from the controller or context does not update in real-time during a drag session. It only updates once the drop action is committed. The active visual removals and split previews are managed by the library's internal rendering layout.
 
 ---
 
@@ -129,9 +130,14 @@ function Dashboard() {
 }
 ```
 
----
+## 4. API Reference and Configurations
 
-## 4. API Reference for hooks
+### `<Zeugma>` Component Props
+
+- `controller`: The layout state controller returned by `useZeugma(options)`.
+- `persist?: boolean | ZeugmaPersistOptions`: Layout persistence configuration in localStorage.
+  - `enabled?: boolean`: Whether layout persistence is enabled (defaults to true).
+  - `key?: string`: The localStorage key (defaults to `'zeugma-layout'`).
 
 ### `useZeugma(options)`
 

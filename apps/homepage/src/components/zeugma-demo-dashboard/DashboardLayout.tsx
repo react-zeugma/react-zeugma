@@ -31,10 +31,14 @@ export function DashboardToolbar({
   onRefresh,
   timeRange,
   onTimeRangeChange,
+  persist,
+  onPersistChange,
 }: {
   onRefresh?: () => void
   timeRange: string
   onTimeRangeChange?: (range: string) => void
+  persist: boolean
+  onPersistChange: (val: boolean) => void
 }) {
   const { layout, addTab, removeTab, setLayout } = useZeugmaContext()
   const activeWidgets = getActiveWidgets(layout)
@@ -145,6 +149,19 @@ export function DashboardToolbar({
               </div>
             )}
           </div>
+        </div>
+
+        {/* Persistence Toggle */}
+        <div className="flex items-center gap-1.5 ml-2 border-l border-[#252830] pl-3.5">
+          <label className="flex items-center gap-2 cursor-pointer select-none text-[10px] font-semibold uppercase tracking-wider text-[#8E8E8E] hover:text-[#d8d9da] transition-colors">
+            <input
+              type="checkbox"
+              checked={persist}
+              onChange={(e) => onPersistChange(e.target.checked)}
+              className="w-3.5 h-3.5 accent-[#5794F2] cursor-pointer"
+            />
+            <span>Persist Layout</span>
+          </label>
         </div>
       </div>
 

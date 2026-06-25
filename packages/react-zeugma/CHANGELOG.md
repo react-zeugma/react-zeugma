@@ -1,5 +1,20 @@
 # react-zeugma
 
+## 6.6.2
+
+### Patch Changes
+
+- **Layout State Decoupling**:
+  - Decoupled the logical `layout` from the internal `renderingLayout` so the context layout remains stable and unchanged until the user drops the widget.
+  - Excluded `renderingLayout` from the public `ZeugmaController` interface to keep internal transitions encapsulated.
+- **Resizing Pointer Events Prevention**:
+  - Globally disabled pointer events on all non-separator pane elements during resizing sessions to prevent iframe focus/cursor locking.
+- **Fixed Default Drag Dimensions**:
+  - Removed dynamic bounding rect calculations on drag overlay and hardcoded default widget dimensions to 420px width and 260px height.
+- **Default Drag Overlay Scaling**:
+  - Implemented automatic scaling of the cursor-following drag preview overlay to `0.8` (using a smooth `150ms` cubic-bezier transition) when there is an active drag-to-dismiss gesture, with no other style overrides.
+  - Set `transformOrigin` to `top left` to ensure correct cursor alignment.
+
 ## 6.6.1
 
 ### Patch Changes

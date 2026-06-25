@@ -109,10 +109,10 @@ export interface ZeugmaQueries {
 export interface ZeugmaController
   extends ZeugmaState, ZeugmaStateSetters, ZeugmaActions, ZeugmaQueries {}
 
-/** @internal Internal controller containing transient drag-and-drop orchestration state. */
 export interface ZeugmaControllerInternal extends ZeugmaController {
   // Transient drag-and-drop/resize state
   _internalSetLayout: Dispatch<SetStateAction<TreeNode | null>>
+  renderingLayout: TreeNode | null
   activeId: string | null
   setActiveId: Dispatch<SetStateAction<string | null>>
   activeType: 'pane' | 'tab' | null
@@ -121,8 +121,6 @@ export interface ZeugmaControllerInternal extends ZeugmaController {
   setDismissIntentId: Dispatch<SetStateAction<string | null>>
   containerRef: RefObject<HTMLElement | null>
   setContainerRef: (element: HTMLElement | null) => void
-  layoutBeforeDrag: TreeNode | null
-  setLayoutBeforeDrag: Dispatch<SetStateAction<TreeNode | null>>
 }
 
 export interface ZeugmaClassNames {
@@ -252,6 +250,8 @@ export type ZeugmaProps =
 export interface ZeugmaStateValue extends ZeugmaState, ZeugmaQueries {
   /** Callback to update the layout tree. */
   setLayout: Dispatch<SetStateAction<TreeNode | null>>
+  /** The transient layout tree used for rendering on screen. During drag-and-drop, this has the dragged item removed. */
+  renderingLayout: TreeNode | null
   /** Programmatically updates the global locked status. */
   setLocked: Dispatch<SetStateAction<boolean>>
   /** Normalized or overridden CSS classes for custom layout styling. */

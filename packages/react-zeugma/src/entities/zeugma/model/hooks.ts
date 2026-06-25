@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback, useMemo, useContext } from 'react'
-import { TabDetails, TreeNode, PaneNode, PortalRegistryContext } from '../../../shared'
+import { TabDetails, TreeNode, PortalRegistryContext } from '../../../shared'
 
 /**
  * Custom hook to track the latest pointer/touch coordinate relative to the viewport during dragging.
@@ -118,10 +118,7 @@ export function usePortalRegistry() {
   }
 }
 
-export function collectAllTabIds(
-  layout: TreeNode | null,
-  layoutBeforeDrag: TreeNode | null,
-): string[] {
+export function collectAllTabIds(layout: TreeNode | null): string[] {
   const ids = new Set<string>()
   function traverse(node: TreeNode | null) {
     if (!node) return
@@ -135,19 +132,14 @@ export function collectAllTabIds(
     }
   }
   traverse(layout)
-  if (layoutBeforeDrag) {
-    traverse(layoutBeforeDrag)
-  }
   return Array.from(ids).sort()
 }
 
-export function useAllTabIds(layout: TreeNode | null, layoutBeforeDrag: TreeNode | null): string[] {
-  return useMemo(() => collectAllTabIds(layout, layoutBeforeDrag), [layout, layoutBeforeDrag])
+export function useAllTabIds(layout: TreeNode | null): string[] {
+  return useMemo(() => collectAllTabIds(layout), [layout])
 }
 
 interface UseZeugmaDragMeasurementProps {
-  activeId: string | null
-  findPaneContainingTab: (tabId: string) => PaneNode | null
   onDragStart?: (activeId: string) => void
   onDragEnd?: (
     activeId: string,
@@ -161,33 +153,18 @@ interface UseZeugmaDragMeasurementProps {
 }
 
 export function useZeugmaDragMeasurement(props: UseZeugmaDragMeasurementProps) {
-  const { activeId, findPaneContainingTab, onDragStart, onDragEnd } = props
+  const { onDragStart, onDragEnd } = props
 
   const [overTabId, setOverTabId] = useState<string | null>(null)
   const [overTabPosition, setOverTabPosition] = useState<'before' | 'after' | null>(null)
-  const [draggedSize, setDraggedSize] = useState<{ width: number; height: number } | null>(null)
 
   const handleDragStartInternal = useCallback(
     (draggingId: string) => {
-      const parentPane = findPaneContainingTab(draggingId)
-      let el: HTMLElement | null = null
-      if (parentPane) {
-        el = document.getElementById(parentPane.id)
-      } else {
-        el = document.getElementById(draggingId)
-      }
-
-      if (el) {
-        const rect = el.getBoundingClientRect()
-        setDraggedSize({ width: rect.width, height: rect.height })
-      } else {
-        setDraggedSize(null)
-      }
       if (onDragStart) {
         onDragStart(draggingId)
       }
     },
-    [onDragStart, findPaneContainingTab],
+    [onDragStart],
   )
 
   const handleDragEndInternal = useCallback(
@@ -200,7 +177,6 @@ export function useZeugmaDragMeasurement(props: UseZeugmaDragMeasurementProps) {
         position?: 'top' | 'bottom' | 'left' | 'right' | 'center'
       } | null,
     ) => {
-      setDraggedSize(null)
       if (onDragEnd) {
         onDragEnd(actId, ovId, dropAction)
       }
@@ -208,19 +184,11 @@ export function useZeugmaDragMeasurement(props: UseZeugmaDragMeasurementProps) {
     [onDragEnd],
   )
 
-  useEffect(() => {
-    if (!activeId) {
-      setDraggedSize(null)
-    }
-  }, [activeId])
-
   return {
     overTabId,
     setOverTabId,
     overTabPosition,
     setOverTabPosition,
-    draggedSize,
-    setDraggedSize,
     handleDragStartInternal,
     handleDragEndInternal,
   }

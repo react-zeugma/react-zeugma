@@ -32,8 +32,6 @@ interface UseZeugmaDndProps {
   layout: TreeNode | null
   _internalSetLayout: Dispatch<SetStateAction<TreeNode | null>>
   setLayout: (nextLayout: SetStateAction<TreeNode | null>) => void
-  layoutBeforeDrag: TreeNode | null
-  setLayoutBeforeDrag: Dispatch<SetStateAction<TreeNode | null>>
   activeId: string | null
   setActiveId: Dispatch<SetStateAction<string | null>>
   activeType: 'pane' | 'tab' | null
@@ -73,8 +71,6 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
     layout,
     _internalSetLayout,
     setLayout,
-    layoutBeforeDrag,
-    setLayoutBeforeDrag,
     activeId,
     setActiveId,
     setActiveType,
@@ -102,6 +98,7 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
 
   const containerRectRef = useRef<DOMRect | null>(null)
   const latestPointerRef = useLatestPointer(activeId)
+  const initialLayoutForDragRef = useRef<TreeNode | null>(null)
 
   const [isOverLocked, setIsOverLocked] = useState(false)
   useBodyCursorOverride(isOverLocked)
@@ -140,8 +137,8 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
         layoutAfterSelect = selectTabHelper(layout, parentPane.id, draggingId) || layout
       }
     }
+    initialLayoutForDragRef.current = layoutAfterSelect
 
-    setLayoutBeforeDrag(layoutAfterSelect)
     const layoutAfterRemove = isTabDrag
       ? removeTabHelper(layoutAfterSelect, draggingId)
       : removePaneHelper(layoutAfterSelect, draggingId)
@@ -300,8 +297,8 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
     containerRectRef.current = null
 
     // Capture the original layout before drag
-    const originalLayout = layoutBeforeDrag || layout
-    setLayoutBeforeDrag(null)
+    const originalLayout = initialLayoutForDragRef.current || layout
+    initialLayoutForDragRef.current = null
 
     if (wasDismissIntent) {
       if (onRemove) {
@@ -527,9 +524,11 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
     onDismissIntentChange?.(null)
     containerRectRef.current = null
 
-    if (layoutBeforeDrag !== null) {
-      _internalSetLayout(layoutBeforeDrag)
-      setLayoutBeforeDrag(null)
+    const originalLayout = initialLayoutForDragRef.current || layout
+    initialLayoutForDragRef.current = null
+    _internalSetLayout(originalLayout)
+    if (originalLayout !== layout) {
+      setLayout(originalLayout)
     }
   }
 

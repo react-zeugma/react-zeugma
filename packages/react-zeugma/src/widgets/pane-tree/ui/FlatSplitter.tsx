@@ -16,7 +16,7 @@ export const FlatSplitter: React.FC<FlatSplitterProps> = ({
   snapThreshold,
   containerRef,
 }) => {
-  const { layout, setLayout, classNames, locked } = useZeugmaState()
+  const { renderingLayout, setLayout, classNames, locked } = useZeugmaState()
   const [isResizing, setIsResizing] = useState(false)
 
   const {
@@ -41,7 +41,7 @@ export const FlatSplitter: React.FC<FlatSplitterProps> = ({
     splitPercentage: currentNode.splitPercentage,
     resizerSize,
     snapThreshold,
-    layout,
+    layout: renderingLayout,
     currentNode,
     onLayoutChange: setLayout,
     onResizeStart: () => setIsResizing(true),

@@ -64,7 +64,6 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
       if (controllerInstance) {
         controllerInstance.setActiveId('tab-1')
         controllerInstance.setActiveType('tab')
-        controllerInstance.setLayoutBeforeDrag(initialLayout)
 
         const newLayout: TreeNode = {
           type: 'pane',
@@ -85,7 +84,6 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
       if (controllerInstance) {
         controllerInstance.setActiveId(null)
         controllerInstance.setActiveType(null)
-        controllerInstance.setLayoutBeforeDrag(null)
 
         const finalLayout: TreeNode = {
           type: 'pane',
@@ -158,7 +156,6 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
       if (controllerInstance) {
         controllerInstance.setActiveId('tab-1')
         controllerInstance.setActiveType('tab')
-        controllerInstance.setLayoutBeforeDrag(initialLayout)
 
         const newLayout: TreeNode = {
           type: 'pane',
@@ -178,7 +175,6 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
       if (controllerInstance) {
         controllerInstance.setActiveId(null)
         controllerInstance.setActiveType(null)
-        controllerInstance.setLayoutBeforeDrag(null)
 
         const finalLayout: TreeNode = {
           type: 'split',

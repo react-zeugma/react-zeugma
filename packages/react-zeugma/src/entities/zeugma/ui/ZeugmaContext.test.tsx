@@ -170,6 +170,7 @@ describe('Tab Drop Preview rendering', () => {
 
   const defaultState = {
     layout: null,
+    renderingLayout: null,
     setLayout: () => {},
     activeId: 'tab-1',
     activeType: 'tab' as const,

@@ -155,6 +155,8 @@ function ZeugmaDemoDashboardInner() {
         rootDropPreview: 'grafana-root-drop-preview',
         resizer: 'grafana-resizer',
         tabDropPreview: 'grafana-tab-drop-preview',
+        paneDragPreview: 'opacity-90 shadow-2xl',
+        tabDragPreview: 'opacity-90 shadow-2xl',
       }}
     >
       <DashboardContainer>

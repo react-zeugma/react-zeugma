@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useZeugma } from './useZeugma'
-import type { TreeNode, PaneNode, SplitNode } from '../../../shared'
+import type { TreeNode, PaneNode, SplitNode, ZeugmaControllerInternal } from '../../../shared'
 
 describe('useZeugma Hook', () => {
   const initialLayout: TreeNode = {
@@ -255,5 +255,40 @@ describe('useZeugma Hook', () => {
     })
 
     expect(onFullscreenChangeMock).toHaveBeenCalledWith('pane-1')
+  })
+
+  it('should maintain renderingLayout separately from logical layout when using _internalSetLayout', () => {
+    const { result } = renderHook(() => useZeugma({ initialLayout }))
+
+    expect(result.current.layout).toEqual(initialLayout)
+    expect((result.current as unknown as ZeugmaControllerInternal).renderingLayout).toEqual(
+      initialLayout,
+    )
+
+    act(() => {
+      ;(result.current as unknown as ZeugmaControllerInternal)._internalSetLayout(null)
+    })
+
+    // logical layout should stay unchanged
+    expect(result.current.layout).toEqual(initialLayout)
+    // renderingLayout should be updated to null
+    expect((result.current as unknown as ZeugmaControllerInternal).renderingLayout).toBeNull()
+
+    // programmatically setting layout via setLayout should sync both layout and renderingLayout
+    const updatedLayout: TreeNode = {
+      type: 'pane',
+      id: 'pane-2',
+      tabs: ['tab-2'],
+      activeTabId: 'tab-2',
+    }
+
+    act(() => {
+      result.current.setLayout(updatedLayout)
+    })
+
+    expect(result.current.layout).toEqual(updatedLayout)
+    expect((result.current as unknown as ZeugmaControllerInternal).renderingLayout).toEqual(
+      updatedLayout,
+    )
   })
 })

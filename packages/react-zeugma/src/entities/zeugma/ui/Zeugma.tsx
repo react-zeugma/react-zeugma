@@ -51,6 +51,7 @@ const ZeugmaProviderInternal: React.FC<
     layout,
     setLayout,
     _internalSetLayout,
+    renderingLayout,
     fullscreenPaneId,
     setFullscreenPaneId,
     locked,
@@ -68,8 +69,6 @@ const ZeugmaProviderInternal: React.FC<
     setDismissIntentId,
     containerRef,
     setContainerRef,
-    layoutBeforeDrag,
-    setLayoutBeforeDrag,
     removePane,
     addTab,
     updateMetadata,
@@ -99,12 +98,9 @@ const ZeugmaProviderInternal: React.FC<
     setOverTabId,
     overTabPosition,
     setOverTabPosition,
-    draggedSize,
     handleDragStartInternal,
     handleDragEndInternal,
   } = useZeugmaDragMeasurement({
-    activeId,
-    findPaneContainingTab,
     onDragStart,
     onDragEnd,
   })
@@ -113,8 +109,6 @@ const ZeugmaProviderInternal: React.FC<
     layout,
     _internalSetLayout,
     setLayout,
-    layoutBeforeDrag,
-    setLayoutBeforeDrag,
     activeId,
     setActiveId,
     activeType,
@@ -184,6 +178,7 @@ const ZeugmaProviderInternal: React.FC<
   const stateValue = useMemo(
     () => ({
       layout,
+      renderingLayout,
       setLayout,
       activeId,
       activeType,
@@ -211,6 +206,7 @@ const ZeugmaProviderInternal: React.FC<
     }),
     [
       layout,
+      renderingLayout,
       activeId,
       activeType,
       dismissIntentId,
@@ -279,7 +275,7 @@ const ZeugmaProviderInternal: React.FC<
   )
 
   // Collect all tab IDs and widget IDs in the current layout tree
-  const allTabIds = useAllTabIds(layout, layoutBeforeDrag)
+  const allTabIds = useAllTabIds(layout)
 
   const portalRegistryValue = useMemo(
     () => ({
@@ -319,19 +315,29 @@ const ZeugmaProviderInternal: React.FC<
             {activeId && activeType && (
               <CursorOverlay
                 activeId={activeId}
-                render={(id) => (
-                  <DragOverlayPreview
-                    activeId={id}
-                    activeType={activeType}
-                    dismissIntentId={dismissIntentId}
-                    draggedSize={draggedSize}
-                    renderDragOverlay={renderDragOverlay}
-                    renderPaneRef={renderPaneRef}
-                    renderPane={renderPane}
-                    tabHeadersRef={tabHeadersRef}
-                    classNames={stableClassNames}
-                  />
-                )}
+                render={(id) => {
+                  const isDismissing = id === dismissIntentId
+                  return (
+                    <div
+                      style={{
+                        transition: 'transform 150ms cubic-bezier(0.2, 0, 0, 1)',
+                        transform: isDismissing ? 'scale(0.8)' : 'scale(1)',
+                        transformOrigin: 'top left',
+                      }}
+                    >
+                      <DragOverlayPreview
+                        activeId={id}
+                        activeType={activeType}
+                        dismissIntentId={dismissIntentId}
+                        renderDragOverlay={renderDragOverlay}
+                        renderPaneRef={renderPaneRef}
+                        renderPane={renderPane}
+                        tabHeadersRef={tabHeadersRef}
+                        classNames={stableClassNames}
+                      />
+                    </div>
+                  )
+                }}
                 className={`${classNames.dragOverlay || ''} ${
                   activeId === dismissIntentId ? classNames.dismissPreview || '' : ''
                 }`.trim()}

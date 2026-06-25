@@ -39,6 +39,9 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
   const [layout, setLocalLayout] = useState<TreeNode | null>(() => {
     return controlledLayout !== undefined ? controlledLayout : (initialLayout ?? null)
   })
+  const [renderingLayout, setRenderingLayout] = useState<TreeNode | null>(() => {
+    return controlledLayout !== undefined ? controlledLayout : (initialLayout ?? null)
+  })
   const [prevControlledLayoutJson, setPrevControlledLayoutJson] = useState<string>(() => {
     return safeJsonStringify(controlledLayout !== undefined ? controlledLayout : null)
   })
@@ -46,7 +49,6 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
     controlledFullscreenPaneId || null,
   )
   const [locked, setLocked] = useState(initialLocked)
-  const [layoutBeforeDrag, setLayoutBeforeDrag] = useState<TreeNode | null>(null)
 
   const [activeId, setActiveId] = useState<string | null>(null)
   const [activeType, setActiveType] = useState<'pane' | 'tab' | null>(null)
@@ -61,9 +63,6 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
   // Keep layout and callback refs in sync to make actions and queries completely stable
   const layoutRef = useRef<TreeNode | null>(layout)
   layoutRef.current = layout
-
-  const layoutBeforeDragRef = useRef<TreeNode | null>(layoutBeforeDrag)
-  layoutBeforeDragRef.current = layoutBeforeDrag
 
   const onChangeRef = useRef(onChange)
   onChangeRef.current = onChange
@@ -93,6 +92,7 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
     if (currentControlledLayoutJson !== prevControlledLayoutJson) {
       setPrevControlledLayoutJson(currentControlledLayoutJson)
       setLocalLayout(controlledLayout)
+      setRenderingLayout(controlledLayout)
     }
   }
 
@@ -108,6 +108,7 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
         if (safeJsonStringify(prev) !== safeJsonStringify(next)) {
           layoutRef.current = next
           setLocalLayout(next)
+          setRenderingLayout(next)
           onChangeRef.current?.(next)
         }
       }
@@ -126,12 +127,11 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
 
   // Internal setter used by DnD — does NOT trigger onChange or reset transient states
   const _internalSetLayout = useCallback((nextLayoutOrUpdater: SetStateAction<TreeNode | null>) => {
-    setLocalLayout((prev) => {
+    setRenderingLayout((prev) => {
       const next =
         typeof nextLayoutOrUpdater === 'function'
           ? (nextLayoutOrUpdater as (prev: TreeNode | null) => TreeNode | null)(prev)
           : nextLayoutOrUpdater
-      layoutRef.current = next
       return next
     })
   }, [])
@@ -141,7 +141,6 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
     (nextLayoutOrUpdater: SetStateAction<TreeNode | null>) => {
       setLocalFullscreenPaneId(null)
       onFullscreenChangeRef.current?.(null)
-      setLayoutBeforeDrag(null)
       setActiveId(null)
       setActiveType(null)
       setDismissIntentId(null)
@@ -253,51 +252,30 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
   )
 
   const handleFindPaneById = useCallback((paneId: string) => {
-    let pane = findPaneById(layoutRef.current, paneId)
-    if (!pane && layoutBeforeDragRef.current) {
-      pane = findPaneById(layoutBeforeDragRef.current, paneId)
-    }
-    return pane
+    return findPaneById(layoutRef.current, paneId)
   }, [])
 
   const handleFindPaneContainingTab = useCallback((tabId: string) => {
-    let pane = findPaneContainingTab(layoutRef.current, tabId)
-    if (!pane && layoutBeforeDragRef.current) {
-      pane = findPaneContainingTab(layoutBeforeDragRef.current, tabId)
-    }
-    return pane
+    return findPaneContainingTab(layoutRef.current, tabId)
   }, [])
 
   const handleFindTabById = useCallback((tabId: string) => {
-    let tab = findTabById(layoutRef.current, tabId)
-    if (!tab && layoutBeforeDragRef.current) {
-      tab = findTabById(layoutBeforeDragRef.current, tabId)
-    }
-    return tab
+    return findTabById(layoutRef.current, tabId)
   }, [])
 
   const handleGetTabMetadata = useCallback((tabId: string) => {
-    let metadata = getTabMetadata(layoutRef.current, tabId)
-    if (!metadata && layoutBeforeDragRef.current) {
-      metadata = getTabMetadata(layoutBeforeDragRef.current, tabId)
-    }
-    return metadata
+    return getTabMetadata(layoutRef.current, tabId)
   }, [])
 
   const handleGetActiveTabMetadata = useCallback((paneId: string) => {
-    let metadata = getActiveTabMetadata(layoutRef.current, paneId)
-    if (!metadata && layoutBeforeDragRef.current) {
-      metadata = getActiveTabMetadata(layoutBeforeDragRef.current, paneId)
-    }
-    return metadata
+    return getActiveTabMetadata(layoutRef.current, paneId)
   }, [])
 
   const controller: ZeugmaControllerInternal = {
     layout,
     setLayout,
     _internalSetLayout,
-    layoutBeforeDrag,
-    setLayoutBeforeDrag,
+    renderingLayout,
     fullscreenPaneId,
     setFullscreenPaneId,
     locked,

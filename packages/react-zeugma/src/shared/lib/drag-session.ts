@@ -35,6 +35,9 @@ export function createDragSession({ cursor, resizerEl, onMove, onEnd }: DragSess
       cursor: ${cursor} !important;
       user-select: none !important;
     }
+    .zeugma-resizing *:not([role="separator"]) {
+      pointer-events: none !important;
+    }
   `
   document.head.appendChild(styleEl)
 

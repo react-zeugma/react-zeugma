@@ -25,7 +25,7 @@ export const PaneTree: React.FC<PaneTreeProps> = ({
 }) => {
   useRegisterRenderPane(renderPane)
   const {
-    layout,
+    renderingLayout,
     activeId,
     dismissIntentId,
     setContainerRef,
@@ -41,7 +41,7 @@ export const PaneTree: React.FC<PaneTreeProps> = ({
 
   const resizerSize = propResizerSize !== undefined ? propResizerSize : (contextResizerSize ?? 4)
 
-  const currentNode = tree !== undefined ? tree : layout
+  const currentNode = tree !== undefined ? tree : renderingLayout
 
   const containerRef = useRef<HTMLDivElement>(null)
 

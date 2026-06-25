@@ -5,7 +5,6 @@ interface DragOverlayPreviewProps {
   activeId: string
   activeType: 'pane' | 'tab'
   dismissIntentId: string | null
-  draggedSize: { width: number; height: number } | null
   renderDragOverlay?: (active: {
     type: 'tab' | 'pane'
     id: string
@@ -23,7 +22,6 @@ export const DragOverlayPreview: React.FC<DragOverlayPreviewProps> = ({
   activeId,
   activeType,
   dismissIntentId,
-  draggedSize,
   renderDragOverlay,
   renderPaneRef,
   renderPane,
@@ -50,8 +48,8 @@ export const DragOverlayPreview: React.FC<DragOverlayPreviewProps> = ({
           className={classNames.paneDragPreview || ''}
           style={{
             pointerEvents: 'none',
-            width: draggedSize ? `${draggedSize.width}px` : 'auto',
-            height: draggedSize ? `${draggedSize.height}px` : 'auto',
+            width: '420px',
+            height: '260px',
             overflow: 'hidden',
           }}
         >
@@ -67,8 +65,8 @@ export const DragOverlayPreview: React.FC<DragOverlayPreviewProps> = ({
           className={classNames.tabDragPreview || ''}
           style={{
             pointerEvents: 'none',
-            width: draggedSize ? `${draggedSize.width}px` : 'auto',
-            height: draggedSize ? `${draggedSize.height}px` : 'auto',
+            width: '420px',
+            height: '260px',
             overflow: 'hidden',
           }}
         >
@@ -91,8 +89,8 @@ export const DragOverlayPreview: React.FC<DragOverlayPreviewProps> = ({
             position: 'relative',
             pointerEvents: 'none',
             overflow: 'hidden',
-            width: draggedSize ? `${draggedSize.width}px` : 'auto',
-            height: draggedSize ? `${draggedSize.height}px` : 'auto',
+            width: '420px',
+            height: '260px',
           }}
         >
           {tabHeaderRender({ isDragging: true, isOver: false })}
@@ -106,8 +104,6 @@ export const DragOverlayPreview: React.FC<DragOverlayPreviewProps> = ({
       style={{
         pointerEvents: 'none',
         overflow: 'hidden',
-        minWidth: '200px',
-        minHeight: '120px',
         width: '100%',
         height: '100%',
       }}

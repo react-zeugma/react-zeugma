@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { Zeugma, Pane, useZeugma, TabDetails, usePaneContext, PaneTree } from 'react-zeugma'
 import {
   DashboardToolbar,
@@ -80,10 +80,30 @@ function DashboardPaneHeader() {
   )
 }
 
+function useDashboardPersist(key = 'zeugma-demo-persist-enabled') {
+  const [persist, setPersist] = useState(false)
+
+  // Hydrate checkbox state from localStorage on mount (prevents SSR mismatch)
+  useEffect(() => {
+    const saved = localStorage.getItem(key)
+    if (saved === 'true') {
+      setPersist(true)
+    }
+  }, [key])
+
+  // Persist checkbox state in localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem(key, String(persist))
+  }, [persist, key])
+
+  return [persist, setPersist] as const
+}
+
 // ── Inner Dashboard Component ────────────────────────────────────────────────
 
 function ZeugmaDemoDashboardInner() {
   const [timeRange, setTimeRange] = useState('15m')
+  const [persist, setPersist] = useDashboardPersist()
   const controller = useZeugma({ initialLayout: defaultDashboardLayout })
 
   // ── Tab / Widget rendering ───────────────────────────────────────────────
@@ -149,6 +169,7 @@ function ZeugmaDemoDashboardInner() {
       controller={controller}
       resizerSize={4}
       enableDragToDismiss={true}
+      persist={persist}
       classNames={{
         dropPreview:
           'bg-[#5794F2]/10 border border-[#5794F2]/30 transition-all duration-200 shadow-lg',
@@ -160,7 +181,12 @@ function ZeugmaDemoDashboardInner() {
       }}
     >
       <DashboardContainer>
-        <DashboardToolbar timeRange={timeRange} onTimeRangeChange={setTimeRange} />
+        <DashboardToolbar
+          timeRange={timeRange}
+          onTimeRangeChange={setTimeRange}
+          persist={persist}
+          onPersistChange={setPersist}
+        />
 
         <div className="grafana-workspace">{<PaneTree renderPane={renderPane} />}</div>
       </DashboardContainer>

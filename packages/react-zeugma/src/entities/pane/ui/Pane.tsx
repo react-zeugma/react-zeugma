@@ -4,9 +4,9 @@ import {
   useZeugmaState,
   useZeugmaActions,
   PortalRegistryContext,
-  PaneNode,
   TabDetails,
 } from '../../../shared'
+import { findPaneById } from '../../../shared/lib/tree'
 import { DragListenersCtx } from '../model/context'
 import { PaneRenderProps } from '../model/types'
 import { DropZone } from './DropZone'
@@ -100,16 +100,19 @@ export const Pane: React.FC<PaneProps> & {
 } = ({ id, children, style, locked: propLocked = false }) => {
   const {
     layout,
+    renderingLayout,
     activeId,
     classNames: globalClassNames,
     fullscreenPaneId,
     onFullscreenChange,
     locked: globalLocked,
-    findPaneById,
   } = useZeugmaState()
   const { removePane, updateMetadata, selectTab, removeTab } = useZeugmaActions()
 
-  const paneNode = useMemo(() => findPaneById(id) as PaneNode | null, [layout, id, findPaneById])
+  const paneNode = useMemo(() => {
+    const targetTree = id === activeId ? layout : renderingLayout
+    return findPaneById(targetTree, id)
+  }, [layout, renderingLayout, id, activeId])
   const paneContainerId = paneNode?.id ?? id
   const tabs = paneNode?.tabs ?? [id]
   const activeTabId = paneNode?.activeTabId ?? id

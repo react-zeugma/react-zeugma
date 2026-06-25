@@ -11,7 +11,13 @@ import {
   BaseZeugmaProps,
   ZeugmaControllerInternal,
 } from '../../../shared'
-import { usePortalRegistry, useZeugmaDnd, useAllTabIds, useZeugmaDragMeasurement } from '../model'
+import {
+  usePortalRegistry,
+  useZeugmaDnd,
+  useAllTabIds,
+  useZeugmaDragMeasurement,
+  useZeugmaPersistence,
+} from '../model'
 import { CursorOverlay } from './CursorOverlay'
 import { PortalHostItem } from './PortalHostItem'
 import { DragOverlayPreview } from './DragOverlayPreview'
@@ -44,6 +50,9 @@ const ZeugmaProviderInternal: React.FC<
     onResize,
     onResizeEnd,
     onDismissIntentChange,
+
+    // Persistence
+    persist = false,
   } = props
 
   const internalController = controller as ZeugmaControllerInternal
@@ -80,6 +89,9 @@ const ZeugmaProviderInternal: React.FC<
     updateSplitPercentage,
     moveTab,
   } = internalController
+
+  // Synchronize layout persistence
+  useZeugmaPersistence({ persist, layout, setLayout })
 
   const {
     portalTargets,

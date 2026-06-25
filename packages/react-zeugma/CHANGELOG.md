@@ -1,5 +1,20 @@
 # react-zeugma
 
+## 6.7.0
+
+### Minor Changes
+
+- **Layout Persistence Support**:
+  - Added support for layout persistence using `localStorage`.
+  - Introduced the `persist` prop on `<Zeugma>` component, allowing configuring persistence as a boolean (to enable layout saving/restoring with the default key `'zeugma-layout'`) or as a `ZeugmaPersistOptions` object (supporting custom `key` and `enabled` flag).
+  - Isolated the persistence logic into a dedicated `useZeugmaPersistence` custom hook.
+- **Fixed Multi-Tab Drag Visibility**:
+  - Fixed a bug where dragging a tab in a multi-tabbed pane did not visually remove it from the pane's tab list during the drag session. Pane components now resolve their tabs and state using the active `renderingLayout` instead of the logical `layout`.
+- **Fixed Tab Drop Back No-Op State Desync**:
+  - Fixed a bug where dropping a tab back to its original layout position did not restore it visually on screen (desync between logical layout and rendering layout due to identical/no-op layout state comparisons). `setLayout` now always force-synchronizes `renderingLayout` to the committed layout structure.
+- **Fixed Drag Preview Content Rendering**:
+  - Fixed a bug where grabbing a tab or pane left the drag preview overlay empty (since the item is removed from the active `renderingLayout`). Pane components now resolve their children and tabs using the original logical `layout` structure when they match the active dragging ID.
+
 ## 6.6.2
 
 ### Patch Changes

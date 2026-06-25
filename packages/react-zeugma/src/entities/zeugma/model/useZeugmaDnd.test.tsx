@@ -371,7 +371,7 @@ describe('useZeugmaDnd Hook', () => {
       }),
     )
 
-    // Simulate drag start for pane-1 to set layoutBeforeDrag
+    // Simulate drag start for pane-1 to set active drag state
     const dragStartEvent = {
       active: { id: 'pane-1' },
       activatorEvent: new MouseEvent('mousedown'),

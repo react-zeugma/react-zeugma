@@ -26,13 +26,13 @@ describe('useZeugmaDnd Hook', () => {
       layout: {
         type: 'pane',
         id: 'pane-1',
-        tabs: ['tab-1', 'tab-2'],
+        tabIds: ['tab-1', 'tab-2'],
         activeTabId: 'tab-1',
       },
       renderingLayout: {
         type: 'pane',
         id: 'pane-1',
-        tabs: ['tab-1', 'tab-2'],
+        tabIds: ['tab-1', 'tab-2'],
         activeTabId: 'tab-1',
       },
       setLayout: setLayoutMock,
@@ -181,7 +181,7 @@ describe('useZeugmaDnd Hook', () => {
     expect(controller.setLayout).toHaveBeenCalledWith({
       type: 'pane',
       id: 'pane-1',
-      tabs: ['tab-1', 'tab-2'],
+      tabIds: ['tab-1', 'tab-2'],
       activeTabId: 'tab-1',
       tabsMetadata: undefined,
     })
@@ -216,7 +216,7 @@ describe('useZeugmaDnd Hook', () => {
     expect(controller._internalSetLayout).toHaveBeenCalledWith({
       type: 'pane',
       id: 'pane-1',
-      tabs: ['tab-2'],
+      tabIds: ['tab-2'],
       activeTabId: 'tab-2',
       tabsMetadata: undefined,
     })
@@ -285,7 +285,7 @@ describe('useZeugmaDnd Hook', () => {
     expect(controller._internalSetLayout).toHaveBeenCalledWith({
       type: 'pane',
       id: 'pane-1',
-      tabs: ['tab-1'],
+      tabIds: ['tab-1'],
       activeTabId: 'tab-1',
       tabsMetadata: undefined,
     })
@@ -301,7 +301,7 @@ describe('useZeugmaDnd Hook', () => {
     expect(controller.setLayout).toHaveBeenCalledWith({
       type: 'pane',
       id: 'pane-1',
-      tabs: ['tab-1', 'tab-2'],
+      tabIds: ['tab-1', 'tab-2'],
       activeTabId: 'tab-2',
     })
 
@@ -309,7 +309,7 @@ describe('useZeugmaDnd Hook', () => {
     expect(controller._internalSetLayout).toHaveBeenCalledWith({
       type: 'pane',
       id: 'pane-1',
-      tabs: ['tab-1', 'tab-2'],
+      tabIds: ['tab-1', 'tab-2'],
       activeTabId: 'tab-2',
     })
   })
@@ -393,7 +393,7 @@ describe('useZeugmaDnd Hook', () => {
     expect(controller.setLayout).toHaveBeenCalledWith({
       type: 'pane',
       id: 'pane-1',
-      tabs: ['tab-1', 'tab-2'],
+      tabIds: ['tab-1', 'tab-2'],
       activeTabId: 'tab-1',
     })
     expect(onDragEndMock).toHaveBeenCalledWith('pane-1', 'root', {
@@ -410,13 +410,13 @@ describe('useZeugmaDnd Hook', () => {
       first: {
         type: 'pane',
         id: 'pane-1',
-        tabs: ['tab-1'],
+        tabIds: ['tab-1'],
         activeTabId: 'tab-1',
       },
       second: {
         type: 'pane',
         id: 'pane-2',
-        tabs: ['tab-2'],
+        tabIds: ['tab-2'],
         activeTabId: 'tab-2',
       },
       splitPercentage: 50,
@@ -458,13 +458,13 @@ describe('useZeugmaDnd Hook', () => {
       first: {
         type: 'pane',
         id: 'pane-2',
-        tabs: ['tab-2'],
+        tabIds: ['tab-2'],
         activeTabId: 'tab-2',
       },
       second: {
         type: 'pane',
         id: 'pane-1',
-        tabs: ['tab-1'],
+        tabIds: ['tab-1'],
         activeTabId: 'tab-1',
       },
       splitPercentage: 100 / 3,

@@ -2,7 +2,7 @@ import { TreeNode } from 'react-zeugma'
 
 export function isTabOpenInTree(node: TreeNode | null, tabId: string): boolean {
   if (!node) return false
-  if (node.type === 'pane') return node.tabs.includes(tabId)
+  if (node.type === 'pane') return node.tabIds.includes(tabId)
   return isTabOpenInTree(node.first, tabId) || isTabOpenInTree(node.second, tabId)
 }
 

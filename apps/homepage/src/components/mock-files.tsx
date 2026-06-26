@@ -22,13 +22,13 @@ const initialLayout: TreeNode = {
   type: 'split',
   direction: 'row',
   splitPercentage: 25,
-  first: { type: 'pane', id: 'pane-explorer', tabs: ['explorer'], activeTabId: 'explorer' },
+  first: { type: 'pane', id: 'pane-explorer', tabIds: ['explorer'], activeTabId: 'explorer' },
   second: {
     type: 'split',
     direction: 'column',
     splitPercentage: 70,
-    first: { type: 'pane', id: 'pane-editor', tabs: ['README.md', 'App.tsx'], activeTabId: 'App.tsx' },
-    second: { type: 'pane', id: 'pane-terminal', tabs: ['terminal'], activeTabId: 'terminal' },
+    first: { type: 'pane', id: 'pane-editor', tabIds: ['README.md', 'App.tsx'], activeTabId: 'App.tsx' },
+    second: { type: 'pane', id: 'pane-terminal', tabIds: ['terminal'], activeTabId: 'terminal' },
   },
 }
 
@@ -125,7 +125,7 @@ export const defaultOuterLayout: TreeNode = {
     first: {
       type: 'pane',
       id: 'pane-explorer',
-      tabs: ['explorer'],
+      tabIds: ['explorer'],
       activeTabId: 'explorer',
     },
     second: {
@@ -135,13 +135,13 @@ export const defaultOuterLayout: TreeNode = {
       first: {
         type: 'pane',
         id: 'pane-editor',
-        tabs: ['README.md', 'App.tsx'],
+        tabIds: ['README.md', 'App.tsx'],
         activeTabId: 'App.tsx',
       },
       second: {
         type: 'pane',
         id: 'pane-terminal',
-        tabs: ['terminal'],
+        tabIds: ['terminal'],
         activeTabId: 'terminal',
       },
     },
@@ -149,7 +149,7 @@ export const defaultOuterLayout: TreeNode = {
   second: {
     type: 'pane',
     id: 'pane-inspector',
-    tabs: ['inspector'],
+    tabIds: ['inspector'],
     activeTabId: 'inspector',
   },
 }
@@ -178,13 +178,13 @@ export const LAYOUT_PRESETS: LayoutPreset[] = [
       first: {
         type: 'pane',
         id: 'pane-editor',
-        tabs: ['README.md', 'App.tsx'],
+        tabIds: ['README.md', 'App.tsx'],
         activeTabId: 'App.tsx',
       },
       second: {
         type: 'pane',
         id: 'pane-terminal',
-        tabs: ['terminal'],
+        tabIds: ['terminal'],
         activeTabId: 'terminal',
       },
     },
@@ -199,7 +199,7 @@ export const LAYOUT_PRESETS: LayoutPreset[] = [
       first: {
         type: 'pane',
         id: 'pane-editor-left',
-        tabs: ['App.tsx', 'README.md'],
+        tabIds: ['App.tsx', 'README.md'],
         activeTabId: 'App.tsx',
       },
       second: {
@@ -209,13 +209,13 @@ export const LAYOUT_PRESETS: LayoutPreset[] = [
         first: {
           type: 'pane',
           id: 'pane-editor-right',
-          tabs: ['App.tsx'],
+          tabIds: ['App.tsx'],
           activeTabId: 'App.tsx',
         },
         second: {
           type: 'pane',
           id: 'pane-terminal',
-          tabs: ['terminal'],
+          tabIds: ['terminal'],
           activeTabId: 'terminal',
         },
       },
@@ -227,7 +227,7 @@ export const LAYOUT_PRESETS: LayoutPreset[] = [
     layout: {
       type: 'pane',
       id: 'pane-editor',
-      tabs: ['App.tsx'],
+      tabIds: ['App.tsx'],
       activeTabId: 'App.tsx',
     },
   },
@@ -241,7 +241,7 @@ export const LAYOUT_PRESETS: LayoutPreset[] = [
       first: {
         type: 'pane',
         id: 'pane-explorer',
-        tabs: ['explorer'],
+        tabIds: ['explorer'],
         activeTabId: 'explorer',
       },
       second: {
@@ -255,20 +255,20 @@ export const LAYOUT_PRESETS: LayoutPreset[] = [
           first: {
             type: 'pane',
             id: 'pane-editor',
-            tabs: ['App.tsx'],
+            tabIds: ['App.tsx'],
             activeTabId: 'App.tsx',
           },
           second: {
             type: 'pane',
             id: 'pane-terminal',
-            tabs: ['terminal'],
+            tabIds: ['terminal'],
             activeTabId: 'terminal',
           },
         },
         second: {
           type: 'pane',
           id: 'pane-inspector',
-          tabs: ['inspector'],
+          tabIds: ['inspector'],
           activeTabId: 'inspector',
         },
       },

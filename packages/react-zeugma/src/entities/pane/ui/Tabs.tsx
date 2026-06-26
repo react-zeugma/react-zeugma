@@ -1,11 +1,12 @@
 import React, { createContext, useContext, useMemo } from 'react'
 import { Tab } from './Tab'
 import { useZeugmaState, useZeugmaDrag } from '../../../shared'
+import type { RenderTabProps } from '../../../shared'
 import { calculateTabDropIndex } from '../../../shared/lib/tree'
 import { PaneContext } from './Pane'
 
 export interface TabsContextValue {
-  tabs: string[]
+  tabIds: string[]
   activeTabId: string
   locked: boolean
   tabsMetadata?: Record<string, Record<string, unknown>>
@@ -25,7 +26,7 @@ export const useTabsContext = () => {
 
 export interface TabsProps {
   /** The list of tab IDs in this pane. */
-  tabs?: string[]
+  tabIds?: string[]
   /** The currently active tab ID. */
   activeTabId?: string
   /** Whether dragging is locked on these tabs. */
@@ -37,15 +38,7 @@ export interface TabsProps {
   /** Callback when a tab is closed/removed. */
   removeTab?: (id: string) => void
   /** Render function for each individual tab content. */
-  renderTab: (props: {
-    tabId: string
-    activeTabId: string
-    isDragging: boolean
-    isOver: boolean
-    metadata?: Record<string, unknown>
-    onSelect: () => void
-    onRemove: () => void
-  }) => React.ReactNode
+  renderTab: (props: RenderTabProps) => React.ReactNode
   /** Custom CSS classes for Tabs container and tab wrappers. */
   classNames?: {
     container?: string
@@ -68,7 +61,7 @@ const resolveDynamicProp = <T,>(
 export const Tabs: React.FC<TabsProps> & {
   Tab: typeof Tab
 } = ({
-  tabs: propTabs,
+  tabIds: propTabs,
   activeTabId: propActiveTabId,
   locked: propLocked,
   tabsMetadata: propTabsMetadata,
@@ -80,7 +73,7 @@ export const Tabs: React.FC<TabsProps> & {
 }) => {
   const paneContext = useContext(PaneContext)
 
-  const tabs = propTabs ?? paneContext?.tabs ?? []
+  const tabIds = propTabs ?? paneContext?.tabIds ?? []
   const activeTabId = propActiveTabId ?? paneContext?.activeTabId ?? ''
   const locked = propLocked ?? paneContext?.locked ?? false
   const tabsMetadata = propTabsMetadata ?? paneContext?.tabsMetadata
@@ -92,17 +85,17 @@ export const Tabs: React.FC<TabsProps> & {
 
   const contextValue = useMemo<TabsContextValue>(
     () => ({
-      tabs,
+      tabIds,
       activeTabId,
       locked,
       tabsMetadata,
       selectTab,
       removeTab,
     }),
-    [tabs, activeTabId, locked, tabsMetadata, selectTab, removeTab],
+    [tabIds, activeTabId, locked, tabsMetadata, selectTab, removeTab],
   )
 
-  const targetIndex = calculateTabDropIndex(tabs, activeType, overTabId, overTabPosition)
+  const targetIndex = calculateTabDropIndex(tabIds, activeType, overTabId, overTabPosition)
 
   return (
     <TabsContext.Provider value={contextValue}>
@@ -115,7 +108,7 @@ export const Tabs: React.FC<TabsProps> & {
           ...styles?.container,
         }}
       >
-        {tabs.map((tabId, index) => {
+        {tabIds.map((tabId, index) => {
           const metadata = tabsMetadata?.[tabId]
           const resolvedClassName = resolveDynamicProp(classNames?.tab, tabId)
           const resolvedStyle = resolveDynamicProp(styles?.tab, tabId)
@@ -140,8 +133,10 @@ export const Tabs: React.FC<TabsProps> & {
               <Tab id={tabId} locked={locked} className={resolvedClassName} style={resolvedStyle}>
                 {({ isDragging, isOver }) =>
                   renderTab({
-                    tabId,
-                    activeTabId,
+                    id: tabId,
+                    paneId: paneContext?.id ?? '',
+                    isActive: tabId === activeTabId,
+                    index,
                     isDragging,
                     isOver,
                     metadata,
@@ -154,7 +149,7 @@ export const Tabs: React.FC<TabsProps> & {
           )
         })}
 
-        {targetIndex === tabs.length && globalClassNames.tabDropPreview && (
+        {targetIndex === tabIds.length && globalClassNames.tabDropPreview && (
           <div style={{ position: 'relative', height: '100%', width: 0, zIndex: 10 }}>
             <div
               className={globalClassNames.tabDropPreview}

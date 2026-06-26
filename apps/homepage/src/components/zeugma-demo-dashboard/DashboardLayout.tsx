@@ -22,7 +22,7 @@ import { AVAILABLE_WIDGETS, PRESETS } from './constants'
 function getActiveWidgets(node: TreeNode | null): string[] {
   if (!node) return []
   if (node.type === 'pane') {
-    return node.tabs
+    return node.tabIds
   }
   return [...getActiveWidgets(node.first), ...getActiveWidgets(node.second)]
 }
@@ -54,7 +54,8 @@ export function DashboardToolbar({
       if (activeWidgets.length <= 1) return
       removeTab(widgetId)
     } else {
-      addTab(widgetId)
+      const widget = AVAILABLE_WIDGETS.find((w) => w.id === widgetId)
+      addTab(widgetId, undefined, widget ? { color: widget.color } : undefined)
     }
   }
 

@@ -9,7 +9,7 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
     const initialLayout: TreeNode = {
       type: 'pane',
       id: 'pane-1',
-      tabs: ['tab-1', 'tab-2'],
+      tabIds: ['tab-1', 'tab-2'],
       activeTabId: 'tab-1',
     }
 
@@ -68,7 +68,7 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
         const newLayout: TreeNode = {
           type: 'pane',
           id: 'pane-1',
-          tabs: ['tab-2'],
+          tabIds: ['tab-2'],
           activeTabId: 'tab-2',
         }
         controllerInstance._internalSetLayout!(newLayout)
@@ -88,7 +88,7 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
         const finalLayout: TreeNode = {
           type: 'pane',
           id: 'pane-1',
-          tabs: ['tab-2', 'tab-1'],
+          tabIds: ['tab-2', 'tab-1'],
           activeTabId: 'tab-1',
         }
         controllerInstance._internalSetLayout!(finalLayout)
@@ -104,7 +104,7 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
     const initialLayout: TreeNode = {
       type: 'pane',
       id: 'pane-1',
-      tabs: ['tab-1', 'tab-2'],
+      tabIds: ['tab-1', 'tab-2'],
       activeTabId: 'tab-1',
     }
 
@@ -160,7 +160,7 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
         const newLayout: TreeNode = {
           type: 'pane',
           id: 'pane-1',
-          tabs: ['tab-2'],
+          tabIds: ['tab-2'],
           activeTabId: 'tab-2',
         }
         controllerInstance._internalSetLayout!(newLayout)
@@ -183,13 +183,13 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
           first: {
             type: 'pane',
             id: 'pane-1',
-            tabs: ['tab-2'],
+            tabIds: ['tab-2'],
             activeTabId: 'tab-2',
           },
           second: {
             type: 'pane',
             id: 'pane-2',
-            tabs: ['tab-1'],
+            tabIds: ['tab-1'],
             activeTabId: 'tab-1',
           },
         }
@@ -206,7 +206,7 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
     const initialLayout: TreeNode = {
       type: 'pane',
       id: 'pane-1',
-      tabs: ['tab-1', 'tab-2'],
+      tabIds: ['tab-1', 'tab-2'],
       activeTabId: 'tab-1',
     }
 

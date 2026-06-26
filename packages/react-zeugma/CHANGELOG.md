@@ -1,5 +1,15 @@
 # react-zeugma
 
+## 6.7.1
+
+### Patch Changes
+
+- **Refactor render tabs function**
+  - Renamed `tabs` to `tabIds` in `TreeNode` interface.
+  - Updated renderTabs function to take a singleton tab details.
+- **Fix metadata being undefined**
+  - Fixed the problem during the tab dragging.
+
 ## 6.7.0
 
 ### Minor Changes

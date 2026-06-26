@@ -17,7 +17,7 @@ describe('Zeugma Context Provider & Consumers', () => {
   const initialLayout: TreeNode = {
     type: 'pane',
     id: 'pane-1',
-    tabs: ['tab-1'],
+    tabIds: ['tab-1'],
     activeTabId: 'tab-1',
   }
 
@@ -74,7 +74,7 @@ describe('Zeugma Context Provider & Consumers', () => {
     const initialLayout: TreeNode = {
       type: 'pane',
       id: 'pane-1',
-      tabs: ['tab-1'],
+      tabIds: ['tab-1'],
       activeTabId: 'tab-1',
       tabsMetadata: {
         'tab-1': { title: 'My Tab Title', customProp: 42 },
@@ -201,11 +201,11 @@ describe('Tab Drop Preview rendering', () => {
       <ZeugmaStateContext.Provider value={defaultState}>
         <ZeugmaDragContext.Provider value={dragValue}>
           <Tabs
-            tabs={['tab-1', 'tab-2']}
+            tabIds={['tab-1', 'tab-2']}
             activeTabId="tab-1"
             selectTab={() => {}}
             removeTab={() => {}}
-            renderTab={({ tabId }) => <span data-testid={tabId}>{tabId} Content</span>}
+            renderTab={({ id: tabId }) => <span data-testid={tabId}>{tabId} Content</span>}
           />
         </ZeugmaDragContext.Provider>
       </ZeugmaStateContext.Provider>,
@@ -232,11 +232,11 @@ describe('Tab Drop Preview rendering', () => {
       <ZeugmaStateContext.Provider value={defaultState}>
         <ZeugmaDragContext.Provider value={dragValue}>
           <Tabs
-            tabs={['tab-1', 'tab-2']}
+            tabIds={['tab-1', 'tab-2']}
             activeTabId="tab-1"
             selectTab={() => {}}
             removeTab={() => {}}
-            renderTab={({ tabId }) => <span data-testid={tabId}>{tabId} Content</span>}
+            renderTab={({ id: tabId }) => <span data-testid={tabId}>{tabId} Content</span>}
           />
         </ZeugmaDragContext.Provider>
       </ZeugmaStateContext.Provider>,
@@ -257,11 +257,11 @@ describe('Tab Drop Preview rendering', () => {
       <ZeugmaStateContext.Provider value={defaultState}>
         <ZeugmaDragContext.Provider value={dragValue}>
           <Tabs
-            tabs={['tab-1', 'tab-2']}
+            tabIds={['tab-1', 'tab-2']}
             activeTabId="tab-1"
             selectTab={() => {}}
             removeTab={() => {}}
-            renderTab={({ tabId }) => <span data-testid={tabId}>{tabId} Content</span>}
+            renderTab={({ id: tabId }) => <span data-testid={tabId}>{tabId} Content</span>}
           />
         </ZeugmaDragContext.Provider>
       </ZeugmaStateContext.Provider>,
@@ -282,11 +282,11 @@ describe('Tab Drop Preview rendering', () => {
       <ZeugmaStateContext.Provider value={defaultState}>
         <ZeugmaDragContext.Provider value={dragValue}>
           <Tabs
-            tabs={['tab-1', 'tab-2']}
+            tabIds={['tab-1', 'tab-2']}
             activeTabId="tab-1"
             selectTab={() => {}}
             removeTab={() => {}}
-            renderTab={({ tabId }) => <span data-testid={tabId}>{tabId} Content</span>}
+            renderTab={({ id: tabId }) => <span data-testid={tabId}>{tabId} Content</span>}
           />
         </ZeugmaDragContext.Provider>
       </ZeugmaStateContext.Provider>,
@@ -297,7 +297,7 @@ describe('Tab Drop Preview rendering', () => {
     expect(indicator?.getAttribute('style')).toContain('transform: translateX(-100%)')
   })
 
-  it('should not render the drop preview indicator when overTabId is not in the tabs list', () => {
+  it('should not render the drop preview indicator when overTabId is not in the tabIds list', () => {
     const dragValue = {
       overTabId: 'tab-3',
       overTabPosition: 'before' as const,
@@ -307,11 +307,11 @@ describe('Tab Drop Preview rendering', () => {
       <ZeugmaStateContext.Provider value={defaultState}>
         <ZeugmaDragContext.Provider value={dragValue}>
           <Tabs
-            tabs={['tab-1', 'tab-2']}
+            tabIds={['tab-1', 'tab-2']}
             activeTabId="tab-1"
             selectTab={() => {}}
             removeTab={() => {}}
-            renderTab={({ tabId }) => <span data-testid={tabId}>{tabId} Content</span>}
+            renderTab={({ id: tabId }) => <span data-testid={tabId}>{tabId} Content</span>}
           />
         </ZeugmaDragContext.Provider>
       </ZeugmaStateContext.Provider>,
@@ -321,11 +321,11 @@ describe('Tab Drop Preview rendering', () => {
     expect(indicator).toBeNull()
   })
 
-  it('should resolve active tabs from renderingLayout during dragging', () => {
+  it('should resolve active tabIds from renderingLayout during dragging', () => {
     const layoutWithDragRemoved: TreeNode = {
       type: 'pane',
       id: 'pane-1',
-      tabs: ['tab-2'],
+      tabIds: ['tab-2'],
       activeTabId: 'tab-2',
     }
 
@@ -361,7 +361,7 @@ describe('Tab Drop Preview rendering', () => {
         <ZeugmaActionsContext.Provider value={mockActions}>
           <ZeugmaStateContext.Provider value={stateWithDrag}>
             <Pane id="pane-1">
-              <Pane.Tabs renderTab={({ tabId }) => <span data-testid={tabId}>{tabId}</span>} />
+              <Pane.Tabs renderTab={({ id: tabId }) => <span data-testid={tabId}>{tabId}</span>} />
             </Pane>
           </ZeugmaStateContext.Provider>
         </ZeugmaActionsContext.Provider>
@@ -374,13 +374,13 @@ describe('Tab Drop Preview rendering', () => {
     expect(queryByTestId('tab-2')).not.toBeNull()
   })
 
-  it('should resolve active tabs from logical layout if the pane itself is being dragged', () => {
+  it('should resolve active tabIds from logical layout if the pane itself is being dragged', () => {
     const layoutWithDragRemoved = null // pane is completely removed from renderingLayout
 
     const originalLayout: TreeNode = {
       type: 'pane',
       id: 'pane-1',
-      tabs: ['tab-1', 'tab-2'],
+      tabIds: ['tab-1', 'tab-2'],
       activeTabId: 'tab-1',
     }
 
@@ -417,7 +417,7 @@ describe('Tab Drop Preview rendering', () => {
         <ZeugmaActionsContext.Provider value={mockActions}>
           <ZeugmaStateContext.Provider value={stateWithDrag}>
             <Pane id="pane-1">
-              <Pane.Tabs renderTab={({ tabId }) => <span data-testid={tabId}>{tabId}</span>} />
+              <Pane.Tabs renderTab={({ id: tabId }) => <span data-testid={tabId}>{tabId}</span>} />
             </Pane>
           </ZeugmaStateContext.Provider>
         </ZeugmaActionsContext.Provider>
@@ -444,7 +444,7 @@ describe('Tab Drop Preview rendering', () => {
       const initialLayout: TreeNode = {
         type: 'pane',
         id: 'pane-1',
-        tabs: ['tab-1'],
+        tabIds: ['tab-1'],
         activeTabId: 'tab-1',
       }
 
@@ -475,14 +475,14 @@ describe('Tab Drop Preview rendering', () => {
       })
 
       const updatedSavedLayout = JSON.parse(localStorage.getItem('zeugma-layout')!)
-      expect(updatedSavedLayout.tabs).toContain('tab-2')
+      expect(updatedSavedLayout.tabIds).toContain('tab-2')
     })
 
     it('should load layout from localStorage on mount if persist is true', () => {
       const savedLayout: TreeNode = {
         type: 'pane',
         id: 'pane-1',
-        tabs: ['tab-1', 'tab-2'],
+        tabIds: ['tab-1', 'tab-2'],
         activeTabId: 'tab-2',
       }
       localStorage.setItem('zeugma-layout', JSON.stringify(savedLayout))
@@ -490,7 +490,7 @@ describe('Tab Drop Preview rendering', () => {
       const initialLayout: TreeNode = {
         type: 'pane',
         id: 'pane-1',
-        tabs: ['tab-1'],
+        tabIds: ['tab-1'],
         activeTabId: 'tab-1',
       }
 
@@ -519,7 +519,7 @@ describe('Tab Drop Preview rendering', () => {
       const initialLayout: TreeNode = {
         type: 'pane',
         id: 'pane-1',
-        tabs: ['tab-1'],
+        tabIds: ['tab-1'],
         activeTabId: 'tab-1',
       }
 
@@ -544,7 +544,7 @@ describe('Tab Drop Preview rendering', () => {
       const initialLayout: TreeNode = {
         type: 'pane',
         id: 'pane-1',
-        tabs: ['tab-1'],
+        tabIds: ['tab-1'],
         activeTabId: 'tab-1',
       }
 

@@ -7,7 +7,7 @@ describe('useZeugma Hook', () => {
   const initialLayout: TreeNode = {
     type: 'pane',
     id: 'pane-1',
-    tabs: ['tab-1'],
+    tabIds: ['tab-1'],
     activeTabId: 'tab-1',
   }
 
@@ -27,7 +27,7 @@ describe('useZeugma Hook', () => {
     const updatedLayout: TreeNode = {
       type: 'pane',
       id: 'pane-updated',
-      tabs: ['tab-updated'],
+      tabIds: ['tab-updated'],
       activeTabId: 'tab-updated',
     }
 
@@ -69,7 +69,7 @@ describe('useZeugma Hook', () => {
     const layoutWithTwoTabs: TreeNode = {
       type: 'pane',
       id: 'pane-1',
-      tabs: ['tab-1', 'tab-2'],
+      tabIds: ['tab-1', 'tab-2'],
       activeTabId: 'tab-1',
     }
     const { result } = renderHook(() => useZeugma({ initialLayout: layoutWithTwoTabs }))
@@ -79,7 +79,7 @@ describe('useZeugma Hook', () => {
       result.current.removeTab('tab-2')
     })
     const pane = result.current.layout as PaneNode
-    expect(pane.tabs).toEqual(['tab-1'])
+    expect(pane.tabIds).toEqual(['tab-1'])
 
     // Remove the entire pane
     act(() => {
@@ -101,7 +101,7 @@ describe('useZeugma Hook', () => {
 
     const secondChild = root.second as PaneNode
     expect(secondChild.type).toBe('pane')
-    expect(secondChild.tabs).toEqual(['tab-new'])
+    expect(secondChild.tabIds).toEqual(['tab-new'])
   })
 
   it('should perform updateSplitPercentage', () => {
@@ -109,8 +109,8 @@ describe('useZeugma Hook', () => {
       type: 'split',
       direction: 'row',
       splitPercentage: 50,
-      first: { type: 'pane', id: 'pane-1', tabs: ['tab-1'], activeTabId: 'tab-1' },
-      second: { type: 'pane', id: 'pane-2', tabs: ['tab-2'], activeTabId: 'tab-2' },
+      first: { type: 'pane', id: 'pane-1', tabIds: ['tab-1'], activeTabId: 'tab-1' },
+      second: { type: 'pane', id: 'pane-2', tabIds: ['tab-2'], activeTabId: 'tab-2' },
     }
     const { result } = renderHook(() => useZeugma({ initialLayout: layoutWithSplit }))
 
@@ -129,8 +129,8 @@ describe('useZeugma Hook', () => {
       type: 'split',
       direction: 'row',
       splitPercentage: 50,
-      first: { type: 'pane', id: 'pane-1', tabs: ['tab-1'], activeTabId: 'tab-1' },
-      second: { type: 'pane', id: 'pane-2', tabs: ['tab-2'], activeTabId: 'tab-2' },
+      first: { type: 'pane', id: 'pane-1', tabIds: ['tab-1'], activeTabId: 'tab-1' },
+      second: { type: 'pane', id: 'pane-2', tabIds: ['tab-2'], activeTabId: 'tab-2' },
     }
     const { result } = renderHook(() => useZeugma({ initialLayout: layoutWithSplit }))
 
@@ -141,7 +141,7 @@ describe('useZeugma Hook', () => {
 
     let layout = result.current.layout as PaneNode
     expect(layout.type).toBe('pane') // second pane collapsed
-    expect(layout.tabs).toEqual(['tab-1', 'tab-2'])
+    expect(layout.tabIds).toEqual(['tab-1', 'tab-2'])
 
     // Move tab-2 before tab-1
     act(() => {
@@ -149,7 +149,7 @@ describe('useZeugma Hook', () => {
     })
 
     layout = result.current.layout as PaneNode
-    expect(layout.tabs).toEqual(['tab-2', 'tab-1'])
+    expect(layout.tabIds).toEqual(['tab-2', 'tab-1'])
   })
 
   it('should support tree queries (findPaneById, findPaneContainingTab, findTabById)', () => {
@@ -177,7 +177,7 @@ describe('useZeugma Hook', () => {
     })
 
     const pane = result.current.layout as PaneNode
-    expect(pane.tabs).toEqual(['tab-1', 'tab-2', 'tab-3'])
+    expect(pane.tabIds).toEqual(['tab-1', 'tab-2', 'tab-3'])
     expect(pane.activeTabId).toBe('tab-3')
   })
 
@@ -231,7 +231,7 @@ describe('useZeugma Hook', () => {
     const layoutWithTwoTabs: TreeNode = {
       type: 'pane',
       id: 'pane-1',
-      tabs: ['tab-1', 'tab-2'],
+      tabIds: ['tab-1', 'tab-2'],
       activeTabId: 'tab-1',
     }
     const { result } = renderHook(() => useZeugma({ initialLayout: layoutWithTwoTabs }))
@@ -278,7 +278,7 @@ describe('useZeugma Hook', () => {
     const updatedLayout: TreeNode = {
       type: 'pane',
       id: 'pane-2',
-      tabs: ['tab-2'],
+      tabIds: ['tab-2'],
       activeTabId: 'tab-2',
     }
 

@@ -6,7 +6,7 @@ import {
   PortalRegistryContext,
   TabDetails,
 } from '../../../shared'
-import { findPaneById } from '../../../shared/lib/tree'
+import { findPaneOrContainingTab } from '../../../shared/lib/tree'
 import { DragListenersCtx } from '../model/context'
 import { PaneRenderProps } from '../model/types'
 import { DropZone } from './DropZone'
@@ -111,10 +111,10 @@ export const Pane: React.FC<PaneProps> & {
 
   const paneNode = useMemo(() => {
     const targetTree = id === activeId ? layout : renderingLayout
-    return findPaneById(targetTree, id)
+    return findPaneOrContainingTab(targetTree, id)
   }, [layout, renderingLayout, id, activeId])
   const paneContainerId = paneNode?.id ?? id
-  const tabs = paneNode?.tabs ?? [id]
+  const tabIds = paneNode?.tabIds ?? [id]
   const activeTabId = paneNode?.activeTabId ?? id
   const tabsMetadata = paneNode?.tabsMetadata
 
@@ -128,7 +128,7 @@ export const Pane: React.FC<PaneProps> & {
   const showDropZones =
     activeId !== null &&
     activeId !== id &&
-    (!tabs.includes(activeId) || tabs.length > 1) &&
+    (!tabIds.includes(activeId) || tabIds.length > 1) &&
     !isDroppableDisabled
 
   const { attributes, listeners, setNodeRef } = useDraggable({
@@ -136,7 +136,7 @@ export const Pane: React.FC<PaneProps> & {
     disabled: isDraggableDisabled,
   })
 
-  const dragging = activeId !== null && tabs.includes(activeId)
+  const dragging = activeId !== null && tabIds.includes(activeId)
   const isFullscreen = fullscreenPaneId === id
 
   const renderProps: PaneRenderProps = useMemo(
@@ -155,7 +155,7 @@ export const Pane: React.FC<PaneProps> & {
         updateMetadata(id, updater)
       },
       locked: isDraggableDisabled,
-      tabs,
+      tabIds,
       activeTabId,
       selectTab: (tabId) => selectTab(paneContainerId, tabId),
       removeTab: (tabId) => {
@@ -178,7 +178,7 @@ export const Pane: React.FC<PaneProps> & {
       metadata,
       updateMetadata,
       isDraggableDisabled,
-      tabs,
+      tabIds,
       activeTabId,
       selectTab,
       paneContainerId,

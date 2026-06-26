@@ -85,11 +85,11 @@ export const Tab: React.FC<TabProps> = ({ id, locked = false, children, classNam
 
   const isTargetOver = isOver && overTabId === id
 
-  const tabs = tabsContext?.tabs || []
-  const index = tabs.indexOf(id)
+  const tabIds = tabsContext?.tabIds || []
+  const index = tabIds.indexOf(id)
   const activeTabId = tabsContext?.activeTabId
 
-  const showSeparator = index > 0 && id !== activeTabId && tabs[index - 1] !== activeTabId
+  const showSeparator = index > 0 && id !== activeTabId && tabIds[index - 1] !== activeTabId
 
   const separator = showSeparator ? <div className={classNames.tabSeparator} /> : null
 

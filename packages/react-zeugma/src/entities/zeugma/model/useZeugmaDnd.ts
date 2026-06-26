@@ -400,7 +400,7 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
         draggedPaneNode = {
           type: 'pane',
           id: generateUniqueId(),
-          tabs: [draggingId],
+          tabIds: [draggingId],
           activeTabId: draggingId,
           tabsMetadata: sourceMetadata ? { [draggingId]: sourceMetadata } : undefined,
         }
@@ -408,7 +408,7 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
         draggedPaneNode = findPaneById(originalLayout, draggingId) ?? {
           type: 'pane',
           id: generateUniqueId(),
-          tabs: [draggingId],
+          tabIds: [draggingId],
           activeTabId: draggingId,
         }
       }
@@ -460,7 +460,7 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
       ? findPaneContainingTab(originalLayout, draggingId)
       : findPaneById(originalLayout, draggingId)
     const isParentTarget = parentPane && parentPane.id === targetId
-    const isOnlyTab = parentPane && parentPane.tabs.length === 1
+    const isOnlyTab = parentPane && parentPane.tabIds.length === 1
 
     if (draggingId === targetId || (isParentTarget && isOnlyTab)) {
       _internalSetLayout(originalLayout)
@@ -479,7 +479,7 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
       draggedPaneNode = {
         type: 'pane',
         id: generateUniqueId(),
-        tabs: [draggingId],
+        tabIds: [draggingId],
         activeTabId: draggingId,
         tabsMetadata: sourceMetadata ? { [draggingId]: sourceMetadata } : undefined,
       }
@@ -487,7 +487,7 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
       draggedPaneNode = findPaneById(originalLayout, draggingId) ?? {
         type: 'pane',
         id: generateUniqueId(),
-        tabs: [draggingId],
+        tabIds: [draggingId],
         activeTabId: draggingId,
       }
     }

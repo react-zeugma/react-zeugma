@@ -1,14 +1,6 @@
 import { FileCode2, Folder, Terminal, Code, X } from 'lucide-react'
 import { FILES } from '../mock-files'
-
-interface IDETabProps {
-  tabId: string
-  activeTabId: string | null
-  isDragging: boolean
-  isOver: boolean
-  onSelect: () => void
-  onRemove: () => void
-}
+import { RenderTabProps } from 'react-zeugma'
 
 export function getTabMetadata(tabId: string) {
   const basename = tabId.includes('/') ? tabId.split('/').pop()! : tabId
@@ -35,21 +27,13 @@ export function getTabMetadata(tabId: string) {
   return { title, icon, closeable }
 }
 
-export function IDETab({
-  tabId,
-  activeTabId,
-  isDragging,
-  isOver,
-  onSelect,
-  onRemove,
-}: IDETabProps) {
-  const isTabActive = activeTabId === tabId
-  const { title, icon, closeable } = getTabMetadata(tabId)
+export function IDETab({ id, isActive, isDragging, isOver, onSelect, onRemove }: RenderTabProps) {
+  const { title, icon, closeable } = getTabMetadata(id)
 
   const baseClass =
     'px-2.5 flex items-center gap-1.5 border-r border-[#1e1e1e] text-[11px] font-mono tracking-wide transition-all cursor-pointer h-full relative group'
 
-  const activeClass = isTabActive
+  const activeClass = isActive
     ? 'bg-[#1e1e1e] text-white border-t border-t-indigo-500'
     : 'bg-[#252526] text-[#858585] hover:text-[#cccccc] hover:bg-[#2d2d2d] border-t border-t-transparent'
 
@@ -57,7 +41,7 @@ export function IDETab({
   const overClass = isOver ? 'bg-indigo-500/10 animate-pulse' : ''
 
   const closeBtnClass = `ml-0.5 w-4 h-4 rounded flex items-center justify-center transition-all shrink-0 ${
-    isTabActive
+    isActive
       ? 'text-[#858585] hover:text-white hover:bg-zinc-700'
       : 'opacity-0 group-hover:opacity-100 text-[#858585] hover:text-white hover:bg-zinc-700'
   }`

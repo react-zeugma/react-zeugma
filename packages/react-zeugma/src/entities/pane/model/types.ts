@@ -20,7 +20,7 @@ export interface BaseLeafRenderProps {
 export interface PaneRenderProps extends BaseLeafRenderProps {
   // Tabulation extensions:
   /** The array of tab IDs in this pane. */
-  tabs: string[]
+  tabIds: string[]
   /** The currently active tab ID. */
   activeTabId: string
   /** Selects a specific tab to make it active. */

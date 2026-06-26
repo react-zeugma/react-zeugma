@@ -8,6 +8,7 @@ export type {
   SplitNode,
   PaneNode,
   TabDetails,
+  RenderTabProps,
   SplitDirection,
   DragOverlayActiveItem,
 } from './shared'

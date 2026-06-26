@@ -189,7 +189,7 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
           findPaneContainingTab(prev, paneToAdd) ?? {
             type: 'pane',
             id: paneToAdd,
-            tabs: [paneToAdd],
+            tabIds: [paneToAdd],
             activeTabId: paneToAdd,
           }
         const treeWithoutDragging = removePane(prev, paneToAdd)

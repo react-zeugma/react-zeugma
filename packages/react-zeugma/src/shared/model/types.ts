@@ -13,7 +13,7 @@ export interface SplitNode {
 export interface PaneNode {
   type: 'pane'
   id: string
-  tabs: string[]
+  tabIds: string[]
   activeTabId: string
   locked?: boolean
   tabsMetadata?: Record<string, Record<string, unknown>>
@@ -27,6 +27,17 @@ export interface TabDetails {
   isActive: boolean
   index: number
   metadata: Record<string, unknown> | undefined
+}
+
+export interface RenderTabProps extends TabDetails {
+  /** Whether this tab is currently being dragged. */
+  isDragging: boolean
+  /** Whether another dragged item is hovering over this tab. */
+  isOver: boolean
+  /** Callback to select/activate this tab. */
+  onSelect: () => void
+  /** Callback to close/remove this tab. */
+  onRemove: () => void
 }
 
 export interface UseZeugmaOptions {

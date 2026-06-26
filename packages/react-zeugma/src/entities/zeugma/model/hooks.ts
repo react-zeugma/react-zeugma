@@ -123,7 +123,7 @@ export function collectAllTabIds(layout: TreeNode | null): string[] {
   function traverse(node: TreeNode | null) {
     if (!node) return
     if (node.type === 'pane') {
-      node.tabs.forEach((tabId) => {
+      node.tabIds.forEach((tabId) => {
         ids.add(tabId)
       })
     } else if (node.type === 'split') {

@@ -23,9 +23,9 @@ import { WIDGET_META, defaultDashboardLayout } from './zeugma-demo-dashboard/con
 // ── Custom Pane Header (Drag Handle, Fullscreen, Close) ──────────────────────
 
 function DashboardPaneHeader() {
-  const { tabs, activeTabId, toggleFullscreen, isFullscreen, remove } = usePaneContext()
+  const { tabIds, activeTabId, toggleFullscreen, isFullscreen, remove } = usePaneContext()
   const activeWidgetMeta = WIDGET_META[activeTabId]
-  const showTabs = tabs.length > 1 || activeWidgetMeta?.isTabbed !== false
+  const showTabs = tabIds.length > 1 || activeWidgetMeta?.isTabbed !== false
 
   return (
     <div className="grafana-panel-header flex items-center justify-between min-h-[30px] border-b border-[#1e2127] bg-[#111317]">
@@ -36,13 +36,24 @@ function DashboardPaneHeader() {
               container: 'grafana-tabs-container h-full flex items-center',
               tab: 'h-full flex items-center',
             }}
-            renderTab={({ tabId, activeTabId: currentActive, onSelect }) => {
-              const meta = WIDGET_META[tabId]
-              const isActive = tabId === currentActive
+            renderTab={({ id, isActive, onSelect, metadata }) => {
+              const meta = WIDGET_META[id]
+              const tabColor = typeof metadata?.color === 'string' ? metadata.color : undefined
               return (
-                <button onClick={onSelect} className={`grafana-tab ${isActive ? 'active' : ''}`}>
+                <button
+                  onClick={onSelect}
+                  className={`grafana-tab ${isActive ? 'active' : ''}`}
+                  style={
+                    isActive && tabColor
+                      ? {
+                          color: tabColor,
+                          borderBottomColor: tabColor,
+                        }
+                      : undefined
+                  }
+                >
                   {meta?.icon}
-                  <span className="text-[10px] font-semibold">{meta?.title || tabId}</span>
+                  <span className="text-[10px] font-semibold">{meta?.title}</span>
                 </button>
               )
             }}

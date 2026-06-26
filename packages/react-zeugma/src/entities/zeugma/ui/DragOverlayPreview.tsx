@@ -89,8 +89,6 @@ export const DragOverlayPreview: React.FC<DragOverlayPreviewProps> = ({
             position: 'relative',
             pointerEvents: 'none',
             overflow: 'hidden',
-            width: '420px',
-            height: '260px',
           }}
         >
           {tabHeaderRender({ isDragging: true, isOver: false })}

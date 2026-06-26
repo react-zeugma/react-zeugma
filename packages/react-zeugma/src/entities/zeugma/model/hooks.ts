@@ -70,19 +70,25 @@ export function usePortalRegistry() {
     }
   }, [])
 
-  const registerPortalTarget = useCallback((tabId: string, el: HTMLDivElement | null) => {
-    if (!isMountedRef.current) return
-    setPortalTargets((prev) => {
-      if (!el) {
-        if (!prev[tabId]) return prev
-        const next = { ...prev }
-        delete next[tabId]
-        return next
-      }
-      if (prev[tabId] === el) return prev
-      return { ...prev, [tabId]: el }
-    })
-  }, [])
+  const registerPortalTarget = useCallback(
+    (tabId: string, el: HTMLDivElement | null, expectedEl?: HTMLDivElement | null) => {
+      if (!isMountedRef.current) return
+      setPortalTargets((prev) => {
+        if (!el) {
+          if (expectedEl && prev[tabId] !== expectedEl) {
+            return prev
+          }
+          if (!prev[tabId]) return prev
+          const next = { ...prev }
+          delete next[tabId]
+          return next
+        }
+        if (prev[tabId] === el) return prev
+        return { ...prev, [tabId]: el }
+      })
+    },
+    [],
+  )
 
   const registerRenderCallback = useCallback(
     (tabId: string, render: (tab: TabDetails) => React.ReactNode) => {

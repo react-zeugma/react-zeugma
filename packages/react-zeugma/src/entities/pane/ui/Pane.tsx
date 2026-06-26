@@ -6,7 +6,7 @@ import {
   PortalRegistryContext,
   TabDetails,
 } from '../../../shared'
-import { findPaneOrContainingTab } from '../../../shared/lib/tree'
+import { findPaneOrContainingTab, findPaneContainingTab } from '../../../shared/lib/tree'
 import { DragListenersCtx } from '../model/context'
 import { PaneRenderProps } from '../model/types'
 import { DropZone } from './DropZone'
@@ -62,7 +62,7 @@ export const PaneContent: React.FC<PaneContentProps> = ({ children, className, s
     const el = targetRef.current
     registerPortalTarget(activeTabId, el)
     return () => {
-      registerPortalTarget(activeTabId, null)
+      registerPortalTarget(activeTabId, null, el)
     }
   }, [activeTabId, registerPortalTarget])
 
@@ -102,6 +102,7 @@ export const Pane: React.FC<PaneProps> & {
     layout,
     renderingLayout,
     activeId,
+    activeType,
     classNames: globalClassNames,
     fullscreenPaneId,
     onFullscreenChange,
@@ -110,9 +111,20 @@ export const Pane: React.FC<PaneProps> & {
   const { removePane, updateMetadata, selectTab, removeTab } = useZeugmaActions()
 
   const paneNode = useMemo(() => {
+    if (activeType === 'tab' && id === activeId) {
+      const originalPane = findPaneContainingTab(layout, id)
+      const sourceMetadata = originalPane?.tabsMetadata?.[id]
+      return {
+        type: 'pane' as const,
+        id,
+        tabIds: [id],
+        activeTabId: id,
+        tabsMetadata: sourceMetadata ? { [id]: sourceMetadata } : undefined,
+      }
+    }
     const targetTree = id === activeId ? layout : renderingLayout
     return findPaneOrContainingTab(targetTree, id)
-  }, [layout, renderingLayout, id, activeId])
+  }, [layout, renderingLayout, id, activeId, activeType])
   const paneContainerId = paneNode?.id ?? id
   const tabIds = paneNode?.tabIds ?? [id]
   const activeTabId = paneNode?.activeTabId ?? id

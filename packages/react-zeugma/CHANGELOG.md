@@ -1,5 +1,12 @@
 # react-zeugma
 
+## 6.7.2
+
+### Patch Changes
+
+- **Fix metadata being undefined**
+  - Fixed drag overlay.
+
 ## 6.7.1
 
 ### Patch Changes

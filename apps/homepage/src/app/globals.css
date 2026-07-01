@@ -191,54 +191,63 @@ body {
 
 /* Resizer styling for the demo */
 .zeugma-resizer {
-  transition: background-color 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex !important;
   align-items: center;
   justify-content: center;
   background-color: transparent;
+  transition: background-color 0.2s ease;
 }
 
-.zeugma-resizer:hover {
-  background-color: rgba(99, 102, 241, 0.15);
-}
-
+.zeugma-resizer:hover,
 .zeugma-resizer[data-resizing='true'] {
-  background-color: #6366f1;
+  background-color: rgba(99, 102, 241, 0.04);
 }
 
 .zeugma-resizer::after {
   content: '';
-  background-color: #71717a;
+  background-color: #d4d4d8;
   border-radius: 9999px;
   transition:
-    opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1),
-    background-color 0.15s cubic-bezier(0.4, 0, 0.2, 1),
-    transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-  opacity: 0.8;
+    width 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    height 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.2s ease,
+    opacity 0.2s ease;
+  opacity: 0.6;
 }
 
 .dark .zeugma-resizer::after {
-  background-color: #a1a1aa;
+  background-color: #3f3f46;
 }
 
-.zeugma-resizer:hover::after {
+.zeugma-resizer[data-direction='row']::after {
+  width: 2px;
+  height: 24px;
+}
+
+.zeugma-resizer[data-direction='column']::after {
+  width: 24px;
+  height: 2px;
+}
+
+/* Hover and Active/Resizing States */
+.zeugma-resizer:hover::after,
+.zeugma-resizer[data-resizing='true']::after {
   background-color: #6366f1;
   opacity: 1;
 }
 
-.zeugma-resizer[data-resizing='true']::after {
-  opacity: 0;
-  transform: scale(0.5);
+.zeugma-resizer[data-direction='row']:hover::after,
+.zeugma-resizer[data-direction='row'][data-resizing='true']::after {
+  width: 4px;
+  height: 100%;
+  border-radius: 0px;
 }
 
-.zeugma-resizer[data-direction='row']::after {
-  width: 1.5px;
-  height: 14px;
-}
-
-.zeugma-resizer[data-direction='column']::after {
-  width: 14px;
-  height: 1.5px;
+.zeugma-resizer[data-direction='column']:hover::after,
+.zeugma-resizer[data-direction='column'][data-resizing='true']::after {
+  width: 100%;
+  height: 4px;
+  border-radius: 0px;
 }
 /* ResizableContainer handle */
 .zeugma-container-resizer {
@@ -377,7 +386,7 @@ body {
 
 /* Dashboard Container */
 .grafana-dashboard-container {
-  background-color: #0b0c0e;
+  background-color: #111217;
   border-radius: 16px;
   overflow: hidden;
   display: flex;
@@ -391,14 +400,14 @@ body {
   overflow: hidden;
   height: clamp(600px, 75vh, 900px);
   box-shadow:
-    0 50px 120px -20px rgba(87, 148, 242, 0.1),
+    0 50px 120px -20px rgba(0, 0, 0, 0.75),
     0 30px 100px -10px rgba(0, 0, 0, 0.85);
   transition: box-shadow 0.5s ease;
 }
 
 .grafana-dashboard-shell:hover {
   box-shadow:
-    0 60px 150px -10px rgba(87, 148, 242, 0.18),
+    0 60px 150px -10px rgba(0, 0, 0, 0.85),
     0 40px 120px -5px rgba(0, 0, 0, 0.9);
 }
 
@@ -408,8 +417,8 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 8px 14px;
-  background-color: #111317;
-  border-bottom: 1px solid #1a1d21;
+  background-color: #161719;
+  border-bottom: 1px solid #2c3035;
   gap: 12px;
   flex-wrap: wrap;
 }
@@ -417,7 +426,7 @@ body {
 .grafana-toolbar-title {
   font-size: 13px;
   font-weight: 700;
-  color: #d8d9da;
+  color: #ccccdc;
   letter-spacing: -0.01em;
   white-space: nowrap;
 }
@@ -448,8 +457,8 @@ body {
   display: flex;
   align-items: center;
   gap: 2px;
-  background: #1a1d21;
-  border: 1px solid #252830;
+  background: #181b1f;
+  border: 1px solid #2c3035;
   border-radius: 6px;
   padding: 2px 4px;
 }
@@ -457,7 +466,7 @@ body {
 .grafana-time-pill {
   font-size: 10px;
   font-weight: 600;
-  color: #6b6b6b;
+  color: #8b8f97;
   padding: 2px 6px;
   border-radius: 4px;
   transition: all 0.15s;
@@ -467,13 +476,13 @@ body {
 }
 
 .grafana-time-pill:hover {
-  color: #d8d9da;
-  background: #252830;
+  color: #ccccdc;
+  background: #2c3035;
 }
 
 .grafana-time-pill.active {
-  color: #5794f2;
-  background: rgba(87, 148, 242, 0.12);
+  color: #ffffff;
+  background: #2c3035;
 }
 
 .grafana-refresh-btn {
@@ -483,24 +492,24 @@ body {
   width: 28px;
   height: 28px;
   border-radius: 6px;
-  border: 1px solid #252830;
-  background: #1a1d21;
-  color: #6b6b6b;
+  border: 1px solid #2c3035;
+  background: #181b1f;
+  color: #8b8f97;
   cursor: pointer;
   transition: all 0.15s;
 }
 
 .grafana-refresh-btn:hover {
-  color: #d8d9da;
-  border-color: #3a3d42;
-  background: #252830;
+  color: #ccccdc;
+  border-color: #3e444c;
+  background: #2c3035;
 }
 
 .grafana-select {
-  background-color: #1a1d21;
-  border: 1px solid #252830;
+  background-color: #181b1f;
+  border: 1px solid #2c3035;
   border-radius: 4px;
-  color: #d8d9da;
+  color: #ccccdc;
   font-size: 11px;
   font-weight: 600;
   padding: 4px 8px;
@@ -510,7 +519,7 @@ body {
 }
 
 .grafana-select:hover {
-  border-color: #3a3d42;
+  border-color: #3e444c;
   color: #ffffff;
 }
 
@@ -524,8 +533,8 @@ body {
   top: 100%;
   left: 0;
   margin-top: 4px;
-  background-color: #141619;
-  border: 1px solid #252830;
+  background-color: #181b1f;
+  border: 1px solid #2c3035;
   border-radius: 4px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
   padding: 4px 0;
@@ -541,7 +550,7 @@ body {
   padding: 6px 12px;
   font-size: 11px;
   font-weight: 600;
-  color: #d8d9da;
+  color: #ccccdc;
   background: transparent;
   border: none;
   text-align: left;
@@ -550,16 +559,16 @@ body {
 }
 
 .grafana-dropdown-item:hover {
-  background-color: #252830;
+  background-color: #2c3035;
   color: #ffffff;
 }
 
 .grafana-dropdown-checkbox {
   width: 12px;
   height: 12px;
-  border: 1px solid #3a3d42;
+  border: 1px solid #2c3035;
   border-radius: 2px;
-  background-color: #1a1d21;
+  background-color: #181b1f;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -590,8 +599,8 @@ body {
 
 /* Panel Chrome */
 .grafana-panel {
-  background-color: #141619;
-  border: 1px solid #1e2127;
+  background-color: #181b1f;
+  border: 1px solid #2c3035;
   border-radius: 0;
 }
 
@@ -600,7 +609,7 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 6px 10px;
-  border-bottom: 1px solid #1e2127;
+  border-bottom: 1px solid #2c3035;
   min-height: 30px;
 }
 
@@ -613,14 +622,14 @@ body {
   border-radius: 4px;
   border: none;
   background: transparent;
-  color: #6b6b6b;
+  color: #8b8f97;
   cursor: pointer;
   transition: all 0.15s;
 }
 
 .grafana-pane-btn:hover {
-  color: #d8d9da;
-  background: #252830;
+  color: #ccccdc;
+  background: #2c3035;
 }
 
 .grafana-panel-icon {
@@ -631,7 +640,7 @@ body {
 .grafana-panel-title {
   font-size: 11px;
   font-weight: 700;
-  color: #d8d9da;
+  color: #ccccdc;
   letter-spacing: -0.01em;
   white-space: nowrap;
   overflow: hidden;
@@ -650,7 +659,7 @@ body {
   flex-direction: column;
   height: 100%;
   width: 100%;
-  background: #141619;
+  background: #181b1f;
   overflow: hidden;
 }
 
@@ -658,8 +667,8 @@ body {
   display: flex;
   align-items: center;
   height: 28px;
-  background: #111317;
-  border-bottom: 1px solid #1e2127;
+  background: #161719;
+  border-bottom: 1px solid #2c3035;
   cursor: grab;
   user-select: none;
   padding: 0 4px;
@@ -684,10 +693,10 @@ body {
   padding: 0 10px;
   font-size: 10px;
   font-weight: 600;
-  color: #6b6b6b;
+  color: #ccccdc;
+  opacity: 0.45;
   background: transparent;
   border: none;
-  border-bottom: 2px solid transparent;
   cursor: pointer;
   transition: all 0.15s;
   white-space: nowrap;
@@ -695,12 +704,13 @@ body {
 }
 
 .grafana-tab:hover {
-  color: #d8d9da;
+  opacity: 0.8;
 }
 
 .grafana-tab.active {
-  color: #5794f2;
-  border-bottom-color: #5794f2;
+  color: #ffffff;
+  opacity: 1;
+  font-weight: 700;
 }
 
 .grafana-pane-drag-icon {
@@ -708,25 +718,25 @@ body {
   align-items: center;
   justify-content: center;
   padding: 0 4px;
-  color: #3a3d42;
+  color: #2c3035;
   transition: color 0.15s;
 }
 
 .grafana-panel-header:hover .grafana-pane-drag-icon {
-  color: #6b6b6b;
+  color: #8b8f97;
 }
 
 /* Widget Footer (mount/render counters) */
 .grafana-widget-footer {
-  background: #111317;
-  border-top: 1px solid #1e2127;
+  background: #161719;
+  border-top: 1px solid #2c3035;
   padding: 3px 10px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   font-size: 9px;
   font-family: var(--font-mono);
-  color: #4a4a4a;
+  color: #8b8f97;
   flex-shrink: 0;
   user-select: none;
 }
@@ -737,8 +747,8 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 6px 14px;
-  background: #111317;
-  border-bottom: 1px solid #1a1d21;
+  background: #161719;
+  border-bottom: 1px solid #2c3035;
   flex-shrink: 0;
   gap: 8px;
 }
@@ -746,7 +756,7 @@ body {
 .grafana-demo-nav-active {
   font-size: 11px;
   font-weight: 700;
-  color: #5794f2;
+  color: #ffffff;
   position: relative;
   padding: 2px 0;
 }
@@ -781,15 +791,15 @@ body {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #6b6b6b;
-  background: #111317;
-  border-bottom: 1px solid #1e2127;
+  color: #8b8f97;
+  background: #161719;
+  border-bottom: 1px solid #2c3035;
   white-space: nowrap;
 }
 
 .grafana-table td {
   padding: 5px 8px;
-  border-bottom: 1px solid #1a1d21;
+  border-bottom: 1px solid #181b1f;
   white-space: nowrap;
 }
 
@@ -798,7 +808,7 @@ body {
 }
 
 .grafana-table-row:hover {
-  background-color: #1a1d21;
+  background-color: #181b1f;
 }
 
 .grafana-method-badge {
@@ -828,9 +838,9 @@ body {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #4a4a4a;
-  border-bottom: 1px solid #1e2127;
-  background: #111317;
+  color: #8b8f97;
+  border-bottom: 1px solid #2c3035;
+  background: #161719;
 }
 
 .grafana-log-stream {
@@ -847,17 +857,17 @@ body {
   padding: 2px 8px;
   font-size: 10px;
   line-height: 1.6;
-  border-bottom: 1px solid #1a1d2108;
+  border-bottom: 1px solid #181b1f08;
   transition: background-color 0.1s;
   align-items: flex-start;
 }
 
 .grafana-log-line:hover {
-  background-color: #1a1d21;
+  background-color: #181b1f;
 }
 
 .grafana-log-time {
-  color: #4a4a4a;
+  color: #8b8f97;
   font-size: 9px;
   white-space: nowrap;
   width: 62px;
@@ -897,21 +907,21 @@ body {
 
 /* Stat Cards */
 .grafana-stat-card {
-  background: #111317;
-  border: 1px solid #1e2127;
+  background: #161719;
+  border: 1px solid #2c3035;
   border-radius: 8px;
   padding: 10px 12px;
   transition: border-color 0.2s;
 }
 
 .grafana-stat-card:hover {
-  border-color: #2a2d32;
+  border-color: #3e444c;
 }
 
 /* Tooltip */
 .grafana-tooltip {
-  background: #1a1d21;
-  border: 1px solid #2a2d32;
+  background: #181b1f;
+  border: 1px solid #2c3035;
   border-radius: 6px;
   padding: 8px 10px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
@@ -919,7 +929,7 @@ body {
 
 .grafana-tooltip-time {
   font-size: 9px;
-  color: #6b6b6b;
+  color: #8b8f97;
   margin-bottom: 4px;
   font-family: var(--font-mono);
 }
@@ -947,7 +957,7 @@ body {
 .grafana-tooltip-value {
   font-size: 10px;
   font-weight: 700;
-  color: #d8d9da;
+  color: #ccccdc;
   font-family: var(--font-mono);
 }
 
@@ -957,8 +967,8 @@ body {
   align-items: center;
   gap: 6px;
   padding: 8px 14px;
-  background: #1a1d21;
-  border: 1px solid #5794f2;
+  background: #181b1f;
+  border: 1px solid #2c3035;
   border-radius: 8px;
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
   opacity: 0.95;
@@ -981,11 +991,11 @@ body {
 }
 
 .grafana-resizer:hover {
-  background-color: rgba(87, 148, 242, 0.1);
+  background-color: rgba(255, 255, 255, 0.04);
 }
 
 .grafana-resizer[data-resizing='true'] {
-  background-color: #5794f2;
+  background-color: #2c3035;
 }
 
 .grafana-resizer::after {
@@ -1000,7 +1010,7 @@ body {
 }
 
 .grafana-resizer:hover::after {
-  background-color: #5794f2;
+  background-color: #ccccdc;
   opacity: 1;
 }
 
@@ -1021,8 +1031,8 @@ body {
 
 /* Root Drop Preview */
 .grafana-root-drop-preview {
-  background-color: rgba(87, 148, 242, 0.08);
-  border: 1px solid rgba(87, 148, 242, 0.25);
+  background-color: rgba(204, 204, 220, 0.04);
+  border: 1px solid rgba(204, 204, 220, 0.15);
   backdrop-filter: blur(12px);
   transition: all 0.2s ease-in-out;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
@@ -1035,7 +1045,7 @@ body {
   top: 0;
   bottom: 0;
   width: 2px;
-  background-color: #5794f2;
+  background-color: #ccccdc;
   z-index: 10;
   pointer-events: none;
 }
@@ -1048,4 +1058,541 @@ body {
   100% {
     transform: translateX(200%);
   }
+}
+
+/* Custom Prism Syntax Highlighting Theme (One Light / One Dark) */
+
+/* --- DEFAULT (LIGHT THEME) --- */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  color: #a0a1a7;
+  font-style: italic;
+}
+
+.token.punctuation {
+  color: #383a42;
+}
+
+.token.selector,
+.token.tag,
+.token.heading,
+.token.subheading {
+  color: #e45649;
+}
+
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.attr-name,
+.token.deleted {
+  color: #986801;
+}
+
+.token.string,
+.token.char,
+.token.attr-value,
+.token.inserted {
+  color: #50a14f;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.token.variable {
+  color: #0184bc;
+}
+
+.token.property,
+.token.function,
+.token.class-name {
+  color: #4078f2;
+}
+
+.token.keyword,
+.token.atrule,
+.token.rule {
+  color: #a626a4;
+}
+
+.token.regex,
+.token.important {
+  color: #a626a4;
+}
+
+.token.important,
+.token.bold {
+  font-weight: bold;
+}
+.token.italic {
+  font-style: italic;
+}
+
+.token.entity {
+  cursor: help;
+}
+
+/* --- DARK THEME OVERRIDES --- */
+.dark .token.comment,
+.dark .token.prolog,
+.dark .token.doctype,
+.dark .token.cdata {
+  color: #5c6370;
+}
+
+.dark .token.punctuation {
+  color: #abb2bf;
+}
+
+.dark .token.selector,
+.dark .token.tag,
+.dark .token.heading,
+.dark .token.subheading {
+  color: #e06c75;
+}
+
+.dark .token.boolean,
+.dark .token.number,
+.dark .token.constant,
+.dark .token.symbol,
+.dark .token.attr-name,
+.dark .token.deleted {
+  color: #d19a66;
+}
+
+.dark .token.string,
+.dark .token.char,
+.dark .token.attr-value,
+.dark .token.inserted {
+  color: #98c379;
+}
+
+.dark .token.operator,
+.dark .token.entity,
+.dark .token.url,
+.dark .token.variable {
+  color: #56b6c2;
+}
+
+.dark .token.property,
+.dark .token.function,
+.dark .token.class-name {
+  color: #61afef;
+}
+
+.dark .token.keyword,
+.dark .token.atrule,
+.dark .token.rule {
+  color: #c678dd;
+}
+
+.dark .token.regex,
+.dark .token.important {
+  color: #c678dd;
+}
+
+/* ── Grafana-style Dashboard Settings Drawer ───────────────────────────────── */
+
+.grafana-dashboard-layout-wrapper {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  background-color: #111217;
+}
+
+.grafana-drawer {
+  display: flex;
+  flex-direction: column;
+  background-color: #161719;
+  border-right: 1px solid #2c3035;
+  height: 100%;
+  width: 320px;
+  min-width: 320px;
+  max-width: 320px;
+  z-index: 40;
+  overflow: hidden;
+}
+
+.grafana-drawer.overlay {
+  position: absolute;
+  left: 0;
+  top: 0;
+  box-shadow: 5px 0 25px rgba(0, 0, 0, 0.5);
+  animation: slideInLeft 0.2s ease-out;
+}
+
+.grafana-drawer.docked {
+  position: relative;
+  animation: expandWidth 0.2s ease-out;
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes expandWidth {
+  from {
+    width: 0;
+    min-width: 0;
+    opacity: 0;
+  }
+  to {
+    width: 320px;
+    min-width: 320px;
+    opacity: 1;
+  }
+}
+
+.grafana-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid #2c3035;
+  background-color: #181b1f;
+  min-height: 40px;
+}
+
+.grafana-drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  scrollbar-width: thin;
+  scrollbar-color: #2c3035 transparent;
+}
+
+.grafana-drawer-body::-webkit-scrollbar {
+  width: 4px;
+}
+
+.grafana-drawer-body::-webkit-scrollbar-thumb {
+  background: #2c3035;
+  border-radius: 2px;
+}
+
+.grafana-setting-card {
+  background-color: #181b1f;
+  border: 1px solid #2c3035;
+  padding: 10px 12px;
+  border-radius: 2px;
+}
+
+/* Custom Switch Toggle */
+.grafana-switch {
+  position: relative;
+  display: inline-block;
+  width: 28px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.grafana-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.grafana-switch-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #181b1f;
+  transition: 0.2s;
+  border-radius: 8px;
+  border: 1px solid #2c3035;
+}
+
+.grafana-switch-slider:before {
+  position: absolute;
+  content: '';
+  height: 10px;
+  width: 10px;
+  left: 2px;
+  bottom: 2px;
+  background-color: #8b8f97;
+  transition: 0.2s;
+  border-radius: 50%;
+}
+
+.grafana-switch input:checked + .grafana-switch-slider {
+  background-color: #5794f2;
+  border-color: #5794f2;
+}
+
+.grafana-switch input:checked + .grafana-switch-slider:before {
+  transform: translateX(12px);
+  background-color: #ffffff;
+}
+
+.grafana-switch input:disabled + .grafana-switch-slider {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Custom Range Slider */
+.grafana-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 3px;
+  background: #2c3035;
+  border-radius: 2px;
+  outline: none;
+  margin: 6px 0;
+}
+
+.grafana-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ccccdc;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.grafana-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.25);
+}
+
+.grafana-slider::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ccccdc;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.1s;
+}
+
+.grafana-slider::-moz-range-thumb:hover {
+  transform: scale(1.25);
+}
+
+.grafana-slider:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Drawer Buttons */
+.grafana-drawer-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 10px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #ccccdc;
+  background: #2c3035;
+  border: 1px solid #3e444c;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.grafana-drawer-btn:hover:not(:disabled) {
+  background: #3e444c;
+  color: #ffffff;
+  border-color: #4e555f;
+}
+
+.grafana-drawer-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Active Pane Card */
+.grafana-drawer-item-card {
+  background-color: #181b1f;
+  border: 1px solid #2c3035;
+  padding: 10px;
+  border-radius: 2px;
+  transition: all 0.2s;
+}
+
+.grafana-drawer-item-card:hover {
+  border-color: #3e444c;
+}
+
+.grafana-drawer-item-card.highlighted {
+  border-color: #ff780a;
+  background-color: rgba(255, 120, 10, 0.02);
+  box-shadow: 0 0 12px rgba(255, 120, 10, 0.05);
+}
+
+/* Drawer Action Buttons */
+.grafana-drawer-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 2px;
+  border: none;
+  background: transparent;
+  color: #8b8f97;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.grafana-drawer-action-btn:hover:not(:disabled) {
+  color: #ccccdc;
+  background: #2c3035;
+}
+
+.grafana-drawer-action-btn.active {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.grafana-drawer-action-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Tree Visualizer Scrollbar */
+.grafana-tree-container {
+  scrollbar-width: thin;
+  scrollbar-color: #2c3035 transparent;
+}
+
+.grafana-tree-container::-webkit-scrollbar {
+  height: 4px;
+  width: 4px;
+}
+
+.grafana-tree-container::-webkit-scrollbar-thumb {
+  background: #2c3035;
+  border-radius: 2px;
+}
+
+/* Configure Button */
+.grafana-config-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid #2c3035;
+  background: #181b1f;
+  color: #8b8f97;
+  font-size: 10px;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.15s;
+  padding: 0 10px;
+  gap: 6px;
+}
+
+.grafana-config-btn:hover {
+  color: #ccccdc;
+  border-color: #3e444c;
+  background: #2c3035;
+}
+
+.grafana-config-btn.active {
+  color: #ffffff;
+  border-color: #ccccdc;
+  background: #2c3035;
+}
+
+/* Drawer Title */
+.grafana-drawer-title-text {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #ccccdc;
+}
+
+/* Drawer Tabs styling */
+.grafana-drawer-tabs {
+  display: flex;
+  border-bottom: 1px solid #2c3035;
+  background-color: #161719;
+}
+
+.grafana-drawer-tab {
+  flex: 1;
+  text-align: center;
+  padding: 8px 0;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8b8f97;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.grafana-drawer-tab:hover {
+  color: #ccccdc;
+}
+
+.grafana-drawer-tab.active {
+  color: #ffffff;
+  border-bottom-color: #5794f2;
+  background-color: rgba(24, 27, 31, 0.3);
+}
+
+/* Settings Row and Labels */
+.grafana-setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.grafana-setting-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #ccccdc;
+  letter-spacing: 0.02em;
+}
+
+.grafana-setting-desc {
+  font-size: 8.5px;
+  color: #8b8f97;
+  margin-top: 2px;
+  line-height: 1.3;
+}
+
+/* Documentation search item highlight animation */
+@keyframes search-highlight-flash {
+  0% {
+    background-color: rgba(99, 102, 241, 0.22);
+    box-shadow: 0 0 0 6px rgba(99, 102, 241, 0.22);
+  }
+  65% {
+    background-color: rgba(99, 102, 241, 0.22);
+    box-shadow: 0 0 0 6px rgba(99, 102, 241, 0.22);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+.search-highlight-fade {
+  animation: search-highlight-flash 3.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  border-radius: 8px;
 }

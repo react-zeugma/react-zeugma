@@ -27,8 +27,8 @@ const initialLayout: TreeNode = {
   type: 'split',
   direction: 'row',
   splitPercentage: 30,
-  first: { type: 'pane', id: 'left-panel', tabs: ['left-panel'], activeTabId: 'left-panel' },
-  second: { type: 'pane', id: 'right-panel', tabs: ['right-panel'], activeTabId: 'right-panel' },
+  first: { type: 'pane', id: 'left-panel', tabIds: ['left-panel'], activeTabId: 'left-panel' },
+  second: { type: 'pane', id: 'right-panel', tabIds: ['right-panel'], activeTabId: 'right-panel' },
 }
 
 // 2. Build your custom pane wrapper
@@ -201,7 +201,7 @@ A helper component to render and reorder a list of tabs inside a pane.
 ```tsx
 import { Tabs } from 'react-zeugma'
 ;<Tabs
-  tabs={['tab1', 'tab2']}
+  tabIds={['tab1', 'tab2']}
   activeTabId="tab1"
   selectTab={(tabId) => console.log('Select tab:', tabId)}
   removeTab={(tabId) => console.log('Close tab:', tabId)}
@@ -229,7 +229,7 @@ import { Tabs } from 'react-zeugma'
 
 | Property       | Description                                            | Type                                                                                                                                                                                 | Default |
 | -------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------- |
-| `tabs`         | Array of tab IDs.                                      | `string[]`                                                                                                                                                                           | -       |
+| `tabIds`       | Array of tab IDs.                                      | `string[]`                                                                                                                                                                           | -       |
 | `activeTabId`  | The currently active tab ID.                           | `string`                                                                                                                                                                             | -       |
 | `locked`       | Whether tab dragging/reordering is disabled.           | `boolean`                                                                                                                                                                            | `false` |
 | `tabsMetadata` | Metadata mapping associated with each tab in the pane. | `Record<string, Record<string, unknown>>`                                                                                                                                            | -       |
@@ -327,7 +327,7 @@ import { usePaneContext } from 'react-zeugma'
 
 const {
   id,
-  tabs,
+  tabIds,
   activeTabId,
   isDragging,
   isFullscreen,
@@ -344,7 +344,7 @@ const {
 | Property / Method   | Description                                         | Type                                                                                                                        |
 | ------------------- | --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | `id`                | The ID of the current pane.                         | `string`                                                                                                                    |
-| `tabs`              | List of tab IDs inside the pane.                    | `string[]`                                                                                                                  |
+| `tabIds`            | List of tab IDs inside the pane.                    | `string[]`                                                                                                                  |
 | `activeTabId`       | Currently active tab ID.                            | `string`                                                                                                                    |
 | `isDragging`        | `true` if this pane is being dragged.               | `boolean`                                                                                                                   |
 | `isFullscreen`      | `true` if this pane is maximized.                   | `boolean`                                                                                                                   |

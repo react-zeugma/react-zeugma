@@ -192,7 +192,7 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
             tabIds: [paneToAdd],
             activeTabId: paneToAdd,
           }
-        const treeWithoutDragging = removePane(prev, paneToAdd)
+        const treeWithoutDragging = removePane(prev, draggedPaneNode.id)
         return splitPane(treeWithoutDragging, targetPane.id, direction, splitType, draggedPaneNode)
       },
     ),

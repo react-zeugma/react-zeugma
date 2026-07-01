@@ -2,26 +2,26 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Copy, Check } from 'lucide-react'
+import { ArrowRight, Copy, Check, Split, Move, FileJson, Cpu } from 'lucide-react'
 import dynamic from 'next/dynamic'
+import { Footer } from '../components/footer'
 
-const ZeugmaDemoIDE = dynamic(
-  () => import('../components/zeugma-demo-ide').then((mod) => ({ default: mod.ZeugmaDemoIDE })),
+const ZeugmaDemoDashboard = dynamic(
+  () =>
+    import('../components/zeugma-demo-dashboard').then((mod) => ({
+      default: mod.ZeugmaDemoDashboard,
+    })),
   {
     ssr: false,
     loading: () => (
-      <div className="w-full min-h-[500px] bg-[#0c0c0e] border border-border-primary rounded-3xl animate-pulse" />
+      <div className="w-full h-[750px] bg-[#0c0c0e] border border-border-primary rounded-2xl animate-pulse" />
     ),
   },
 )
 
-import { Footer } from '../components/footer'
+interface HomeProps {}
 
-interface HomeProps {
-  articles?: { slug: string; title: string; description: string }[]
-}
-
-export function Home({ articles = [] }: HomeProps) {
+export function Home({}: HomeProps) {
   const [copied, setCopied] = useState(false)
 
   const handleCopy = () => {
@@ -80,25 +80,128 @@ export function Home({ articles = [] }: HomeProps) {
         </div>
       </section>
 
-      {/* Composable nested workspace / Dashboard Demo */}
-      <section className="py-24 px-6 border-t border-border-primary bg-bg-app relative overflow-hidden z-20">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-indigo-500/2 blur-[120px] rounded-full pointer-events-none" />
+      {/* Live Demo Preview Section */}
+      <section className="py-12 px-6 border-t border-border-primary bg-bg-app relative overflow-hidden z-20">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[750px] bg-indigo-500/5 blur-[120px] rounded-full pointer-events-none" />
         <div className="max-w-7xl mx-auto text-center relative z-10">
-          <h2
-            id="zeugma-demo-dashboard"
-            className="text-3xl sm:text-4xl font-extrabold text-text-primary mb-4 tracking-tight"
-          >
-            Build Next-Generation Dashboards & Layouts
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-text-primary mb-4 tracking-tight">
+            Interactive Layout Dashboard
           </h2>
           <p className="text-text-secondary text-sm max-w-2xl mx-auto mb-12">
-            <strong className="text-text-primary">react-zeugma</strong> is completely headless,
-            context-isolated, and serialized to JSON. Below is a live interactive dashboard built
-            with react-zeugma, running an app preview that also implements its own independent
-            react-zeugma workspace.
+            Try it right here — drag tabs, resize panels, and rearrange the layout. Head to the full
+            demo for presets, lock mode, and more controls.
           </p>
-          <div className="block text-left rounded-2xl transition-all duration-500 shadow-[0_50px_120px_-20px_rgba(99,102,241,0.15),0_30px_100px_-10px_rgba(0,0,0,0.95)] hover:shadow-[0_60px_150px_-10px_rgba(99,102,241,0.25),0_40px_120px_-5px_rgba(0,0,0,0.98)] overflow-hidden">
-            <ZeugmaDemoIDE />
+
+          <div className="rounded-2xl border border-border-primary bg-bg-sidebar/30 overflow-hidden shadow-[0_15px_35px_rgba(0,0,0,0.4)] transition-shadow duration-300">
+            <div className="h-[750px] w-full">
+              <ZeugmaDemoDashboard />
+            </div>
           </div>
+
+          <div className="mt-8 flex justify-center">
+            <Link
+              href="/demo"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors group cursor-pointer"
+            >
+              <span>Open full demo with presets &amp; configuration</span>
+              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Core Features Grid Section */}
+      <section className="py-24 px-6 border-t border-border-primary bg-bg-app relative overflow-hidden z-20">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-indigo-500/2 blur-[120px] rounded-full pointer-events-none" />
+        <div className="max-w-6xl mx-auto relative z-10">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-text-primary mb-4 tracking-tight">
+              Built for Next-Generation Layouts
+            </h2>
+            <p className="text-text-secondary text-sm max-w-2xl mx-auto">
+              <strong className="text-text-primary">react-zeugma</strong> is completely headless,
+              context-isolated, and serialized to JSON. It provides everything you need to build
+              desktop-grade workspace layouts and dynamic dashboards.
+            </p>
+          </div>
+
+          {/* Cards Grid */}
+          <div className="grid sm:grid-cols-2 gap-6 max-w-5xl mx-auto mb-12">
+            {[
+              {
+                title: 'Arbitrary Splits',
+                description:
+                  'Split horizontally or vertically without constraints. Create complex bento grids or simple side-by-side layouts instantly.',
+                icon: Split,
+                iconClass: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20',
+                hoverClass:
+                  'hover:border-indigo-500/30 hover:shadow-[0_20px_40px_-15px_rgba(99,102,241,0.12)]',
+                glowClass: 'from-indigo-500/5',
+              },
+              {
+                title: 'Smooth Resizing',
+                description:
+                  'Fluid, non-blocking resize handles with snap-to-edge capabilities. Feels completely native to the browser.',
+                icon: Move,
+                iconClass: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+                hoverClass:
+                  'hover:border-emerald-500/30 hover:shadow-[0_20px_40px_-15px_rgba(16,185,129,0.12)]',
+                glowClass: 'from-emerald-500/5',
+              },
+              {
+                title: 'Flexible & Unopinionated',
+                description:
+                  'Save and load layout trees via simple JSON serialization. Complete control over state management and persistence flows.',
+                icon: FileJson,
+                iconClass: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+                hoverClass:
+                  'hover:border-amber-500/30 hover:shadow-[0_20px_40px_-15px_rgba(245,158,11,0.12)]',
+                glowClass: 'from-amber-500/5',
+              },
+              {
+                title: 'Headless Design',
+                description:
+                  'We handle the complex math, drop zones, and tree states. You bring your own CSS and components.',
+                icon: Cpu,
+                iconClass: 'text-rose-400 bg-rose-500/10 border-rose-500/20',
+                hoverClass:
+                  'hover:border-rose-500/30 hover:shadow-[0_20px_40px_-15px_rgba(244,63,94,0.12)]',
+                glowClass: 'from-rose-500/5',
+              },
+            ].map((feature) => {
+              const Icon = feature.icon
+              return (
+                <div
+                  key={feature.title}
+                  className={`group relative bg-bg-sidebar border border-border-primary p-8 rounded-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-lg ${feature.hoverClass}`}
+                >
+                  {/* Subtle background glow on hover */}
+                  <div
+                    className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl pointer-events-none bg-linear-to-br ${feature.glowClass} to-transparent`}
+                  />
+
+                  <div className="relative z-10 flex flex-col gap-4 h-full justify-between">
+                    <div className="flex flex-col gap-4">
+                      <div
+                        className={`w-12 h-12 rounded-xl flex items-center justify-center border ${feature.iconClass}`}
+                      >
+                        <Icon className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-text-primary mb-2">
+                          {feature.title}
+                        </h3>
+                        <p className="text-sm text-text-secondary leading-relaxed">
+                          {feature.description}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
           <div className="mt-8 flex justify-center">
             <Link
               href="/docs"
@@ -110,51 +213,6 @@ export function Home({ articles = [] }: HomeProps) {
           </div>
         </div>
       </section>
-
-      {/* Blog Section */}
-      {articles.length > 0 && (
-        <section className="py-24 px-6 border-t border-border-primary bg-bg-app relative z-20">
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-text-primary mb-4 tracking-tight">
-                Latest Insights & Deep Dives
-              </h2>
-              <p className="text-text-secondary text-sm max-w-2xl mx-auto">
-                Explore technical articles and engineering deep dives written by the creators of{' '}
-                <strong className="text-text-primary">react-zeugma</strong>.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-8">
-              {articles.map((article) => (
-                <Link
-                  key={article.slug}
-                  href={`/blog/${article.slug}`}
-                  className="group block bg-bg-sidebar border border-border-primary hover:border-border-secondary p-6 rounded-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-indigo-500/5"
-                >
-                  <div className="flex flex-col h-full justify-between">
-                    <div>
-                      <span className="inline-block text-[10px] font-bold tracking-wider uppercase text-indigo-600 dark:text-indigo-400 mb-3 bg-indigo-500/10 px-2.5 py-1 rounded-full">
-                        Engineering
-                      </span>
-                      <h3 className="text-lg font-bold text-text-primary mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                        {article.title}
-                      </h3>
-                      <p className="text-xs text-text-secondary line-clamp-3 leading-relaxed mb-4">
-                        {article.description}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-xs font-semibold text-indigo-600 dark:text-indigo-400 group-hover:text-indigo-800 dark:group-hover:text-indigo-300 transition-colors mt-auto">
-                      <span>Read article</span>
-                      <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
 
       <Footer />
     </div>

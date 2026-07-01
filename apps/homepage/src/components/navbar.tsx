@@ -1,35 +1,63 @@
 'use client'
 
-import { Sun, Moon, Menu, X } from 'lucide-react'
+import { Sun, Moon, Menu, X, Search } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useCallback, useRef, useState, useEffect } from 'react'
 import { BrandIcon } from './brand-icon'
 import { useTheme } from './theme-provider'
+import { SearchModal } from '../views/docs/search-modal'
+import { docsData } from '../config/docs-data'
 
 const LOGO_URL = '/logo.png'
 
 export const NAV_ITEMS: {
   label: string
-  to: '/' | '/demo' | '/docs' | '/changelog' | '/blog'
+  to: '/' | '/demo' | '/docs' | '/changelog'
 }[] = [
   { label: 'Home', to: '/' },
   { label: 'Demo', to: '/demo' },
   { label: 'Docs', to: '/docs' },
   { label: 'Changelog', to: '/changelog' },
-  { label: 'Blog', to: '/blog' },
 ]
+
 export function Navbar() {
   const pathname = usePathname()
   const { theme, toggleTheme } = useTheme()
   const router = useRouter()
   const prefetched = useRef<Set<string>>(new Set())
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [searchModalOpen, setSearchModalOpen] = useState(false)
 
   // Automatically close mobile menu when path changes
   useEffect(() => {
     setMobileMenuOpen(false)
   }, [pathname])
+
+  // Keyboard shortcut listener for search modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement
+      if (
+        e.key === '/' &&
+        target.tagName !== 'INPUT' &&
+        target.tagName !== 'TEXTAREA' &&
+        !target.isContentEditable
+      ) {
+        e.preventDefault()
+        setSearchModalOpen(true)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
+  // Listen for global open-search event (e.g., from mobile docs search button)
+  useEffect(() => {
+    const handleOpen = () => setSearchModalOpen(true)
+    window.addEventListener('open-search', handleOpen)
+    return () => window.removeEventListener('open-search', handleOpen)
+  }, [])
 
   const prefetch = useCallback(
     (href: string) => {
@@ -40,10 +68,22 @@ export function Navbar() {
     [router],
   )
 
+  const handleSearchClick = () => {
+    setSearchModalOpen(true)
+  }
+
+  const handleSelectResult = (id: string) => {
+    if (pathname === '/docs') {
+      window.dispatchEvent(new CustomEvent('scroll-to-section', { detail: id }))
+    } else {
+      router.push(`/docs#${id}`)
+    }
+  }
+
   return (
-    <div>
-      <nav className="sticky top-0 z-50 bg-bg-app/80 backdrop-blur-md border-b border-border-primary px-4 sm:px-6 flex items-center justify-between h-14 transition-colors duration-200 select-none">
-        <Link href="/" className="flex items-center gap-2 group">
+    <header className="sticky top-0 z-50 w-full">
+      <nav className="relative bg-bg-app/80 backdrop-blur-md border-b border-border-primary px-4 sm:px-6 flex items-center justify-between h-14 transition-colors duration-200 select-none">
+        <Link href="/" className="flex items-center gap-2 group z-10">
           <img src={LOGO_URL} alt="react-zeugma logo" className="w-6 h-6 object-contain" />
           <span className="font-extrabold text-lg tracking-tight text-text-primary">
             react-zeugma
@@ -51,7 +91,7 @@ export function Navbar() {
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-6">
+        <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-6">
           {NAV_ITEMS.map((item) => {
             const isActive = pathname === item.to
             return (
@@ -70,7 +110,30 @@ export function Navbar() {
         </div>
 
         {/* Right Action Controls */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 z-10">
+          {/* Desktop Search Button */}
+          <button
+            onClick={handleSearchClick}
+            className="hidden md:flex items-center justify-between gap-2 px-4 py-2 bg-bg-pane-inner border border-border-primary rounded-lg text-xs text-text-muted hover:text-text-primary transition-all duration-200 cursor-pointer select-none font-medium w-44 lg:w-56"
+          >
+            <div className="flex items-center gap-2">
+              <Search className="h-3.5 w-3.5 text-text-muted" />
+              <span>Search docs...</span>
+            </div>
+            <kbd className="inline-flex items-center justify-center h-5 select-none rounded border border-border-primary bg-bg-sidebar px-2 font-mono text-[10px] font-medium text-text-muted">
+              /
+            </kbd>
+          </button>
+
+          {/* Mobile Search Button */}
+          <button
+            onClick={handleSearchClick}
+            className="md:hidden p-1.5 rounded-md hover:bg-bg-sidebar border border-transparent hover:border-border-primary text-text-secondary hover:text-text-primary transition-all cursor-pointer"
+            title="Search documentation"
+          >
+            <Search className="w-4 h-4" />
+          </button>
+
           <button
             onClick={toggleTheme}
             className="p-1.5 rounded-md hover:bg-bg-sidebar border border-transparent hover:border-border-primary text-text-secondary hover:text-text-primary transition-all cursor-pointer"
@@ -94,7 +157,7 @@ export function Navbar() {
               href="https://github.com/react-zeugma/react-zeugma"
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-2 bg-text-primary hover:bg-text-primary/90 text-bg-app px-3 py-1.5 rounded-md text-xs font-semibold transition-colors"
+              className="flex items-center gap-2 bg-text-primary hover:bg-text-primary/95 text-bg-app px-3 py-1.5 rounded-md text-xs font-semibold transition-colors"
             >
               <BrandIcon name="github" size={22} title="GitHub" />
               GitHub
@@ -153,13 +216,20 @@ export function Navbar() {
             href="https://github.com/react-zeugma/react-zeugma"
             target="_blank"
             rel="noreferrer"
-            className="flex items-center justify-center gap-2 bg-text-primary hover:bg-text-primary/90 text-bg-app px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors"
+            className="flex items-center justify-center gap-2 bg-text-primary hover:bg-text-primary/95 text-bg-app px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors"
           >
             <BrandIcon name="github" size={22} title="GitHub" />
             GitHub Repository
           </a>
         </div>
       </div>
-    </div>
+
+      <SearchModal
+        isOpen={searchModalOpen}
+        onClose={() => setSearchModalOpen(false)}
+        sections={docsData}
+        onSelectResult={handleSelectResult}
+      />
+    </header>
   )
 }

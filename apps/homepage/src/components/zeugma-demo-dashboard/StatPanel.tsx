@@ -117,7 +117,7 @@ export function StatPanel() {
       unit: 'req/s',
       trend: stats.requestsTrend,
       color: '#5794F2',
-      icon: <Zap className="w-3 h-3 text-[#5794F2]" />,
+      icon: <Zap className="w-3 h-3 text-[#8b8f97]" />,
     },
     {
       label: 'Uptime',
@@ -125,7 +125,7 @@ export function StatPanel() {
       unit: '%',
       trend: stats.uptimeTrend,
       color: '#73BF69',
-      icon: <Server className="w-3 h-3 text-[#73BF69]" />,
+      icon: <Server className="w-3 h-3 text-[#8b8f97]" />,
     },
     {
       label: 'P99 Latency',
@@ -133,7 +133,7 @@ export function StatPanel() {
       unit: 'ms',
       trend: stats.latencyTrend,
       color: '#FF9830',
-      icon: <Clock className="w-3 h-3 text-[#FF9830]" />,
+      icon: <Clock className="w-3 h-3 text-[#8b8f97]" />,
     },
     {
       label: 'Error Rate',
@@ -141,12 +141,12 @@ export function StatPanel() {
       unit: '%',
       trend: stats.errorTrend,
       color: '#F2495C',
-      icon: <AlertTriangle className="w-3 h-3 text-[#F2495C]" />,
+      icon: <AlertTriangle className="w-3 h-3 text-[#8b8f97]" />,
     },
   ]
 
   return (
-    <PanelChrome title="Key Metrics" icon={<Zap className="w-3.5 h-3.5 text-[#5794F2]" />}>
+    <PanelChrome title="Key Metrics" icon={<Zap className="w-3.5 h-3.5 text-[#8b8f97]" />}>
       <div className="grid grid-cols-2 gap-2 p-2 h-full">
         {cards.map((card) => (
           <StatCard key={card.label} {...card} />

@@ -8,7 +8,7 @@ export const metadata: Metadata = docsMetadata
 
 export default async function Page() {
   const markdown = await fetchDocs()
-  const { sections, skillMdContent } = parseDocs(markdown)
+  const { skillMdContent } = parseDocs(markdown)
 
-  return <Docs sections={sections} skillMdContent={skillMdContent} />
+  return <Docs skillMdContent={skillMdContent} />
 }

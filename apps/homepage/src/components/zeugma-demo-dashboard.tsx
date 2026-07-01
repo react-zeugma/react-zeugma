@@ -20,56 +20,39 @@ import { Maximize2, Minimize2, X } from 'lucide-react'
 
 import { WIDGET_META, defaultDashboardLayout } from './zeugma-demo-dashboard/constants'
 
+import { DashboardDrawer } from './zeugma-demo-dashboard/DashboardDrawer'
+import { EmptyWidgetPanel } from './zeugma-demo-dashboard/EmptyWidgetPanel'
+
 // ── Custom Pane Header (Drag Handle, Fullscreen, Close) ──────────────────────
 
 function DashboardPaneHeader() {
-  const { tabIds, activeTabId, toggleFullscreen, isFullscreen, remove } = usePaneContext()
-  const activeWidgetMeta = WIDGET_META[activeTabId]
-  const showTabs = tabIds.length > 1 || activeWidgetMeta?.isTabbed !== false
+  const { toggleFullscreen, isFullscreen, remove } = usePaneContext()
+
+  const getWidgetTitle = (id: string) => {
+    if (id.startsWith('empty-widget')) return 'Empty Panel'
+    return WIDGET_META[id]?.title || id
+  }
 
   return (
     <div className="grafana-panel-header flex items-center justify-between min-h-[30px] border-b border-[#1e2127] bg-[#111317]">
-      {showTabs ? (
-        <div className="flex items-center flex-1 h-full min-w-0">
-          <Pane.Tabs
-            classNames={{
-              container: 'grafana-tabs-container h-full flex items-center',
-              tab: 'h-full flex items-center',
-            }}
-            renderTab={({ id, isActive, onSelect, metadata }) => {
-              const meta = WIDGET_META[id]
-              const tabColor = typeof metadata?.color === 'string' ? metadata.color : undefined
-              return (
-                <button
-                  onClick={onSelect}
-                  className={`grafana-tab ${isActive ? 'active' : ''}`}
-                  style={
-                    isActive && tabColor
-                      ? {
-                          color: tabColor,
-                          borderBottomColor: tabColor,
-                        }
-                      : undefined
-                  }
-                >
-                  {meta?.icon}
-                  <span className="text-[10px] font-semibold">{meta?.title}</span>
-                </button>
-              )
-            }}
-          />
-          <Pane.DragHandle className="flex-1 h-full min-w-[30px] cursor-grab" />
-        </div>
-      ) : (
-        <Pane.DragHandle className="flex items-center gap-1.5 min-w-0 flex-1 cursor-grab h-full">
-          {WIDGET_META[activeTabId]?.icon && (
-            <span className="grafana-panel-icon shrink-0">{WIDGET_META[activeTabId].icon}</span>
-          )}
-          <span className="grafana-panel-title">
-            {WIDGET_META[activeTabId]?.title || activeTabId}
-          </span>
-        </Pane.DragHandle>
-      )}
+      <div className="flex items-center flex-1 h-full min-w-0">
+        <Pane.Tabs
+          classNames={{
+            container: 'grafana-tabs-container h-full flex items-center',
+            tab: 'h-full flex items-center',
+          }}
+          renderTab={({ id, isActive, onSelect }) => {
+            const meta = WIDGET_META[id]
+            return (
+              <button onClick={onSelect} className={`grafana-tab ${isActive ? 'active' : ''}`}>
+                {meta?.icon}
+                <span className="text-[10px] font-semibold">{getWidgetTitle(id)}</span>
+              </button>
+            )
+          }}
+        />
+        <Pane.DragHandle className="flex-1 h-full min-w-[30px] cursor-grab" />
+      </div>
 
       <div className="flex items-center gap-0.5 shrink-0 pl-2">
         <button
@@ -115,12 +98,28 @@ function useDashboardPersist(key = 'zeugma-demo-persist-enabled') {
 function ZeugmaDemoDashboardInner() {
   const [timeRange, setTimeRange] = useState('15m')
   const [persist, setPersist] = useDashboardPersist()
+
+  // ── Drawer & API Customization States ──────────────────────────────────────
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [hoveredPaneId, setHoveredPaneId] = useState<string | null>(null)
+
+  const [resizerSize, setResizerSize] = useState(4)
+  const [enableDragToDismiss, setEnableDragToDismiss] = useState(true)
+  const [dismissThreshold, setDismissThreshold] = useState(60)
+  const [snapThreshold, setSnapThreshold] = useState(8)
+  const [dragActivationDistance, setDragActivationDistance] = useState(8)
+  const [minSplitPercentage, setMinSplitPercentage] = useState(5)
+  const [maxSplitPercentage, setMaxSplitPercentage] = useState(95)
+
   const controller = useZeugma({ initialLayout: defaultDashboardLayout })
 
   // ── Tab / Widget rendering ───────────────────────────────────────────────
 
   const renderWidget = useCallback((tab: TabDetails) => {
     const getContent = () => {
+      if (tab.id.startsWith('empty-widget')) {
+        return <EmptyWidgetPanel tabId={tab.id} />
+      }
       switch (tab.id) {
         case 'time-series':
           return <TimeSeriesPanel />
@@ -158,9 +157,16 @@ function ZeugmaDemoDashboardInner() {
 
   const renderPane = useCallback(
     (paneId: string) => {
+      const isHighlighted = paneId === hoveredPaneId
       return (
         <Pane id={paneId}>
-          <div className="grafana-panel flex flex-col h-full w-full overflow-hidden">
+          <div
+            className={`grafana-panel flex flex-col h-full w-full overflow-hidden transition-all duration-200 ${
+              isHighlighted
+                ? 'ring-1 ring-[#ccccdc] shadow-[0_0_15px_rgba(204,204,220,0.15)] z-10'
+                : ''
+            }`}
+          >
             <DashboardPaneHeader />
 
             <Pane.Content className="grafana-panel-body flex-1 min-h-0 overflow-hidden">
@@ -170,7 +176,7 @@ function ZeugmaDemoDashboardInner() {
         </Pane>
       )
     },
-    [renderWidget],
+    [renderWidget, hoveredPaneId],
   )
 
   // ── Render ─────────────────────────────────────────────────────────────────
@@ -178,12 +184,16 @@ function ZeugmaDemoDashboardInner() {
   return (
     <Zeugma
       controller={controller}
-      resizerSize={4}
-      enableDragToDismiss={true}
+      resizerSize={resizerSize}
+      enableDragToDismiss={enableDragToDismiss}
+      dismissThreshold={dismissThreshold}
+      snapThreshold={snapThreshold}
+      dragActivationDistance={dragActivationDistance}
+      minSplitPercentage={minSplitPercentage}
+      maxSplitPercentage={maxSplitPercentage}
       persist={persist}
       classNames={{
-        dropPreview:
-          'bg-[#5794F2]/10 border border-[#5794F2]/30 transition-all duration-200 shadow-lg',
+        dropPreview: 'bg-white/5 border border-white/20 transition-all duration-200 shadow-lg',
         rootDropPreview: 'grafana-root-drop-preview',
         resizer: 'grafana-resizer',
         tabDropPreview: 'grafana-tab-drop-preview',
@@ -191,15 +201,44 @@ function ZeugmaDemoDashboardInner() {
         tabDragPreview: 'opacity-90 shadow-2xl',
       }}
     >
-      <DashboardContainer>
+      <DashboardContainer className="relative">
         <DashboardToolbar
           timeRange={timeRange}
           onTimeRangeChange={setTimeRange}
-          persist={persist}
-          onPersistChange={setPersist}
+          drawerOpen={drawerOpen}
+          onToggleDrawer={() => setDrawerOpen(!drawerOpen)}
         />
 
-        <div className="grafana-workspace">{<PaneTree renderPane={renderPane} />}</div>
+        <div className="flex-1 flex flex-row min-h-0 overflow-hidden relative w-full">
+          <DashboardDrawer
+            isOpen={drawerOpen}
+            onClose={() => setDrawerOpen(false)}
+            isDocked={true}
+            controller={controller}
+            resizerSize={resizerSize}
+            setResizerSize={setResizerSize}
+            enableDragToDismiss={enableDragToDismiss}
+            setEnableDragToDismiss={setEnableDragToDismiss}
+            dismissThreshold={dismissThreshold}
+            setDismissThreshold={setDismissThreshold}
+            snapThreshold={snapThreshold}
+            setSnapThreshold={setSnapThreshold}
+            dragActivationDistance={dragActivationDistance}
+            setDragActivationDistance={setDragActivationDistance}
+            minSplitPercentage={minSplitPercentage}
+            setMinSplitPercentage={setMinSplitPercentage}
+            maxSplitPercentage={maxSplitPercentage}
+            setMaxSplitPercentage={setMaxSplitPercentage}
+            hoveredPaneId={hoveredPaneId}
+            setHoveredPaneId={setHoveredPaneId}
+            persist={persist}
+            onPersistChange={setPersist}
+          />
+
+          <div className="grafana-workspace min-w-0">
+            <PaneTree renderPane={renderPane} />
+          </div>
+        </div>
       </DashboardContainer>
     </Zeugma>
   )

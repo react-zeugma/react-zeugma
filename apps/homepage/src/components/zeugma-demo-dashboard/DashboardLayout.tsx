@@ -1,7 +1,7 @@
 'use client'
 
-import { ReactNode, useState, useRef, useEffect } from 'react'
-import { GripVertical, Clock, RefreshCw, ChevronDown } from 'lucide-react'
+import { ReactNode } from 'react'
+import { GripVertical, Clock, RefreshCw, SlidersHorizontal } from 'lucide-react'
 
 // ── Panel Chrome ─────────────────────────────────────────────────────────────
 
@@ -16,154 +16,44 @@ export function PanelChrome({
   return <>{children}</>
 }
 
-import { useZeugmaContext, TreeNode } from 'react-zeugma'
-import { AVAILABLE_WIDGETS, PRESETS } from './constants'
-
-function getActiveWidgets(node: TreeNode | null): string[] {
-  if (!node) return []
-  if (node.type === 'pane') {
-    return node.tabIds
-  }
-  return [...getActiveWidgets(node.first), ...getActiveWidgets(node.second)]
-}
+import { useZeugmaContext } from 'react-zeugma'
+import { defaultDashboardLayout } from './constants'
 
 export function DashboardToolbar({
   onRefresh,
   timeRange,
   onTimeRangeChange,
-  persist,
-  onPersistChange,
+  drawerOpen,
+  onToggleDrawer,
 }: {
   onRefresh?: () => void
   timeRange: string
   onTimeRangeChange?: (range: string) => void
-  persist: boolean
-  onPersistChange: (val: boolean) => void
+  drawerOpen?: boolean
+  onToggleDrawer?: () => void
 }) {
-  const { layout, addTab, removeTab, setLayout } = useZeugmaContext()
-  const activeWidgets = getActiveWidgets(layout)
-
-  const [activePreset, setActivePreset] = useState('all')
-  const [dropdownOpen, setDropdownOpen] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
+  const { setLayout } = useZeugmaContext()
   const ranges = ['5m', '15m', '30m', '1h', '6h', '24h']
 
-  const handleToggleWidget = (widgetId: string) => {
-    setActivePreset('')
-    if (activeWidgets.includes(widgetId)) {
-      if (activeWidgets.length <= 1) return
-      removeTab(widgetId)
-    } else {
-      const widget = AVAILABLE_WIDGETS.find((w) => w.id === widgetId)
-      addTab(widgetId, undefined, widget ? { color: widget.color } : undefined)
-    }
-  }
-
-  const handleApplyPreset = (presetName: string) => {
-    setActivePreset(presetName)
-    const preset = PRESETS.find((p) => p.name === presetName)
-    if (preset) {
-      setLayout(preset.layout)
-    }
-  }
-
   const handleRefresh = () => {
-    handleApplyPreset('all')
+    setLayout(defaultDashboardLayout)
     if (onRefresh) {
       onRefresh()
     }
   }
 
-  // Close dropdown on click outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setDropdownOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [])
-
   return (
     <div className="grafana-toolbar">
-      {/* Left: Presets and Widget Selects next to each other */}
-      <div className="flex items-center gap-3">
-        {/* Preset Selector */}
-        <div className="flex items-center gap-1.5">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#8E8E8E] shrink-0">
-            Preset:
-          </span>
-          <select
-            value={activePreset}
-            onChange={(e) => handleApplyPreset(e.target.value)}
-            className="grafana-select"
-          >
-            <option value="" disabled hidden>
-              Custom Layout
-            </option>
-            {PRESETS.map((p) => (
-              <option key={p.name} value={p.name}>
-                {p.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Widgets Selector */}
-        <div className="flex items-center gap-1.5" ref={dropdownRef}>
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#8E8E8E] shrink-0">
-            Widgets:
-          </span>
-          <div className="grafana-dropdown">
-            <button
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="grafana-select flex items-center gap-1.5"
-            >
-              <span>
-                {activeWidgets.length} / {AVAILABLE_WIDGETS.length} Active
-              </span>
-              <ChevronDown className="w-3 h-3 opacity-60" />
-            </button>
-
-            {dropdownOpen && (
-              <div className="grafana-dropdown-menu">
-                {AVAILABLE_WIDGETS.map((w) => {
-                  const isActive = activeWidgets.includes(w.id)
-                  return (
-                    <button
-                      key={w.id}
-                      onClick={() => handleToggleWidget(w.id)}
-                      className="grafana-dropdown-item"
-                    >
-                      <span className={`grafana-dropdown-checkbox ${isActive ? 'checked' : ''}`} />
-                      <span
-                        className="w-1.5 h-1.5 rounded-full"
-                        style={{ backgroundColor: w.color }}
-                      />
-                      <span>{w.label}</span>
-                    </button>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Persistence Toggle */}
-        <div className="flex items-center gap-1.5 ml-2 border-l border-[#252830] pl-3.5">
-          <label className="flex items-center gap-2 cursor-pointer select-none text-[10px] font-semibold uppercase tracking-wider text-[#8E8E8E] hover:text-[#d8d9da] transition-colors">
-            <input
-              type="checkbox"
-              checked={persist}
-              onChange={(e) => onPersistChange(e.target.checked)}
-              className="w-3.5 h-3.5 accent-[#5794F2] cursor-pointer"
-            />
-            <span>Persist Layout</span>
-          </label>
-        </div>
+      {/* Left: Configure Button */}
+      <div className="flex items-center">
+        <button
+          onClick={onToggleDrawer}
+          className={`grafana-config-btn ${drawerOpen ? 'active' : ''}`}
+          title="Configure Dashboard"
+        >
+          <SlidersHorizontal className="w-3.5 h-3.5" />
+          <span>Configure</span>
+        </button>
       </div>
 
       {/* Right: Time range + Refresh */}

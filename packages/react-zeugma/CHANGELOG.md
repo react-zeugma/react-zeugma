@@ -5,7 +5,7 @@
 ### Patch Changes
 
 - **Fix metadata being undefined**
-  - Fixed drag overlay.
+  - Error on metadatas fixed when dragging a tab or pane in a multi-tabbed layout.
 
 ## 6.7.1
 

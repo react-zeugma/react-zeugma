@@ -65,7 +65,7 @@ export function FpsMonitor({
   return (
     <div className={className}>
       {/* Top Banner */}
-      <div className="text-[9px] text-[#73BF69] bg-[#73BF69]/10 border border-[#73BF69]/20 rounded px-2 py-1 text-center font-semibold tracking-wide uppercase select-none">
+      <div className="text-[9px] text-[#ccccdc] bg-white/5 border border-white/10 rounded px-2 py-1 text-center font-semibold tracking-wide uppercase select-none">
         ✓ Diagnostics Active: Real-time UI Telemetry
       </div>
 

@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 6.7.3
+
+### Patch Changes
+
+- Implement dragging pane directly into tabs.
+
 ## 6.7.2
 
 ### Patch Changes

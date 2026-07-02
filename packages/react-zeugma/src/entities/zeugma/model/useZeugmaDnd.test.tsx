@@ -70,7 +70,7 @@ describe('useZeugmaDnd Hook', () => {
     }
   }
 
-  it('should filter out tab drop zones in collision detection when dragging a pane', () => {
+  it('should not filter out tab drop zones in collision detection when dragging a pane', () => {
     const controller = mockController()
     const setOverTabId = vi.fn()
     const setOverTabPosition = vi.fn()
@@ -103,11 +103,28 @@ describe('useZeugmaDnd Hook', () => {
       droppableContainers: [],
     } as unknown as Parameters<dndKitCore.CollisionDetection>[0]
     const paneResult = collisionDetection(paneArgs)
-    expect(paneResult).toEqual([{ id: 'drop-left-pane-2' }]) // For pane drag, tab-drop-tab-1 is filtered out
+    expect(paneResult).toEqual(mockCollisions) // For pane drag, tab-drop-tab-1 is also not filtered out
   })
 
-  it('should not trigger moveTab when dropping a pane on a tab-drop zone', () => {
+  it('should merge tabs of a dragged pane next to the target tab when dropping a pane on a tab-drop zone', () => {
     const controller = mockController()
+    controller.layout = {
+      type: 'split',
+      direction: 'row',
+      first: {
+        type: 'pane',
+        id: 'pane-1',
+        tabIds: ['tab-1'],
+        activeTabId: 'tab-1',
+      },
+      second: {
+        type: 'pane',
+        id: 'pane-2',
+        tabIds: ['tab-2'],
+        activeTabId: 'tab-2',
+      },
+      splitPercentage: 50,
+    }
     const setOverTabId = vi.fn()
     const setOverTabPosition = vi.fn()
 
@@ -121,20 +138,51 @@ describe('useZeugmaDnd Hook', () => {
       }),
     )
 
+    const handleDragStart = hookInstance.result.current.onDragStart
     const handleDragEnd = hookInstance.result.current.onDragEnd
 
-    // Simulate dragging a pane (isTabDrag = false) and dropping it over a tab drop zone
+    // 1. Simulate starting drag of pane-1
+    handleDragStart({
+      active: { id: 'pane-1' },
+      activatorEvent: new MouseEvent('mousedown'),
+    } as unknown as dndKitCore.DragStartEvent)
+
+    // 2. Simulate dropping pane-1 over tab-drop-tab-2
     const paneDragEndEvent = {
       active: { id: 'pane-1' },
-      over: { id: 'tab-drop-tab-2' },
+      over: {
+        id: 'tab-drop-tab-2',
+        rect: {
+          width: 100,
+          height: 0,
+          top: 0,
+          bottom: 0,
+          left: 0,
+          right: 100,
+        },
+        data: {},
+        disabled: false,
+        node: { current: null },
+      },
+      activatorEvent: new MouseEvent('mouseup'),
+      delta: { x: 60, y: 0 },
     } as unknown as dndKitCore.DragEndEvent
 
     handleDragEnd(paneDragEndEvent)
 
-    // Verify moveTab is NOT called
-    expect(controller.moveTab).not.toHaveBeenCalled()
-    // Verify onDragEnd callback is called with nulls
-    expect(onDragEndMock).toHaveBeenCalledWith('pane-1', null, null)
+    // Verify setLayout IS called to merge pane-1's tabs into pane-2
+    expect(controller.setLayout).toHaveBeenCalledWith({
+      type: 'pane',
+      id: 'pane-2',
+      tabIds: ['tab-1', 'tab-2'],
+      activeTabId: 'tab-1',
+      tabsMetadata: undefined,
+    })
+    // Verify onDragEnd callback is called with the target tab and drop metadata
+    expect(onDragEndMock).toHaveBeenCalledWith('pane-1', 'tab-2', {
+      type: 'move',
+      position: 'center',
+    })
   })
 
   it('should trigger moveTab when dropping a tab on a tab-drop zone', () => {

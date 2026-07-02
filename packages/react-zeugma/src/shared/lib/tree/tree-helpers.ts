@@ -583,6 +583,75 @@ export function computeLayout(
 }
 
 /**
+ * Tree Helper: Move/insert all tabs of a dragged pane next to a target tab in another pane.
+ */
+export function movePaneTabs(
+  tree: TreeNode | null,
+  draggedPaneId: string,
+  targetTabId: string,
+  position: 'before' | 'after' = 'before',
+): TreeNode | null {
+  if (tree === null) return null
+
+  // 1. Find the dragged pane to get its tabs, activeTabId, and tabsMetadata
+  const sourcePane = findPaneById(tree, draggedPaneId)
+  if (!sourcePane) return tree
+
+  const draggedTabIds = sourcePane.tabIds
+  const draggedActiveTabId = sourcePane.activeTabId
+  const draggedTabsMetadata = sourcePane.tabsMetadata || {}
+
+  // 2. Remove the dragged pane from the layout tree
+  const cleanTree = removePane(tree, draggedPaneId)
+  if (cleanTree === null) {
+    return sourcePane
+  }
+
+  // 3. Insert the dragged pane's tabs into the target pane next to targetTabId
+  function insert(node: TreeNode): TreeNode {
+    if (node.type === 'pane') {
+      if (node.tabIds.includes(targetTabId)) {
+        const newTabs = [...node.tabIds]
+        // Filter out any of the dragged tabs if they somehow already existed
+        const filteredTabs = newTabs.filter((t) => !draggedTabIds.includes(t))
+        let insertIndex = filteredTabs.indexOf(targetTabId)
+        if (insertIndex < 0) {
+          insertIndex = 0
+        }
+        if (position === 'after') {
+          insertIndex += 1
+        }
+        filteredTabs.splice(insertIndex, 0, ...draggedTabIds)
+
+        const newTabsMetadata = { ...node.tabsMetadata }
+        for (const tid of draggedTabIds) {
+          if (draggedTabsMetadata[tid]) {
+            newTabsMetadata[tid] = draggedTabsMetadata[tid]
+          }
+        }
+        return {
+          ...node,
+          tabIds: filteredTabs,
+          activeTabId: draggedActiveTabId,
+          tabsMetadata: Object.keys(newTabsMetadata).length > 0 ? newTabsMetadata : undefined,
+        }
+      }
+      return node
+    }
+    if (node.type === 'split') {
+      return {
+        ...node,
+        first: insert(node.first),
+        second: insert(node.second),
+      }
+    }
+    return node
+  }
+
+  return insert(cleanTree)
+}
+
+/**
  * Calculates the target drop insertion index in a list of tabs during a drag.
  * Returns -1 if the drop target is not in the list.
  */
@@ -592,8 +661,8 @@ export function calculateTabDropIndex(
   overTabId: string | null,
   overTabPosition: 'before' | 'after' | null,
 ): number {
-  const isDraggingTab = activeType === 'tab'
-  const isHoveredTabInThisPane = isDraggingTab && overTabId && tabIds.includes(overTabId)
+  const isDraggingTabOrPane = activeType === 'tab' || activeType === 'pane'
+  const isHoveredTabInThisPane = isDraggingTabOrPane && overTabId && tabIds.includes(overTabId)
   if (!isHoveredTabInThisPane || !overTabPosition) {
     return -1
   }

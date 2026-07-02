@@ -16,6 +16,7 @@ export {
   selectTab,
   mergeTab,
   moveTab,
+  movePaneTabs,
   computeLayout,
   calculateTabDropIndex,
 } from './shared/lib/tree/tree-helpers'

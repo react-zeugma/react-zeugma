@@ -400,6 +400,7 @@ import {
   selectTab,
   mergeTab,
   moveTab,
+  movePaneTabs,
   findPaneById,
   findPaneContainingTab,
   findTabById,

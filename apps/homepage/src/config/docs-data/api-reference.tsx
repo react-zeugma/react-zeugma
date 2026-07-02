@@ -185,6 +185,11 @@ const TREE_UTILITIES = [
     "(tree: TreeNode, draggedTabId: string, targetTabId: string, position?: 'before' | 'after') => TreeNode",
     'Reorders a tab relative to another target tab.',
   ],
+  [
+    'movePaneTabs',
+    "(tree: TreeNode, draggedPaneId: string, targetTabId: string, position?: 'before' | 'after') => TreeNode",
+    'Moves all tabs from a dragged pane next to a target tab.',
+  ],
 ]
 
 export const apiReferenceSection: DocSection = {

@@ -38,27 +38,26 @@ const initialPlaygroundLayout: TreeNode = {
 }
 
 function PlaygroundPaneHeader() {
-  const { tabIds, activeTabId, selectTab, remove } = usePaneContext()
+  const { remove } = usePaneContext()
   return (
     <div className="flex items-center justify-between px-3 py-1.5 bg-bg-sidebar border-b border-border-primary/80 select-none">
-      <div className="flex items-center gap-1 overflow-x-auto scrollbar-none">
-        {tabIds.map((id) => {
-          const isActive = id === activeTabId
-          return (
-            <button
-              key={id}
-              onClick={() => selectTab(id)}
-              className={`px-2 py-0.5 text-[10px] font-bold rounded-md transition-colors cursor-pointer ${
-                isActive
-                  ? 'bg-bg-pane text-indigo-500 shadow-2xs'
-                  : 'text-text-secondary hover:text-text-primary'
-              }`}
-            >
-              {id}
-            </button>
-          )
-        })}
-      </div>
+      <Pane.Tabs
+        classNames={{
+          container: 'flex items-center gap-1 overflow-x-auto scrollbar-none',
+        }}
+        renderTab={({ id, isActive, onSelect }) => (
+          <button
+            onClick={onSelect}
+            className={`px-2 py-0.5 text-[10px] font-bold rounded-md transition-colors cursor-pointer ${
+              isActive
+                ? 'bg-bg-pane text-indigo-500 shadow-2xs'
+                : 'text-text-secondary hover:text-text-primary'
+            }`}
+          >
+            {id}
+          </button>
+        )}
+      />
       <Pane.DragHandle className="flex-1 h-5 mx-2 cursor-grab active:cursor-grabbing" />
       <button
         onClick={remove}
@@ -274,6 +273,7 @@ export default function Dashboard() {
                 resizer: 'zeugma-resizer',
                 dropPreview:
                   'bg-indigo-500/5 border border-indigo-500 border-dashed rounded-lg shadow-sm',
+                tabDropPreview: 'w-[2px] bg-indigo-500 z-10',
               }}
             />
           ) : (

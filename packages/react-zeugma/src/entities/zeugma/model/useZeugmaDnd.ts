@@ -10,6 +10,7 @@ import {
   generateUniqueId,
   moveTab as moveTabHelper,
   selectTab as selectTabHelper,
+  movePaneTabs,
 } from '../../../shared/lib/tree'
 import { SmartPointerSensor, SmartTouchSensor } from '../lib/sensors'
 import { useLatestPointer, useBodyCursorOverride } from './hooks'
@@ -73,6 +74,7 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
     setLayout,
     activeId,
     setActiveId,
+    activeType,
     setActiveType,
     dismissIntentId,
     setDismissIntentId,
@@ -161,7 +163,7 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
 
     // Handle tab drop hover location
     const tabDropMatch = overIdStr.match(/^tab-drop-(.+)$/)
-    if (tabDropMatch && over && isTabDrag) {
+    if (tabDropMatch && over && (isTabDrag || activeType === 'pane')) {
       const [, targetTabId] = tabDropMatch
 
       if (draggingId !== targetTabId) {
@@ -338,15 +340,41 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
     // Check for tab reorder drop
     const tabDropMatch = overIdStr.match(/^tab-drop-(.+)$/)
     if (tabDropMatch) {
-      if (!isTabDrag) {
-        _internalSetLayout(originalLayout)
-        if (onDragEnd) {
-          onDragEnd(draggingId, null, null)
-        }
-        return
-      }
       const [, targetTabId] = tabDropMatch
-      if (draggingId !== targetTabId) {
+      if (isTabDrag) {
+        if (draggingId !== targetTabId) {
+          let position: 'before' | 'after' = 'before'
+          const overRect = over.rect
+          const ae = event.activatorEvent
+          let px: number | null = null
+          if (latestPointerRef.current) {
+            px = latestPointerRef.current.x
+          } else {
+            const coords = getPointerCoordinates(ae)
+            if (coords) {
+              px = coords.x + event.delta.x
+            }
+          }
+
+          if (px !== null) {
+            const center = overRect.left + overRect.width / 2
+            if (px > center) {
+              position = 'after'
+            }
+          }
+
+          const newLayout = moveTabHelper(originalLayout, draggingId, targetTabId, position)
+          setLayout(newLayout)
+          if (onDragEnd) {
+            onDragEnd(draggingId, targetTabId, { type: 'move', position: 'center' })
+          }
+        } else {
+          _internalSetLayout(originalLayout)
+          if (onDragEnd) {
+            onDragEnd(draggingId, null, null)
+          }
+        }
+      } else {
         let position: 'before' | 'after' = 'before'
         const overRect = over.rect
         const ae = event.activatorEvent
@@ -367,15 +395,10 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
           }
         }
 
-        const newLayout = moveTabHelper(originalLayout, draggingId, targetTabId, position)
+        const newLayout = movePaneTabs(originalLayout, draggingId, targetTabId, position)
         setLayout(newLayout)
         if (onDragEnd) {
           onDragEnd(draggingId, targetTabId, { type: 'move', position: 'center' })
-        }
-      } else {
-        _internalSetLayout(originalLayout)
-        if (onDragEnd) {
-          onDragEnd(draggingId, null, null)
         }
       }
       return

@@ -5,22 +5,19 @@ export const customCollisionDetection: CollisionDetection = (args) => {
   const isTabDrag = activeIdStr.startsWith('tab-header-')
 
   const pointerCollisions = pointerWithin(args)
-  // If we're dragging a pane, filter out any tab-drop colliders
-  const filteredCollisions = isTabDrag
-    ? pointerCollisions
-    : pointerCollisions.filter((collision) => !collision.id.toString().startsWith('tab-drop-'))
+  // We allow tab-drop colliders for both tab drags and pane drags.
+  const filteredCollisions = pointerCollisions
 
   if (filteredCollisions.length > 0) {
     const sortedCollisions = [...filteredCollisions].sort((a, b) => {
       const aId = a.id.toString()
       const bId = b.id.toString()
 
-      if (isTabDrag) {
-        const aIsTab = aId.startsWith('tab-drop-')
-        const bIsTab = bId.startsWith('tab-drop-')
-        if (aIsTab && !bIsTab) return -1
-        if (!aIsTab && bIsTab) return 1
-      }
+      // Prioritize tab drop zones over root/pane drop zones for both tab and pane drags
+      const aIsTab = aId.startsWith('tab-drop-')
+      const bIsTab = bId.startsWith('tab-drop-')
+      if (aIsTab && !bIsTab) return -1
+      if (!aIsTab && bIsTab) return 1
 
       const aIsRoot = aId.startsWith('drop-root-')
       const bIsRoot = bId.startsWith('drop-root-')

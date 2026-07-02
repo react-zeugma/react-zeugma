@@ -124,3 +124,72 @@ export const homeJsonLd = {
     name: 'Yusuf Arslan',
   },
 }
+
+export const docsJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'TechArticle',
+  name: 'react-zeugma Documentation',
+  headline: 'react-zeugma Documentation',
+  description:
+    'Detailed API references, installation instructions, quick-start guide, custom styling, and tree mutation utility documentation for react-zeugma.',
+  inLanguage: 'en',
+  url: 'https://react-zeugma.com/docs',
+  mainEntityOfPage: 'https://react-zeugma.com/docs',
+  about: {
+    '@type': 'SoftwareApplication',
+    name: 'react-zeugma',
+    applicationCategory: 'DeveloperApplication',
+    operatingSystem: 'All',
+    url: 'https://react-zeugma.com',
+  },
+  author: {
+    '@type': 'Person',
+    name: 'Yusuf Arslan',
+  },
+  publisher: {
+    '@type': 'Person',
+    name: 'Yusuf Arslan',
+  },
+  hasPart: [
+    {
+      '@type': 'WebPageElement',
+      name: 'Introduction',
+      url: 'https://react-zeugma.com/docs#introduction',
+    },
+    {
+      '@type': 'WebPageElement',
+      name: 'Quick Start',
+      url: 'https://react-zeugma.com/docs#quickstart',
+    },
+    {
+      '@type': 'WebPageElement',
+      name: 'Tree Layout Structure',
+      url: 'https://react-zeugma.com/docs#tree-layout',
+    },
+    {
+      '@type': 'WebPageElement',
+      name: 'State Controller',
+      url: 'https://react-zeugma.com/docs#state-controller',
+    },
+    {
+      '@type': 'WebPageElement',
+      name: 'Pane Customization',
+      url: 'https://react-zeugma.com/docs#pane-customization',
+    },
+    {
+      '@type': 'WebPageElement',
+      name: 'Advanced Features',
+      url: 'https://react-zeugma.com/docs#advanced-features',
+    },
+    {
+      '@type': 'WebPageElement',
+      name: 'API Reference',
+      url: 'https://react-zeugma.com/docs#api-reference',
+    },
+    {
+      '@type': 'WebPageElement',
+      name: 'AI Integration (SKILL.md)',
+      url: 'https://react-zeugma.com/docs#skill-md',
+    },
+  ],
+}

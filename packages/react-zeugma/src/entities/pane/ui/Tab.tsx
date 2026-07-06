@@ -43,7 +43,7 @@ export interface TabProps {
 }
 
 export const Tab: React.FC<TabProps> = ({ id, locked = false, children, className, style }) => {
-  const { locked: globalLocked, classNames = {} } = useZeugmaState()
+  const { locked: globalLocked, classNames = {}, fullscreenPaneId } = useZeugmaState()
   const { overTabId } = useZeugmaDrag()
   const portalRegistry = useContext(PortalRegistryContext)
 
@@ -61,7 +61,8 @@ export const Tab: React.FC<TabProps> = ({ id, locked = false, children, classNam
   }, [id, children, portalRegistry])
 
   const tabsContext = useContext(TabsContext)
-  const isLocked = locked || globalLocked || (tabsContext?.locked ?? false)
+  const isLocked =
+    locked || globalLocked || (tabsContext?.locked ?? false) || fullscreenPaneId !== null
 
   const {
     attributes,

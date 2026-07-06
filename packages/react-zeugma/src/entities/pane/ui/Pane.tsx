@@ -134,8 +134,8 @@ export const Pane: React.FC<PaneProps> & {
   const localLocked = paneNode?.locked ?? false
 
   const isPaneLocked = propLocked || localLocked
-  const isDraggableDisabled = globalLocked || isPaneLocked
-  const isDroppableDisabled = globalLocked || isPaneLocked
+  const isDraggableDisabled = globalLocked || isPaneLocked || fullscreenPaneId !== null
+  const isDroppableDisabled = globalLocked || isPaneLocked || fullscreenPaneId !== null
 
   const showDropZones =
     activeId !== null &&

@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 6.7.4
+
+### Patch Changes
+
+- Disable dragging and dropping of panes and tabs when a pane is zoomed to fullscreen.
+
 ## 6.7.3
 
 ### Patch Changes

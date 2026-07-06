@@ -564,4 +564,44 @@ describe('Tab Drop Preview rendering', () => {
       expect(localStorage.getItem('zeugma-layout')).toBeNull()
     })
   })
+
+  it('should disable dragging on both panes and tabs in fullscreen mode', () => {
+    const initialLayout: TreeNode = {
+      type: 'pane',
+      id: 'pane-1',
+      tabIds: ['tab-1'],
+      activeTabId: 'tab-1',
+    }
+
+    const useDraggableSpy = vi.mocked(dndKitCore.useDraggable)
+    useDraggableSpy.mockClear()
+
+    const TestWrapper = () => {
+      const controller = useZeugma({ initialLayout, fullscreenPaneId: 'pane-1' })
+      return (
+        <Zeugma
+          controller={controller}
+          renderPane={(id) => (
+            <Pane id={id}>
+              <Pane.Tabs renderTab={({ id: tabId }) => <span data-testid={tabId}>{tabId}</span>} />
+            </Pane>
+          )}
+        />
+      )
+    }
+
+    render(<TestWrapper />)
+
+    const calls = useDraggableSpy.mock.calls
+    expect(calls.length).toBeGreaterThan(0)
+
+    const paneDragCall = calls.find((c) => c[0].id === 'pane-1')
+    const tabDragCall = calls.find((c) => c[0].id === 'tab-header-tab-1')
+
+    expect(paneDragCall).toBeDefined()
+    expect(paneDragCall![0].disabled).toBe(true)
+
+    expect(tabDragCall).toBeDefined()
+    expect(tabDragCall![0].disabled).toBe(true)
+  })
 })

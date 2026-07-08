@@ -16,6 +16,7 @@ export {
   selectTab,
   mergeTab,
   moveTab,
+  swapTabs,
   movePaneTabs,
   computeLayout,
   calculateTabDropIndex,

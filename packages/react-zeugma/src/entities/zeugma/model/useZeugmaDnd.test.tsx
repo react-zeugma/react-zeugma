@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { renderHook } from '@testing-library/react'
 import { useZeugmaDnd } from './useZeugmaDnd'
-import type { ZeugmaControllerInternal } from '../../../shared'
+import type { ZeugmaControllerInternal, TreeNode } from '../../../shared'
 import * as dndKitCore from '@dnd-kit/core'
 
 vi.mock('@dnd-kit/core', async (importOriginal) => {
@@ -516,6 +516,113 @@ describe('useZeugmaDnd Hook', () => {
         activeTabId: 'tab-1',
       },
       splitPercentage: 100 / 3,
+    })
+  })
+
+  it('should trigger swap on drop when dragging a tab to the center drop zone of a target pane', () => {
+    const customLayout: TreeNode = {
+      type: 'split',
+      direction: 'row',
+      splitPercentage: 50,
+      first: {
+        type: 'pane',
+        id: 'pane-1',
+        tabIds: ['tab-1'],
+        activeTabId: 'tab-1',
+      },
+      second: {
+        type: 'pane',
+        id: 'pane-2',
+        tabIds: ['tab-2'],
+        activeTabId: 'tab-2',
+      },
+    }
+
+    const controller = {
+      ...mockController(),
+      layout: customLayout,
+      renderingLayout: customLayout,
+    }
+    const setOverTabId = vi.fn()
+    const setOverTabPosition = vi.fn()
+    const onDragEndMock = vi.fn()
+
+    const hookInstance = renderHook(() =>
+      useZeugmaDnd({
+        ...controller,
+        setOverTabId,
+        setOverTabPosition,
+        onDragEnd: onDragEndMock,
+      }),
+    )
+
+    // Simulate drag start for tab-1
+    hookInstance.result.current.onDragStart({
+      active: { id: 'tab-header-tab-1' },
+      activatorEvent: new MouseEvent('mousedown'),
+    } as unknown as dndKitCore.DragStartEvent)
+
+    // Simulate drag move over target pane-2 center drop zone ('drop-center-pane-2')
+    hookInstance.result.current.onDragMove({
+      active: { id: 'tab-header-tab-1' },
+      over: {
+        id: 'drop-center-pane-2',
+        rect: {
+          width: 200,
+          height: 200,
+          top: 0,
+          bottom: 200,
+          left: 0,
+          right: 200,
+        },
+        data: {},
+        disabled: false,
+        node: { current: null },
+      },
+      activatorEvent: new MouseEvent('mousemove'),
+      delta: { x: 0, y: 0 },
+    } as unknown as dndKitCore.DragMoveEvent)
+
+    // Simulate dropping the tab on 'drop-center-pane-2'
+    hookInstance.result.current.onDragEnd({
+      active: { id: 'tab-header-tab-1' },
+      over: {
+        id: 'drop-center-pane-2',
+        rect: {
+          width: 200,
+          height: 200,
+          top: 0,
+          bottom: 200,
+          left: 0,
+          right: 200,
+        },
+        data: {},
+        disabled: false,
+        node: { current: null },
+      },
+      activatorEvent: new MouseEvent('mouseup'),
+      delta: { x: 0, y: 0 },
+    } as unknown as dndKitCore.DragEndEvent)
+
+    // setLayout should be called with swapped layout: pane-1 has tab-2, pane-2 has tab-1
+    expect(controller.setLayout).toHaveBeenCalledWith({
+      type: 'split',
+      direction: 'row',
+      splitPercentage: 50,
+      first: {
+        type: 'pane',
+        id: 'pane-1',
+        tabIds: ['tab-2'],
+        activeTabId: 'tab-2',
+        tabsMetadata: undefined,
+      },
+      second: {
+        type: 'pane',
+        id: 'pane-2',
+        tabIds: ['tab-1'],
+        activeTabId: 'tab-1',
+        tabsMetadata: undefined,
+      },
     })
   })
 })

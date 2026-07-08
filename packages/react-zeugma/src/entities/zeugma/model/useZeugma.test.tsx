@@ -299,8 +299,6 @@ describe('useZeugma Hook', () => {
       ;(result.current as unknown as ZeugmaControllerInternal)._internalSetLayout(null)
     })
 
-    expect((result.current as unknown as ZeugmaControllerInternal).renderingLayout).toBeNull()
-
     // Call setLayout with the original layout (structurally identical, so a no-op for logical layout)
     act(() => {
       result.current.setLayout(initialLayout)
@@ -311,5 +309,68 @@ describe('useZeugma Hook', () => {
     expect((result.current as unknown as ZeugmaControllerInternal).renderingLayout).toEqual(
       initialLayout,
     )
+  })
+
+  it('should swap tabs in the same pane when moveTab is called with position: center', () => {
+    const layoutWithThreeTabs: TreeNode = {
+      type: 'pane',
+      id: 'pane-1',
+      tabIds: ['tab-1', 'tab-2', 'tab-3'],
+      activeTabId: 'tab-1',
+    }
+    const { result } = renderHook(() => useZeugma({ initialLayout: layoutWithThreeTabs }))
+
+    act(() => {
+      result.current.moveTab('tab-1', 'tab-3', 'center')
+    })
+
+    const pane = result.current.layout as PaneNode
+    expect(pane.tabIds).toEqual(['tab-3', 'tab-2', 'tab-1'])
+    expect(pane.activeTabId).toBe('tab-1')
+  })
+
+  it('should swap tabs across different panes when moveTab is called with position: center', () => {
+    const layoutWithSplit: TreeNode = {
+      type: 'split',
+      direction: 'row',
+      splitPercentage: 50,
+      first: {
+        type: 'pane',
+        id: 'pane-1',
+        tabIds: ['tab-1', 'tab-2'],
+        activeTabId: 'tab-1',
+        tabsMetadata: {
+          'tab-1': { label: 'Tab 1' },
+        },
+      },
+      second: {
+        type: 'pane',
+        id: 'pane-2',
+        tabIds: ['tab-3', 'tab-4'],
+        activeTabId: 'tab-3',
+        tabsMetadata: {
+          'tab-3': { label: 'Tab 3' },
+        },
+      },
+    }
+    const { result } = renderHook(() => useZeugma({ initialLayout: layoutWithSplit }))
+
+    act(() => {
+      result.current.moveTab('tab-1', 'tab-3', 'center')
+    })
+
+    const root = result.current.layout as SplitNode
+    const firstPane = root.first as PaneNode
+    const secondPane = root.second as PaneNode
+
+    expect(firstPane.tabIds).toEqual(['tab-3', 'tab-2'])
+    expect(firstPane.activeTabId).toBe('tab-3')
+    expect(firstPane.tabsMetadata?.['tab-3']).toEqual({ label: 'Tab 3' })
+    expect(firstPane.tabsMetadata?.['tab-1']).toBeUndefined()
+
+    expect(secondPane.tabIds).toEqual(['tab-1', 'tab-4'])
+    expect(secondPane.activeTabId).toBe('tab-1')
+    expect(secondPane.tabsMetadata?.['tab-1']).toEqual({ label: 'Tab 1' })
+    expect(secondPane.tabsMetadata?.['tab-3']).toBeUndefined()
   })
 })

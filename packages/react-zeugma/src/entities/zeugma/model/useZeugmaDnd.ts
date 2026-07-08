@@ -4,12 +4,12 @@ import { SplitDirection, TreeNode, PaneNode } from '../../../shared'
 import {
   removePane as removePaneHelper,
   removeTab as removeTabHelper,
-  splitPane as splitPaneHelper,
+  splitPane,
   findPaneById,
   findPaneContainingTab,
   generateUniqueId,
-  moveTab as moveTabHelper,
-  selectTab as selectTabHelper,
+  moveTab,
+  selectTab,
   movePaneTabs,
 } from '../../../shared/lib/tree'
 import { SmartPointerSensor, SmartTouchSensor } from '../lib/sensors'
@@ -136,7 +136,7 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
     if (isTabDrag) {
       const parentPane = findPaneContainingTab(layout, draggingId)
       if (parentPane) {
-        layoutAfterSelect = selectTabHelper(layout, parentPane.id, draggingId) || layout
+        layoutAfterSelect = selectTab(layout, parentPane.id, draggingId) || layout
       }
     }
     initialLayoutForDragRef.current = layoutAfterSelect
@@ -363,7 +363,7 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
             }
           }
 
-          const newLayout = moveTabHelper(originalLayout, draggingId, targetTabId, position)
+          const newLayout = moveTab(originalLayout, draggingId, targetTabId, position)
           setLayout(newLayout)
           if (onDragEnd) {
             onDragEnd(draggingId, targetTabId, { type: 'move', position: 'center' })
@@ -468,8 +468,8 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
       return
     }
 
-    // Check for edge (split) drop
-    const match = overIdStr.match(/^drop-(left|right|top|bottom)-(.+)$/)
+    // Check for edge (split) or center (swap) drop
+    const match = overIdStr.match(/^drop-(left|right|top|bottom|center)-(.+)$/)
     if (!match) {
       _internalSetLayout(originalLayout)
       if (onDragEnd) {
@@ -479,6 +479,35 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
     }
 
     const [, dropZone, targetId] = match
+
+    if (dropZone === 'center') {
+      if (isTabDrag) {
+        const targetPane = findPaneById(originalLayout, targetId)
+        if (targetPane && targetPane.activeTabId) {
+          const targetTabId = targetPane.activeTabId
+          const newLayout = moveTab(originalLayout, draggingId, targetTabId, 'center')
+          setLayout(newLayout)
+          if (onDragEnd) {
+            onDragEnd(draggingId, targetId, {
+              type: 'move',
+              position: 'center',
+            })
+          }
+        } else {
+          _internalSetLayout(originalLayout)
+          if (onDragEnd) {
+            onDragEnd(draggingId, null, null)
+          }
+        }
+      } else {
+        _internalSetLayout(originalLayout)
+        if (onDragEnd) {
+          onDragEnd(draggingId, null, null)
+        }
+      }
+      return
+    }
+
     const parentPane = isTabDrag
       ? findPaneContainingTab(originalLayout, draggingId)
       : findPaneById(originalLayout, draggingId)
@@ -520,7 +549,7 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
       ? removeTabHelper(originalLayout, draggingId)
       : removePaneHelper(originalLayout, draggingId)
 
-    const newLayout = splitPaneHelper(
+    const newLayout = splitPane(
       cleanLayout,
       targetId,
       direction,

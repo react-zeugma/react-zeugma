@@ -428,6 +428,90 @@ export function mergeTab(
   return insert(cleanTree)
 }
 
+export function swapTabs(
+  tree: TreeNode | null,
+  draggedTabId: string,
+  targetTabId: string,
+): TreeNode | null {
+  if (tree === null) return null
+  if (draggedTabId === targetTabId) return tree
+
+  const sourcePane = findPaneContainingTab(tree, draggedTabId)
+  const targetPane = findPaneContainingTab(tree, targetTabId)
+
+  if (!sourcePane || !targetPane) return tree
+
+  const sourcePaneId = sourcePane.id
+  const targetPaneId = targetPane.id
+  const sourceMetadata = sourcePane.tabsMetadata?.[draggedTabId]
+  const targetMetadata = targetPane.tabsMetadata?.[targetTabId]
+
+  function swap(node: TreeNode): TreeNode {
+    if (node.type === 'pane') {
+      let changed = false
+      let newTabIds = [...node.tabIds]
+      let newActiveTabId = node.activeTabId
+      const newTabsMetadata = node.tabsMetadata ? { ...node.tabsMetadata } : {}
+
+      if (sourcePaneId === targetPaneId) {
+        if (node.id === sourcePaneId) {
+          const dragIdx = newTabIds.indexOf(draggedTabId)
+          const targetIdx = newTabIds.indexOf(targetTabId)
+          if (dragIdx !== -1 && targetIdx !== -1) {
+            newTabIds[dragIdx] = targetTabId
+            newTabIds[targetIdx] = draggedTabId
+          }
+          newActiveTabId = draggedTabId
+          changed = true
+        }
+      } else {
+        if (node.id === sourcePaneId) {
+          newTabIds = newTabIds.map((id) => (id === draggedTabId ? targetTabId : id))
+          if (newActiveTabId === draggedTabId) {
+            newActiveTabId = targetTabId
+          }
+          delete newTabsMetadata[draggedTabId]
+          if (targetMetadata) {
+            newTabsMetadata[targetTabId] = targetMetadata
+          }
+          changed = true
+        }
+        if (node.id === targetPaneId) {
+          newTabIds = newTabIds.map((id) => (id === targetTabId ? draggedTabId : id))
+          if (newActiveTabId === targetTabId) {
+            newActiveTabId = draggedTabId
+          }
+          delete newTabsMetadata[targetTabId]
+          if (sourceMetadata) {
+            newTabsMetadata[draggedTabId] = sourceMetadata
+          }
+          changed = true
+        }
+      }
+
+      if (changed) {
+        return {
+          ...node,
+          tabIds: newTabIds,
+          activeTabId: newActiveTabId,
+          tabsMetadata: Object.keys(newTabsMetadata).length > 0 ? newTabsMetadata : undefined,
+        }
+      }
+      return node
+    }
+    if (node.type === 'split') {
+      return {
+        ...node,
+        first: swap(node.first),
+        second: swap(node.second),
+      }
+    }
+    return node
+  }
+
+  return swap(tree)
+}
+
 /**
  * Tree Helper: Move/reorder a tab inside or to a target pane next to a target tab.
  */
@@ -435,9 +519,14 @@ export function moveTab(
   tree: TreeNode | null,
   draggedTabId: string,
   targetTabId: string,
-  position: 'before' | 'after' = 'before',
+  position: 'before' | 'after' | 'center' = 'before',
 ): TreeNode | null {
   if (tree === null) return null
+  if (draggedTabId === targetTabId) return tree
+
+  if (position === 'center') {
+    return swapTabs(tree, draggedTabId, targetTabId)
+  }
 
   const sourcePane = findPaneContainingTab(tree, draggedTabId)
   const sourceMetadata = sourcePane?.tabsMetadata?.[draggedTabId]

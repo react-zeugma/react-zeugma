@@ -181,7 +181,8 @@ Import these layout mutators/queries from \`react-zeugma/utils\`:
 - **\`removeTab(tree, tabId)\`**: Removes a tab from its pane; collapses empty panes. Returns the updated tree.
 - **\`selectTab(tree, paneId, tabId)\`**: Activates a tab inside a pane. Returns the updated tree.
 - **\`mergeTab(tree, draggedTabId, targetPaneId)\`**: Moves a tab from its source pane to target pane. Returns the updated tree.
-- **\`moveTab(tree, draggedTabId, targetTabId, position?)\`**: Moves a tab before/after target tab. Returns the updated tree.
+- **\`moveTab(tree, draggedTabId, targetTabId, position?)\`**: Moves a tab before/after target tab, or swaps them if position is \`'center'\`. Returns the updated tree.
+- **\`swapTabs(tree, draggedTabId, targetTabId)\`**: Swaps the positions and active states of two tabs. Returns the updated tree.
 - **\`movePaneTabs(tree, draggedPaneId, targetTabId, position?)\`**: Moves all tabs from a dragged pane before/after target tab. Returns the updated tree.
 - **\`findPaneById(tree, paneId)\`**: Returns matching \`PaneNode\` or \`null\`.
 - **\`findPaneContainingTab(tree, tabId)\`**: Returns parent \`PaneNode\` containing the tab, or \`null\`.

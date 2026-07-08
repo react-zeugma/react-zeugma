@@ -101,7 +101,11 @@ export interface ZeugmaActions {
   /** Updates the split percentage of a split node. */
   updateSplitPercentage: (currentNode: SplitNode, percentage: number) => void
   /** Moves/reorders a tab relative to another target tab. */
-  moveTab: (draggedTabId: string, targetTabId: string, position?: 'before' | 'after') => void
+  moveTab: (
+    draggedTabId: string,
+    targetTabId: string,
+    position?: 'before' | 'after' | 'center',
+  ) => void
 }
 
 export interface ZeugmaQueries {
@@ -163,6 +167,8 @@ export interface ZeugmaClassNames {
   lockedPreview?: string
   /** CSS class applied to drop zone indicator when hovering over a locked pane. */
   tabDropPreview?: string
+  /** CSS class applied to the drop zone indicator when hovering over a pane's center swap zone. */
+  swapPreview?: string
   /** CSS class applied to the separator line between tabs. */
   tabSeparator?: string
   /** CSS class applied to the wrapper element for a tab's contents. */

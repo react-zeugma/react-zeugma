@@ -3,7 +3,7 @@ import { useDroppable } from '@dnd-kit/core'
 
 export interface DropZoneProps {
   id: string
-  position: 'top' | 'bottom' | 'left' | 'right' | 'full' | 'top-header'
+  position: 'top' | 'bottom' | 'left' | 'right' | 'full' | 'top-header' | 'center'
   activeClassName?: string
 }
 
@@ -54,6 +54,15 @@ const activationPositions: Record<string, React.CSSProperties> = {
     pointerEvents: 'auto',
     cursor: 'not-allowed',
   },
+  center: {
+    position: 'absolute',
+    top: '25%',
+    left: '25%',
+    width: '50%',
+    height: '50%',
+    zIndex: 22,
+    pointerEvents: 'auto',
+  },
 }
 
 const previewPositions: Record<string, React.CSSProperties> = {
@@ -98,6 +107,16 @@ const previewPositions: Record<string, React.CSSProperties> = {
     boxSizing: 'border-box',
   },
   full: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 21,
+    pointerEvents: 'none',
+    boxSizing: 'border-box',
+  },
+  center: {
     position: 'absolute',
     top: 0,
     left: 0,

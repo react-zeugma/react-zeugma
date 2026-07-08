@@ -1,5 +1,13 @@
 # react-zeugma
 
+## 6.8.0
+
+### Minor Changes
+
+- **Tab Swapping Drop Zone**:
+  - Added a 5th center drop zone to panes (active only when dragging a tab) that swaps the dragged tab with the active tab of the target pane.
+  - Exposed a new `swapPreview` custom classname in `ZeugmaClassNames` to style the swap overlay.
+
 ## 6.7.4
 
 ### Patch Changes

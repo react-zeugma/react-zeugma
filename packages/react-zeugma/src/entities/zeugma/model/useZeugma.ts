@@ -248,8 +248,9 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
   )
 
   const handleMoveTab = useCallback(
-    wrapMutation((prev, draggedTabId: string, targetTabId: string, position?: 'before' | 'after') =>
-      moveTab(prev, draggedTabId, targetTabId, position),
+    wrapMutation(
+      (prev, draggedTabId: string, targetTabId: string, position?: 'before' | 'after' | 'center') =>
+        moveTab(prev, draggedTabId, targetTabId, position),
     ),
     [wrapMutation],
   )

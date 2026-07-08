@@ -96,8 +96,8 @@ const ZEUGMA_CONTROLLER_METHODS = [
   ],
   [
     'moveTab',
-    "(draggedTabId: string, targetTabId: string, position?: 'before' | 'after') => void",
-    'Reorders a tab relative to another target tab.',
+    "(draggedTabId: string, targetTabId: string, position?: 'before' | 'after' | 'center') => void",
+    "Reorders a tab relative to another target tab, or swaps them if position is 'center'.",
   ],
   ['findPaneById', '(paneId: string) => PaneNode | null', 'Queries a PaneNode by its unique ID.'],
   [
@@ -182,8 +182,13 @@ const TREE_UTILITIES = [
   ],
   [
     'moveTab',
-    "(tree: TreeNode, draggedTabId: string, targetTabId: string, position?: 'before' | 'after') => TreeNode",
-    'Reorders a tab relative to another target tab.',
+    "(tree: TreeNode, draggedTabId: string, targetTabId: string, position?: 'before' | 'after' | 'center') => TreeNode",
+    "Reorders a tab relative to another target tab, or swaps them if position is 'center'.",
+  ],
+  [
+    'swapTabs',
+    '(tree: TreeNode, draggedTabId: string, targetTabId: string) => TreeNode',
+    'Swaps the positions and active states of two tabs.',
   ],
   [
     'movePaneTabs',

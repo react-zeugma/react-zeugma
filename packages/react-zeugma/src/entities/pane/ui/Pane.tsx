@@ -243,6 +243,13 @@ export const Pane: React.FC<PaneProps> & {
                   activeClassName={globalClassNames.dropPreview}
                 />
               ))}
+              {activeType === 'tab' && (
+                <DropZone
+                  id={`drop-center-${id}`}
+                  position="center"
+                  activeClassName={globalClassNames.swapPreview ?? globalClassNames.dropPreview}
+                />
+              )}
             </div>
           )}
 

@@ -94,6 +94,11 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
       setPrevControlledLayoutJson(currentControlledLayoutJson)
       setLocalLayout(controlledLayout)
       setRenderingLayout(controlledLayout)
+      setPoppedOutTabIds((prevPopped) => {
+        if (prevPopped.length === 0) return prevPopped
+        const filtered = prevPopped.filter((id) => findTabById(controlledLayout, id) !== null)
+        return filtered.length === prevPopped.length ? prevPopped : filtered
+      })
     }
   }
 
@@ -110,6 +115,13 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
           layoutRef.current = next
           setLocalLayout(next)
           setRenderingLayout(next)
+
+          setPoppedOutTabIds((prevPopped) => {
+            if (prevPopped.length === 0) return prevPopped
+            const filtered = prevPopped.filter((id) => findTabById(next, id) !== null)
+            return filtered.length === prevPopped.length ? prevPopped : filtered
+          })
+
           onChangeRef.current?.(next)
         }
       }

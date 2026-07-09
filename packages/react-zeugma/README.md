@@ -96,28 +96,29 @@ import { Zeugma } from 'react-zeugma'
 
 ##### Props
 
-| Property                 | Description                                                                                                                                                 | Type                                                                                                                                                                                             | Default |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------- |
-| `controller`             | The layout state controller returned by `useZeugma(options)`.                                                                                               | `ZeugmaController`                                                                                                                                                                               | -       |
-| `children`               | Children components rendered inside the context provider.                                                                                                   | `ReactNode`                                                                                                                                                                                      | -       |
-| `renderPane`             | Callback function to map active pane IDs to custom pane structures. Required in standalone mode (without children) and must not be passed in provider mode. | `(paneId: string) => ReactNode`                                                                                                                                                                  | -       |
-| `renderDragOverlay`      | Custom overlay renderer function for the drag-under-cursor preview.                                                                                         | `(active: DragOverlayActiveItem) => ReactNode`                                                                                                                                                   | -       |
-| `classNames`             | CSS class name mapping overrides for custom dashboard and overlay styling.                                                                                  | `ZeugmaClassNames`                                                                                                                                                                               | -       |
-| `resizerSize`            | Thickness of the split resizer bars in pixels.                                                                                                              | `number`                                                                                                                                                                                         | `4`     |
-| `dragActivationDistance` | Minimum pointer drag distance (in pixels) required to activate dragging.                                                                                    | `number`                                                                                                                                                                                         | `8`     |
-| `snapThreshold`          | Threshold in pixels to snap layout resizers to adjacent edges.                                                                                              | `number`                                                                                                                                                                                         | `8`     |
-| `minSplitPercentage`     | Minimum split limit percentage allowed for resized panes.                                                                                                   | `number`                                                                                                                                                                                         | `5`     |
-| `maxSplitPercentage`     | Maximum split limit percentage allowed for resized panes.                                                                                                   | `number`                                                                                                                                                                                         | `95`    |
-| `enableDragToDismiss`    | Enables drag-out-to-dismiss gesture for widgets.                                                                                                            | `boolean`                                                                                                                                                                                        | `false` |
-| `dismissThreshold`       | Distance in pixels outside container bounds required to trigger dismissal.                                                                                  | `number`                                                                                                                                                                                         | `60`    |
-| `onRemove`               | Callback triggered when a pane is removed.                                                                                                                  | `(paneId: string) => void`                                                                                                                                                                       | -       |
-| `onDragStart`            | Callback triggered when a drag gesture begins.                                                                                                              | `(activeId: string) => void`                                                                                                                                                                     | -       |
-| `onDragEnd`              | Callback triggered when a drag gesture ends, containing active pane, target pane, and action metadata.                                                      | `(activeId: string, overId: string \| null, dropAction: { type: 'split' \| 'move'; direction?: SplitDirection; position?: 'top' \| 'bottom' \| 'left' \| 'right' \| 'center' } \| null) => void` | -       |
-| `onResizeStart`          | Callback triggered when resizing begins.                                                                                                                    | `(currentNode: SplitNode) => void`                                                                                                                                                               | -       |
-| `onResize`               | Callback triggered during pane resizing.                                                                                                                    | `(currentNode: SplitNode, percentage: number) => void`                                                                                                                                           | -       |
-| `onResizeEnd`            | Callback triggered when pane resizing completes.                                                                                                            | `(currentNode: SplitNode, percentage: number) => void`                                                                                                                                           | -       |
-| `onDismissIntentChange`  | Callback triggered when drag-out dismiss intent changes.                                                                                                    | `(paneId: string \| null) => void`                                                                                                                                                               | -       |
-| `persist`                | Layout persistence configuration in localStorage. If true, uses default options.                                                                            | `boolean \| ZeugmaPersistOptions`                                                                                                                                                                | `false` |
+| Property                 | Description                                                                                                                                                          | Type                                                                                                                                                                                             | Default |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------- |
+| `controller`             | The layout state controller returned by `useZeugma(options)`.                                                                                                        | `ZeugmaController`                                                                                                                                                                               | -       |
+| `children`               | Children components rendered inside the context provider.                                                                                                            | `ReactNode`                                                                                                                                                                                      | -       |
+| `renderPane`             | Callback function to map active pane IDs to custom pane structures. Required in standalone mode (without children) and must not be passed in provider mode.          | `(paneId: string) => ReactNode`                                                                                                                                                                  | -       |
+| `renderDragOverlay`      | Custom overlay renderer function for the drag-under-cursor preview.                                                                                                  | `(active: DragOverlayActiveItem) => ReactNode`                                                                                                                                                   | -       |
+| `classNames`             | CSS class name mapping overrides for custom dashboard and overlay styling.                                                                                           | `ZeugmaClassNames`                                                                                                                                                                               | -       |
+| `resizerSize`            | Thickness of the split resizer bars in pixels.                                                                                                                       | `number`                                                                                                                                                                                         | `4`     |
+| `dragActivationDistance` | Minimum pointer drag distance (in pixels) required to activate dragging.                                                                                             | `number`                                                                                                                                                                                         | `8`     |
+| `snapThreshold`          | Threshold in pixels to snap layout resizers to adjacent edges.                                                                                                       | `number`                                                                                                                                                                                         | `8`     |
+| `minSplitPercentage`     | Minimum split limit percentage allowed for resized panes.                                                                                                            | `number`                                                                                                                                                                                         | `5`     |
+| `maxSplitPercentage`     | Maximum split limit percentage allowed for resized panes.                                                                                                            | `number`                                                                                                                                                                                         | `95`    |
+| `enableDragToDismiss`    | Enables drag-out-to-dismiss gesture for widgets.                                                                                                                     | `boolean`                                                                                                                                                                                        | `false` |
+| `dismissThreshold`       | Distance in pixels outside container bounds required to trigger dismissal.                                                                                           | `number`                                                                                                                                                                                         | `60`    |
+| `onRemove`               | Callback triggered when a pane is removed.                                                                                                                           | `(paneId: string) => void`                                                                                                                                                                       | -       |
+| `onDragStart`            | Callback triggered when a drag gesture begins.                                                                                                                       | `(activeId: string) => void`                                                                                                                                                                     | -       |
+| `onDragEnd`              | Callback triggered when a drag gesture ends, containing active pane, target pane, and action metadata.                                                               | `(activeId: string, overId: string \| null, dropAction: { type: 'split' \| 'move'; direction?: SplitDirection; position?: 'top' \| 'bottom' \| 'left' \| 'right' \| 'center' } \| null) => void` | -       |
+| `onResizeStart`          | Callback triggered when resizing begins.                                                                                                                             | `(currentNode: SplitNode) => void`                                                                                                                                                               | -       |
+| `onResize`               | Callback triggered during pane resizing.                                                                                                                             | `(currentNode: SplitNode, percentage: number) => void`                                                                                                                                           | -       |
+| `onResizeEnd`            | Callback triggered when pane resizing completes.                                                                                                                     | `(currentNode: SplitNode, percentage: number) => void`                                                                                                                                           | -       |
+| `onDismissIntentChange`  | Callback triggered when drag-out dismiss intent changes.                                                                                                             | `(paneId: string \| null) => void`                                                                                                                                                               | -       |
+| `persist`                | Layout persistence configuration in localStorage. If true, uses default options.                                                                                     | `boolean \| ZeugmaPersistOptions`                                                                                                                                                                | `false` |
+| `renderPopoutWrapper`    | Custom wrapper to inject context or style managers (e.g. `styled-components`' `StyleSheetManager` or `antd`'s `StyleProvider`/`ConfigProvider`) into popout windows. | `(props: { tabId: string; document: Document; window: Window; children: React.ReactNode }) => React.ReactNode`                                                                                   | -       |
 
 ##### `ZeugmaPersistOptions`
 
@@ -127,6 +128,25 @@ interface ZeugmaPersistOptions {
   enabled?: boolean
   /** The key used for localStorage persistence. Defaults to 'zeugma-layout'. */
   key?: string
+}
+```
+
+##### `TabDetails`
+
+```ts
+interface TabDetails {
+  /** The tab's unique ID. */
+  id: string
+  /** The ID of the pane containing this tab. */
+  paneId: string
+  /** True if this tab is currently selected/active. */
+  isActive: boolean
+  /** The tab's 0-indexed position in the pane tab bar. */
+  index: number
+  /** Custom metadata associated with this tab. */
+  metadata?: Record<string, unknown>
+  /** Force-remount the component during window transitions instead of adopting the DOM node. */
+  remountOnPopout?: boolean
 }
 ```
 
@@ -475,3 +495,31 @@ const parentPane = findPaneContainingTab(currentTree, 'new-file.js')
 | `tab`                    | Individual tab list items.                                          |
 | `tabCloseButton`         | Close button inside a tab item.                                     |
 | `dragHandle`             | Drag target region.                                                 |
+
+---
+
+## Popout Window Styling (CSS-in-JS support)
+
+When using CSS-in-JS libraries like `styled-components` or `antd` (Ant Design) inside your widgets, dynamic styles and modals/portals are injected into the main document's `head`/`body` by default. In popped-out tabs, these styles will not apply because they render inside a separate window.
+
+You can use the `renderPopoutWrapper` callback prop on the `<Zeugma>` component to wrap popped-out widgets with the required style managers and providers targeting the child window's DOM.
+
+##### Example (`styled-components` & `antd`):
+
+```tsx
+import { StyleSheetManager } from 'styled-components'
+import { StyleProvider } from '@ant-design/cssinjs'
+import { ConfigProvider } from 'antd'
+;<Zeugma
+  controller={controller}
+  renderPopoutWrapper={({ document, children }) => (
+    <StyleSheetManager target={document.head}>
+      <StyleProvider container={document.head}>
+        <ConfigProvider getPopupContainer={() => document.body}>{children}</ConfigProvider>
+      </StyleProvider>
+    </StyleSheetManager>
+  )}
+>
+  {/* Dashboard grid structure */}
+</Zeugma>
+```

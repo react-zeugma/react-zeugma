@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { TabDetails } from '../../../shared'
+import { TabDetails, useZeugmaState } from '../../../shared'
 
 export interface PortalHostItemProps {
   tabDetails: TabDetails
@@ -12,6 +12,9 @@ export const PopoutRenderWrapper: React.FC<{ popoutDoc: Document; children: Reac
   popoutDoc,
   children,
 }) => {
+  if (popoutDoc === document) {
+    return <>{children}</>
+  }
   const originalUseEffect = React.useEffect
   const originalUseLayoutEffect = React.useLayoutEffect
   const originalUseInsertionEffect = (
@@ -118,6 +121,7 @@ export const PopoutRenderWrapper: React.FC<{ popoutDoc: Document; children: Reac
 export const PortalHostItem: React.FC<PortalHostItemProps> = React.memo(
   ({ tabDetails, target, renderWidget }) => {
     const { id: tabId } = tabDetails
+    const { renderPopoutWrapper } = useZeugmaState()
     const [mounted, setMounted] = useState(false)
     const wrapperRef = useRef<HTMLDivElement | null>(null)
 
@@ -168,16 +172,27 @@ export const PortalHostItem: React.FC<PortalHostItemProps> = React.memo(
 
     if (!wrapper || !renderWidget) return null
 
-    const widget = renderWidget(tabDetails)
+    const isPopped = !!(target && target.ownerDocument && target.ownerDocument !== document)
+    const keySuffix = tabDetails.remountOnPopout ? (isPopped ? '-popped' : '-docked') : ''
+    let widget: React.ReactNode = (
+      <React.Fragment key={`${tabId}${keySuffix}`}>{renderWidget(tabDetails)}</React.Fragment>
+    )
 
-    if (target && target.ownerDocument && target.ownerDocument !== document) {
-      return createPortal(
-        <PopoutRenderWrapper popoutDoc={target.ownerDocument}>{widget}</PopoutRenderWrapper>,
-        wrapper,
-      )
+    if (isPopped && target && target.ownerDocument && renderPopoutWrapper) {
+      widget = renderPopoutWrapper({
+        tabId,
+        document: target.ownerDocument,
+        window: target.ownerDocument.defaultView || window,
+        children: widget,
+      })
     }
 
-    return createPortal(widget, wrapper)
+    return createPortal(
+      <PopoutRenderWrapper popoutDoc={isPopped && target ? target.ownerDocument : document}>
+        {widget}
+      </PopoutRenderWrapper>,
+      wrapper,
+    )
   },
   (prev, next) => {
     return (

@@ -19,6 +19,12 @@ const ZEUGMA_PROPS = [
     'Enables dragging widgets out of boundaries to dismiss them',
   ],
   ['classNames', 'ZeugmaClassNames', '-', 'Custom CSS classes for dashboard elements'],
+  [
+    'renderPopoutWrapper',
+    '(props: { tabId: string; document: Document; window: Window; children: React.ReactNode }) => React.ReactNode',
+    '-',
+    'Custom wrapper to inject style managers / providers into popout windows',
+  ],
 ]
 
 const RENDER_TAB_PROPS = [
@@ -38,6 +44,11 @@ const RENDER_TAB_PROPS = [
   ['isPoppedOut', 'boolean', 'True if this tab is open in a new popup window.'],
   ['popout', '() => void', 'Callback to popout this tab into a new window.'],
   ['dock', '() => void', 'Callback to dock this tab back to the dashboard.'],
+  [
+    'remountOnPopout',
+    'boolean | undefined',
+    'If true, force-remounts the widget during popout/dock transitions instead of adopting the DOM node.',
+  ],
 ]
 
 const USE_ZEUGMA_OPTIONS = [

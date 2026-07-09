@@ -54,6 +54,7 @@ export interface TabDetails {
   isActive: boolean
   index: number
   metadata: Record<string, unknown> | undefined
+  remountOnPopout?: boolean
 }
 \`\`\`
 
@@ -118,6 +119,7 @@ function Dashboard() {
 - \`persist?: boolean | ZeugmaPersistOptions\`: Layout persistence configuration in localStorage.
   - \`enabled?: boolean\`: Whether layout persistence is enabled (defaults to true).
   - \`key?: string\`: The localStorage key (defaults to \`'zeugma-layout'\`).
+- \`renderPopoutWrapper?: (props: { tabId: string; document: Document; window: Window; children: React.ReactNode }) => React.ReactNode\`: Optional custom wrapper to inject style managers or providers into popout windows.
 
 ### \`useZeugma(options)\`
 

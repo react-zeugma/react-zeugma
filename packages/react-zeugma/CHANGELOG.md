@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 6.9.4
+
+### Patch Changes
+
+- Automatically close and clean up active popout windows when the corresponding widget is removed from the layout tree.
+
 ## 6.9.3
 
 ### Patch Changes

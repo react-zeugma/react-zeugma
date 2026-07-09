@@ -391,4 +391,64 @@ describe('useZeugma Hook', () => {
     })
     expect(result.current.poppedOutTabIds).toEqual([])
   })
+
+  it('should remove a popped-out tab from poppedOutTabIds when that tab is removed from the layout tree', () => {
+    const { result } = renderHook(() => useZeugma({ initialLayout }))
+
+    // Popout tab-1
+    act(() => {
+      result.current.popoutTab('tab-1')
+    })
+    expect(result.current.poppedOutTabIds).toEqual(['tab-1'])
+
+    // Remove tab-1 from the tree
+    act(() => {
+      result.current.removeTab('tab-1')
+    })
+    expect(result.current.poppedOutTabIds).toEqual([])
+  })
+
+  it('should remove a popped-out tab from poppedOutTabIds when the layout is replaced programmatically and no longer contains that tab', () => {
+    const { result } = renderHook(() => useZeugma({ initialLayout }))
+
+    // Popout tab-1
+    act(() => {
+      result.current.popoutTab('tab-1')
+    })
+    expect(result.current.poppedOutTabIds).toEqual(['tab-1'])
+
+    // Programmatically set layout to a new tree without tab-1
+    act(() => {
+      result.current.setLayout({
+        type: 'pane',
+        id: 'pane-2',
+        tabIds: ['tab-2'],
+        activeTabId: 'tab-2',
+      })
+    })
+    expect(result.current.poppedOutTabIds).toEqual([])
+  })
+
+  it('should remove a popped-out tab from poppedOutTabIds when the controlled layout prop changes and no longer contains that tab', () => {
+    let currentLayout = initialLayout
+    const { result, rerender } = renderHook(({ layout }) => useZeugma({ layout }), {
+      initialProps: { layout: currentLayout },
+    })
+
+    // Popout tab-1
+    act(() => {
+      result.current.popoutTab('tab-1')
+    })
+    expect(result.current.poppedOutTabIds).toEqual(['tab-1'])
+
+    // Update controlled layout to a new tree without tab-1
+    currentLayout = {
+      type: 'pane',
+      id: 'pane-2',
+      tabIds: ['tab-2'],
+      activeTabId: 'tab-2',
+    }
+    rerender({ layout: currentLayout })
+    expect(result.current.poppedOutTabIds).toEqual([])
+  })
 })

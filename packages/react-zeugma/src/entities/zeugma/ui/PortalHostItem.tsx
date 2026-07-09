@@ -12,6 +12,9 @@ export const PopoutRenderWrapper: React.FC<{ popoutDoc: Document; children: Reac
   popoutDoc,
   children,
 }) => {
+  if (popoutDoc === document) {
+    return <>{children}</>
+  }
   const originalUseEffect = React.useEffect
   const originalUseLayoutEffect = React.useLayoutEffect
   const originalUseInsertionEffect = (
@@ -175,22 +178,21 @@ export const PortalHostItem: React.FC<PortalHostItemProps> = React.memo(
       <React.Fragment key={`${tabId}${keySuffix}`}>{renderWidget(tabDetails)}</React.Fragment>
     )
 
-    if (isPopped && target && target.ownerDocument) {
-      if (renderPopoutWrapper) {
-        widget = renderPopoutWrapper({
-          tabId,
-          document: target.ownerDocument,
-          window: target.ownerDocument.defaultView || window,
-          children: widget,
-        })
-      }
-      return createPortal(
-        <PopoutRenderWrapper popoutDoc={target.ownerDocument}>{widget}</PopoutRenderWrapper>,
-        wrapper,
-      )
+    if (isPopped && target && target.ownerDocument && renderPopoutWrapper) {
+      widget = renderPopoutWrapper({
+        tabId,
+        document: target.ownerDocument,
+        window: target.ownerDocument.defaultView || window,
+        children: widget,
+      })
     }
 
-    return createPortal(widget, wrapper)
+    return createPortal(
+      <PopoutRenderWrapper popoutDoc={isPopped && target ? target.ownerDocument : document}>
+        {widget}
+      </PopoutRenderWrapper>,
+      wrapper,
+    )
   },
   (prev, next) => {
     return (

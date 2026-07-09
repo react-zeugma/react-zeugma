@@ -40,7 +40,8 @@ export interface PaneContentProps {
 
 export const PaneContent: React.FC<PaneContentProps> = ({ children, className, style }) => {
   const { activeTabId } = usePaneContext()
-  const { classNames } = useZeugmaState()
+  const { classNames, isTabPoppedOut } = useZeugmaState()
+  const { dockTab } = useZeugmaActions()
   const targetRef = useRef<HTMLDivElement | null>(null)
   const portalRegistry = useContext(PortalRegistryContext)
   if (!portalRegistry) {
@@ -66,6 +67,8 @@ export const PaneContent: React.FC<PaneContentProps> = ({ children, className, s
     }
   }, [activeTabId, registerPortalTarget])
 
+  const poppedOut = isTabPoppedOut(activeTabId)
+
   return (
     <div
       ref={targetRef}
@@ -74,9 +77,58 @@ export const PaneContent: React.FC<PaneContentProps> = ({ children, className, s
       style={{
         height: '100%',
         width: '100%',
+        position: 'relative',
         ...style,
       }}
-    />
+    >
+      {poppedOut && (
+        <div
+          className="zeugma-popout-placeholder"
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '12px',
+            padding: '24px',
+            textAlign: 'center',
+            backgroundColor: '#161719',
+            color: '#94a3b8',
+            fontSize: '13px',
+            fontWeight: 500,
+          }}
+        >
+          <div>This panel is open in a new window</div>
+          <button
+            onClick={() => dockTab(activeTabId)}
+            style={{
+              padding: '6px 12px',
+              fontSize: '11px',
+              fontWeight: 600,
+              borderRadius: '4px',
+              backgroundColor: '#2563eb',
+              color: '#ffffff',
+              border: 'none',
+              cursor: 'pointer',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.backgroundColor = '#1d4ed8'
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.backgroundColor = '#2563eb'
+            }}
+          >
+            Dock Back
+          </button>
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -107,8 +159,10 @@ export const Pane: React.FC<PaneProps> & {
     fullscreenPaneId,
     onFullscreenChange,
     locked: globalLocked,
+    poppedOutTabIds = [],
   } = useZeugmaState()
-  const { removePane, updateMetadata, selectTab, removeTab } = useZeugmaActions()
+  const { removePane, updateMetadata, selectTab, removeTab, popoutTab, dockTab } =
+    useZeugmaActions()
 
   const paneNode = useMemo(() => {
     if (activeType === 'tab' && id === activeId) {
@@ -180,6 +234,9 @@ export const Pane: React.FC<PaneProps> & {
       updateTabMetadata: (tabId, updater) => {
         updateMetadata(tabId, updater)
       },
+      isActiveTabPoppedOut: poppedOutTabIds.includes(activeTabId),
+      popoutTab: (tabId) => popoutTab(tabId || activeTabId),
+      dockTab: (tabId) => dockTab(tabId || activeTabId),
     }),
     [
       dragging,
@@ -195,6 +252,9 @@ export const Pane: React.FC<PaneProps> & {
       selectTab,
       paneContainerId,
       tabsMetadata,
+      poppedOutTabIds,
+      popoutTab,
+      dockTab,
     ],
   )
 

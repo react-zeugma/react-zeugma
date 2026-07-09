@@ -55,6 +55,7 @@ export function useBodyCursorOverride(isOverLocked: boolean) {
 
 export function usePortalRegistry() {
   const [portalTargets, setPortalTargets] = useState<Record<string, HTMLDivElement | null>>({})
+  const [popoutTargets, setPopoutTargets] = useState<Record<string, HTMLDivElement | null>>({})
   const renderCallbacksRef = useRef<Record<string, (tab: TabDetails) => React.ReactNode>>({})
   const renderPaneRef = useRef<((paneId: string) => React.ReactNode) | null>(null)
   const tabHeadersRef = useRef<
@@ -90,6 +91,20 @@ export function usePortalRegistry() {
     [],
   )
 
+  const registerPopoutTarget = useCallback((tabId: string, el: HTMLDivElement | null) => {
+    if (!isMountedRef.current) return
+    setPopoutTargets((prev) => {
+      if (!el) {
+        if (!prev[tabId]) return prev
+        const next = { ...prev }
+        delete next[tabId]
+        return next
+      }
+      if (prev[tabId] === el) return prev
+      return { ...prev, [tabId]: el }
+    })
+  }, [])
+
   const registerRenderCallback = useCallback(
     (tabId: string, render: (tab: TabDetails) => React.ReactNode) => {
       renderCallbacksRef.current[tabId] = render
@@ -111,9 +126,14 @@ export function usePortalRegistry() {
     [],
   )
 
+  const mergedTargets = useMemo(() => {
+    return { ...portalTargets, ...popoutTargets }
+  }, [portalTargets, popoutTargets])
+
   return {
-    portalTargets,
+    portalTargets: mergedTargets,
     registerPortalTarget,
+    registerPopoutTarget,
     registerRenderCallback,
     renderCallbacksRef,
     registerRenderPane,

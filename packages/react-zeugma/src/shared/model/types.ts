@@ -1,5 +1,12 @@
 import { ReactNode, Dispatch, SetStateAction, RefObject } from 'react'
 
+declare global {
+  interface Window {
+    __zeugmaActivePopoutDocument?: Document | null
+    __zeugmaCleanup?: () => void
+  }
+}
+
 export type SplitDirection = 'row' | 'column'
 
 export interface SplitNode {
@@ -38,6 +45,12 @@ export interface RenderTabProps extends TabDetails {
   onSelect: () => void
   /** Callback to close/remove this tab. */
   onRemove: () => void
+  /** Whether this tab is popped out in a separate window. */
+  isPoppedOut: boolean
+  /** Popout this tab. */
+  popout: () => void
+  /** Dock this tab back. */
+  dock: () => void
 }
 
 export interface UseZeugmaOptions {
@@ -62,6 +75,8 @@ export interface ZeugmaState {
   fullscreenPaneId: string | null
   /** Whether the layout is globally locked. */
   locked: boolean
+  /** The list of tab/widget IDs that are currently open in a new window. */
+  poppedOutTabIds: string[]
 }
 
 export interface ZeugmaStateSetters {
@@ -106,6 +121,10 @@ export interface ZeugmaActions {
     targetTabId: string,
     position?: 'before' | 'after' | 'center',
   ) => void
+  /** Popout the specified tab into a new window. */
+  popoutTab: (tabId: string) => void
+  /** Dock the specified tab back to the main layout. */
+  dockTab: (tabId: string) => void
 }
 
 export interface ZeugmaQueries {
@@ -306,6 +325,8 @@ export interface ZeugmaStateValue extends ZeugmaState, ZeugmaQueries {
   onResizeEnd?: (currentNode: SplitNode, percentage: number) => void
   minSplitPercentage?: number
   maxSplitPercentage?: number
+  /** Query function to check if a tab is popped out. */
+  isTabPoppedOut: (tabId: string) => boolean
 }
 
 export interface ZeugmaDragStateValue {
@@ -344,4 +365,5 @@ export interface PortalRegistryValue {
     Record<string, (props: { isDragging: boolean; isOver: boolean }) => ReactNode>
   >
   activeIdRef?: RefObject<string | null>
+  registerPopoutTarget?: (tabId: string, el: HTMLDivElement | null) => void
 }

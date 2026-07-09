@@ -1,5 +1,6 @@
 import React, { useMemo, useCallback } from 'react'
 import { DndContext } from '@dnd-kit/core'
+
 import {
   SplitNode,
   ZeugmaStateContext,
@@ -17,6 +18,7 @@ import {
   useAllTabIds,
   useZeugmaDragMeasurement,
   useZeugmaPersistence,
+  useZeugmaPopouts,
 } from '../model'
 import { CursorOverlay } from './CursorOverlay'
 import { PortalHostItem } from './PortalHostItem'
@@ -88,6 +90,9 @@ const ZeugmaProviderInternal: React.FC<
     splitPane,
     updateSplitPercentage,
     moveTab,
+    poppedOutTabIds = [],
+    popoutTab,
+    dockTab,
   } = internalController
 
   // Synchronize layout persistence
@@ -96,6 +101,7 @@ const ZeugmaProviderInternal: React.FC<
   const {
     portalTargets,
     registerPortalTarget,
+    registerPopoutTarget,
     registerRenderCallback,
     renderCallbacksRef,
     registerRenderPane,
@@ -104,6 +110,18 @@ const ZeugmaProviderInternal: React.FC<
     tabHeadersRef,
     activeIdRef,
   } = usePortalRegistry()
+
+  useZeugmaPopouts({
+    poppedOutTabIds,
+    registerPopoutTarget,
+    findTabById,
+    dockTab,
+  })
+
+  const isTabPoppedOut = useCallback(
+    (tabId: string) => poppedOutTabIds.includes(tabId),
+    [poppedOutTabIds],
+  )
 
   const {
     overTabId,
@@ -215,6 +233,8 @@ const ZeugmaProviderInternal: React.FC<
       getActiveTabMetadata,
       renderPane,
       resizerSize,
+      poppedOutTabIds,
+      isTabPoppedOut,
     }),
     [
       layout,
@@ -243,6 +263,8 @@ const ZeugmaProviderInternal: React.FC<
       getActiveTabMetadata,
       renderPane,
       resizerSize,
+      poppedOutTabIds,
+      isTabPoppedOut,
     ],
   )
 
@@ -269,6 +291,8 @@ const ZeugmaProviderInternal: React.FC<
       splitPane,
       updateSplitPercentage,
       moveTab,
+      popoutTab,
+      dockTab,
     }),
     [
       removePane,
@@ -283,6 +307,8 @@ const ZeugmaProviderInternal: React.FC<
       splitPane,
       updateSplitPercentage,
       moveTab,
+      popoutTab,
+      dockTab,
     ],
   )
 
@@ -299,6 +325,7 @@ const ZeugmaProviderInternal: React.FC<
       registerTabHeader,
       tabHeadersRef,
       activeIdRef,
+      registerPopoutTarget,
     }),
     [
       registerPortalTarget,
@@ -309,6 +336,7 @@ const ZeugmaProviderInternal: React.FC<
       registerTabHeader,
       tabHeadersRef,
       activeIdRef,
+      registerPopoutTarget,
     ],
   )
 

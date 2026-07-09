@@ -1,6 +1,11 @@
 import React, { createContext, useContext, useMemo, useCallback, useEffect } from 'react'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
-import { useZeugmaState, useZeugmaDrag, PortalRegistryContext } from '../../../shared'
+import {
+  useZeugmaState,
+  ZeugmaActionsContext,
+  useZeugmaDrag,
+  PortalRegistryContext,
+} from '../../../shared'
 import { TabsContext } from './Tabs'
 
 export interface TabContextValue {
@@ -12,6 +17,9 @@ export interface TabContextValue {
   locked: boolean
   selectTab: () => void
   removeTab: () => void
+  isPoppedOut: boolean
+  popoutTab: () => void
+  dockTab: () => void
 }
 
 export const TabContext = createContext<TabContextValue | undefined>(undefined)
@@ -43,7 +51,13 @@ export interface TabProps {
 }
 
 export const Tab: React.FC<TabProps> = ({ id, locked = false, children, className, style }) => {
-  const { locked: globalLocked, classNames = {}, fullscreenPaneId } = useZeugmaState()
+  const {
+    locked: globalLocked,
+    classNames = {},
+    fullscreenPaneId,
+    poppedOutTabIds = [],
+  } = useZeugmaState()
+  const actions = useContext(ZeugmaActionsContext)
   const { overTabId } = useZeugmaDrag()
   const portalRegistry = useContext(PortalRegistryContext)
 
@@ -59,6 +73,8 @@ export const Tab: React.FC<TabProps> = ({ id, locked = false, children, classNam
       }
     }
   }, [id, children, portalRegistry])
+
+  const isPoppedOut = poppedOutTabIds.includes(id)
 
   const tabsContext = useContext(TabsContext)
   const isLocked =
@@ -115,8 +131,22 @@ export const Tab: React.FC<TabProps> = ({ id, locked = false, children, classNam
       locked: isLocked,
       selectTab: selectThisTab,
       removeTab: removeThisTab,
+      isPoppedOut,
+      popoutTab: () => actions?.popoutTab(id),
+      dockTab: () => actions?.dockTab(id),
     }),
-    [id, isActive, isDragging, isTargetOver, metadata, isLocked, selectThisTab, removeThisTab],
+    [
+      id,
+      isActive,
+      isDragging,
+      isTargetOver,
+      metadata,
+      isLocked,
+      selectThisTab,
+      removeThisTab,
+      isPoppedOut,
+      actions,
+    ],
   )
 
   return (

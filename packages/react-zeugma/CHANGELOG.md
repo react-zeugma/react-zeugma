@@ -1,5 +1,19 @@
 # react-zeugma
 
+## 6.9.0
+
+### Minor Changes
+
+- **Popout Tabs (Open in a New Window)**:
+  - Re-introduced support for popping out tabs/widgets into separate browser window views.
+  - Implemented stable React portal target management using DOM-level `document.adoptNode` and window redirection, preventing components from unmounting and keeping widget runtime states completely intact.
+  - Added the `useZeugmaPopouts` hook to manage the lifecycle of popout windows, dynamically copy stylesheets, body classes, and background styles, and focus existing popouts.
+  - Patched standard React hooks (`useEffect`, `useLayoutEffect`, `useInsertionEffect`) and DOM APIs (`createElement`, `getElementById`, `querySelector`, etc.) dynamically inside popout contexts to support third-party libraries.
+  - Exposed `popoutTab(tabId)` and `dockTab(tabId)` actions, `poppedOutTabIds` state, and `isTabPoppedOut(tabId)` queries via `useZeugmaContext` and `usePaneContext`.
+  - Added a placeholder screen in empty/popped-out panes allowing users to dock panels back manually.
+  - Integrated popout/dock controls and a new interactive `MapPanel` widget into the homepage demo dashboard.
+  - Updated library `README.md`, developer API references, and AI skill configurations to cover popout APIs.
+
 ## 6.8.0
 
 ### Minor Changes

@@ -227,17 +227,17 @@ import { Tabs } from 'react-zeugma'
 
 ##### Props
 
-| Property       | Description                                            | Type                                                                                                                                                                                 | Default |
-| -------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------- |
-| `tabIds`       | Array of tab IDs.                                      | `string[]`                                                                                                                                                                           | -       |
-| `activeTabId`  | The currently active tab ID.                           | `string`                                                                                                                                                                             | -       |
-| `locked`       | Whether tab dragging/reordering is disabled.           | `boolean`                                                                                                                                                                            | `false` |
-| `tabsMetadata` | Metadata mapping associated with each tab in the pane. | `Record<string, Record<string, unknown>>`                                                                                                                                            | -       |
-| `selectTab`    | Callback when a tab is selected.                       | `(id: string) => void`                                                                                                                                                               | -       |
-| `removeTab`    | Callback when a tab is closed.                         | `(id: string) => void`                                                                                                                                                               | -       |
-| `classNames`   | Custom class names for the container and tabs.         | `{ container?: string; tab?: string \| ((tabId: string) => string) }`                                                                                                                | -       |
-| `styles`       | Custom CSS style overrides for the container and tabs. | `{ container?: CSSProperties; tab?: CSSProperties \| ((tabId: string) => CSSProperties) }`                                                                                           | -       |
-| `renderTab`    | Render prop function called for each tab item.         | `(props: { tabId: string; activeTabId: string; isDragging: boolean; isOver: boolean; metadata?: Record<string, unknown>; onSelect: () => void; onRemove: () => void }) => ReactNode` | -       |
+| Property       | Description                                            | Type                                                                                                                                                                                                                                             | Default |
+| -------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------- |
+| `tabIds`       | Array of tab IDs.                                      | `string[]`                                                                                                                                                                                                                                       | -       |
+| `activeTabId`  | The currently active tab ID.                           | `string`                                                                                                                                                                                                                                         | -       |
+| `locked`       | Whether tab dragging/reordering is disabled.           | `boolean`                                                                                                                                                                                                                                        | `false` |
+| `tabsMetadata` | Metadata mapping associated with each tab in the pane. | `Record<string, Record<string, unknown>>`                                                                                                                                                                                                        | -       |
+| `selectTab`    | Callback when a tab is selected.                       | `(id: string) => void`                                                                                                                                                                                                                           | -       |
+| `removeTab`    | Callback when a tab is closed.                         | `(id: string) => void`                                                                                                                                                                                                                           | -       |
+| `classNames`   | Custom class names for the container and tabs.         | `{ container?: string; tab?: string \| ((tabId: string) => string) }`                                                                                                                                                                            | -       |
+| `styles`       | Custom CSS style overrides for the container and tabs. | `{ container?: CSSProperties; tab?: CSSProperties \| ((tabId: string) => CSSProperties) }`                                                                                                                                                       | -       |
+| `renderTab`    | Render prop function called for each tab item.         | `(props: { tabId: string; activeTabId: string; isDragging: boolean; isOver: boolean; metadata?: Record<string, unknown>; onSelect: () => void; onRemove: () => void; isPoppedOut: boolean; popout: () => void; dock: () => void }) => ReactNode` | -       |
 
 ---
 
@@ -313,6 +313,9 @@ const { layout, locked, setLocked, addTab, removePane, selectTab, findPaneById }
 | `findTabById`           | Queries detailed tab location and state metadata.                      | `(tabId: string) => TabDetails \| null`                                                                                       |
 | `getTabMetadata`        | Gets metadata for a tab ID.                                            | `(tabId: string) => Record<string, unknown> \| undefined`                                                                     |
 | `getActiveTabMetadata`  | Gets metadata for the active tab in a pane.                            | `(paneId: string) => Record<string, unknown> \| undefined`                                                                    |
+| `poppedOutTabIds`       | The list of tab/widget IDs that are currently open in a new window.    | `string[]`                                                                                                                    |
+| `popoutTab`             | Popout the specified tab into a new window.                            | `(tabId: string) => void`                                                                                                     |
+| `dockTab`               | Dock the specified tab back to the main layout.                        | `(tabId: string) => void`                                                                                                     |
 
 ---
 
@@ -341,22 +344,25 @@ const {
 
 ##### Context Values
 
-| Property / Method   | Description                                         | Type                                                                                                                        |
-| ------------------- | --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `id`                | The ID of the current pane.                         | `string`                                                                                                                    |
-| `tabIds`            | List of tab IDs inside the pane.                    | `string[]`                                                                                                                  |
-| `activeTabId`       | Currently active tab ID.                            | `string`                                                                                                                    |
-| `isDragging`        | `true` if this pane is being dragged.               | `boolean`                                                                                                                   |
-| `isFullscreen`      | `true` if this pane is maximized.                   | `boolean`                                                                                                                   |
-| `toggleFullscreen`  | Toggles maximized state for this pane.              | `() => void`                                                                                                                |
-| `remove`            | Removes this pane from the layout tree.             | `() => void`                                                                                                                |
-| `selectTab`         | Activates a tab within this pane.                   | `(tabId: string) => void`                                                                                                   |
-| `removeTab`         | Closes a tab from this pane.                        | `(tabId: string) => void`                                                                                                   |
-| `metadata`          | Active tab's custom metadata.                       | `Record<string, unknown> \| undefined`                                                                                      |
-| `updateMetadata`    | Updates active tab's metadata.                      | `(updater: (current: Record<string, unknown> \| undefined) => Record<string, unknown> \| undefined) => void`                |
-| `locked`            | Whether the pane or the dashboard is locked.        | `boolean`                                                                                                                   |
-| `tabsMetadata`      | Tab metadata mapping for all tabs inside this pane. | `Record<string, Record<string, unknown>> \| undefined`                                                                      |
-| `updateTabMetadata` | Updates metadata for a specific tab in the pane.    | `(tabId: string, updater: (current: Record<string, unknown> \| undefined) => Record<string, unknown> \| undefined) => void` |
+| Property / Method      | Description                                             | Type                                                                                                                        |
+| ---------------------- | ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `id`                   | The ID of the current pane.                             | `string`                                                                                                                    |
+| `tabIds`               | List of tab IDs inside the pane.                        | `string[]`                                                                                                                  |
+| `activeTabId`          | Currently active tab ID.                                | `string`                                                                                                                    |
+| `isDragging`           | `true` if this pane is being dragged.                   | `boolean`                                                                                                                   |
+| `isFullscreen`         | `true` if this pane is maximized.                       | `boolean`                                                                                                                   |
+| `toggleFullscreen`     | Toggles maximized state for this pane.                  | `() => void`                                                                                                                |
+| `remove`               | Removes this pane from the layout tree.                 | `() => void`                                                                                                                |
+| `selectTab`            | Activates a tab within this pane.                       | `(tabId: string) => void`                                                                                                   |
+| `removeTab`            | Closes a tab from this pane.                            | `(tabId: string) => void`                                                                                                   |
+| `metadata`             | Active tab's custom metadata.                           | `Record<string, unknown> \| undefined`                                                                                      |
+| `updateMetadata`       | Updates active tab's metadata.                          | `(updater: (current: Record<string, unknown> \| undefined) => Record<string, unknown> \| undefined) => void`                |
+| `locked`               | Whether the pane or the dashboard is locked.            | `boolean`                                                                                                                   |
+| `tabsMetadata`         | Tab metadata mapping for all tabs inside this pane.     | `Record<string, Record<string, unknown>> \| undefined`                                                                      |
+| `updateTabMetadata`    | Updates metadata for a specific tab in the pane.        | `(tabId: string, updater: (current: Record<string, unknown> \| undefined) => Record<string, unknown> \| undefined) => void` |
+| `isActiveTabPoppedOut` | Whether the active tab is popped out into a new window. | `boolean`                                                                                                                   |
+| `popoutTab`            | Popout the active tab into a new window.                | `(tabId?: string) => void`                                                                                                  |
+| `dockTab`              | Dock the active tab back to the main layout.            | `(tabId?: string) => void`                                                                                                  |
 
 ---
 

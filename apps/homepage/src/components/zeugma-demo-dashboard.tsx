@@ -16,7 +16,8 @@ import { CpuGaugePanel, MemGaugePanel } from './zeugma-demo-dashboard/GaugePanel
 import { WidgetWrapper } from './zeugma-demo-dashboard/WidgetWrapper'
 import { LiveDataProvider } from './zeugma-demo-dashboard/LiveDataProvider'
 import { FpsMonitor } from './fps-monitor'
-import { Maximize2, Minimize2, X } from 'lucide-react'
+import { MapPanel } from './zeugma-demo-dashboard/MapPanel'
+import { Maximize2, Minimize2, X, ExternalLink } from 'lucide-react'
 
 import { WIDGET_META, defaultDashboardLayout } from './zeugma-demo-dashboard/constants'
 
@@ -26,7 +27,8 @@ import { EmptyWidgetPanel } from './zeugma-demo-dashboard/EmptyWidgetPanel'
 // ── Custom Pane Header (Drag Handle, Fullscreen, Close) ──────────────────────
 
 function DashboardPaneHeader() {
-  const { toggleFullscreen, isFullscreen, remove } = usePaneContext()
+  const { toggleFullscreen, isFullscreen, remove, isActiveTabPoppedOut, popoutTab, dockTab } =
+    usePaneContext()
 
   const getWidgetTitle = (id: string) => {
     if (id.startsWith('empty-widget')) return 'Empty Panel'
@@ -41,12 +43,16 @@ function DashboardPaneHeader() {
             container: 'grafana-tabs-container h-full flex items-center',
             tab: 'h-full flex items-center',
           }}
-          renderTab={({ id, isActive, onSelect }) => {
+          renderTab={({ id, isActive, onSelect, isPoppedOut }) => {
             const meta = WIDGET_META[id]
             return (
-              <button onClick={onSelect} className={`grafana-tab ${isActive ? 'active' : ''}`}>
+              <button
+                onClick={onSelect}
+                className={`grafana-tab ${isActive ? 'active' : ''} ${isPoppedOut ? 'opacity-50' : ''}`}
+              >
                 {meta?.icon}
                 <span className="text-[10px] font-semibold">{getWidgetTitle(id)}</span>
+                {isPoppedOut && <ExternalLink className="w-2.5 h-2.5 ml-1 opacity-70" />}
               </button>
             )
           }}
@@ -55,6 +61,19 @@ function DashboardPaneHeader() {
       </div>
 
       <div className="flex items-center gap-0.5 shrink-0 pl-2">
+        <button
+          onClick={() => {
+            if (isActiveTabPoppedOut) {
+              dockTab()
+            } else {
+              popoutTab()
+            }
+          }}
+          className={`grafana-pane-btn ${isActiveTabPoppedOut ? 'text-blue-400' : ''}`}
+          title={isActiveTabPoppedOut ? 'Dock Panel' : 'Open in New Window'}
+        >
+          <ExternalLink className="w-3 h-3" />
+        </button>
         <button
           onClick={toggleFullscreen}
           className="grafana-pane-btn"
@@ -139,6 +158,8 @@ function ZeugmaDemoDashboardInner() {
           return <MemGaugePanel />
         case 'fps-monitor':
           return <FpsMonitor />
+        case 'system-map':
+          return <MapPanel />
         default:
           return (
             <PanelChrome title="Unknown">

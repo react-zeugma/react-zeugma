@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { TabDetails } from '../../../shared'
+import { TabDetails, useZeugmaState } from '../../../shared'
 
 export interface PortalHostItemProps {
   tabDetails: TabDetails
@@ -118,6 +118,7 @@ export const PopoutRenderWrapper: React.FC<{ popoutDoc: Document; children: Reac
 export const PortalHostItem: React.FC<PortalHostItemProps> = React.memo(
   ({ tabDetails, target, renderWidget }) => {
     const { id: tabId } = tabDetails
+    const { renderPopoutWrapper } = useZeugmaState()
     const [mounted, setMounted] = useState(false)
     const wrapperRef = useRef<HTMLDivElement | null>(null)
 
@@ -168,9 +169,17 @@ export const PortalHostItem: React.FC<PortalHostItemProps> = React.memo(
 
     if (!wrapper || !renderWidget) return null
 
-    const widget = renderWidget(tabDetails)
+    let widget = renderWidget(tabDetails)
 
     if (target && target.ownerDocument && target.ownerDocument !== document) {
+      if (renderPopoutWrapper) {
+        widget = renderPopoutWrapper({
+          tabId,
+          document: target.ownerDocument,
+          window: target.ownerDocument.defaultView || window,
+          children: widget,
+        })
+      }
       return createPortal(
         <PopoutRenderWrapper popoutDoc={target.ownerDocument}>{widget}</PopoutRenderWrapper>,
         wrapper,

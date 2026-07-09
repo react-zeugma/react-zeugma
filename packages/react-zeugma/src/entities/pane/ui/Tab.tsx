@@ -78,11 +78,7 @@ export const Tab: React.FC<TabProps> = ({ id, locked = false, children, classNam
 
   const tabsContext = useContext(TabsContext)
   const isLocked =
-    locked ||
-    globalLocked ||
-    (tabsContext?.locked ?? false) ||
-    fullscreenPaneId !== null ||
-    isPoppedOut
+    locked || globalLocked || (tabsContext?.locked ?? false) || fullscreenPaneId !== null
 
   const {
     attributes,

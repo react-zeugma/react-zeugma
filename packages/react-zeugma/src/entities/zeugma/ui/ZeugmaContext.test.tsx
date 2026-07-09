@@ -189,6 +189,8 @@ describe('Tab Drop Preview rendering', () => {
     getTabMetadata: () => undefined,
     getActiveTabMetadata: () => undefined,
     renderPane: () => null,
+    poppedOutTabIds: [] as string[],
+    isTabPoppedOut: () => false,
   }
 
   it('should render the drop preview indicator before the target tab when position is before', () => {
@@ -349,6 +351,8 @@ describe('Tab Drop Preview rendering', () => {
       splitPane: vi.fn(),
       updateSplitPercentage: vi.fn(),
       moveTab: vi.fn(),
+      popoutTab: vi.fn(),
+      dockTab: vi.fn(),
     }
 
     const dragValue = {
@@ -405,6 +409,8 @@ describe('Tab Drop Preview rendering', () => {
       splitPane: vi.fn(),
       updateSplitPercentage: vi.fn(),
       moveTab: vi.fn(),
+      popoutTab: vi.fn(),
+      dockTab: vi.fn(),
     }
 
     const dragValue = {

@@ -131,6 +131,25 @@ interface ZeugmaPersistOptions {
 }
 ```
 
+##### `TabDetails`
+
+```ts
+interface TabDetails {
+  /** The tab's unique ID. */
+  id: string
+  /** The ID of the pane containing this tab. */
+  paneId: string
+  /** True if this tab is currently selected/active. */
+  isActive: boolean
+  /** The tab's 0-indexed position in the pane tab bar. */
+  index: number
+  /** Custom metadata associated with this tab. */
+  metadata?: Record<string, unknown>
+  /** Force-remount the component during window transitions instead of adopting the DOM node. */
+  remountOnPopout?: boolean
+}
+```
+
 ---
 
 #### `<PaneTree>`
@@ -491,7 +510,6 @@ You can use the `renderPopoutWrapper` callback prop on the `<Zeugma>` component 
 import { StyleSheetManager } from 'styled-components'
 import { StyleProvider } from '@ant-design/cssinjs'
 import { ConfigProvider } from 'antd'
-
 ;<Zeugma
   controller={controller}
   renderPopoutWrapper={({ document, children }) => (

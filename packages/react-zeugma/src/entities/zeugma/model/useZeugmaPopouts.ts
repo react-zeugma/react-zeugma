@@ -12,6 +12,53 @@ let lastActiveEvent: Event | null = null
 let interceptionInitialized = false
 const activePopoutDocuments = new Set<Document>()
 
+let headObserver: MutationObserver | null = null
+
+function startHeadObserver() {
+  if (typeof window === 'undefined' || headObserver) return
+  headObserver = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (
+          node instanceof HTMLElement &&
+          (node.tagName.toLowerCase() === 'style' || node.tagName.toLowerCase() === 'link')
+        ) {
+          activePopoutDocuments.forEach((doc) => {
+            try {
+              const cloned = node.cloneNode(true) as HTMLElement
+              if (cloned.tagName.toLowerCase() === 'link') {
+                const href = (node as HTMLLinkElement).href
+                if (href) {
+                  cloned.setAttribute('href', href)
+                }
+              }
+              doc.head.appendChild(cloned)
+            } catch (e) {
+              console.warn('Failed to mirror style node to popout:', e)
+            }
+          })
+        }
+      })
+    })
+  })
+  headObserver.observe(document.head, { childList: true })
+}
+
+function stopHeadObserver() {
+  if (headObserver) {
+    headObserver.disconnect()
+    headObserver = null
+  }
+}
+
+const delayClose = (closeFn: () => void) => {
+  if (typeof requestAnimationFrame !== 'undefined') {
+    requestAnimationFrame(closeFn)
+  } else {
+    setTimeout(closeFn, 0)
+  }
+}
+
 export function getActiveDocument(): Document {
   if (typeof window === 'undefined') return document
 
@@ -254,6 +301,7 @@ export function useZeugmaPopouts(props: UseZeugmaPopoutsProps) {
 
       activeWindows[tabId] = popup
       activePopoutDocuments.add(popup.document)
+      startHeadObserver()
 
       // Copy document title & styles
       popup.document.title = title
@@ -358,6 +406,9 @@ export function useZeugmaPopouts(props: UseZeugmaPopoutsProps) {
       // Listen for window close
       const handleUnload = () => {
         activePopoutDocuments.delete(popup.document)
+        if (activePopoutDocuments.size === 0) {
+          stopHeadObserver()
+        }
         dockTab(tabId)
       }
       popup.addEventListener('beforeunload', handleUnload)
@@ -379,12 +430,21 @@ export function useZeugmaPopouts(props: UseZeugmaPopoutsProps) {
         registerPopoutTarget?.(tabId, null)
         if (popup) {
           activePopoutDocuments.delete(popup.document)
+          if (activePopoutDocuments.size === 0) {
+            stopHeadObserver()
+          }
           try {
             const popupObj = popup as unknown as { __zeugmaCleanup?: () => void; close: () => void }
             if (popupObj.__zeugmaCleanup) {
               popupObj.__zeugmaCleanup()
             }
-            popupObj.close()
+            delayClose(() => {
+              try {
+                popupObj.close()
+              } catch {
+                // Already closed
+              }
+            })
           } catch {
             // Already closed
           }
@@ -406,12 +466,21 @@ export function useZeugmaPopouts(props: UseZeugmaPopoutsProps) {
             if (popupObj.__zeugmaCleanup) {
               popupObj.__zeugmaCleanup()
             }
-            popupObj.close()
+            delayClose(() => {
+              try {
+                popupObj.close()
+              } catch {
+                // Already closed
+              }
+            })
           } catch {
             // Already closed
           }
         }
       })
+      if (activePopoutDocuments.size === 0) {
+        stopHeadObserver()
+      }
     }
   }, [])
 }

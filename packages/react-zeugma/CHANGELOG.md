@@ -5,6 +5,9 @@
 ### Patch Changes
 
 - Add `renderPopoutWrapper` callback prop to allow wrapping popped-out widgets with custom style/context providers (e.g. styled-components StyleSheetManager or antd ConfigProvider).
+- Add `remountOnPopout` option to TabDetails to force-remount specific widgets during window transitions instead of using `adoptNode` (essential for context-bound libraries like Leaflet or AG Grid).
+- Implement dynamic style syncing via `MutationObserver` on the main document's head, mirroring newly added styles and absolute-resolved `<link>` elements to all open popouts in real-time.
+- Delay child window closures during docking by one frame to let React cleanly execute all portal unmount and cleanup hooks before the context is destroyed.
 
 ## 6.9.0
 

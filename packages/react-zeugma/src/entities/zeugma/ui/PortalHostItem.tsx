@@ -161,8 +161,14 @@ export const PortalHostItem: React.FC<PortalHostItemProps> = React.memo(
 
     if (!mounted) return null
 
+    const targetDoc = target ? target.ownerDocument : document
+    if (wrapperRef.current && wrapperRef.current.ownerDocument !== targetDoc) {
+      wrapperRef.current.remove()
+      wrapperRef.current = null
+    }
+
     if (!wrapperRef.current) {
-      wrapperRef.current = document.createElement('div')
+      wrapperRef.current = targetDoc.createElement('div')
       wrapperRef.current.className = `zeugma-portal-wrapper-${tabId}`
       wrapperRef.current.style.width = '100%'
       wrapperRef.current.style.height = '100%'

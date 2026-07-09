@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 6.9.2
+
+### Patch Changes
+
+- Fix Ant Design dropdown positioning, theme CSS variables injection, and relative font/image asset resolution inside popout portal windows.
+
 ## 6.9.1
 
 ### Patch Changes

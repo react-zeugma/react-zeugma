@@ -12,6 +12,15 @@ let lastActiveEvent: Event | null = null
 let interceptionInitialized = false
 const activePopoutDocuments = new Set<Document>()
 
+interface RegisteredListener {
+  target: 'window' | 'document'
+  type: string
+  listener: EventListenerOrEventListenerObject
+  options?: boolean | AddEventListenerOptions
+}
+
+const mainListeners = new Set<RegisteredListener>()
+
 let headObserver: MutationObserver | null = null
 
 function startHeadObserver() {
@@ -48,6 +57,40 @@ function stopHeadObserver() {
   if (headObserver) {
     headObserver.disconnect()
     headObserver = null
+  }
+}
+
+let htmlObserver: MutationObserver | null = null
+
+function startHtmlObserver() {
+  if (typeof window === 'undefined' || htmlObserver) return
+  htmlObserver = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.type === 'attributes' && mutation.attributeName) {
+        const val = document.documentElement.getAttribute(mutation.attributeName)
+        activePopoutDocuments.forEach((doc) => {
+          try {
+            if (doc && doc.documentElement) {
+              if (val !== null) {
+                doc.documentElement.setAttribute(mutation.attributeName!, val)
+              } else {
+                doc.documentElement.removeAttribute(mutation.attributeName!)
+              }
+            }
+          } catch (e) {
+            console.warn('Failed to sync documentElement attribute:', e)
+          }
+        })
+      }
+    })
+  })
+  htmlObserver.observe(document.documentElement, { attributes: true })
+}
+
+function stopHtmlObserver() {
+  if (htmlObserver) {
+    htmlObserver.disconnect()
+    htmlObserver = null
   }
 }
 
@@ -92,6 +135,230 @@ export function setupPopoutInterception() {
   if (typeof window === 'undefined' || interceptionInitialized) return
   interceptionInitialized = true
 
+  // Patch [Symbol.hasInstance] globally on constructors to correctly identify cross-window DOM nodes
+  const isProtoOf = (instance: unknown, proto: unknown) => {
+    if (!instance || !proto) return false
+    try {
+      let currentProto = Object.getPrototypeOf(instance)
+      while (currentProto) {
+        if (currentProto === proto) return true
+        currentProto = Object.getPrototypeOf(currentProto)
+      }
+    } catch {}
+    return false
+  }
+
+  const patchHasInstance = (
+    Constructor: unknown,
+    checkFn: (obj: Record<string, unknown>) => boolean,
+  ) => {
+    try {
+      Object.defineProperty(Constructor as object, Symbol.hasInstance, {
+        value: function (instance: unknown) {
+          if (!instance) return false
+          if (isProtoOf(instance, (Constructor as { prototype?: unknown }).prototype)) return true
+          return checkFn(instance as Record<string, unknown>)
+        },
+        configurable: true,
+        writable: true,
+      })
+    } catch (e) {
+      console.warn('Failed to patch Symbol.hasInstance on', Constructor, e)
+    }
+  }
+
+  if (typeof Node !== 'undefined') {
+    patchHasInstance(Node, (instance) => {
+      return typeof instance.nodeType === 'number' && typeof instance.nodeName === 'string'
+    })
+  }
+  if (typeof Element !== 'undefined') {
+    patchHasInstance(Element, (instance) => {
+      return instance.nodeType === 1
+    })
+  }
+  if (typeof HTMLElement !== 'undefined') {
+    patchHasInstance(HTMLElement, (instance) => {
+      return instance.nodeType === 1 && typeof instance.style === 'object'
+    })
+  }
+  if (typeof HTMLBodyElement !== 'undefined') {
+    patchHasInstance(HTMLBodyElement, (instance) => {
+      return instance.nodeType === 1 && instance.tagName === 'BODY'
+    })
+  }
+  if (typeof HTMLHtmlElement !== 'undefined') {
+    patchHasInstance(HTMLHtmlElement, (instance) => {
+      return instance.nodeType === 1 && instance.tagName === 'HTML'
+    })
+  }
+  if (typeof HTMLInputElement !== 'undefined') {
+    patchHasInstance(HTMLInputElement, (instance) => {
+      return instance.nodeType === 1 && instance.tagName === 'INPUT'
+    })
+  }
+  if (typeof HTMLTextAreaElement !== 'undefined') {
+    patchHasInstance(HTMLTextAreaElement, (instance) => {
+      return instance.nodeType === 1 && instance.tagName === 'TEXTAREA'
+    })
+  }
+  if (typeof ShadowRoot !== 'undefined') {
+    patchHasInstance(ShadowRoot, (instance) => {
+      return instance.nodeType === 11 && instance.host !== undefined
+    })
+  }
+  if (typeof SVGElement !== 'undefined') {
+    patchHasInstance(SVGElement, (instance) => {
+      return instance.nodeType === 1 && typeof instance.getBBox === 'function'
+    })
+  }
+  if (typeof Document !== 'undefined') {
+    patchHasInstance(Document, (instance) => {
+      return instance.nodeType === 9
+    })
+  }
+  if (typeof Window !== 'undefined') {
+    patchHasInstance(Window, (instance) => {
+      return (
+        instance && typeof instance.document === 'object' && typeof instance.location === 'object'
+      )
+    })
+  }
+
+  // Proxy Document properties to active popout document when one is active
+  const docProto = Document.prototype
+  const originalDocBody = Object.getOwnPropertyDescriptor(docProto, 'body')
+  const originalDocEl = Object.getOwnPropertyDescriptor(docProto, 'documentElement')
+  const originalDocHead = Object.getOwnPropertyDescriptor(docProto, 'head')
+  const originalDocActive = Object.getOwnPropertyDescriptor(docProto, 'activeElement')
+  const originalDocDefaultView = Object.getOwnPropertyDescriptor(docProto, 'defaultView')
+  const originalDocScrolling = Object.getOwnPropertyDescriptor(docProto, 'scrollingElement')
+
+  Object.defineProperties(document, {
+    body: {
+      get() {
+        const activeDoc = getActiveDocument()
+        if (activeDoc && activeDoc !== document) {
+          return activeDoc.body
+        }
+        return originalDocBody?.get?.call(document) || document.body
+      },
+      configurable: true,
+    },
+    documentElement: {
+      get() {
+        const activeDoc = getActiveDocument()
+        if (activeDoc && activeDoc !== document) {
+          return activeDoc.documentElement
+        }
+        return originalDocEl?.get?.call(document) || document.documentElement
+      },
+      configurable: true,
+    },
+    head: {
+      get() {
+        const activeDoc = getActiveDocument()
+        if (activeDoc && activeDoc !== document) {
+          return activeDoc.head
+        }
+        return originalDocHead?.get?.call(document) || document.head
+      },
+      configurable: true,
+    },
+    activeElement: {
+      get() {
+        const activeDoc = getActiveDocument()
+        if (activeDoc && activeDoc !== document) {
+          return activeDoc.activeElement
+        }
+        return originalDocActive?.get?.call(document) || document.activeElement
+      },
+      configurable: true,
+    },
+    defaultView: {
+      get() {
+        const activeDoc = getActiveDocument()
+        if (activeDoc && activeDoc !== document) {
+          return activeDoc.defaultView
+        }
+        return originalDocDefaultView?.get?.call(document) || document.defaultView
+      },
+      configurable: true,
+    },
+    scrollingElement: {
+      get() {
+        const activeDoc = getActiveDocument()
+        if (activeDoc && activeDoc !== document) {
+          return activeDoc.scrollingElement
+        }
+        return originalDocScrolling?.get?.call(document) || document.scrollingElement
+      },
+      configurable: true,
+    },
+  })
+
+  // Proxy Window properties to active popout window when one is active
+  const winProto = Window.prototype
+  const winProperties = [
+    'innerWidth',
+    'innerHeight',
+    'pageXOffset',
+    'pageYOffset',
+    'scrollX',
+    'scrollY',
+    'screenX',
+    'screenY',
+    'outerWidth',
+    'outerHeight',
+    'devicePixelRatio',
+  ] as const
+
+  const originalWinGetters: Record<string, (() => unknown) | undefined> = {}
+  winProperties.forEach((prop) => {
+    const desc =
+      Object.getOwnPropertyDescriptor(winProto, prop) ||
+      Object.getOwnPropertyDescriptor(window, prop)
+    if (desc && desc.get) {
+      originalWinGetters[prop] = desc.get
+    }
+  })
+
+  winProperties.forEach((prop) => {
+    Object.defineProperty(window, prop, {
+      get() {
+        const activeDoc = getActiveDocument()
+        if (activeDoc && activeDoc !== document && activeDoc.defaultView) {
+          try {
+            return (activeDoc.defaultView as unknown as Record<string, unknown>)[prop]
+          } catch {}
+        }
+        const orig = originalWinGetters[prop]
+        if (orig) {
+          return orig.call(window)
+        }
+        return (window as unknown as Record<string, unknown>)[prop]
+      },
+      configurable: true,
+    })
+  })
+
+  const originalContains = Node.prototype.contains
+  Node.prototype.contains = function (this: Node, otherNode: Node | null) {
+    if (!otherNode) return false
+    if (originalContains.call(this, otherNode)) return true
+
+    if (this === document || this === document.body || this === document.documentElement) {
+      for (const doc of activePopoutDocuments) {
+        try {
+          if (doc.contains(otherNode)) {
+            return true
+          }
+        } catch {}
+      }
+    }
+    return false
+  }
+
   // Reset active document on main window events to be safe
   const resetActive = () => {
     lastActiveEvent = null
@@ -113,53 +380,19 @@ export function setupPopoutInterception() {
     return originalCreateElement.call(document, tagName, options)
   }
 
-  const originalAppendChild = document.body.appendChild
-  document.body.appendChild = function <T extends Node>(node: T): T {
-    const activeDoc = getActiveDocument()
-    if (activeDoc && activeDoc !== document) {
-      return activeDoc.body.appendChild(node) as unknown as T
-    }
-    return originalAppendChild.call(document.body, node) as unknown as T
-  }
-
-  const originalRemoveChild = document.body.removeChild
-  document.body.removeChild = function <T extends Node>(child: T): T {
-    const activeDoc = getActiveDocument()
-    if (activeDoc && activeDoc !== document) {
-      return activeDoc.body.removeChild(child) as unknown as T
-    }
-    return originalRemoveChild.call(document.body, child) as unknown as T
-  }
-
-  const originalInsertBefore = document.body.insertBefore
-  document.body.insertBefore = function <T extends Node>(node: T, child: Node | null): T {
-    const activeDoc = getActiveDocument()
-    if (activeDoc && activeDoc !== document) {
-      return activeDoc.body.insertBefore(node, child) as unknown as T
-    }
-    return originalInsertBefore.call(document.body, node, child) as unknown as T
-  }
-
-  const originalReplaceChild = document.body.replaceChild
-  document.body.replaceChild = function <T extends Node>(node: Node, child: T): T {
-    const activeDoc = getActiveDocument()
-    if (activeDoc && activeDoc !== document) {
-      return activeDoc.body.replaceChild(node, child) as unknown as T
-    }
-    return originalReplaceChild.call(document.body, node, child) as unknown as T
-  }
-
   const originalDocAddEventListener = document.addEventListener
   document.addEventListener = function (
     type: string,
     listener: EventListenerOrEventListenerObject,
     options?: boolean | AddEventListenerOptions,
   ) {
-    const activeDoc = getActiveDocument()
-    if (activeDoc && activeDoc !== document) {
-      return activeDoc.addEventListener(type, listener, options)
-    }
-    return originalDocAddEventListener.call(document, type, listener, options)
+    mainListeners.add({ target: 'document', type, listener, options })
+    originalDocAddEventListener.call(document, type, listener, options)
+    activePopoutDocuments.forEach((doc) => {
+      try {
+        doc.addEventListener(type, listener, options)
+      } catch {}
+    })
   }
 
   const originalDocRemoveEventListener = document.removeEventListener
@@ -168,15 +401,17 @@ export function setupPopoutInterception() {
     listener: EventListenerOrEventListenerObject,
     options?: boolean | EventListenerOptions,
   ) {
-    // Call on main document
+    for (const record of mainListeners) {
+      if (record.target === 'document' && record.type === type && record.listener === listener) {
+        mainListeners.delete(record)
+        break
+      }
+    }
     originalDocRemoveEventListener.call(document, type, listener, options)
-    // Call on all open popout documents as a fallback to prevent leaks
     activePopoutDocuments.forEach((doc) => {
       try {
         doc.removeEventListener(type, listener, options)
-      } catch {
-        // Safe no-op
-      }
+      } catch {}
     })
   }
 
@@ -186,11 +421,15 @@ export function setupPopoutInterception() {
     listener: EventListenerOrEventListenerObject,
     options?: boolean | AddEventListenerOptions,
   ) {
-    const activeDoc = getActiveDocument()
-    if (activeDoc && activeDoc !== document && activeDoc.defaultView) {
-      return activeDoc.defaultView.addEventListener(type, listener, options)
-    }
-    return originalWinAddEventListener.call(window, type, listener, options)
+    mainListeners.add({ target: 'window', type, listener, options })
+    originalWinAddEventListener.call(window, type, listener, options)
+    activePopoutDocuments.forEach((doc) => {
+      try {
+        if (doc.defaultView) {
+          doc.defaultView.addEventListener(type, listener, options)
+        }
+      } catch {}
+    })
   }
 
   const originalWinRemoveEventListener = window.removeEventListener
@@ -199,17 +438,19 @@ export function setupPopoutInterception() {
     listener: EventListenerOrEventListenerObject,
     options?: boolean | EventListenerOptions,
   ) {
-    // Call on main window
+    for (const record of mainListeners) {
+      if (record.target === 'window' && record.type === type && record.listener === listener) {
+        mainListeners.delete(record)
+        break
+      }
+    }
     originalWinRemoveEventListener.call(window, type, listener, options)
-    // Call on all open popout windows as a fallback to prevent leaks
     activePopoutDocuments.forEach((doc) => {
       try {
         if (doc.defaultView) {
           doc.defaultView.removeEventListener(type, listener, options)
         }
-      } catch {
-        // Safe no-op
-      }
+      } catch {}
     })
   }
 
@@ -301,11 +542,28 @@ export function useZeugmaPopouts(props: UseZeugmaPopoutsProps) {
 
       activeWindows[tabId] = popup
       activePopoutDocuments.add(popup.document)
+
+      mainListeners.forEach((record) => {
+        try {
+          if (record.target === 'window') {
+            popup.addEventListener(record.type, record.listener, record.options)
+          } else {
+            popup.document.addEventListener(record.type, record.listener, record.options)
+          }
+        } catch {}
+      })
+
       startHeadObserver()
+      startHtmlObserver()
 
       // Copy document title & styles
       popup.document.title = title
       popup.document.head.innerHTML = ''
+      try {
+        const baseNode = popup.document.createElement('base')
+        baseNode.setAttribute('href', window.location.origin + '/')
+        popup.document.head.appendChild(baseNode)
+      } catch {}
       Array.from(document.querySelectorAll('style, link[rel="stylesheet"]')).forEach((node) => {
         const clonedNode = node.cloneNode(true) as HTMLElement
         if (node.tagName.toLowerCase() === 'link') {
@@ -329,9 +587,42 @@ export function useZeugmaPopouts(props: UseZeugmaPopoutsProps) {
         popup.document.head.appendChild(clonedNode)
       })
 
+      // Copy adopted stylesheets if supported
+      if (
+        typeof document.adoptedStyleSheets !== 'undefined' &&
+        typeof popup.document.adoptedStyleSheets !== 'undefined'
+      ) {
+        try {
+          const clonedSheets = Array.from(document.adoptedStyleSheets)
+            .map((sheet) => {
+              try {
+                const newSheet = new (
+                  popup as unknown as {
+                    CSSStyleSheet: typeof CSSStyleSheet
+                  }
+                ).CSSStyleSheet()
+                const cssText = Array.from(sheet.cssRules)
+                  .map((rule) => rule.cssText)
+                  .join('\n')
+                newSheet.replaceSync(cssText)
+                return newSheet
+              } catch {
+                return null
+              }
+            })
+            .filter((s): s is CSSStyleSheet => s !== null)
+          popup.document.adoptedStyleSheets = clonedSheets
+        } catch (e) {
+          console.warn('Failed to copy adoptedStyleSheets:', e)
+        }
+      }
+
       // Synchronize classes and background styles
       popup.document.documentElement.className = document.documentElement.className
       popup.document.body.className = document.body.className
+      Array.from(document.documentElement.attributes).forEach((attr) => {
+        popup.document.documentElement.setAttribute(attr.name, attr.value)
+      })
       popup.document.body.style.margin = '0'
       popup.document.body.style.padding = '0'
       popup.document.body.style.height = '100vh'
@@ -363,8 +654,11 @@ export function useZeugmaPopouts(props: UseZeugmaPopoutsProps) {
             ? activeBgColor
             : '#181b1f'
 
-      popup.document.documentElement.style.backgroundColor = finalBgColor
-      popup.document.body.style.backgroundColor = finalBgColor
+      const themeAttr = document.documentElement.getAttribute('data-theme')
+      if (!themeAttr) {
+        popup.document.documentElement.style.backgroundColor = finalBgColor
+        popup.document.body.style.backgroundColor = finalBgColor
+      }
       popup.document.body.style.color = bodyComputedStyle.color || docComputedStyle.color
       popup.document.body.style.fontFamily =
         bodyComputedStyle.fontFamily || docComputedStyle.fontFamily
@@ -390,14 +684,14 @@ export function useZeugmaPopouts(props: UseZeugmaPopoutsProps) {
         ).__zeugmaActivePopoutDocument = popup.document
 
         // Reset after event cycle finishes
-        queueMicrotask(() => {
+        setTimeout(() => {
           if (lastActiveEvent === e) {
             lastActiveEvent = null
             ;(
               globalThis as unknown as { __zeugmaActivePopoutDocument?: Document | null }
             ).__zeugmaActivePopoutDocument = null
           }
-        })
+        }, 0)
       }
       eventsToTrack.forEach((evtName) => {
         popup.addEventListener(evtName, trackEvent, true)
@@ -408,6 +702,7 @@ export function useZeugmaPopouts(props: UseZeugmaPopoutsProps) {
         activePopoutDocuments.delete(popup.document)
         if (activePopoutDocuments.size === 0) {
           stopHeadObserver()
+          stopHtmlObserver()
         }
         dockTab(tabId)
       }
@@ -432,6 +727,7 @@ export function useZeugmaPopouts(props: UseZeugmaPopoutsProps) {
           activePopoutDocuments.delete(popup.document)
           if (activePopoutDocuments.size === 0) {
             stopHeadObserver()
+            stopHtmlObserver()
           }
           try {
             const popupObj = popup as unknown as { __zeugmaCleanup?: () => void; close: () => void }
@@ -480,7 +776,12 @@ export function useZeugmaPopouts(props: UseZeugmaPopoutsProps) {
       })
       if (activePopoutDocuments.size === 0) {
         stopHeadObserver()
+        stopHtmlObserver()
       }
     }
   }, [])
+}
+
+if (typeof window !== 'undefined') {
+  setupPopoutInterception()
 }

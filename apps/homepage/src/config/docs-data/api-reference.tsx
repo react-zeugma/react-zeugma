@@ -23,7 +23,7 @@ const ZEUGMA_PROPS = [
     'renderPopoutWrapper',
     '(props: { tabId: string; document: Document; window: Window; children: React.ReactNode }) => React.ReactNode',
     '-',
-    'Custom wrapper to inject style managers / providers into popout windows',
+    '[Experimental] Custom wrapper to inject style managers / providers into popout windows',
   ],
 ]
 
@@ -41,13 +41,13 @@ const RENDER_TAB_PROPS = [
   ['isOver', 'boolean', 'True if another dragged tab/item is currently hovering over this tab.'],
   ['onSelect', '() => void', 'Callback to select/activate this tab.'],
   ['onRemove', '() => void', 'Callback to close/remove this tab.'],
-  ['isPoppedOut', 'boolean', 'True if this tab is open in a new popup window.'],
-  ['popout', '() => void', 'Callback to popout this tab into a new window.'],
-  ['dock', '() => void', 'Callback to dock this tab back to the dashboard.'],
+  ['isPoppedOut', 'boolean', '[Experimental] True if this tab is open in a new popup window.'],
+  ['popout', '() => void', '[Experimental] Callback to popout this tab into a new window.'],
+  ['dock', '() => void', '[Experimental] Callback to dock this tab back to the dashboard.'],
   [
     'remountOnPopout',
     'boolean | undefined',
-    'If true, force-remounts the widget during popout/dock transitions instead of adopting the DOM node.',
+    '[Experimental] If true, force-remounts the widget during popout/dock transitions instead of adopting the DOM node.',
   ],
 ]
 
@@ -124,11 +124,15 @@ const ZEUGMA_CONTROLLER_METHODS = [
     '(tabId: string) => TabDetails | null',
     'Queries details (paneId, index, metadata, isActive) of a tab.',
   ],
-  ['popoutTab', '(tabId: string) => void', 'Opens the specified tab in a new popup window.'],
+  [
+    'popoutTab',
+    '(tabId: string) => void',
+    '[Experimental] Opens the specified tab in a new popup window.',
+  ],
   [
     'dockTab',
     '(tabId: string) => void',
-    'Docks the specified tab back into the dashboard grid layout.',
+    '[Experimental] Docks the specified tab back into the dashboard grid layout.',
   ],
 ]
 
@@ -170,17 +174,17 @@ const USE_PANE_CONTEXT_PROPERTIES = [
   [
     'isActiveTabPoppedOut',
     'boolean',
-    'True if the active tab in this pane is open in a new window.',
+    '[Experimental] True if the active tab in this pane is open in a new window.',
   ],
   [
     'popoutTab',
     '(tabId?: string) => void',
-    'Pops out the active tab (or specific tab ID) into a new window.',
+    '[Experimental] Pops out the active tab (or specific tab ID) into a new window.',
   ],
   [
     'dockTab',
     '(tabId?: string) => void',
-    'Docks the active tab (or specific tab ID) back to the dashboard grid.',
+    '[Experimental] Docks the active tab (or specific tab ID) back to the dashboard grid.',
   ],
 ]
 

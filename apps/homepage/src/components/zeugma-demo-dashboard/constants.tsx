@@ -1,7 +1,7 @@
 'use client'
 
 import { TreeNode } from 'react-zeugma'
-import { Activity, BarChart3, Zap, Table2, ScrollText, Gauge } from 'lucide-react'
+import { Activity, BarChart3, Zap, Table2, ScrollText, Gauge, MapPin } from 'lucide-react'
 
 // ── Widget Registry ──────────────────────────────────────────────────────────
 
@@ -42,6 +42,10 @@ export const WIDGET_META: Record<string, { title: string; icon: React.ReactNode 
     title: 'FPS Monitor',
     icon: <Activity className="w-3.5 h-3.5 text-[#8b8f97]" />,
   },
+  'system-map': {
+    title: 'System Node Map',
+    icon: <MapPin className="w-3.5 h-3.5 text-[#8b8f97]" />,
+  },
 }
 
 export const AVAILABLE_WIDGETS = [
@@ -54,6 +58,7 @@ export const AVAILABLE_WIDGETS = [
   { id: 'cpu-gauge', label: 'CPU', color: '#5794F2' },
   { id: 'mem-gauge', label: 'Memory', color: '#FF9830' },
   { id: 'fps-monitor', label: 'FPS', color: '#B877D9' },
+  { id: 'system-map', label: 'Node Map', color: '#5794F2' },
 ]
 
 // ── Preset Layout Definitions ────────────────────────────────────────────────
@@ -74,10 +79,11 @@ export const defaultDashboardLayout: TreeNode = {
       first: {
         type: 'pane',
         id: 'pane-stats',
-        tabIds: ['key-metrics'],
+        tabIds: ['key-metrics', 'system-map'],
         activeTabId: 'key-metrics',
         tabsMetadata: {
           'key-metrics': { color: '#5794F2' },
+          'system-map': { color: '#5794F2' },
         },
       },
       second: {

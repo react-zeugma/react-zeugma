@@ -49,6 +49,7 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
     controlledFullscreenPaneId || null,
   )
   const [locked, setLocked] = useState(initialLocked)
+  const [poppedOutTabIds, setPoppedOutTabIds] = useState<string[]>([])
 
   const [activeId, setActiveId] = useState<string | null>(null)
   const [activeType, setActiveType] = useState<'pane' | 'tab' | null>(null)
@@ -280,6 +281,20 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
     return getActiveTabMetadata(layoutRef.current, paneId)
   }, [])
 
+  const handlePopoutTab = useCallback((tabId: string) => {
+    setPoppedOutTabIds((prev) => {
+      if (prev.includes(tabId)) return prev
+      return [...prev, tabId]
+    })
+  }, [])
+
+  const handleDockTab = useCallback((tabId: string) => {
+    setPoppedOutTabIds((prev) => {
+      if (!prev.includes(tabId)) return prev
+      return prev.filter((id) => id !== tabId)
+    })
+  }, [])
+
   const controller: ZeugmaControllerInternal = {
     layout,
     setLayout,
@@ -289,6 +304,7 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
     setFullscreenPaneId,
     locked,
     setLocked,
+    poppedOutTabIds,
     activeId,
     setActiveId,
     activeType,
@@ -309,6 +325,8 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
     removeTab: handleRemoveTab,
     splitPane: handleSplitPane,
     updateSplitPercentage: handleUpdateSplitPercentage,
+    popoutTab: handlePopoutTab,
+    dockTab: handleDockTab,
 
     // Queries
     findPaneById: handleFindPaneById,

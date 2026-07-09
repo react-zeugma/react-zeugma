@@ -35,6 +35,9 @@ const RENDER_TAB_PROPS = [
   ['isOver', 'boolean', 'True if another dragged tab/item is currently hovering over this tab.'],
   ['onSelect', '() => void', 'Callback to select/activate this tab.'],
   ['onRemove', '() => void', 'Callback to close/remove this tab.'],
+  ['isPoppedOut', 'boolean', 'True if this tab is open in a new popup window.'],
+  ['popout', '() => void', 'Callback to popout this tab into a new window.'],
+  ['dock', '() => void', 'Callback to dock this tab back to the dashboard.'],
 ]
 
 const USE_ZEUGMA_OPTIONS = [
@@ -110,6 +113,12 @@ const ZEUGMA_CONTROLLER_METHODS = [
     '(tabId: string) => TabDetails | null',
     'Queries details (paneId, index, metadata, isActive) of a tab.',
   ],
+  ['popoutTab', '(tabId: string) => void', 'Opens the specified tab in a new popup window.'],
+  [
+    'dockTab',
+    '(tabId: string) => void',
+    'Docks the specified tab back into the dashboard grid layout.',
+  ],
 ]
 
 const USE_PANE_CONTEXT_PROPERTIES = [
@@ -146,6 +155,21 @@ const USE_PANE_CONTEXT_PROPERTIES = [
     'updateTabMetadata',
     '(tabId: string, updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined) => void',
     'Updates metadata for a specific tab in the pane.',
+  ],
+  [
+    'isActiveTabPoppedOut',
+    'boolean',
+    'True if the active tab in this pane is open in a new window.',
+  ],
+  [
+    'popoutTab',
+    '(tabId?: string) => void',
+    'Pops out the active tab (or specific tab ID) into a new window.',
+  ],
+  [
+    'dockTab',
+    '(tabId?: string) => void',
+    'Docks the active tab (or specific tab ID) back to the dashboard grid.',
   ],
 ]
 

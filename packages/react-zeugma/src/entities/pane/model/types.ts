@@ -34,4 +34,10 @@ export interface PaneRenderProps extends BaseLeafRenderProps {
     tabId: string,
     updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined,
   ) => void
+  /** Whether the active tab is popped out into a new window. */
+  isActiveTabPoppedOut: boolean
+  /** Popout the active tab (or a specific tab) into a new window. */
+  popoutTab: (tabId?: string) => void
+  /** Dock the active tab (or a specific tab) back to the main layout. */
+  dockTab: (tabId?: string) => void
 }

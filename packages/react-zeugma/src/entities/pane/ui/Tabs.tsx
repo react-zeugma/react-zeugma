@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useMemo } from 'react'
 import { Tab } from './Tab'
-import { useZeugmaState, useZeugmaDrag } from '../../../shared'
+import { useZeugmaState, ZeugmaActionsContext, useZeugmaDrag } from '../../../shared'
 import type { RenderTabProps } from '../../../shared'
 import { calculateTabDropIndex } from '../../../shared/lib/tree'
 import { PaneContext } from './Pane'
@@ -80,7 +80,8 @@ export const Tabs: React.FC<TabsProps> & {
   const selectTab = propSelectTab ?? paneContext?.selectTab ?? (() => {})
   const removeTab = propRemoveTab ?? paneContext?.removeTab ?? (() => {})
 
-  const { classNames: globalClassNames = {}, activeType } = useZeugmaState()
+  const { classNames: globalClassNames = {}, activeType, poppedOutTabIds = [] } = useZeugmaState()
+  const actions = useContext(ZeugmaActionsContext)
   const { overTabId, overTabPosition } = useZeugmaDrag()
 
   const contextValue = useMemo<TabsContextValue>(
@@ -142,6 +143,9 @@ export const Tabs: React.FC<TabsProps> & {
                     metadata,
                     onSelect: () => selectTab(tabId),
                     onRemove: () => removeTab(tabId),
+                    isPoppedOut: poppedOutTabIds.includes(tabId),
+                    popout: () => actions?.popoutTab(tabId),
+                    dock: () => actions?.dockTab(tabId),
                   })
                 }
               </Tab>

@@ -147,6 +147,9 @@ const {
   findPaneById,
   findPaneContainingTab,
   findTabById,
+  poppedOutTabIds,
+  popoutTab,
+  dockTab,
 } = useZeugmaContext()
 \`\`\`
 
@@ -166,6 +169,9 @@ const {
   selectTab,
   removeTab,
   updateMetadata,
+  isActiveTabPoppedOut,
+  popoutTab,
+  dockTab,
 } = usePaneContext()
 \`\`\`
 

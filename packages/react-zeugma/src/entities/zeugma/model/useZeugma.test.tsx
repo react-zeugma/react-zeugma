@@ -373,4 +373,22 @@ describe('useZeugma Hook', () => {
     expect(secondPane.tabsMetadata?.['tab-1']).toEqual({ label: 'Tab 1' })
     expect(secondPane.tabsMetadata?.['tab-3']).toBeUndefined()
   })
+
+  it('should support popout and dock actions', () => {
+    const { result } = renderHook(() => useZeugma({ initialLayout }))
+
+    expect(result.current.poppedOutTabIds).toEqual([])
+
+    // Popout tab-1
+    act(() => {
+      result.current.popoutTab('tab-1')
+    })
+    expect(result.current.poppedOutTabIds).toEqual(['tab-1'])
+
+    // Dock tab-1 back
+    act(() => {
+      result.current.dockTab('tab-1')
+    })
+    expect(result.current.poppedOutTabIds).toEqual([])
+  })
 })

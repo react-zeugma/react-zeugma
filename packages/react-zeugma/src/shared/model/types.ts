@@ -34,7 +34,7 @@ export interface TabDetails {
   isActive: boolean
   index: number
   metadata: Record<string, unknown> | undefined
-  /** Force-remount the component during window transitions instead of adopting the DOM node. */
+  /** [Experimental] Force-remount the component during window transitions instead of adopting the DOM node. */
   remountOnPopout?: boolean
 }
 
@@ -47,11 +47,11 @@ export interface RenderTabProps extends TabDetails {
   onSelect: () => void
   /** Callback to close/remove this tab. */
   onRemove: () => void
-  /** Whether this tab is popped out in a separate window. */
+  /** [Experimental] Whether this tab is popped out in a separate window. */
   isPoppedOut: boolean
-  /** Popout this tab. */
+  /** [Experimental] Popout this tab. */
   popout: () => void
-  /** Dock this tab back. */
+  /** [Experimental] Dock this tab back. */
   dock: () => void
 }
 
@@ -77,7 +77,7 @@ export interface ZeugmaState {
   fullscreenPaneId: string | null
   /** Whether the layout is globally locked. */
   locked: boolean
-  /** The list of tab/widget IDs that are currently open in a new window. */
+  /** [Experimental] The list of tab/widget IDs that are currently open in a new window. */
   poppedOutTabIds: string[]
 }
 
@@ -123,9 +123,9 @@ export interface ZeugmaActions {
     targetTabId: string,
     position?: 'before' | 'after' | 'center',
   ) => void
-  /** Popout the specified tab into a new window. */
+  /** [Experimental] Popout the specified tab into a new window. */
   popoutTab: (tabId: string) => void
-  /** Dock the specified tab back to the main layout. */
+  /** [Experimental] Dock the specified tab back to the main layout. */
   dockTab: (tabId: string) => void
 }
 
@@ -266,7 +266,7 @@ export interface BaseZeugmaProps {
 
   /** Configuration for layout persistence in localStorage. */
   persist?: boolean | ZeugmaPersistOptions
-  /** Optional custom wrapper element/component to wrap the contents of a popout tab.
+  /** [Experimental] Optional custom wrapper element/component to wrap the contents of a popout tab.
    * Useful for styled-components (StyleSheetManager), Antd (ConfigProvider), etc.
    */
   renderPopoutWrapper?: (props: {
@@ -336,9 +336,9 @@ export interface ZeugmaStateValue extends ZeugmaState, ZeugmaQueries {
   onResizeEnd?: (currentNode: SplitNode, percentage: number) => void
   minSplitPercentage?: number
   maxSplitPercentage?: number
-  /** Query function to check if a tab is popped out. */
+  /** [Experimental] Query function to check if a tab is popped out. */
   isTabPoppedOut: (tabId: string) => boolean
-  /** Optional custom wrapper to wrap the contents of a popout tab. */
+  /** [Experimental] Optional custom wrapper to wrap the contents of a popout tab. */
   renderPopoutWrapper?: (props: {
     tabId: string
     document: Document

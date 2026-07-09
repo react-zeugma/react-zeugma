@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 6.9.3
+
+### Patch Changes
+
+- Fix a regression where widgets were remounted when popped out into separate windows or docked back to the main layout. The portal wrapper element is now adopted to the target document rather than recreated, preserving React portal target references and keeping widget state intact.
+
 ## 6.9.2
 
 ### Patch Changes

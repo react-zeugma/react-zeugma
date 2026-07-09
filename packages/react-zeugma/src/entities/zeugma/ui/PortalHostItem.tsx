@@ -163,8 +163,7 @@ export const PortalHostItem: React.FC<PortalHostItemProps> = React.memo(
 
     const targetDoc = target ? target.ownerDocument : document
     if (wrapperRef.current && wrapperRef.current.ownerDocument !== targetDoc) {
-      wrapperRef.current.remove()
-      wrapperRef.current = null
+      targetDoc.adoptNode(wrapperRef.current)
     }
 
     if (!wrapperRef.current) {

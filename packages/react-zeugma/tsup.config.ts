@@ -9,7 +9,7 @@ export default defineConfig({
   clean: true,
   minify: true,
   treeshake: true,
-  external: ['react', 'react-dom'],
+  external: ['react', 'react-dom', '@dnd-kit/core'],
   esbuildOptions(options) {
     options.banner = {
       js: '"use client";', // Add "use client" for Next.js compatibility since it is a React client library

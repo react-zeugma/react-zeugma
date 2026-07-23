@@ -23,8 +23,8 @@ import {
   findTabById,
   getTabMetadata,
   getActiveTabMetadata,
+  areLayoutsEqual,
 } from '../../../shared/lib/tree'
-import { safeJsonStringify } from '../../../shared/lib/json'
 
 export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
   const {
@@ -42,9 +42,7 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
   const [renderingLayout, setRenderingLayout] = useState<TreeNode | null>(() => {
     return controlledLayout !== undefined ? controlledLayout : (initialLayout ?? null)
   })
-  const [prevControlledLayoutJson, setPrevControlledLayoutJson] = useState<string>(() => {
-    return safeJsonStringify(controlledLayout !== undefined ? controlledLayout : null)
-  })
+  const prevControlledLayoutRef = useRef<TreeNode | null | undefined>(controlledLayout)
   const [fullscreenPaneId, setLocalFullscreenPaneId] = useState<string | null>(
     controlledFullscreenPaneId || null,
   )
@@ -92,9 +90,8 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
 
   // Sync state if controlled layout changes from outside during render
   if (controlledLayout !== undefined) {
-    const currentControlledLayoutJson = safeJsonStringify(controlledLayout)
-    if (currentControlledLayoutJson !== prevControlledLayoutJson) {
-      setPrevControlledLayoutJson(currentControlledLayoutJson)
+    if (!areLayoutsEqual(controlledLayout, prevControlledLayoutRef.current ?? null)) {
+      prevControlledLayoutRef.current = controlledLayout
       setLocalLayout(controlledLayout)
       setRenderingLayout(controlledLayout)
       setPoppedOutTabIds((prevPopped) => {
@@ -114,7 +111,7 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
         const prev = layoutRef.current
         const next = mutationFn(prev, ...args)
 
-        if (safeJsonStringify(prev) !== safeJsonStringify(next)) {
+        if (!areLayoutsEqual(prev, next)) {
           layoutRef.current = next
           setLocalLayout(next)
           setRenderingLayout(next)

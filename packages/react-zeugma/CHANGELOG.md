@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 6.9.5
+
+### Patch Changes
+
+- Prevent layout modifications (closes, additions, splits, merges, resizes, and popouts) at the API level when a pane/tab is in fullscreen mode.
+
 ## 6.9.4
 
 ### Patch Changes

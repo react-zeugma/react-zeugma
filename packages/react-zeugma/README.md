@@ -284,14 +284,14 @@ const controller = useZeugma({
 
 ##### Options
 
-| Parameter            | Description                                                                 | Type                                    | Default |
-| -------------------- | --------------------------------------------------------------------------- | --------------------------------------- | ------- |
-| `initialLayout`      | Initial layout tree structure. Only used on mount.                          | `TreeNode \| null`                      | `null`  |
-| `layout`             | Controlled layout tree structure. Hook runs in controlled mode if provided. | `TreeNode \| null`                      | `null`  |
-| `onChange`           | Callback triggered when the layout tree updates.                            | `(newLayout: TreeNode \| null) => void` | -       |
-| `fullscreenPaneId`   | Controlled fullscreen pane ID.                                              | `string \| null`                        | `null`  |
-| `onFullscreenChange` | Callback triggered when fullscreen state toggles.                           | `(paneId: string \| null) => void`      | -       |
-| `locked`             | Global lock status to disable resizing and drag-and-drop operations.        | `boolean`                               | `false` |
+| Parameter            | Description                                                                                                                                                              | Type                                    | Default |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------- | ------- |
+| `initialLayout`      | Initial layout tree structure. Only used on mount.                                                                                                                       | `TreeNode \| null`                      | `null`  |
+| `layout`             | Controlled layout tree structure. Hook runs in controlled mode if provided.                                                                                              | `TreeNode \| null`                      | `null`  |
+| `onChange`           | Callback triggered when the layout tree updates.                                                                                                                         | `(newLayout: TreeNode \| null) => void` | -       |
+| `fullscreenPaneId`   | Controlled fullscreen pane ID. When active (not null), structural layout changes (closes, additions, splits, merges, resizes, and popouts) are blocked at the API level. | `string \| null`                        | `null`  |
+| `onFullscreenChange` | Callback triggered when fullscreen state toggles.                                                                                                                        | `(paneId: string \| null) => void`      | -       |
+| `locked`             | Global lock status to disable resizing and drag-and-drop operations.                                                                                                     | `boolean`                               | `false` |
 
 ---
 
@@ -310,32 +310,32 @@ const { layout, locked, setLocked, addTab, removePane, selectTab, findPaneById }
 
 ##### Context Values
 
-| Property / Method       | Description                                                                            | Type                                                                                                                          |
-| ----------------------- | -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `layout`                | The current active layout tree structure.                                              | `TreeNode \| null`                                                                                                            |
-| `fullscreenPaneId`      | The ID of the maximized fullscreen pane.                                               | `string \| null`                                                                                                              |
-| `locked`                | Whether the dashboard layout is globally locked.                                       | `boolean`                                                                                                                     |
-| `setLayout`             | React state setter to update the layout tree.                                          | `Dispatch<SetStateAction<TreeNode \| null>>`                                                                                  |
-| `setFullscreenPaneId`   | Updates the active fullscreen pane ID.                                                 | `(paneId: string \| null) => void`                                                                                            |
-| `setLocked`             | Updates the global layout lock state.                                                  | `Dispatch<SetStateAction<boolean>>`                                                                                           |
-| `removePane`            | Removes a pane and collapses the split.                                                | `(paneId: string) => void`                                                                                                    |
-| `addTab`                | Adds a tab to a pane, or splits/creates one if target is omitted.                      | `(tabId: string, targetPaneId?: string, metadata?: Record<string, unknown>) => void`                                          |
-| `updateMetadata`        | Mutates a specific tab's metadata.                                                     | `(id: string, updater: (current: Record<string, unknown> \| undefined) => Record<string, unknown> \| undefined) => void`      |
-| `updatePaneLock`        | Toggles the lock status of a specific pane.                                            | `(paneId: string, locked: boolean) => void`                                                                                   |
-| `selectTab`             | Focuses/activates a tab within a pane.                                                 | `(paneId: string, tabId: string) => void`                                                                                     |
-| `mergeTab`              | Programmatically drags and drops a tab from one pane to another.                       | `(draggedTabId: string, targetPaneId: string) => void`                                                                        |
-| `removeTab`             | Programmatically closes a tab.                                                         | `(tabId: string) => void`                                                                                                     |
-| `splitPane`             | Programmatically splits a pane node and adds a new one.                                | `(targetId: string, direction: SplitDirection, splitType: 'left' \| 'right' \| 'top' \| 'bottom', paneToAdd: string) => void` |
-| `updateSplitPercentage` | Updates a SplitNode percentage.                                                        | `(currentNode: SplitNode, percentage: number) => void`                                                                        |
-| `moveTab`               | Reorders a tab next to another, or swaps them if position is 'center'.                 | `(draggedTabId: string, targetTabId: string, position?: 'before' \| 'after' \| 'center') => void`                             |
-| `findPaneById`          | Queries a PaneNode by its unique ID.                                                   | `(paneId: string) => PaneNode \| null`                                                                                        |
-| `findPaneContainingTab` | Queries the parent PaneNode of a tab ID.                                               | `(tabId: string) => PaneNode \| null`                                                                                         |
-| `findTabById`           | Queries detailed tab location and state metadata.                                      | `(tabId: string) => TabDetails \| null`                                                                                       |
-| `getTabMetadata`        | Gets metadata for a tab ID.                                                            | `(tabId: string) => Record<string, unknown> \| undefined`                                                                     |
-| `getActiveTabMetadata`  | Gets metadata for the active tab in a pane.                                            | `(paneId: string) => Record<string, unknown> \| undefined`                                                                    |
-| `poppedOutTabIds`       | **[Experimental]** The list of tab/widget IDs that are currently open in a new window. | `string[]`                                                                                                                    |
-| `popoutTab`             | **[Experimental]** Popout the specified tab into a new window.                         | `(tabId: string) => void`                                                                                                     |
-| `dockTab`               | **[Experimental]** Dock the specified tab back to the main layout.                     | `(tabId: string) => void`                                                                                                     |
+| Property / Method       | Description                                                                                                                                                             | Type                                                                                                                          |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `layout`                | The current active layout tree structure.                                                                                                                               | `TreeNode \| null`                                                                                                            |
+| `fullscreenPaneId`      | The ID of the maximized fullscreen pane. When active, structural layout changes (closes, additions, splits, merges, resizes, and popouts) are blocked at the API level. | `string \| null`                                                                                                              |
+| `locked`                | Whether the dashboard layout is globally locked.                                                                                                                        | `boolean`                                                                                                                     |
+| `setLayout`             | React state setter to update the layout tree.                                                                                                                           | `Dispatch<SetStateAction<TreeNode \| null>>`                                                                                  |
+| `setFullscreenPaneId`   | Updates the active fullscreen pane ID.                                                                                                                                  | `(paneId: string \| null) => void`                                                                                            |
+| `setLocked`             | Updates the global layout lock state.                                                                                                                                   | `Dispatch<SetStateAction<boolean>>`                                                                                           |
+| `removePane`            | Removes a pane and collapses the split.                                                                                                                                 | `(paneId: string) => void`                                                                                                    |
+| `addTab`                | Adds a tab to a pane, or splits/creates one if target is omitted.                                                                                                       | `(tabId: string, targetPaneId?: string, metadata?: Record<string, unknown>) => void`                                          |
+| `updateMetadata`        | Mutates a specific tab's metadata.                                                                                                                                      | `(id: string, updater: (current: Record<string, unknown> \| undefined) => Record<string, unknown> \| undefined) => void`      |
+| `updatePaneLock`        | Toggles the lock status of a specific pane.                                                                                                                             | `(paneId: string, locked: boolean) => void`                                                                                   |
+| `selectTab`             | Focuses/activates a tab within a pane.                                                                                                                                  | `(paneId: string, tabId: string) => void`                                                                                     |
+| `mergeTab`              | Programmatically drags and drops a tab from one pane to another.                                                                                                        | `(draggedTabId: string, targetPaneId: string) => void`                                                                        |
+| `removeTab`             | Programmatically closes a tab.                                                                                                                                          | `(tabId: string) => void`                                                                                                     |
+| `splitPane`             | Programmatically splits a pane node and adds a new one.                                                                                                                 | `(targetId: string, direction: SplitDirection, splitType: 'left' \| 'right' \| 'top' \| 'bottom', paneToAdd: string) => void` |
+| `updateSplitPercentage` | Updates a SplitNode percentage.                                                                                                                                         | `(currentNode: SplitNode, percentage: number) => void`                                                                        |
+| `moveTab`               | Reorders a tab next to another, or swaps them if position is 'center'.                                                                                                  | `(draggedTabId: string, targetTabId: string, position?: 'before' \| 'after' \| 'center') => void`                             |
+| `findPaneById`          | Queries a PaneNode by its unique ID.                                                                                                                                    | `(paneId: string) => PaneNode \| null`                                                                                        |
+| `findPaneContainingTab` | Queries the parent PaneNode of a tab ID.                                                                                                                                | `(tabId: string) => PaneNode \| null`                                                                                         |
+| `findTabById`           | Queries detailed tab location and state metadata.                                                                                                                       | `(tabId: string) => TabDetails \| null`                                                                                       |
+| `getTabMetadata`        | Gets metadata for a tab ID.                                                                                                                                             | `(tabId: string) => Record<string, unknown> \| undefined`                                                                     |
+| `getActiveTabMetadata`  | Gets metadata for the active tab in a pane.                                                                                                                             | `(paneId: string) => Record<string, unknown> \| undefined`                                                                    |
+| `poppedOutTabIds`       | **[Experimental]** The list of tab/widget IDs that are currently open in a new window.                                                                                  | `string[]`                                                                                                                    |
+| `popoutTab`             | **[Experimental]** Popout the specified tab into a new window.                                                                                                          | `(tabId: string) => void`                                                                                                     |
+| `dockTab`               | **[Experimental]** Dock the specified tab back to the main layout.                                                                                                      | `(tabId: string) => void`                                                                                                     |
 
 ---
 
@@ -503,24 +503,38 @@ const parentPane = findPaneContainingTab(currentTree, 'new-file.js')
 > [!WARNING]
 > Popout window capabilities (opening tabs in separate browser windows via `window.open` and React portals) are **experimental** and may experience limitations or browser warnings depending on popup blockers, iframe restrictions, and context cleanup in third-party libraries. Use with caution in production.
 
-When using CSS-in-JS libraries like `styled-components` or `antd` (Ant Design) inside your widgets, dynamic styles and modals/portals are injected into the main document's `head`/`body` by default. In popped-out tabs, these styles will not apply because they render inside a separate window.
+> [!NOTE]
+> React Zeugma automatically clones and synchronizes all static stylesheets, `<link>` tags, and document attributes (such as `data-theme` or body classes) from the main window to any active popout window in real-time. You only need `renderPopoutWrapper` to configure dynamic CSS-in-JS style injection and context provider redirection.
+
+When using CSS-in-JS libraries like `styled-components` or `antd` (Ant Design) inside your widgets, dynamic styles are injected into the main document's `<head>` by default. In popped-out tabs, these dynamic styles will not apply because they render inside a separate window. Additionally, shared JS context caches will prevent styles from being re-emitted unless a separate cache instance is created.
 
 You can use the `renderPopoutWrapper` callback prop on the `<Zeugma>` component to wrap popped-out widgets with the required style managers and providers targeting the child window's DOM.
 
 ##### Example (`styled-components` & `antd`):
 
 ```tsx
+import React, { useMemo } from 'react'
 import { StyleSheetManager } from 'styled-components'
-import { StyleProvider } from '@ant-design/cssinjs'
+import { StyleProvider, createCache } from '@ant-design/cssinjs'
 import { ConfigProvider } from 'antd'
-;<Zeugma
-  controller={controller}
-  renderPopoutWrapper={({ document, children }) => (
+
+// Using a wrapper component is recommended to safely instantiate a style cache per popout window
+const PopoutStyleManager = ({ document, children }) => {
+  const cache = useMemo(() => createCache(), [])
+
+  return (
     <StyleSheetManager target={document.head}>
-      <StyleProvider container={document.head}>
+      <StyleProvider cache={cache} container={document.head}>
         <ConfigProvider getPopupContainer={() => document.body}>{children}</ConfigProvider>
       </StyleProvider>
     </StyleSheetManager>
+  )
+}
+
+;<Zeugma
+  controller={controller}
+  renderPopoutWrapper={({ document, children }) => (
+    <PopoutStyleManager document={document}>{children}</PopoutStyleManager>
   )}
 >
   {/* Dashboard grid structure */}

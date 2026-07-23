@@ -65,6 +65,9 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
   const layoutRef = useRef<TreeNode | null>(layout)
   layoutRef.current = layout
 
+  const fullscreenPaneIdRef = useRef<string | null>(fullscreenPaneId)
+  fullscreenPaneIdRef.current = fullscreenPaneId
+
   const onChangeRef = useRef(onChange)
   onChangeRef.current = onChange
 
@@ -140,6 +143,7 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
 
   // Internal setter used by DnD — does NOT trigger onChange or reset transient states
   const _internalSetLayout = useCallback((nextLayoutOrUpdater: SetStateAction<TreeNode | null>) => {
+    if (fullscreenPaneIdRef.current !== null) return
     setRenderingLayout((prev) => {
       const next =
         typeof nextLayoutOrUpdater === 'function'
@@ -172,13 +176,17 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
 
   // Layout Modification Actions using wrapped mutation functions
   const handleRemovePane = useCallback(
-    wrapMutation((prev, paneId: string) => removePane(prev, paneId)),
+    wrapMutation((prev, paneId: string) => {
+      if (fullscreenPaneIdRef.current !== null) return prev
+      return removePane(prev, paneId)
+    }),
     [wrapMutation],
   )
 
   const handleAddTab = useCallback(
     wrapMutation(
       (prev, tabId: string, targetPaneId?: string, metadata?: Record<string, unknown>) => {
+        if (fullscreenPaneIdRef.current !== null) return prev
         const cleanedPrev = removeTab(prev, tabId) ?? prev
         return addTab(cleanedPrev, targetPaneId, tabId, metadata)
       },
@@ -195,6 +203,7 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
         splitType: 'left' | 'right' | 'top' | 'bottom',
         paneToAdd: string,
       ) => {
+        if (fullscreenPaneIdRef.current !== null) return prev
         const targetPane = findPaneById(prev, targetId) ?? findPaneContainingTab(prev, targetId)
         if (!targetPane) return prev
 
@@ -213,9 +222,10 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
   )
 
   const handleUpdateSplitPercentage = useCallback(
-    wrapMutation((prev, currentNode: SplitNode, percentage: number) =>
-      updateSplitPercentage(prev, currentNode, percentage),
-    ),
+    wrapMutation((prev, currentNode: SplitNode, percentage: number) => {
+      if (fullscreenPaneIdRef.current !== null) return prev
+      return updateSplitPercentage(prev, currentNode, percentage)
+    }),
     [wrapMutation],
   )
 
@@ -252,6 +262,7 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
 
   const handleMergeTab = useCallback(
     wrapMutation((prev, draggedTabId: string, targetPaneId: string) => {
+      if (fullscreenPaneIdRef.current !== null) return prev
       const targetPane =
         findPaneById(prev, targetPaneId) ?? findPaneContainingTab(prev, targetPaneId)
       if (!targetPane) return prev
@@ -262,14 +273,24 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
 
   const handleMoveTab = useCallback(
     wrapMutation(
-      (prev, draggedTabId: string, targetTabId: string, position?: 'before' | 'after' | 'center') =>
-        moveTab(prev, draggedTabId, targetTabId, position),
+      (
+        prev,
+        draggedTabId: string,
+        targetTabId: string,
+        position?: 'before' | 'after' | 'center',
+      ) => {
+        if (fullscreenPaneIdRef.current !== null) return prev
+        return moveTab(prev, draggedTabId, targetTabId, position)
+      },
     ),
     [wrapMutation],
   )
 
   const handleRemoveTab = useCallback(
-    wrapMutation((prev, tabId: string) => removeTab(prev, tabId)),
+    wrapMutation((prev, tabId: string) => {
+      if (fullscreenPaneIdRef.current !== null) return prev
+      return removeTab(prev, tabId)
+    }),
     [wrapMutation],
   )
 
@@ -294,6 +315,7 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
   }, [])
 
   const handlePopoutTab = useCallback((tabId: string) => {
+    if (fullscreenPaneIdRef.current !== null) return
     setPoppedOutTabIds((prev) => {
       if (prev.includes(tabId)) return prev
       return [...prev, tabId]
@@ -301,6 +323,7 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
   }, [])
 
   const handleDockTab = useCallback((tabId: string) => {
+    if (fullscreenPaneIdRef.current !== null) return
     setPoppedOutTabIds((prev) => {
       if (!prev.includes(tabId)) return prev
       return prev.filter((id) => id !== tabId)

@@ -129,7 +129,7 @@ Instantiates the dashboard state engine.
 - \`layout?: TreeNode | null\` (Controlled layout tree)
 - \`onChange?: (newLayout: TreeNode | null) => void\` (Layout updates handler)
 - \`locked?: boolean\` (Disable all resize/drag-and-drop operations)
-- \`fullscreenPaneId?: string | null\` (Maximize target pane ID)
+- \`fullscreenPaneId?: string | null\` (Maximize target pane ID. When active, structural layout changes are blocked)
 - \`onFullscreenChange?: (paneId: string | null) => void\` (Maximize toggle handler)
 
 ### \`useZeugmaContext()\`
@@ -196,6 +196,46 @@ Import these layout mutators/queries from \`react-zeugma/utils\`:
 - **\`findPaneContainingTab(tree, tabId)\`**: Returns parent \`PaneNode\` containing the tab, or \`null\`.
 - **\`findTabById(tree, tabId)\`**: Returns \`TabDetails\` or \`null\`.
 - **\`computeLayout(tree)\`**: Calculates absolute positions (\`{ left, top, width, height }\` as percentages) for all panes and splitters.
+
+---
+
+## 6. Popout Window Styling (Experimental)
+
+When using CSS-in-JS libraries like \`styled-components\` or \`@ant-design/cssinjs\` (Ant Design) inside widgets, dynamic styles are injected into the main document's head by default. To make styles apply in popout windows (which are separate windows/documents), use \`renderPopoutWrapper\` to wrap popped-out widgets with appropriate style providers and cache targets.
+
+React Zeugma automatically clones and syncs static stylesheets, \`<link>\` tags, and document attributes (such as \`data-theme\`) to popouts in real-time. Only dynamic CSS-in-JS injection needs wrapping.
+
+### Example Configuration:
+
+\`\`\`tsx
+import React, { useMemo } from 'react'
+import { StyleSheetManager } from 'styled-components'
+import { StyleProvider, createCache } from '@ant-design/cssinjs'
+import { ConfigProvider } from 'antd'
+
+// 1. Create a wrapper component to instantiate a style cache per window
+function PopoutStyleManager({ document, children }) {
+  const cache = useMemo(() => createCache(), [])
+
+  return (
+    <StyleSheetManager target={document.head}>
+      <StyleProvider cache={cache} container={document.head}>
+        <ConfigProvider getPopupContainer={() => document.body}>
+          {children}
+        </ConfigProvider>
+      </StyleProvider>
+    </StyleSheetManager>
+  )
+}
+
+// 2. Pass it as renderPopoutWrapper
+<Zeugma
+  controller={controller}
+  renderPopoutWrapper={({ document, children }) => (
+    <PopoutStyleManager document={document}>{children}</PopoutStyleManager>
+  )}
+/>
+\`\`\`
 `
 
 export const skillMdSection: DocSection = {

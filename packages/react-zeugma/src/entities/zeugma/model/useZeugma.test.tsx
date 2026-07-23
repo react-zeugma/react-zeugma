@@ -451,4 +451,100 @@ describe('useZeugma Hook', () => {
     rerender({ layout: currentLayout })
     expect(result.current.poppedOutTabIds).toEqual([])
   })
+
+  it('should block layout-modifying actions when fullscreenPaneId is not null', () => {
+    const layoutWithSplit: TreeNode = {
+      type: 'split',
+      direction: 'row',
+      splitPercentage: 50,
+      first: {
+        type: 'pane',
+        id: 'pane-1',
+        tabIds: ['tab-1'],
+        activeTabId: 'tab-1',
+      },
+      second: {
+        type: 'pane',
+        id: 'pane-2',
+        tabIds: ['tab-2', 'tab-3'],
+        activeTabId: 'tab-2',
+      },
+    }
+    const { result } = renderHook(() => useZeugma({ initialLayout: layoutWithSplit }))
+
+    // Set fullscreen mode
+    act(() => {
+      result.current.setFullscreenPaneId('pane-2')
+    })
+    expect(result.current.fullscreenPaneId).toBe('pane-2')
+
+    // 1. Try removePane
+    act(() => {
+      result.current.removePane('pane-1')
+    })
+    expect(result.current.layout).toEqual(layoutWithSplit) // Unchanged
+
+    // 2. Try removeTab
+    act(() => {
+      result.current.removeTab('tab-3')
+    })
+    expect(result.current.layout).toEqual(layoutWithSplit) // Unchanged
+
+    // 3. Try addTab
+    act(() => {
+      result.current.addTab('tab-new', 'pane-2')
+    })
+    expect(result.current.layout).toEqual(layoutWithSplit) // Unchanged
+
+    // 4. Try splitPane
+    act(() => {
+      result.current.splitPane('pane-2', 'row', 'right', 'tab-new')
+    })
+    expect(result.current.layout).toEqual(layoutWithSplit) // Unchanged
+
+    // 5. Try updateSplitPercentage
+    act(() => {
+      const root = result.current.layout as SplitNode
+      result.current.updateSplitPercentage(root, 75)
+    })
+    expect(result.current.layout).toEqual(layoutWithSplit) // Unchanged
+
+    // 6. Try mergeTab
+    act(() => {
+      result.current.mergeTab('tab-1', 'pane-2')
+    })
+    expect(result.current.layout).toEqual(layoutWithSplit) // Unchanged
+
+    // 7. Try moveTab
+    act(() => {
+      result.current.moveTab('tab-3', 'tab-2', 'before')
+    })
+    expect(result.current.layout).toEqual(layoutWithSplit) // Unchanged
+
+    // 8. Try popoutTab
+    act(() => {
+      result.current.popoutTab('tab-2')
+    })
+    expect(result.current.poppedOutTabIds).toEqual([]) // Unchanged
+
+    // 9. Try selectTab (SHOULD WORK)
+    act(() => {
+      result.current.selectTab('pane-2', 'tab-3')
+    })
+    const updatedPane2 = (result.current.layout as SplitNode).second as PaneNode
+    expect(updatedPane2.activeTabId).toBe('tab-3') // Changed!
+
+    // 10. Try setLayout (SHOULD WORK & RESET FULLSCREEN)
+    const newLayout: TreeNode = {
+      type: 'pane',
+      id: 'pane-new',
+      tabIds: ['tab-new'],
+      activeTabId: 'tab-new',
+    }
+    act(() => {
+      result.current.setLayout(newLayout)
+    })
+    expect(result.current.layout).toEqual(newLayout)
+    expect(result.current.fullscreenPaneId).toBeNull()
+  })
 })

@@ -8,7 +8,12 @@ interface TabContentWrapperProps {
 
 export function TabContentWrapper({ tabId, children }: TabContentWrapperProps) {
   return (
-    <RenderCounterFooter id={`content-${tabId}`} label={`View: ${tabId}`}>
+    <RenderCounterFooter
+      id={`content-${tabId}`}
+      label={`View: ${tabId}`}
+      className="h-full w-full flex flex-col overflow-hidden min-h-0"
+      footerClassName="grafana-widget-footer"
+    >
       {children}
     </RenderCounterFooter>
   )

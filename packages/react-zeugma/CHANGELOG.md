@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 6.9.7
+
+### Patch Changes
+
+- Remove hardcoded default Tailwind CSS classes from DevTools components (`RenderCounterBadge` and `RenderCounterFooter`) to keep them completely style-agnostic and unstyled for consumer applications.
+
 ## 6.9.6
 
 ### Patch Changes

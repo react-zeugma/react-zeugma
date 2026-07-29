@@ -250,8 +250,8 @@ const renderPane = (paneId: string) => (
 Import mount and render counter utilities from \`react-zeugma/devtools\` or \`react-zeugma\`:
 
 - **\`useRenderCounter(idOrOptions?, options?)\`**: Tracks component mount counts and render cycle passes in a React 18/19 StrictMode safe manner. Returns \`{ mounts, renders, reset }\`.
-- **\`<RenderCounterBadge id={id} position="top-right" disabled={disabled} />\`**: Floating overlay badge displaying mount and render metrics.
-- **\`<RenderCounterFooter id={id} label={label} disabled={disabled}>\`**: Bottom status footer bar for tabbed widgets or layout panels.
+- **\`<RenderCounterBadge id={id} position="top-right" disabled={disabled} className="..." />\`**: Unstyled overlay badge displaying mount and render metrics.
+- **\`<RenderCounterFooter id={id} label={label} disabled={disabled} className="..." footerClassName="...">\`**: Unstyled bottom status footer bar for tabbed widgets or layout panels.
 `
 
 export const skillMdSection: DocSection = {

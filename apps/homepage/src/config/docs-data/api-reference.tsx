@@ -19,12 +19,6 @@ const ZEUGMA_PROPS = [
     'Enables dragging widgets out of boundaries to dismiss them',
   ],
   ['classNames', 'ZeugmaClassNames', '-', 'Custom CSS classes for dashboard elements'],
-  [
-    'renderPopoutWrapper',
-    '(props: { tabId: string; document: Document; window: Window; children: React.ReactNode }) => React.ReactNode',
-    '-',
-    '[Experimental] Custom wrapper to inject style managers / providers into popout windows',
-  ],
 ]
 
 const RENDER_TAB_PROPS = [

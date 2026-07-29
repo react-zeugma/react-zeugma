@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 6.9.8
+
+### Patch Changes
+
+- Restore `renderPopoutWrapper` callback prop on `<Zeugma>` component to allow wrapping popped-out widgets with custom style/context providers (e.g. styled-components StyleSheetManager or antd ConfigProvider).
+
 ## 6.9.7
 
 ### Patch Changes

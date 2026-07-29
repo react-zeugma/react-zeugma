@@ -119,7 +119,6 @@ function Dashboard() {
 - \`persist?: boolean | ZeugmaPersistOptions\`: Layout persistence configuration in localStorage.
   - \`enabled?: boolean\`: Whether layout persistence is enabled (defaults to true).
   - \`key?: string\`: The localStorage key (defaults to \`'zeugma-layout'\`).
-- \`renderPopoutWrapper?: (props: { tabId: string; document: Document; window: Window; children: React.ReactNode }) => React.ReactNode\`: [Experimental] Optional custom wrapper to inject style managers or providers into popout windows.
 
 ### \`useZeugma(options)\`
 
@@ -201,9 +200,11 @@ Import these layout mutators/queries from \`react-zeugma/utils\`:
 
 ## 6. Popout Window Styling (Experimental)
 
-When using CSS-in-JS libraries like \`styled-components\` or \`@ant-design/cssinjs\` (Ant Design) inside widgets, dynamic styles are injected into the main document's head by default. To make styles apply in popout windows (which are separate windows/documents), use \`renderPopoutWrapper\` to wrap popped-out widgets with appropriate style providers and cache targets.
+When using CSS-in-JS libraries like \`styled-components\` or \`@ant-design/cssinjs\` (Ant Design) inside widgets, dynamic styles are injected into the main document's head by default. In popped-out tabs, these dynamic styles will not apply because they render inside a separate window. Additionally, shared JS context caches will prevent styles from being re-emitted unless a separate cache instance is created.
 
-React Zeugma automatically clones and syncs static stylesheets, \`<link>\` tags, and document attributes (such as \`data-theme\`) to popouts in real-time. Only dynamic CSS-in-JS injection needs wrapping.
+To support this cleanly without causing widget remounts when popping windows out (which would reset the widget's internal state), you should wrap your widgets with the required style/theme providers **always** (both when docked and when popped out) directly inside the child render function of \`<Pane.Content>\`. 
+
+Because React Zeugma globally intercepts and patches \`document\` references (like \`document.head\` and \`document.body\`) during the portal rendering phase, you can pass the global \`document\` reference directly to the providers. It will automatically resolve to the correct active window's document.
 
 ### Example Configuration:
 
@@ -213,8 +214,8 @@ import { StyleSheetManager } from 'styled-components'
 import { StyleProvider, createCache } from '@ant-design/cssinjs'
 import { ConfigProvider } from 'antd'
 
-// 1. Create a wrapper component to instantiate a style cache per window
-function PopoutStyleManager({ document, children }) {
+// 1. Create a wrapper component to safely instantiate and reuse a style cache
+const StableStyleManager = ({ children }) => {
   const cache = useMemo(() => createCache(), [])
 
   return (
@@ -228,14 +229,29 @@ function PopoutStyleManager({ document, children }) {
   )
 }
 
-// 2. Pass it as renderPopoutWrapper
-<Zeugma
-  controller={controller}
-  renderPopoutWrapper={({ document, children }) => (
-    <PopoutStyleManager document={document}>{children}</PopoutStyleManager>
-  )}
-/>
+// 2. Wrap your widget directly inside Pane.Content
+const renderPane = (paneId: string) => (
+  <Pane id={paneId}>
+    <Pane.Content>
+      {(tab) => (
+        <StableStyleManager>
+          <Widget tabId={tab.id} />
+        </StableStyleManager>
+      )}
+    </Pane.Content>
+  </Pane>
+)
 \`\`\`
+
+---
+
+## 7. DevTools & Performance Profiling (\`react-zeugma/devtools\`)
+
+Import mount and render counter utilities from \`react-zeugma/devtools\` or \`react-zeugma\`:
+
+- **\`useRenderCounter(idOrOptions?, options?)\`**: Tracks component mount counts and render cycle passes in a React 18/19 StrictMode safe manner. Returns \`{ mounts, renders, reset }\`.
+- **\`<RenderCounterBadge id={id} position="top-right" disabled={disabled} />\`**: Floating overlay badge displaying mount and render metrics.
+- **\`<RenderCounterFooter id={id} label={label} disabled={disabled}>\`**: Bottom status footer bar for tabbed widgets or layout panels.
 `
 
 export const skillMdSection: DocSection = {

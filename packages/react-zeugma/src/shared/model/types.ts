@@ -266,15 +266,6 @@ export interface BaseZeugmaProps {
 
   /** Configuration for layout persistence in localStorage. */
   persist?: boolean | ZeugmaPersistOptions
-  /** [Experimental] Optional custom wrapper element/component to wrap the contents of a popout tab.
-   * Useful for styled-components (StyleSheetManager), Antd (ConfigProvider), etc.
-   */
-  renderPopoutWrapper?: (props: {
-    tabId: string
-    document: Document
-    window: Window
-    children: React.ReactNode
-  }) => React.ReactNode
 }
 
 export interface ZeugmaPersistOptions {
@@ -338,13 +329,6 @@ export interface ZeugmaStateValue extends ZeugmaState, ZeugmaQueries {
   maxSplitPercentage?: number
   /** [Experimental] Query function to check if a tab is popped out. */
   isTabPoppedOut: (tabId: string) => boolean
-  /** [Experimental] Optional custom wrapper to wrap the contents of a popout tab. */
-  renderPopoutWrapper?: (props: {
-    tabId: string
-    document: Document
-    window: Window
-    children: React.ReactNode
-  }) => React.ReactNode
 }
 
 export interface ZeugmaDragStateValue {

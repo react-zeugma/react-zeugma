@@ -19,12 +19,6 @@ const ZEUGMA_PROPS = [
     'Enables dragging widgets out of boundaries to dismiss them',
   ],
   ['classNames', 'ZeugmaClassNames', '-', 'Custom CSS classes for dashboard elements'],
-  [
-    'renderPopoutWrapper',
-    '(props: { tabId: string; document: Document; window: Window; children: React.ReactNode }) => React.ReactNode',
-    '-',
-    '[Experimental] Custom wrapper to inject style managers / providers into popout windows',
-  ],
 ]
 
 const RENDER_TAB_PROPS = [
@@ -314,6 +308,39 @@ export const apiReferenceSection: DocSection = {
             are used to perform state updates in controlled mode.
           </DocParagraph>
           <DocTable headers={['Function', 'Signature', 'Description']} rows={TREE_UTILITIES} />
+        </div>
+      ),
+    },
+    {
+      id: 'api-devtools',
+      title: 'DevTools & Profiling',
+      content: (
+        <div className="space-y-4">
+          <DocParagraph>
+            Built-in DevTools utilities imported from{' '}
+            <DocCode highlight>react-zeugma/devtools</DocCode> (or <DocCode>react-zeugma</DocCode>)
+            for auditing mount lifecycles and render performance.
+          </DocParagraph>
+          <DocTable
+            headers={['Export', 'Signature', 'Description']}
+            rows={[
+              [
+                'useRenderCounter',
+                '(idOrOptions?, options?) => { mounts, renders, reset }',
+                'React 18/19 StrictMode safe hook for tracking component mounts and renders.',
+              ],
+              [
+                'RenderCounterBadge',
+                '(props: RenderCounterBadgeProps) => ReactNode',
+                'Floating overlay badge displaying mount and render counters.',
+              ],
+              [
+                'RenderCounterFooter',
+                '(props: RenderCounterFooterProps) => ReactNode',
+                'Status bar footer component that wraps panel widgets.',
+              ],
+            ]}
+          />
         </div>
       ),
     },

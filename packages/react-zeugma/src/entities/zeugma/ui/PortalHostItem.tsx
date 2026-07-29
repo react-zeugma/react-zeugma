@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { TabDetails, useZeugmaState } from '../../../shared'
+import { TabDetails } from '../../../shared'
 
 export interface PortalHostItemProps {
   tabDetails: TabDetails
@@ -121,7 +121,6 @@ export const PopoutRenderWrapper: React.FC<{ popoutDoc: Document; children: Reac
 export const PortalHostItem: React.FC<PortalHostItemProps> = React.memo(
   ({ tabDetails, target, renderWidget }) => {
     const { id: tabId } = tabDetails
-    const { renderPopoutWrapper } = useZeugmaState()
     const [mounted, setMounted] = useState(false)
     const wrapperRef = useRef<HTMLDivElement | null>(null)
 
@@ -179,18 +178,9 @@ export const PortalHostItem: React.FC<PortalHostItemProps> = React.memo(
 
     const isPopped = !!(target && target.ownerDocument && target.ownerDocument !== document)
     const keySuffix = tabDetails.remountOnPopout ? (isPopped ? '-popped' : '-docked') : ''
-    let widget: React.ReactNode = (
+    const widget: React.ReactNode = (
       <React.Fragment key={`${tabId}${keySuffix}`}>{renderWidget(tabDetails)}</React.Fragment>
     )
-
-    if (isPopped && target && target.ownerDocument && renderPopoutWrapper) {
-      widget = renderPopoutWrapper({
-        tabId,
-        document: target.ownerDocument,
-        window: target.ownerDocument.defaultView || window,
-        children: widget,
-      })
-    }
 
     return createPortal(
       <PopoutRenderWrapper popoutDoc={isPopped && target ? target.ownerDocument : document}>

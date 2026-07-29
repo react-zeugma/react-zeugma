@@ -23,3 +23,10 @@ export type {
   TabsProps,
   PaneControlsProps,
 } from './entities/pane'
+export { useRenderCounter, RenderCounterBadge, RenderCounterFooter } from './devtools'
+export type {
+  RenderCounterOptions,
+  RenderCounterState,
+  RenderCounterBadgeProps,
+  RenderCounterFooterProps,
+} from './devtools'

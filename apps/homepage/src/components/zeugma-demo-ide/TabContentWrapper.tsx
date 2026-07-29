@@ -1,5 +1,5 @@
 import React from 'react'
-import { useRenderCounter } from './hooks'
+import { useRenderCounter } from 'react-zeugma/devtools'
 
 interface TabContentWrapperProps {
   tabId: string

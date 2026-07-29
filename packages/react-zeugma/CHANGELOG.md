@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 6.9.6
+
+### Patch Changes
+
+- Add built-in DevTools utilities (`react-zeugma/devtools`) featuring React 18/19 StrictMode-safe mount and render counters (`useRenderCounter`, `<RenderCounterBadge>`, `<RenderCounterFooter>`).
+
 ## 6.9.5
 
 ### Patch Changes

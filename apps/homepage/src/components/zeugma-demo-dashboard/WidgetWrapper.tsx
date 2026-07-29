@@ -1,5 +1,5 @@
 import React from 'react'
-import { useRenderCounter } from '../zeugma-demo-ide/hooks'
+import { useRenderCounter } from 'react-zeugma/devtools'
 
 interface WidgetWrapperProps {
   tabId: string

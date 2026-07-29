@@ -540,3 +540,38 @@ const PopoutStyleManager = ({ document, children }) => {
   {/* Dashboard grid structure */}
 </Zeugma>
 ```
+
+---
+
+## DevTools & Performance Profiling (`react-zeugma/devtools`)
+
+`react-zeugma` includes built-in DevTools utilities to audit component mount lifecycles and render frequencies across complex dashboard layouts.
+
+### Usage
+
+```tsx
+import { useRenderCounter, RenderCounterBadge, RenderCounterFooter } from 'react-zeugma/devtools'
+// Or directly from 'react-zeugma'
+// import { useRenderCounter, RenderCounterBadge, RenderCounterFooter } from 'react-zeugma'
+
+function MyDashboardWidget({ id }: { id: string }) {
+  // Hook usage
+  const { mounts, renders, reset } = useRenderCounter(id, { logToConsole: true })
+
+  return (
+    <RenderCounterFooter label={id} id={id}>
+      <div className="p-4">
+        <p>Mount count: {mounts}</p>
+        <p>Render count: {renders}</p>
+        <button onClick={reset}>Reset Counters</button>
+      </div>
+    </RenderCounterFooter>
+  )
+}
+```
+
+### Components & Hooks
+
+- `useRenderCounter(idOrOptions?, options?)`: React 18/19 StrictMode-safe hook returning `{ mounts, renders, reset }`.
+- `<RenderCounterBadge id={id} position="top-right" />`: Floating overlay badge for any panel or component.
+- `<RenderCounterFooter id={id} label="Widget Name">`: Wrapper component rendering a bottom status footer for tabbed widgets.

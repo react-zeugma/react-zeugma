@@ -317,5 +317,38 @@ export const apiReferenceSection: DocSection = {
         </div>
       ),
     },
+    {
+      id: 'api-devtools',
+      title: 'DevTools & Profiling',
+      content: (
+        <div className="space-y-4">
+          <DocParagraph>
+            Built-in DevTools utilities imported from{' '}
+            <DocCode highlight>react-zeugma/devtools</DocCode> (or <DocCode>react-zeugma</DocCode>)
+            for auditing mount lifecycles and render performance.
+          </DocParagraph>
+          <DocTable
+            headers={['Export', 'Signature', 'Description']}
+            rows={[
+              [
+                'useRenderCounter',
+                '(idOrOptions?, options?) => { mounts, renders, reset }',
+                'React 18/19 StrictMode safe hook for tracking component mounts and renders.',
+              ],
+              [
+                'RenderCounterBadge',
+                '(props: RenderCounterBadgeProps) => ReactNode',
+                'Floating overlay badge displaying mount and render counters.',
+              ],
+              [
+                'RenderCounterFooter',
+                '(props: RenderCounterFooterProps) => ReactNode',
+                'Status bar footer component that wraps panel widgets.',
+              ],
+            ]}
+          />
+        </div>
+      ),
+    },
   ],
 }

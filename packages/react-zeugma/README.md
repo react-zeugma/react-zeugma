@@ -578,5 +578,5 @@ function MyDashboardWidget({ id }: { id: string }) {
 ### Components & Hooks
 
 - `useRenderCounter(idOrOptions?, options?)`: React 18/19 StrictMode-safe hook returning `{ mounts, renders, reset }`.
-- `<RenderCounterBadge id={id} position="top-right" />`: Floating overlay badge for any panel or component.
-- `<RenderCounterFooter id={id} label="Widget Name">`: Wrapper component rendering a bottom status footer for tabbed widgets.
+- `<RenderCounterBadge id={id} position="top-right" className="..." />`: Unstyled overlay badge for any panel or component.
+- `<RenderCounterFooter id={id} label="Widget Name" className="..." footerClassName="...">`: Unstyled wrapper component rendering a bottom status footer for tabbed widgets.

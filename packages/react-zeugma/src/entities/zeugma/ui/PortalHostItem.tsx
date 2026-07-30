@@ -183,11 +183,11 @@ export const PortalHostItem: React.FC<PortalHostItemProps> = React.memo(
       <React.Fragment key={`${tabId}${keySuffix}`}>{renderWidget(tabDetails)}</React.Fragment>
     )
 
-    if (isPopped && target && target.ownerDocument && renderPopoutWrapper) {
+    if (renderPopoutWrapper) {
       widget = renderPopoutWrapper({
         tabId,
-        document: target.ownerDocument,
-        window: target.ownerDocument.defaultView || window,
+        document: targetDoc,
+        window: targetDoc.defaultView || window,
         children: widget,
       })
     }

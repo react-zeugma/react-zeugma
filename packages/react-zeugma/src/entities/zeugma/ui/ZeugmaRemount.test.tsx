@@ -337,4 +337,110 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
       window.open = originalOpen
     }
   })
+
+  it('should not remount widgets during window popout and docking transitions when using renderPopoutWrapper', () => {
+    const initialLayout: TreeNode = {
+      type: 'pane',
+      id: 'pane-1',
+      tabIds: ['tab-1'],
+      activeTabId: 'tab-1',
+    }
+
+    let mountCount = 0
+    let unmountCount = 0
+
+    const TestWidget = ({ tabId }: { tabId: string }) => {
+      useEffect(() => {
+        mountCount++
+        return () => {
+          unmountCount++
+        }
+      }, [])
+      return <div data-testid={`widget-${tabId}`}>{tabId} Content</div>
+    }
+
+    let controllerInstance: ZeugmaControllerInternal | null = null
+
+    const TestWrapper = () => {
+      const controller = useZeugma({ initialLayout })
+      controllerInstance = controller as ZeugmaControllerInternal
+      const renderPane = (paneId: string) => (
+        <Pane id={paneId}>
+          <div id={`pane-target-${paneId}`}>
+            <Pane.Content>{(tab) => <TestWidget tabId={tab.id} />}</Pane.Content>
+          </div>
+        </Pane>
+      )
+      const renderPopoutWrapper = ({
+        document: targetDoc,
+        children,
+      }: {
+        document: Document
+        children: React.ReactNode
+      }) => {
+        const isMain = targetDoc === document
+        return <div data-testid={isMain ? 'wrapper-main' : 'wrapper-popout'}>{children}</div>
+      }
+      return (
+        <Zeugma
+          controller={controller}
+          renderPane={renderPane}
+          renderPopoutWrapper={renderPopoutWrapper}
+        />
+      )
+    }
+
+    const { getByTestId } = render(<TestWrapper />)
+
+    expect(mountCount).toBe(1)
+    expect(unmountCount).toBe(0)
+    expect(getByTestId('wrapper-main')).toBeTruthy()
+
+    // Reset counters before popout simulation
+    mountCount = 0
+    unmountCount = 0
+
+    // Mock window.open to simulate opening a popout window
+    const originalOpen = window.open
+    const mockPopoutDoc = document.implementation.createHTMLDocument('mock-popout')
+    const mockWindow = {
+      document: mockPopoutDoc,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      focus: () => {},
+      close: () => {},
+      location: { origin: 'http://localhost' },
+    }
+    window.open = () => mockWindow as unknown as Window
+
+    try {
+      // Popout the tab
+      act(() => {
+        if (controllerInstance) {
+          controllerInstance.popoutTab('tab-1')
+        }
+      })
+
+      // Widget should not have remounted (no unmounts, no new mounts)
+      expect(unmountCount).toBe(0)
+      expect(mountCount).toBe(0)
+
+      const popoutWrapper = mockPopoutDoc.querySelector('[data-testid="wrapper-popout"]')
+      expect(popoutWrapper).toBeTruthy()
+
+      // Dock the tab back
+      act(() => {
+        if (controllerInstance) {
+          controllerInstance.dockTab('tab-1')
+        }
+      })
+
+      // Widget should still not have remounted
+      expect(unmountCount).toBe(0)
+      expect(mountCount).toBe(0)
+      expect(getByTestId('wrapper-main')).toBeTruthy()
+    } finally {
+      window.open = originalOpen
+    }
+  })
 })

@@ -25,10 +25,31 @@ export function RenderCounterFooter({
 
   return (
     <div className={className} style={style}>
-      {children && <div className="flex-1 overflow-hidden relative min-h-0">{children}</div>}
+      {children && (
+        <div
+          style={{
+            flex: 1,
+            height: '100%',
+            width: '100%',
+            minHeight: 0,
+            overflow: 'hidden',
+            position: 'relative',
+          }}
+        >
+          {children}
+        </div>
+      )}
       <div className={footerClassName}>
-        <span className="truncate">{displayId}</span>
-        <div className="flex items-center gap-3">
+        <span
+          style={{
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
+          {displayId}
+        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span>
             Mounts: <strong className="counter-mounts">{mounts}</strong>
           </span>

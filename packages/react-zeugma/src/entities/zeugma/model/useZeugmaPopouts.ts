@@ -666,9 +666,10 @@ export function useZeugmaPopouts(props: UseZeugmaPopoutsProps) {
       // Create container
       const container = popup.document.createElement('div')
       container.id = `zeugma-popout-container-${tabId}`
-      container.className = 'grafana-panel h-full w-full overflow-hidden'
+      container.className = 'zeugma-popout-container'
       container.style.width = '100%'
       container.style.height = '100%'
+      container.style.overflow = 'hidden'
       container.style.border = 'none' // Remove double borders in popout mode
       popup.document.body.appendChild(container)
 

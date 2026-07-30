@@ -221,6 +221,11 @@ function ZeugmaDemoDashboardInner() {
         paneDragPreview: 'opacity-90 shadow-2xl',
         tabDragPreview: 'opacity-90 shadow-2xl',
       }}
+      renderPopoutWrapper={({ children }) => (
+        <div className="zeugma-popout-wrapper h-full w-full bg-[#111317] text-white">
+          {children}
+        </div>
+      )}
     >
       <DashboardContainer className="relative">
         <DashboardToolbar

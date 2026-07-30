@@ -1,5 +1,12 @@
 # react-zeugma
 
+## 6.9.9
+
+### Patch Changes
+
+- Eliminate remaining Tailwind CSS inline utility classes in `<RenderCounterFooter>` component and replace them with explicit inline style attributes.
+- Replace Tailwind styling on popout window root container in `useZeugmaPopouts` with standard styles and rename the class to `zeugma-popout-container`.
+
 ## 6.9.8
 
 ### Patch Changes

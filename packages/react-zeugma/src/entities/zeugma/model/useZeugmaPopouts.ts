@@ -107,7 +107,7 @@ export function getActiveDocument(): Document {
 
   if (lastActiveEvent && lastActiveEvent.target) {
     const doc = (lastActiveEvent.target as Node).ownerDocument
-    if (doc && doc !== document) {
+    if (doc && doc !== document && activePopoutDocuments.has(doc)) {
       return doc
     }
   }
@@ -116,16 +116,15 @@ export function getActiveDocument(): Document {
   if (currentEvent && currentEvent.target) {
     const target = currentEvent.target as Node
     const doc = target.ownerDocument
-    if (doc && doc !== document) {
+    if (doc && doc !== document && activePopoutDocuments.has(doc)) {
       return doc
     }
   }
 
-  if (
-    (window as unknown as { __zeugmaActivePopoutDocument?: Document }).__zeugmaActivePopoutDocument
-  ) {
-    return (window as unknown as { __zeugmaActivePopoutDocument?: Document })
-      .__zeugmaActivePopoutDocument as Document
+  const activeDoc = (window as unknown as { __zeugmaActivePopoutDocument?: Document })
+    .__zeugmaActivePopoutDocument
+  if (activeDoc && activePopoutDocuments.has(activeDoc)) {
+    return activeDoc
   }
 
   return document
@@ -700,6 +699,11 @@ export function useZeugmaPopouts(props: UseZeugmaPopoutsProps) {
 
       // Listen for window close
       const handleUnload = () => {
+        lastActiveEvent = null
+        ;(
+          globalThis as unknown as { __zeugmaActivePopoutDocument?: Document | null }
+        ).__zeugmaActivePopoutDocument = null
+
         activePopoutDocuments.delete(popup.document)
         if (activePopoutDocuments.size === 0) {
           stopHeadObserver()
@@ -725,6 +729,21 @@ export function useZeugmaPopouts(props: UseZeugmaPopoutsProps) {
         delete activeWindows[tabId]
         registerPopoutTarget?.(tabId, null)
         if (popup) {
+          if (
+            lastActiveEvent &&
+            (lastActiveEvent.target as Node).ownerDocument === popup.document
+          ) {
+            lastActiveEvent = null
+          }
+          if (
+            (globalThis as unknown as { __zeugmaActivePopoutDocument?: Document | null })
+              .__zeugmaActivePopoutDocument === popup.document
+          ) {
+            ;(
+              globalThis as unknown as { __zeugmaActivePopoutDocument?: Document | null }
+            ).__zeugmaActivePopoutDocument = null
+          }
+
           activePopoutDocuments.delete(popup.document)
           if (activePopoutDocuments.size === 0) {
             stopHeadObserver()

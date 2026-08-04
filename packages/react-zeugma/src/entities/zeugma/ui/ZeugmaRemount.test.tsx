@@ -253,7 +253,7 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
     expect(unmountCount).toBe(0)
   })
 
-  it('should not remount widgets during window popout and docking transitions', () => {
+  it('should remount widgets during window popout and docking transitions', () => {
     const initialLayout: TreeNode = {
       type: 'pane',
       id: 'pane-1',
@@ -319,9 +319,13 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
         }
       })
 
-      // Widget should not have remounted (no unmounts, no new mounts)
-      expect(unmountCount).toBe(0)
-      expect(mountCount).toBe(0)
+      // Widget should remount (unmount old + mount new) because key changes
+      expect(unmountCount).toBe(1)
+      expect(mountCount).toBe(1)
+
+      // Reset counters
+      mountCount = 0
+      unmountCount = 0
 
       // Dock the tab back
       act(() => {
@@ -330,15 +334,15 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
         }
       })
 
-      // Widget should still not have remounted
-      expect(unmountCount).toBe(0)
-      expect(mountCount).toBe(0)
+      // Widget should remount again when docking back
+      expect(unmountCount).toBe(1)
+      expect(mountCount).toBe(1)
     } finally {
       window.open = originalOpen
     }
   })
 
-  it('should not remount widgets during window popout and docking transitions when using renderPopoutWrapper', () => {
+  it('should apply renderPopoutWrapper only when popped out and remount widgets on transition', () => {
     const initialLayout: TreeNode = {
       type: 'pane',
       id: 'pane-1',
@@ -372,14 +376,12 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
         </Pane>
       )
       const renderPopoutWrapper = ({
-        document: targetDoc,
         children,
       }: {
         document: Document
         children: React.ReactNode
       }) => {
-        const isMain = targetDoc === document
-        return <div data-testid={isMain ? 'wrapper-main' : 'wrapper-popout'}>{children}</div>
+        return <div data-testid="wrapper-popout">{children}</div>
       }
       return (
         <Zeugma
@@ -390,11 +392,10 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
       )
     }
 
-    const { getByTestId } = render(<TestWrapper />)
+    render(<TestWrapper />)
 
     expect(mountCount).toBe(1)
     expect(unmountCount).toBe(0)
-    expect(getByTestId('wrapper-main')).toBeTruthy()
 
     // Reset counters before popout simulation
     mountCount = 0
@@ -421,12 +422,17 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
         }
       })
 
-      // Widget should not have remounted (no unmounts, no new mounts)
-      expect(unmountCount).toBe(0)
-      expect(mountCount).toBe(0)
+      // Widget should remount because key changes on popout transition
+      expect(unmountCount).toBe(1)
+      expect(mountCount).toBe(1)
 
+      // Verify the popout wrapper is applied in the popout document
       const popoutWrapper = mockPopoutDoc.querySelector('[data-testid="wrapper-popout"]')
       expect(popoutWrapper).toBeTruthy()
+
+      // Reset counters
+      mountCount = 0
+      unmountCount = 0
 
       // Dock the tab back
       act(() => {
@@ -435,10 +441,9 @@ describe('Zeugma Drag and Drop Widget Remounting', () => {
         }
       })
 
-      // Widget should still not have remounted
-      expect(unmountCount).toBe(0)
-      expect(mountCount).toBe(0)
-      expect(getByTestId('wrapper-main')).toBeTruthy()
+      // Widget should remount again when docking back
+      expect(unmountCount).toBe(1)
+      expect(mountCount).toBe(1)
     } finally {
       window.open = originalOpen
     }

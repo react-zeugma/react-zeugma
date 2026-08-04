@@ -253,7 +253,6 @@ export function findTabById(tree: TreeNode | null, tabId: string): TabDetails | 
     isActive: pane.activeTabId === tabId,
     index,
     metadata: pane.tabsMetadata?.[tabId],
-    remountOnPopout: pane.tabsMetadata?.[tabId]?.remountOnPopout as boolean | undefined,
   }
 }
 

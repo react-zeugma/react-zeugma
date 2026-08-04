@@ -83,7 +83,7 @@ export const defaultDashboardLayout: TreeNode = {
         activeTabId: 'key-metrics',
         tabsMetadata: {
           'key-metrics': { color: '#5794F2' },
-          'system-map': { color: '#5794F2', remountOnPopout: true },
+          'system-map': { color: '#5794F2' },
         },
       },
       second: {

@@ -8,116 +8,6 @@ export interface PortalHostItemProps {
   renderWidget?: (tab: TabDetails) => React.ReactNode
 }
 
-export const PopoutRenderWrapper: React.FC<{ popoutDoc: Document; children: React.ReactNode }> = ({
-  popoutDoc,
-  children,
-}) => {
-  if (popoutDoc === document) {
-    return <>{children}</>
-  }
-  const originalUseEffect = React.useEffect
-  const originalUseLayoutEffect = React.useLayoutEffect
-  const originalUseInsertionEffect = (
-    React as unknown as {
-      useInsertionEffect?: (effect: () => void | (() => void), deps?: React.DependencyList) => void
-    }
-  ).useInsertionEffect
-
-  React.useEffect = (effect, deps) => {
-    return originalUseEffect(() => {
-      window.__zeugmaActivePopoutDocument = popoutDoc
-      try {
-        const cleanup = effect()
-        if (typeof cleanup === 'function') {
-          return () => {
-            window.__zeugmaActivePopoutDocument = popoutDoc
-            try {
-              return cleanup()
-            } finally {
-              window.__zeugmaActivePopoutDocument = null
-            }
-          }
-        }
-        return cleanup
-      } finally {
-        window.__zeugmaActivePopoutDocument = null
-      }
-    }, deps)
-  }
-
-  React.useLayoutEffect = (effect, deps) => {
-    return originalUseLayoutEffect(() => {
-      window.__zeugmaActivePopoutDocument = popoutDoc
-      try {
-        const cleanup = effect()
-        if (typeof cleanup === 'function') {
-          return () => {
-            window.__zeugmaActivePopoutDocument = popoutDoc
-            try {
-              return cleanup()
-            } finally {
-              window.__zeugmaActivePopoutDocument = null
-            }
-          }
-        }
-        return cleanup
-      } finally {
-        window.__zeugmaActivePopoutDocument = null
-      }
-    }, deps)
-  }
-
-  if (originalUseInsertionEffect) {
-    ;(
-      React as unknown as {
-        useInsertionEffect?: (
-          effect: () => void | (() => void),
-          deps?: React.DependencyList,
-        ) => void
-      }
-    ).useInsertionEffect = (effect, deps) => {
-      return originalUseInsertionEffect(() => {
-        window.__zeugmaActivePopoutDocument = popoutDoc
-        try {
-          const cleanup = effect()
-          if (typeof cleanup === 'function') {
-            return () => {
-              window.__zeugmaActivePopoutDocument = popoutDoc
-              try {
-                return cleanup()
-              } finally {
-                window.__zeugmaActivePopoutDocument = null
-              }
-            }
-          }
-          return cleanup
-        } finally {
-          window.__zeugmaActivePopoutDocument = null
-        }
-      }, deps)
-    }
-  }
-
-  window.__zeugmaActivePopoutDocument = popoutDoc
-  try {
-    return <>{children}</>
-  } finally {
-    window.__zeugmaActivePopoutDocument = null
-    React.useEffect = originalUseEffect
-    React.useLayoutEffect = originalUseLayoutEffect
-    if (originalUseInsertionEffect) {
-      ;(
-        React as unknown as {
-          useInsertionEffect?: (
-            effect: () => void | (() => void),
-            deps?: React.DependencyList,
-          ) => void
-        }
-      ).useInsertionEffect = originalUseInsertionEffect
-    }
-  }
-}
-
 export const PortalHostItem: React.FC<PortalHostItemProps> = React.memo(
   ({ tabDetails, target, renderWidget }) => {
     const { id: tabId } = tabDetails
@@ -178,12 +68,19 @@ export const PortalHostItem: React.FC<PortalHostItemProps> = React.memo(
     if (!wrapper || !renderWidget) return null
 
     const isPopped = !!(target && target.ownerDocument && target.ownerDocument !== document)
-    const keySuffix = tabDetails.remountOnPopout ? (isPopped ? '-popped' : '-docked') : ''
+
+    // Always force remount when transitioning between docked and popped states.
+    // This ensures all hooks (e.g. antd's useGlobalCache, Leaflet's map init) run fresh
+    // with the correct document context and style provider cache.
+    const keySuffix = isPopped ? '-popped' : '-docked'
     let widget: React.ReactNode = (
       <React.Fragment key={`${tabId}${keySuffix}`}>{renderWidget(tabDetails)}</React.Fragment>
     )
 
-    if (renderPopoutWrapper) {
+    // Apply the consumer's popout wrapper only when actually popped out.
+    // This wrapper typically provides StyleProvider/StyleSheetManager targeting
+    // the popout document's <head> for correct CSS injection.
+    if (isPopped && renderPopoutWrapper) {
       widget = renderPopoutWrapper({
         tabId,
         document: targetDoc,
@@ -192,12 +89,7 @@ export const PortalHostItem: React.FC<PortalHostItemProps> = React.memo(
       })
     }
 
-    return createPortal(
-      <PopoutRenderWrapper popoutDoc={isPopped && target ? target.ownerDocument : document}>
-        {widget}
-      </PopoutRenderWrapper>,
-      wrapper,
-    )
+    return createPortal(widget, wrapper)
   },
   (prev, next) => {
     return (

@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 6.9.12
+
+### Patch Changes
+
+- fix: always force widget remounting on popout transitions to prevent style/context/DOM side effects
+
 ## 6.9.9
 
 ### Patch Changes

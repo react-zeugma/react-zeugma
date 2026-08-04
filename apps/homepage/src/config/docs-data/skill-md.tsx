@@ -54,7 +54,6 @@ export interface TabDetails {
   isActive: boolean
   index: number
   metadata: Record<string, unknown> | undefined
-  remountOnPopout?: boolean
 }
 \`\`\`
 

@@ -34,8 +34,6 @@ export interface TabDetails {
   isActive: boolean
   index: number
   metadata: Record<string, unknown> | undefined
-  /** [Experimental] Force-remount the component during window transitions instead of adopting the DOM node. */
-  remountOnPopout?: boolean
 }
 
 export interface RenderTabProps extends TabDetails {

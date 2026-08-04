@@ -44,11 +44,6 @@ const RENDER_TAB_PROPS = [
   ['isPoppedOut', 'boolean', '[Experimental] True if this tab is open in a new popup window.'],
   ['popout', '() => void', '[Experimental] Callback to popout this tab into a new window.'],
   ['dock', '() => void', '[Experimental] Callback to dock this tab back to the dashboard.'],
-  [
-    'remountOnPopout',
-    'boolean | undefined',
-    '[Experimental] If true, force-remounts the widget during popout/dock transitions instead of adopting the DOM node.',
-  ],
 ]
 
 const USE_ZEUGMA_OPTIONS = [

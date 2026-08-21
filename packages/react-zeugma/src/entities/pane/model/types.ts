@@ -9,10 +9,6 @@ export interface BaseLeafRenderProps {
   remove: () => void
   /** The metadata values associated with this leaf, or undefined. */
   metadata: Record<string, unknown> | undefined
-  /** Updates the metadata of this leaf using an updater function. */
-  updateMetadata: (
-    updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined,
-  ) => void
   /** True if this specific leaf or the dashboard globally is locked. */
   locked: boolean
 }
@@ -29,11 +25,6 @@ export interface PaneRenderProps extends BaseLeafRenderProps {
   removeTab: (tabId: string) => void
   /** The metadata values associated with all tabs in this pane. */
   tabsMetadata: Record<string, Record<string, unknown>> | undefined
-  /** Updates the metadata of a specific tab. */
-  updateTabMetadata: (
-    tabId: string,
-    updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined,
-  ) => void
   /** Whether the active tab is popped out into a new window. */
   isActiveTabPoppedOut: boolean
   /** Popout the active tab (or a specific tab) into a new window. */

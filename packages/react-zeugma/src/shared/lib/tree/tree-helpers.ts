@@ -282,45 +282,6 @@ export function getActiveTabMetadata(
 }
 
 /**
- * Update metadata on a specific tab or widget node using an updater function.
- */
-export function updateMetadata(
-  tree: TreeNode | null,
-  id: string,
-  updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined,
-): TreeNode | null {
-  if (tree === null) return null
-  if (tree.type === 'pane') {
-    if (tree.tabIds.includes(id)) {
-      const currentTabsMetadata = tree.tabsMetadata || {}
-      const currentTabMeta = currentTabsMetadata[id]
-      const newTabMeta = updater(currentTabMeta)
-
-      const newTabsMetadata = { ...currentTabsMetadata }
-      if (newTabMeta === undefined) {
-        delete newTabsMetadata[id]
-      } else {
-        newTabsMetadata[id] = newTabMeta
-      }
-
-      return {
-        ...tree,
-        tabsMetadata: Object.keys(newTabsMetadata).length > 0 ? newTabsMetadata : undefined,
-      }
-    }
-    return tree
-  }
-  if (tree.type === 'split') {
-    return {
-      ...tree,
-      first: updateMetadata(tree.first, id, updater) ?? tree.first,
-      second: updateMetadata(tree.second, id, updater) ?? tree.second,
-    }
-  }
-  return tree
-}
-
-/**
  * Update the locked status on a specific pane or widget node in the layout tree.
  */
 export function updatePaneLock(

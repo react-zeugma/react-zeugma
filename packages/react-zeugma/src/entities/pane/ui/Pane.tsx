@@ -161,8 +161,7 @@ export const Pane: React.FC<PaneProps> & {
     locked: globalLocked,
     poppedOutTabIds = [],
   } = useZeugmaState()
-  const { removePane, updateMetadata, selectTab, removeTab, popoutTab, dockTab } =
-    useZeugmaActions()
+  const { removePane, selectTab, removeTab, popoutTab, dockTab } = useZeugmaActions()
 
   const paneNode = useMemo(() => {
     if (activeType === 'tab' && id === activeId) {
@@ -217,9 +216,6 @@ export const Pane: React.FC<PaneProps> & {
         removePane(paneContainerId)
       },
       metadata,
-      updateMetadata: (updater) => {
-        updateMetadata(id, updater)
-      },
       locked: isDraggableDisabled,
       tabIds,
       activeTabId,
@@ -231,9 +227,6 @@ export const Pane: React.FC<PaneProps> & {
         removeTab(tabId)
       },
       tabsMetadata,
-      updateTabMetadata: (tabId, updater) => {
-        updateMetadata(tabId, updater)
-      },
       isActiveTabPoppedOut: poppedOutTabIds.includes(activeTabId),
       popoutTab: (tabId) => popoutTab(tabId || activeTabId),
       dockTab: (tabId) => dockTab(tabId || activeTabId),
@@ -245,7 +238,6 @@ export const Pane: React.FC<PaneProps> & {
       id,
       removeTab,
       metadata,
-      updateMetadata,
       isDraggableDisabled,
       tabIds,
       activeTabId,

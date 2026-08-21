@@ -12,7 +12,6 @@ import {
   addTab,
   splitPane,
   updateSplitPercentage,
-  updateMetadata,
   updatePaneLock,
   selectTab,
   mergeTab,
@@ -226,19 +225,6 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
     [wrapMutation],
   )
 
-  const handleUpdateMetadata = useCallback(
-    wrapMutation(
-      (
-        prev,
-        id: string,
-        updater: (
-          current: Record<string, unknown> | undefined,
-        ) => Record<string, unknown> | undefined,
-      ) => updateMetadata(prev, id, updater),
-    ),
-    [wrapMutation],
-  )
-
   const handleUpdatePaneLock = useCallback(
     wrapMutation((prev, paneId: string, isLocked: boolean) => {
       const targetPane = findPaneById(prev, paneId) ?? findPaneContainingTab(prev, paneId)
@@ -349,7 +335,6 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
     // Actions
     removePane: handleRemovePane,
     addTab: handleAddTab,
-    updateMetadata: handleUpdateMetadata,
     updatePaneLock: handleUpdatePaneLock,
     selectTab: handleSelectTab,
     mergeTab: handleMergeTab,

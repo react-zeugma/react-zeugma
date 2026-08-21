@@ -11,7 +11,6 @@ export {
   findTabById,
   getTabMetadata,
   getActiveTabMetadata,
-  updateMetadata,
   updatePaneLock,
   selectTab,
   mergeTab,

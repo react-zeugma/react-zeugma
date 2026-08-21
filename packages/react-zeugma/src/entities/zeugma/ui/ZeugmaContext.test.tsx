@@ -341,7 +341,6 @@ describe('Tab Drop Preview rendering', () => {
     const mockActions = {
       removePane: vi.fn(),
       addTab: vi.fn(),
-      updateMetadata: vi.fn(),
       updatePaneLock: vi.fn(),
       selectTab: vi.fn(),
       mergeTab: vi.fn(),
@@ -399,7 +398,6 @@ describe('Tab Drop Preview rendering', () => {
     const mockActions = {
       removePane: vi.fn(),
       addTab: vi.fn(),
-      updateMetadata: vi.fn(),
       updatePaneLock: vi.fn(),
       selectTab: vi.fn(),
       mergeTab: vi.fn(),

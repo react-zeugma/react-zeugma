@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 7.1.0
+
+### Minor Changes
+
+- Make tab and pane metadata strictly immutable and remove metadata mutation APIs (`updateMetadata`, `updateTabMetadata`). Tab metadata is defined on initial layout declaration or via `addTab(tabId, targetPaneId?, metadata?)` and preserved across layout actions.
+
 ## 6.9.12
 
 ### Patch Changes

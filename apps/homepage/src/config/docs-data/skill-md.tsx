@@ -169,7 +169,6 @@ const {
   remove,
   selectTab,
   removeTab,
-  updateMetadata,
   isActiveTabPoppedOut,
   popoutTab,
   dockTab,

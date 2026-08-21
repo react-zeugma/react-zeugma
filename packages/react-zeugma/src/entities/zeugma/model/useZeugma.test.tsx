@@ -195,18 +195,30 @@ describe('useZeugma Hook', () => {
     expect(result.current.removePane).toBe(initialRemovePane)
   })
 
-  it('should update tab metadata programmatically', () => {
-    const { result } = renderHook(() => useZeugma({ initialLayout }))
+  it('should initialize and preserve immutable tab metadata', () => {
+    const layoutWithMeta: PaneNode = {
+      type: 'pane',
+      id: 'pane-1',
+      tabIds: ['tab-1'],
+      activeTabId: 'tab-1',
+      tabsMetadata: {
+        'tab-1': { title: 'Initial Title' },
+      },
+    }
+    const { result } = renderHook(() => useZeugma({ initialLayout: layoutWithMeta }))
+
+    expect(result.current.getTabMetadata('tab-1')).toEqual({ title: 'Initial Title' })
+    expect(result.current.getActiveTabMetadata('pane-1')).toEqual({ title: 'Initial Title' })
+    expect(result.current.findTabById('tab-1')?.metadata).toEqual({ title: 'Initial Title' })
 
     act(() => {
-      result.current.updateMetadata('tab-1', (current) => ({
-        ...current,
-        title: 'My Custom Title',
-      }))
+      result.current.addTab('tab-2', 'pane-1', { title: 'Tab 2 Title' })
     })
 
     const pane = result.current.layout as PaneNode
-    expect(pane.tabsMetadata?.['tab-1']?.title).toBe('My Custom Title')
+    expect(pane.tabsMetadata?.['tab-1']).toEqual({ title: 'Initial Title' })
+    expect(pane.tabsMetadata?.['tab-2']).toEqual({ title: 'Tab 2 Title' })
+    expect(result.current.getTabMetadata('tab-2')).toEqual({ title: 'Tab 2 Title' })
   })
 
   it('should lock and unlock a specific pane programmatically', () => {

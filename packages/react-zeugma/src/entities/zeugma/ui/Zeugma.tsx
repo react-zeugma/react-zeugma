@@ -83,7 +83,6 @@ const ZeugmaProviderInternal: React.FC<
     setContainerRef,
     removePane,
     addTab,
-    updateMetadata,
     updatePaneLock,
     selectTab,
     mergeTab,
@@ -284,7 +283,6 @@ const ZeugmaProviderInternal: React.FC<
     () => ({
       removePane,
       addTab,
-      updateMetadata,
       updatePaneLock,
       selectTab,
       mergeTab,
@@ -300,7 +298,6 @@ const ZeugmaProviderInternal: React.FC<
     [
       removePane,
       addTab,
-      updateMetadata,
       updatePaneLock,
       selectTab,
       mergeTab,

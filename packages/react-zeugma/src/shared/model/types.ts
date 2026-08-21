@@ -93,11 +93,6 @@ export interface ZeugmaActions {
   removePane: (paneId: string) => void
   /** Appends a tab into a target pane node, or splits/creates a new pane if no target pane ID is provided. */
   addTab: (tabId: string, targetPaneId?: string, metadata?: Record<string, unknown>) => void
-  /** Stable callback to update metadata for a specific tab or widget. */
-  updateMetadata: (
-    id: string,
-    updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined,
-  ) => void
   /** Stable callback to update the locked status of a specific pane in the layout tree. */
   updatePaneLock: (paneId: string, locked: boolean) => void
   /** Stable callback to activate a tab within a pane. */

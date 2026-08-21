@@ -89,11 +89,6 @@ const ZEUGMA_CONTROLLER_METHODS = [
     'Splits a target pane in a given direction and adds a new pane.',
   ],
   [
-    'updateMetadata',
-    '(id: string, updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined) => void',
-    'Updates metadata associated with a tab.',
-  ],
-  [
     'updatePaneLock',
     '(paneId: string, locked: boolean) => void',
     'Toggles lock state for a specific pane.',
@@ -150,21 +145,11 @@ const USE_PANE_CONTEXT_PROPERTIES = [
     'Record<string, unknown> | undefined',
     'Metadata values associated with the active tab.',
   ],
-  [
-    'updateMetadata',
-    '(updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined) => void',
-    'Updates metadata for the active tab.',
-  ],
   ['locked', 'boolean', 'True if this specific pane or the dashboard globally is locked.'],
   [
     'tabsMetadata',
     'Record<string, Record<string, unknown>> | undefined',
     'Tab metadata mapping for all tabs inside this pane.',
-  ],
-  [
-    'updateTabMetadata',
-    '(tabId: string, updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined) => void',
-    'Updates metadata for a specific tab in the pane.',
   ],
   [
     'isActiveTabPoppedOut',

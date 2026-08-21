@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { renderHook } from '@testing-library/react'
 import { useZeugmaDnd } from './useZeugmaDnd'
+import { createMetadataStore } from './metadata-store'
 import type { ZeugmaControllerInternal, TreeNode } from '../../../shared'
 import * as dndKitCore from '@dnd-kit/core'
 
@@ -23,6 +24,7 @@ describe('useZeugmaDnd Hook', () => {
     const setLayoutMock = vi.fn()
     const internalSetLayoutMock = vi.fn()
     return {
+      metadataStore: createMetadataStore(),
       layout: {
         type: 'pane',
         id: 'pane-1',
@@ -179,7 +181,6 @@ describe('useZeugmaDnd Hook', () => {
       id: 'pane-2',
       tabIds: ['tab-1', 'tab-2'],
       activeTabId: 'tab-1',
-      tabsMetadata: undefined,
     })
     // Verify onDragEnd callback is called with the target tab and drop metadata
     expect(onDragEndMock).toHaveBeenCalledWith('pane-1', 'tab-2', {
@@ -234,7 +235,6 @@ describe('useZeugmaDnd Hook', () => {
       id: 'pane-1',
       tabIds: ['tab-1', 'tab-2'],
       activeTabId: 'tab-1',
-      tabsMetadata: undefined,
     })
     expect(onDragEndMock).toHaveBeenCalledWith('tab-1', 'tab-2', {
       type: 'move',
@@ -269,7 +269,6 @@ describe('useZeugmaDnd Hook', () => {
       id: 'pane-1',
       tabIds: ['tab-2'],
       activeTabId: 'tab-2',
-      tabsMetadata: undefined,
     })
     // Verify setLayout was NOT called
     expect(controller.setLayout).not.toHaveBeenCalled()
@@ -338,7 +337,6 @@ describe('useZeugmaDnd Hook', () => {
       id: 'pane-1',
       tabIds: ['tab-1'],
       activeTabId: 'tab-1',
-      tabsMetadata: undefined,
     })
 
     // Reset mocks
@@ -617,14 +615,12 @@ describe('useZeugmaDnd Hook', () => {
         id: 'pane-1',
         tabIds: ['tab-2'],
         activeTabId: 'tab-2',
-        tabsMetadata: undefined,
       },
       second: {
         type: 'pane',
         id: 'pane-2',
         tabIds: ['tab-1'],
         activeTabId: 'tab-1',
-        tabsMetadata: undefined,
       },
     })
   })

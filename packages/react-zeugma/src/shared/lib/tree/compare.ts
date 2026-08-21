@@ -1,6 +1,6 @@
 import { TreeNode, SplitNode, PaneNode } from '../../model/types'
 
-function areObjectsEqual(
+export function areObjectsEqual(
   a: Record<string, unknown> | undefined,
   b: Record<string, unknown> | undefined,
 ): boolean {
@@ -24,7 +24,7 @@ function areObjectsEqual(
   return true
 }
 
-function areMetadataEqual(
+export function areMetadataEqual(
   a: Record<string, Record<string, unknown>> | undefined,
   b: Record<string, Record<string, unknown>> | undefined,
 ): boolean {
@@ -67,6 +67,6 @@ export function areLayoutsEqual(a: TreeNode | null, b: TreeNode | null): boolean
     for (let i = 0; i < a.tabIds.length; i++) {
       if (a.tabIds[i] !== pb.tabIds[i]) return false
     }
-    return areMetadataEqual(a.tabsMetadata, pb.tabsMetadata)
+    return true
   }
 }

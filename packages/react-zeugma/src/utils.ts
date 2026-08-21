@@ -9,9 +9,6 @@ export {
   findPaneById,
   findPaneContainingTab,
   findTabById,
-  getTabMetadata,
-  getActiveTabMetadata,
-  updateMetadata,
   updatePaneLock,
   selectTab,
   mergeTab,
@@ -21,5 +18,7 @@ export {
   computeLayout,
   calculateTabDropIndex,
 } from './shared/lib/tree/tree-helpers'
+
+export { areLayoutsEqual, areMetadataEqual, areObjectsEqual } from './shared/lib/tree/compare'
 
 export type { ComputedPane, ComputedSplitter } from './shared/lib/tree/tree-helpers'

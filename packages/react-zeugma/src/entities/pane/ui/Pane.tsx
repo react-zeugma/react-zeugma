@@ -6,7 +6,8 @@ import {
   PortalRegistryContext,
   TabDetails,
 } from '../../../shared'
-import { findPaneOrContainingTab, findPaneContainingTab } from '../../../shared/lib/tree'
+import { findPaneOrContainingTab } from '../../../shared/lib/tree'
+import { useTabMetadata } from '../../zeugma/model'
 import { DragListenersCtx } from '../model/context'
 import { PaneRenderProps } from '../model/types'
 import { DropZone } from './DropZone'
@@ -166,14 +167,11 @@ export const Pane: React.FC<PaneProps> & {
 
   const paneNode = useMemo(() => {
     if (activeType === 'tab' && id === activeId) {
-      const originalPane = findPaneContainingTab(layout, id)
-      const sourceMetadata = originalPane?.tabsMetadata?.[id]
       return {
         type: 'pane' as const,
         id,
         tabIds: [id],
         activeTabId: id,
-        tabsMetadata: sourceMetadata ? { [id]: sourceMetadata } : undefined,
       }
     }
     const targetTree = id === activeId ? layout : renderingLayout
@@ -182,9 +180,11 @@ export const Pane: React.FC<PaneProps> & {
   const paneContainerId = paneNode?.id ?? id
   const tabIds = paneNode?.tabIds ?? [id]
   const activeTabId = paneNode?.activeTabId ?? id
-  const tabsMetadata = paneNode?.tabsMetadata
 
-  const metadata = tabsMetadata?.[id]
+  const activeTabMetadata = useTabMetadata(activeTabId)
+  const paneMetadata = useTabMetadata(id)
+  const metadata = activeTabMetadata ?? paneMetadata
+
   const localLocked = paneNode?.locked ?? false
 
   const isPaneLocked = propLocked || localLocked
@@ -218,7 +218,7 @@ export const Pane: React.FC<PaneProps> & {
       },
       metadata,
       updateMetadata: (updater) => {
-        updateMetadata(id, updater)
+        updateMetadata(activeTabId || id, updater)
       },
       locked: isDraggableDisabled,
       tabIds,
@@ -230,7 +230,6 @@ export const Pane: React.FC<PaneProps> & {
         }
         removeTab(tabId)
       },
-      tabsMetadata,
       updateTabMetadata: (tabId, updater) => {
         updateMetadata(tabId, updater)
       },
@@ -251,7 +250,6 @@ export const Pane: React.FC<PaneProps> & {
       activeTabId,
       selectTab,
       paneContainerId,
-      tabsMetadata,
       poppedOutTabIds,
       popoutTab,
       dockTab,

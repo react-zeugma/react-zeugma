@@ -23,7 +23,6 @@ export interface PaneNode {
   tabIds: string[]
   activeTabId: string
   locked?: boolean
-  tabsMetadata?: Record<string, Record<string, unknown>>
 }
 
 export type TreeNode = SplitNode | PaneNode
@@ -60,6 +59,12 @@ export interface UseZeugmaOptions {
   layout?: TreeNode | null
   /** Callback triggered when the layout changes via drag-and-drop actions, splits, moves, or resizes. */
   onChange?: (newLayout: TreeNode | null) => void
+  /** Initial metadata map for all tabs/widgets in uncontrolled mode. */
+  initialMetadata?: Record<string, Record<string, unknown>>
+  /** Controlled metadata map for all tabs/widgets. */
+  metadata?: Record<string, Record<string, unknown>>
+  /** Callback triggered when tab/widget metadata changes. */
+  onMetadataChange?: (metadata: Record<string, Record<string, unknown>>) => void
   /** The ID of the pane that is currently taking up the full dashboard area. Null if no pane is fullscreen. */
   fullscreenPaneId?: string | null
   /** Callback triggered when a pane is toggled to/from fullscreen mode. Passes the active fullscreen paneId or null. */
@@ -140,10 +145,25 @@ export interface ZeugmaQueries {
   getActiveTabMetadata: (paneId: string) => Record<string, unknown> | undefined
 }
 
+export interface MetadataStore {
+  get: (tabId: string) => Record<string, unknown> | undefined
+  getAll: () => Record<string, Record<string, unknown>>
+  set: (tabId: string, metadata: Record<string, unknown> | undefined) => void
+  update: (
+    tabId: string,
+    updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined,
+  ) => void
+  remove: (tabId: string) => void
+  setAll: (newMap: Record<string, Record<string, unknown>> | undefined) => void
+  subscribe: (tabId: string, listener: () => void) => () => void
+  subscribeAll: (listener: () => void) => () => void
+}
+
 export interface ZeugmaController
   extends ZeugmaState, ZeugmaStateSetters, ZeugmaActions, ZeugmaQueries {}
 
 export interface ZeugmaControllerInternal extends ZeugmaController {
+  metadataStore: MetadataStore
   // Transient drag-and-drop/resize state
   _internalSetLayout: Dispatch<SetStateAction<TreeNode | null>>
   renderingLayout: TreeNode | null
@@ -278,8 +298,10 @@ export interface BaseZeugmaProps {
 export interface ZeugmaPersistOptions {
   /** Whether to enable persistence. Defaults to true if the object is provided. */
   enabled?: boolean
-  /** The key used for localStorage persistence. Defaults to 'zeugma-layout'. */
+  /** The key used for layout localStorage persistence. Defaults to 'zeugma-layout'. */
   key?: string
+  /** The key used for metadata localStorage persistence. Defaults to `${key}-metadata`. */
+  metadataKey?: string
 }
 
 export type ZeugmaProps =

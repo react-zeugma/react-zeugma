@@ -27,8 +27,6 @@ export interface PaneRenderProps extends BaseLeafRenderProps {
   selectTab: (tabId: string) => void
   /** Removes/closes a specific tab. */
   removeTab: (tabId: string) => void
-  /** The metadata values associated with all tabs in this pane. */
-  tabsMetadata: Record<string, Record<string, unknown>> | undefined
   /** Updates the metadata of a specific tab. */
   updateTabMetadata: (
     tabId: string,

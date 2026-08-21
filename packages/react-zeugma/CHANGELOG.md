@@ -6,6 +6,17 @@
 
 - Make tab and pane metadata strictly immutable and remove metadata mutation APIs (`updateMetadata`, `updateTabMetadata`). Tab metadata is defined on initial layout declaration or via `addTab(tabId, targetPaneId?, metadata?)` and preserved across layout actions.
 
+## 7.0.0
+
+### Major Changes
+
+- **Decoupled Tab Metadata & Isolated Reactivity**:
+  - Removed `tabsMetadata` from `PaneNode` and the layout `TreeNode` hierarchy. Layout trees now represent pure spatial topology (`id`, `tabIds`, `activeTabId`, `locked`).
+  - Introduced fine-grained metadata store backed by React 18/19 `useSyncExternalStore` (`useTabMetadata(tabId)` and `useAllMetadata()`).
+  - Mutating tab metadata via `controller.updateMetadata(tabId, updater)` re-renders only the targeted tab/widget without re-rendering the layout tree, split resizers, or sibling tabs, and without triggering `onChange(layout)`.
+  - Added controlled metadata options (`initialMetadata`, `metadata`, `onMetadataChange`) to `useZeugma()`.
+  - Added automatic metadata persistence to `localStorage` when `persist` is enabled.
+
 ## 6.9.12
 
 ### Patch Changes

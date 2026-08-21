@@ -14,7 +14,8 @@ description: Rules, types, component composition, and programmatic manipulation 
 
 ## 1. Core AI Rules & Constraints
 
-- **Immutable State Rule**: Never mutate layout \`TreeNode\` objects directly in-place. You must treat them as immutable. Always use the pure utility functions exported by \`react-zeugma/utils\` to perform mutations and return fresh tree references.
+- **Immutable Layout Rule**: Never mutate layout \`TreeNode\` objects directly in-place. You must treat them as immutable. Always use the pure utility functions exported by \`react-zeugma/utils\` to perform mutations and return fresh tree references.
+- **Decoupled Metadata Rule**: Tab metadata is decoupled from the \`TreeNode\` topology. Layout objects only contain structural topology (\`id\`, \`tabIds\`, \`activeTabId\`, \`locked\`). Metadata is maintained reactively in an external store and accessed via \`useTabMetadata(tabId)\` or \`controller.getTabMetadata(tabId)\`. Mutating metadata does NOT cause the layout tree, sibling tabs, or split resizers to re-render, and does NOT trigger \`onChange(layout)\`.
 - **Headless Styling Rule**: \`react-zeugma\` is 100% style-agnostic and applies no default CSS. You MUST specify class names in the \`classNames\` configuration on \`<Zeugma>\` (specifically for \`resizer\`, \`dropPreview\`, \`tabDropPreview\`, \`paneDragPreview\`, and \`tabDragPreview\`) or the layout features will be invisible/non-functional.
 - **renderPane Placement Rule**: If using \`<Zeugma>\` with \`children\` (Context Provider Mode), you MUST pass the \`renderPane\` prop directly to \`<PaneTree renderPane={renderPane} />\`, and \`renderPane\` is forbidden on \`<Zeugma>\`. If using \`<Zeugma>\` in standalone mode (without \`children\`), you MUST pass \`renderPane\` directly to \`<Zeugma renderPane={renderPane} />\`.
 - **DragHandle Placement**: Draggable panes require a child \`<Pane.DragHandle>\` component to define the interactive drag region.
@@ -40,10 +41,9 @@ export interface SplitNode {
 export interface PaneNode {
   type: 'pane'
   id: string
-  tabs: string[]
+  tabIds: string[]
   activeTabId: string
   locked?: boolean
-  tabsMetadata?: Record<string, Record<string, unknown>>
 }
 
 export type TreeNode = SplitNode | PaneNode
@@ -57,7 +57,7 @@ export interface TabDetails {
 }
 \`\`\`
 
-- **\`PaneNode\` (Leaf)**: Holds active tabs and the selected tab ID.
+- **\`PaneNode\` (Leaf)**: Holds active tab IDs and the selected tab ID.
 - **\`SplitNode\` (Branch)**: Divides space into \`first\` and \`second\` sub-trees based on \`splitPercentage\` (percentage of the first child's size relative to the parent boundary).
 
 ---
@@ -70,7 +70,7 @@ export interface TabDetails {
 import { useZeugma, Zeugma, Pane } from 'react-zeugma'
 
 function Dashboard() {
-  const controller = useZeugma({ initialLayout })
+  const controller = useZeugma({ initialLayout, initialMetadata })
   return (
     <Zeugma
       controller={controller}
@@ -93,7 +93,7 @@ If \`<Zeugma>\` wraps child components, it serves as a Context Provider. Use \`<
 import { useZeugma, Zeugma, PaneTree, Pane } from 'react-zeugma'
 
 function Dashboard() {
-  const controller = useZeugma({ initialLayout })
+  const controller = useZeugma({ initialLayout, initialMetadata })
   const renderPane = (id: string) => (
     <Pane id={id}>
       <Pane.DragHandle className="drag">Header</Pane.DragHandle>
@@ -110,7 +110,29 @@ function Dashboard() {
 }
 \`\`\`
 
-## 4. API Reference and Configurations
+---
+
+## 4. Metadata Reactivity & Hooks
+
+React Zeugma provides fine-grained hooks for tab metadata:
+
+- **\`useTabMetadata<T>(tabId: string): T | undefined\`**: Subscribes directly to a single tab's metadata. Re-renders only when this specific tab's metadata changes.
+- **\`useAllMetadata<T>(): T\`**: Subscribes to all tab metadata across the dashboard.
+- **\`controller.updateMetadata(tabId, updater)\`**: Updates metadata for a tab in the store. Does NOT mutate the layout tree or trigger \`onChange(layout)\`.
+- **\`controller.getTabMetadata(tabId)\`**: Retrieves current metadata synchronously.
+
+\`\`\`tsx
+import { useTabMetadata } from 'react-zeugma'
+
+function TabBadge({ tabId }: { tabId: string }) {
+  const meta = useTabMetadata<{ unreadCount?: number }>(tabId)
+  return <span>{meta?.unreadCount ?? 0}</span>
+}
+\`\`\`
+
+---
+
+## 5. API Reference and Configurations
 
 ### \`<Zeugma>\` Component Props
 
@@ -127,6 +149,9 @@ Instantiates the dashboard state engine.
 - \`initialLayout?: TreeNode | null\` (Initial uncontrolled tree)
 - \`layout?: TreeNode | null\` (Controlled layout tree)
 - \`onChange?: (newLayout: TreeNode | null) => void\` (Layout updates handler)
+- \`initialMetadata?: Record<string, Record<string, unknown>>\` (Initial tab metadata mapping)
+- \`metadata?: Record<string, Record<string, unknown>>\` (Controlled tab metadata mapping)
+- \`onMetadataChange?: (metadata: Record<string, Record<string, unknown>>) => void\` (Metadata updates handler)
 - \`locked?: boolean\` (Disable all resize/drag-and-drop operations)
 - \`fullscreenPaneId?: string | null\` (Maximize target pane ID. When active, structural layout changes are blocked)
 - \`onFullscreenChange?: (paneId: string | null) => void\` (Maximize toggle handler)
@@ -145,6 +170,8 @@ const {
   addTab,
   selectTab,
   splitPane,
+  updateMetadata,
+  getTabMetadata,
   findPaneById,
   findPaneContainingTab,
   findTabById,
@@ -161,7 +188,7 @@ Access details inside a child component of \`<Pane>\`:
 \`\`\`ts
 const {
   id,
-  tabs,
+  tabIds,
   activeTabId,
   isDragging,
   isFullscreen,
@@ -169,7 +196,9 @@ const {
   remove,
   selectTab,
   removeTab,
+  metadata,
   updateMetadata,
+  updateTabMetadata,
   isActiveTabPoppedOut,
   popoutTab,
   dockTab,
@@ -178,13 +207,13 @@ const {
 
 ---
 
-## 5. Pure Tree Manipulation Utilities
+## 6. Pure Tree Manipulation Utilities
 
 Import these layout mutators/queries from \`react-zeugma/utils\`:
 
 - **\`splitPane(tree, targetId, direction, splitType, paneToAdd)\`**: Splits \`targetId\` pane in a direction (\`'row'\` / \`'column'\`) and split type (\`'left'\` | \`'right'\` | \`'top'\` | \`'bottom'\`). \`paneToAdd\` can be a tab ID string or a full \`PaneNode\`. Returns the updated tree.
 - **\`removePane(tree, paneId)\`**: Removes a pane and collapses the parent split. Returns the updated tree.
-- **\`addTab(tree, targetPaneId, tabId, metadata?)\`**: Appends a tab to a target pane and sets it active. Returns the updated tree.
+- **\`addTab(tree, targetPaneId, tabId)\`**: Appends a tab to a target pane and sets it active. Returns the updated tree.
 - **\`removeTab(tree, tabId)\`**: Removes a tab from its pane; collapses empty panes. Returns the updated tree.
 - **\`selectTab(tree, paneId, tabId)\`**: Activates a tab inside a pane. Returns the updated tree.
 - **\`mergeTab(tree, draggedTabId, targetPaneId)\`**: Moves a tab from its source pane to target pane. Returns the updated tree.
@@ -198,7 +227,7 @@ Import these layout mutators/queries from \`react-zeugma/utils\`:
 
 ---
 
-## 6. Popout Window Styling (Experimental)
+## 7. Popout Window Styling (Experimental)
 
 When using CSS-in-JS libraries like \`styled-components\` or \`@ant-design/cssinjs\` (Ant Design) inside widgets, dynamic styles are injected into the main document's head by default. To make styles apply in popout windows (which are separate windows/documents), use \`renderPopoutWrapper\` to wrap popped-out widgets with appropriate style providers and cache targets.
 
@@ -238,7 +267,7 @@ function PopoutStyleManager({ document, children }) {
 
 ---
 
-## 7. DevTools & Performance Profiling (\`react-zeugma/devtools\`)
+## 8. DevTools & Performance Profiling (\`react-zeugma/devtools\`)
 
 Import mount and render counter utilities from \`react-zeugma/devtools\` or \`react-zeugma\`:
 

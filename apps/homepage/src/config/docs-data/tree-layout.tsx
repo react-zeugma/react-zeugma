@@ -19,7 +19,6 @@ export interface PaneNode {
   tabIds: string[]        // List of tab IDs docked inside this pane
   activeTabId: string     // The currently selected tab ID
   locked?: boolean        // Optional lock to disable dragging this specific pane
-  tabsMetadata?: Record<string, Record<string, unknown>> // Optional metadata per tab
 }`
 
 export const treeLayoutSection: DocSection = {

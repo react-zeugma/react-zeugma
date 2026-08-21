@@ -51,9 +51,36 @@ const USE_ZEUGMA_OPTIONS = [
     'initialLayout',
     'TreeNode | null',
     'null',
-    'The initial layout tree structure for the dashboard',
+    'Initial layout tree structure for uncontrolled mode.',
   ],
-  ['locked', 'boolean', 'false', 'Initial lock state of the workspace'],
+  ['layout', 'TreeNode | null', 'null', 'Controlled layout tree structure.'],
+  [
+    'onChange',
+    '(newLayout: TreeNode | null) => void',
+    '-',
+    'Callback triggered when layout structure/positions change.',
+  ],
+  [
+    'initialMetadata',
+    'Record<string, Record<string, unknown>>',
+    '-',
+    'Initial tab metadata mapping for uncontrolled metadata mode.',
+  ],
+  ['metadata', 'Record<string, Record<string, unknown>>', '-', 'Controlled tab metadata mapping.'],
+  [
+    'onMetadataChange',
+    '(metadata: Record<string, Record<string, unknown>>) => void',
+    '-',
+    'Callback triggered when tab metadata changes.',
+  ],
+  ['locked', 'boolean', 'false', 'Initial lock state of the workspace.'],
+  ['fullscreenPaneId', 'string | null', 'null', 'Controlled fullscreen pane ID.'],
+  [
+    'onFullscreenChange',
+    '(paneId: string | null) => void',
+    '-',
+    'Callback when fullscreen toggles.',
+  ],
 ]
 
 const ZEUGMA_CONTROLLER_METHODS = [
@@ -91,7 +118,12 @@ const ZEUGMA_CONTROLLER_METHODS = [
   [
     'updateMetadata',
     '(id: string, updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined) => void',
-    'Updates metadata associated with a tab.',
+    'Updates metadata associated with a tab without triggering layout re-renders.',
+  ],
+  [
+    'getTabMetadata',
+    '(id: string) => Record<string, unknown> | undefined',
+    'Retrieves the current metadata for a tab.',
   ],
   [
     'updatePaneLock',
@@ -157,11 +189,6 @@ const USE_PANE_CONTEXT_PROPERTIES = [
   ],
   ['locked', 'boolean', 'True if this specific pane or the dashboard globally is locked.'],
   [
-    'tabsMetadata',
-    'Record<string, Record<string, unknown>> | undefined',
-    'Tab metadata mapping for all tabs inside this pane.',
-  ],
-  [
     'updateTabMetadata',
     '(tabId: string, updater: (current: Record<string, unknown> | undefined) => Record<string, unknown> | undefined) => void',
     'Updates metadata for a specific tab in the pane.',
@@ -196,7 +223,7 @@ const TREE_UTILITIES = [
   ],
   [
     'addTab',
-    '(tree: TreeNode, targetPaneId: string, tabId: string, metadata?: Record<string, unknown>) => TreeNode',
+    '(tree: TreeNode, targetPaneId: string, tabId: string) => TreeNode',
     'Appends a tab into a target pane.',
   ],
   [
@@ -272,6 +299,28 @@ export const apiReferenceSection: DocSection = {
             <DocTable
               headers={['Option', 'Type', 'Default', 'Description']}
               rows={USE_ZEUGMA_OPTIONS}
+            />
+          </div>
+
+          <div>
+            <DocHeading level={4}>Fine-Grained Metadata Hooks</DocHeading>
+            <DocParagraph className="mb-3">
+              Subscribe to tab metadata reactively without causing layout re-renders.
+            </DocParagraph>
+            <DocTable
+              headers={['Hook', 'Signature', 'Description']}
+              rows={[
+                [
+                  'useTabMetadata',
+                  '<T = Record<string, unknown>>(tabId: string): T | undefined',
+                  'Subscribes to a single tab’s metadata. Only re-renders when this specific tab’s metadata changes.',
+                ],
+                [
+                  'useAllMetadata',
+                  '<T = Record<string, Record<string, unknown>>>(store?: MetadataStore): T',
+                  'Subscribes to all tab metadata across the dashboard.',
+                ],
+              ]}
             />
           </div>
 

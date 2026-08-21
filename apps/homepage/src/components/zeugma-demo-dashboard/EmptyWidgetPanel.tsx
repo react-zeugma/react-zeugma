@@ -19,24 +19,33 @@ function replaceTabInTree(
   tree: TreeNode | null,
   targetTabId: string,
   newTabId: string,
+  newTabColor?: string,
 ): TreeNode | null {
   if (!tree) return null
   if (tree.type === 'pane') {
     if (tree.tabIds.includes(targetTabId)) {
       const tabIds = tree.tabIds.map((id) => (id === targetTabId ? newTabId : id))
       const activeTabId = tree.activeTabId === targetTabId ? newTabId : tree.activeTabId
+      const tabsMetadata = { ...tree.tabsMetadata }
+      delete tabsMetadata[targetTabId]
+      if (newTabColor) {
+        tabsMetadata[newTabId] = { color: newTabColor }
+      }
       return {
         ...tree,
         tabIds,
         activeTabId,
+        tabsMetadata: Object.keys(tabsMetadata).length > 0 ? tabsMetadata : undefined,
       }
     }
     return tree
   }
   return {
     ...tree,
-    first: (replaceTabInTree(tree.first, targetTabId, newTabId) ?? tree.first) as TreeNode,
-    second: (replaceTabInTree(tree.second, targetTabId, newTabId) ?? tree.second) as TreeNode,
+    first: (replaceTabInTree(tree.first, targetTabId, newTabId, newTabColor) ??
+      tree.first) as TreeNode,
+    second: (replaceTabInTree(tree.second, targetTabId, newTabId, newTabColor) ??
+      tree.second) as TreeNode,
   }
 }
 
@@ -48,10 +57,13 @@ function removeTabFromTree(tree: TreeNode | null, tabId: string): TreeNode | nul
       const newTabs = tree.tabIds.filter((t) => t !== tabId)
       if (newTabs.length === 0) return null
       const newActive = tree.activeTabId === tabId ? newTabs[0] : tree.activeTabId
+      const newMetadata = { ...tree.tabsMetadata }
+      delete newMetadata[tabId]
       return {
         ...tree,
         tabIds: newTabs,
         activeTabId: newActive,
+        tabsMetadata: Object.keys(newMetadata).length > 0 ? newMetadata : undefined,
       }
     }
     return tree
@@ -74,16 +86,11 @@ export function EmptyWidgetPanel({ tabId }: { tabId: string }) {
 
   const handleSelectWidget = (widgetId: string) => {
     const widget = AVAILABLE_WIDGETS.find((w) => w.id === widgetId)
-    if (widget?.color) {
-      controller.updateMetadata(widgetId, () => ({ color: widget.color }))
-    }
-    controller.updateMetadata(tabId, () => undefined)
-
     controller.setLayout((currentLayout) => {
       // 1. Clean the tree from the new widget if it's already there (though it should be inactive)
       const cleanLayout = removeTabFromTree(currentLayout, widgetId)
       // 2. Atomically swap the empty-widget tab ID with the new widget ID in the exact same pane
-      return replaceTabInTree(cleanLayout, tabId, widgetId)
+      return replaceTabInTree(cleanLayout, tabId, widgetId, widget?.color)
     })
   }
 

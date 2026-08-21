@@ -76,15 +76,15 @@ describe('Zeugma Context Provider & Consumers', () => {
       id: 'pane-1',
       tabIds: ['tab-1'],
       activeTabId: 'tab-1',
-    }
-    const initialMetadata = {
-      'tab-1': { title: 'My Tab Title', customProp: 42 },
+      tabsMetadata: {
+        'tab-1': { title: 'My Tab Title', customProp: 42 },
+      },
     }
 
     let receivedMetadata: Record<string, unknown> | undefined = undefined
 
     const TestWrapper = () => {
-      const controller = useZeugma({ initialLayout, initialMetadata })
+      const controller = useZeugma({ initialLayout })
       const renderPane = (paneId: string) => (
         <Pane id={paneId}>
           <div data-testid="pane-root">
@@ -341,7 +341,6 @@ describe('Tab Drop Preview rendering', () => {
     const mockActions = {
       removePane: vi.fn(),
       addTab: vi.fn(),
-      updateMetadata: vi.fn(),
       updatePaneLock: vi.fn(),
       selectTab: vi.fn(),
       mergeTab: vi.fn(),
@@ -399,7 +398,6 @@ describe('Tab Drop Preview rendering', () => {
     const mockActions = {
       removePane: vi.fn(),
       addTab: vi.fn(),
-      updateMetadata: vi.fn(),
       updatePaneLock: vi.fn(),
       selectTab: vi.fn(),
       mergeTab: vi.fn(),
@@ -568,68 +566,6 @@ describe('Tab Drop Preview rendering', () => {
       render(<TestWrapper />)
 
       expect(localStorage.getItem('zeugma-layout')).toBeNull()
-    })
-
-    it('should save and load metadata to/from localStorage when persist is true', () => {
-      const initialLayout: TreeNode = {
-        type: 'pane',
-        id: 'pane-1',
-        tabIds: ['tab-1'],
-        activeTabId: 'tab-1',
-      }
-      const initialMetadata = {
-        'tab-1': { color: 'blue' },
-      }
-
-      let controllerInstance: ZeugmaController | null = null
-
-      const TestWrapper = () => {
-        const controller = useZeugma({ initialLayout, initialMetadata })
-        controllerInstance = controller
-        return (
-          <Zeugma
-            controller={controller}
-            persist={true}
-            renderPane={(id) => <Pane id={id}>{id}</Pane>}
-          />
-        )
-      }
-
-      const { unmount } = render(<TestWrapper />)
-
-      // Update metadata
-      act(() => {
-        controllerInstance!.updateMetadata('tab-1', (c) => ({ ...c, color: 'red', count: 5 }))
-      })
-
-      expect(localStorage.getItem('zeugma-layout-metadata')).not.toBeNull()
-      const savedMeta = JSON.parse(localStorage.getItem('zeugma-layout-metadata')!)
-      expect(savedMeta).toEqual({
-        'tab-1': { color: 'red', count: 5 },
-      })
-
-      unmount()
-
-      // Re-mount in a new wrapper and check if saved metadata is re-hydrated
-      let reloadedController: ZeugmaController | null = null
-      const ReloadWrapper = () => {
-        const controller = useZeugma({ initialLayout })
-        reloadedController = controller
-        return (
-          <Zeugma
-            controller={controller}
-            persist={true}
-            renderPane={(id) => <Pane id={id}>{id}</Pane>}
-          />
-        )
-      }
-
-      render(<ReloadWrapper />)
-
-      expect(reloadedController!.getTabMetadata('tab-1')).toEqual({
-        color: 'red',
-        count: 5,
-      })
     })
   })
 

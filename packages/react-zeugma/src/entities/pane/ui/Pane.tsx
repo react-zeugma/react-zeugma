@@ -6,8 +6,7 @@ import {
   PortalRegistryContext,
   TabDetails,
 } from '../../../shared'
-import { findPaneOrContainingTab } from '../../../shared/lib/tree'
-import { useTabMetadata } from '../../zeugma/model'
+import { findPaneOrContainingTab, findPaneContainingTab } from '../../../shared/lib/tree'
 import { DragListenersCtx } from '../model/context'
 import { PaneRenderProps } from '../model/types'
 import { DropZone } from './DropZone'
@@ -162,16 +161,18 @@ export const Pane: React.FC<PaneProps> & {
     locked: globalLocked,
     poppedOutTabIds = [],
   } = useZeugmaState()
-  const { removePane, updateMetadata, selectTab, removeTab, popoutTab, dockTab } =
-    useZeugmaActions()
+  const { removePane, selectTab, removeTab, popoutTab, dockTab } = useZeugmaActions()
 
   const paneNode = useMemo(() => {
     if (activeType === 'tab' && id === activeId) {
+      const originalPane = findPaneContainingTab(layout, id)
+      const sourceMetadata = originalPane?.tabsMetadata?.[id]
       return {
         type: 'pane' as const,
         id,
         tabIds: [id],
         activeTabId: id,
+        tabsMetadata: sourceMetadata ? { [id]: sourceMetadata } : undefined,
       }
     }
     const targetTree = id === activeId ? layout : renderingLayout
@@ -180,11 +181,9 @@ export const Pane: React.FC<PaneProps> & {
   const paneContainerId = paneNode?.id ?? id
   const tabIds = paneNode?.tabIds ?? [id]
   const activeTabId = paneNode?.activeTabId ?? id
+  const tabsMetadata = paneNode?.tabsMetadata
 
-  const activeTabMetadata = useTabMetadata(activeTabId)
-  const paneMetadata = useTabMetadata(id)
-  const metadata = activeTabMetadata ?? paneMetadata
-
+  const metadata = tabsMetadata?.[id]
   const localLocked = paneNode?.locked ?? false
 
   const isPaneLocked = propLocked || localLocked
@@ -217,9 +216,6 @@ export const Pane: React.FC<PaneProps> & {
         removePane(paneContainerId)
       },
       metadata,
-      updateMetadata: (updater) => {
-        updateMetadata(activeTabId || id, updater)
-      },
       locked: isDraggableDisabled,
       tabIds,
       activeTabId,
@@ -230,9 +226,7 @@ export const Pane: React.FC<PaneProps> & {
         }
         removeTab(tabId)
       },
-      updateTabMetadata: (tabId, updater) => {
-        updateMetadata(tabId, updater)
-      },
+      tabsMetadata,
       isActiveTabPoppedOut: poppedOutTabIds.includes(activeTabId),
       popoutTab: (tabId) => popoutTab(tabId || activeTabId),
       dockTab: (tabId) => dockTab(tabId || activeTabId),
@@ -244,12 +238,12 @@ export const Pane: React.FC<PaneProps> & {
       id,
       removeTab,
       metadata,
-      updateMetadata,
       isDraggableDisabled,
       tabIds,
       activeTabId,
       selectTab,
       paneContainerId,
+      tabsMetadata,
       poppedOutTabIds,
       popoutTab,
       dockTab,

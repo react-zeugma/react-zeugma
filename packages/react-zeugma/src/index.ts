@@ -11,9 +11,8 @@ export type {
   RenderTabProps,
   SplitDirection,
   DragOverlayActiveItem,
-  MetadataStore,
 } from './shared'
-export { useZeugma, useZeugmaContext, useTabMetadata, useAllMetadata } from './entities/zeugma'
+export { useZeugma, useZeugmaContext } from './entities/zeugma'
 export { useResizer } from './features/resize-pane'
 export { PaneTree } from './widgets/pane-tree'
 export { Pane, usePaneContext } from './entities/pane'

@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { TabDetails, useZeugmaState } from '../../../shared'
-import { useTabMetadata } from '../model'
 
 export interface PortalHostItemProps {
   tabDetails: TabDetails
@@ -12,18 +11,9 @@ export interface PortalHostItemProps {
 export const PortalHostItem: React.FC<PortalHostItemProps> = React.memo(
   ({ tabDetails, target, renderWidget }) => {
     const { id: tabId } = tabDetails
-    const metadata = useTabMetadata(tabId)
     const { renderPopoutWrapper } = useZeugmaState()
     const [mounted, setMounted] = useState(false)
     const wrapperRef = useRef<HTMLDivElement | null>(null)
-
-    const resolvedTabDetails = useMemo(
-      () => ({
-        ...tabDetails,
-        metadata,
-      }),
-      [tabDetails, metadata],
-    )
 
     useEffect(() => {
       setMounted(true)
@@ -84,9 +74,7 @@ export const PortalHostItem: React.FC<PortalHostItemProps> = React.memo(
     // with the correct document context and style provider cache.
     const keySuffix = isPopped ? '-popped' : '-docked'
     let widget: React.ReactNode = (
-      <React.Fragment key={`${tabId}${keySuffix}`}>
-        {renderWidget(resolvedTabDetails)}
-      </React.Fragment>
+      <React.Fragment key={`${tabId}${keySuffix}`}>{renderWidget(tabDetails)}</React.Fragment>
     )
 
     // Apply the consumer's popout wrapper only when actually popped out.
@@ -110,7 +98,8 @@ export const PortalHostItem: React.FC<PortalHostItemProps> = React.memo(
       prev.tabDetails.id === next.tabDetails.id &&
       prev.tabDetails.paneId === next.tabDetails.paneId &&
       prev.tabDetails.isActive === next.tabDetails.isActive &&
-      prev.tabDetails.index === next.tabDetails.index
+      prev.tabDetails.index === next.tabDetails.index &&
+      prev.tabDetails.metadata === next.tabDetails.metadata
     )
   },
 )

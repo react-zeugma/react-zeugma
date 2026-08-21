@@ -61,19 +61,6 @@ export const AVAILABLE_WIDGETS = [
   { id: 'system-map', label: 'Node Map', color: '#5794F2' },
 ]
 
-export const DEFAULT_DASHBOARD_METADATA: Record<string, Record<string, unknown>> = {
-  'key-metrics': { color: '#5794F2' },
-  'system-map': { color: '#5794F2' },
-  'fps-monitor': { color: '#B877D9' },
-  'cpu-gauge': { color: '#5794F2' },
-  'mem-gauge': { color: '#FF9830' },
-  'time-series': { color: '#5794F2' },
-  'requests-rate': { color: '#B877D9' },
-  'service-health': { color: '#73BF69' },
-  'top-endpoints': { color: '#FF9830' },
-  'live-logs': { color: '#73BF69' },
-}
-
 // ── Preset Layout Definitions ────────────────────────────────────────────────
 
 export const defaultDashboardLayout: TreeNode = {
@@ -94,12 +81,19 @@ export const defaultDashboardLayout: TreeNode = {
         id: 'pane-stats',
         tabIds: ['key-metrics', 'system-map'],
         activeTabId: 'key-metrics',
+        tabsMetadata: {
+          'key-metrics': { color: '#5794F2' },
+          'system-map': { color: '#5794F2' },
+        },
       },
       second: {
         type: 'pane',
         id: 'pane-fps',
         tabIds: ['fps-monitor'],
         activeTabId: 'fps-monitor',
+        tabsMetadata: {
+          'fps-monitor': { color: '#B877D9' },
+        },
       },
     },
     second: {
@@ -111,12 +105,18 @@ export const defaultDashboardLayout: TreeNode = {
         id: 'pane-cpu',
         tabIds: ['cpu-gauge'],
         activeTabId: 'cpu-gauge',
+        tabsMetadata: {
+          'cpu-gauge': { color: '#5794F2' },
+        },
       },
       second: {
         type: 'pane',
         id: 'pane-mem',
         tabIds: ['mem-gauge'],
         activeTabId: 'mem-gauge',
+        tabsMetadata: {
+          'mem-gauge': { color: '#FF9830' },
+        },
       },
     },
   },
@@ -134,12 +134,18 @@ export const defaultDashboardLayout: TreeNode = {
         id: 'pane-timeseries',
         tabIds: ['time-series'],
         activeTabId: 'time-series',
+        tabsMetadata: {
+          'time-series': { color: '#5794F2' },
+        },
       },
       second: {
         type: 'pane',
         id: 'pane-requests',
         tabIds: ['requests-rate'],
         activeTabId: 'requests-rate',
+        tabsMetadata: {
+          'requests-rate': { color: '#B877D9' },
+        },
       },
     },
     second: {
@@ -152,6 +158,9 @@ export const defaultDashboardLayout: TreeNode = {
         id: 'pane-health',
         tabIds: ['service-health'],
         activeTabId: 'service-health',
+        tabsMetadata: {
+          'service-health': { color: '#73BF69' },
+        },
       },
       second: {
         type: 'split',
@@ -162,12 +171,18 @@ export const defaultDashboardLayout: TreeNode = {
           id: 'pane-table',
           tabIds: ['top-endpoints'],
           activeTabId: 'top-endpoints',
+          tabsMetadata: {
+            'top-endpoints': { color: '#FF9830' },
+          },
         },
         second: {
           type: 'pane',
           id: 'pane-logs',
           tabIds: ['live-logs'],
           activeTabId: 'live-logs',
+          tabsMetadata: {
+            'live-logs': { color: '#73BF69' },
+          },
         },
       },
     },
@@ -183,6 +198,9 @@ export const systemFocusLayout: TreeNode = {
     id: 'pane-timeseries',
     tabIds: ['time-series'],
     activeTabId: 'time-series',
+    tabsMetadata: {
+      'time-series': { color: '#5794F2' },
+    },
   },
   second: {
     type: 'split',
@@ -197,12 +215,18 @@ export const systemFocusLayout: TreeNode = {
         id: 'pane-stats',
         tabIds: ['key-metrics'],
         activeTabId: 'key-metrics',
+        tabsMetadata: {
+          'key-metrics': { color: '#5794F2' },
+        },
       },
       second: {
         type: 'pane',
         id: 'pane-fps',
         tabIds: ['fps-monitor'],
         activeTabId: 'fps-monitor',
+        tabsMetadata: {
+          'fps-monitor': { color: '#B877D9' },
+        },
       },
     },
     second: {
@@ -214,12 +238,18 @@ export const systemFocusLayout: TreeNode = {
         id: 'pane-cpu',
         tabIds: ['cpu-gauge'],
         activeTabId: 'cpu-gauge',
+        tabsMetadata: {
+          'cpu-gauge': { color: '#5794F2' },
+        },
       },
       second: {
         type: 'pane',
         id: 'pane-mem',
         tabIds: ['mem-gauge'],
         activeTabId: 'mem-gauge',
+        tabsMetadata: {
+          'mem-gauge': { color: '#FF9830' },
+        },
       },
     },
   },
@@ -238,12 +268,18 @@ export const serviceFocusLayout: TreeNode = {
       id: 'pane-requests',
       tabIds: ['requests-rate'],
       activeTabId: 'requests-rate',
+      tabsMetadata: {
+        'requests-rate': { color: '#B877D9' },
+      },
     },
     second: {
       type: 'pane',
       id: 'pane-health',
       tabIds: ['service-health'],
       activeTabId: 'service-health',
+      tabsMetadata: {
+        'service-health': { color: '#73BF69' },
+      },
     },
   },
   second: {
@@ -255,12 +291,18 @@ export const serviceFocusLayout: TreeNode = {
       id: 'pane-table',
       tabIds: ['top-endpoints'],
       activeTabId: 'top-endpoints',
+      tabsMetadata: {
+        'top-endpoints': { color: '#FF9830' },
+      },
     },
     second: {
       type: 'pane',
       id: 'pane-logs',
       tabIds: ['live-logs'],
       activeTabId: 'live-logs',
+      tabsMetadata: {
+        'live-logs': { color: '#73BF69' },
+      },
     },
   },
 }
@@ -278,12 +320,18 @@ export const minimalLayout: TreeNode = {
       id: 'pane-stats',
       tabIds: ['key-metrics'],
       activeTabId: 'key-metrics',
+      tabsMetadata: {
+        'key-metrics': { color: '#5794F2' },
+      },
     },
     second: {
       type: 'pane',
       id: 'pane-fps',
       tabIds: ['fps-monitor'],
       activeTabId: 'fps-monitor',
+      tabsMetadata: {
+        'fps-monitor': { color: '#B877D9' },
+      },
     },
   },
   second: {
@@ -291,6 +339,9 @@ export const minimalLayout: TreeNode = {
     id: 'pane-logs',
     tabIds: ['live-logs'],
     activeTabId: 'live-logs',
+    tabsMetadata: {
+      'live-logs': { color: '#73BF69' },
+    },
   },
 }
 

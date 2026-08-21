@@ -33,10 +33,13 @@ export function removeTab(tree: TreeNode | null, tabId: string): TreeNode | null
       if (tree.activeTabId === tabId) {
         newActive = newTabs[0]
       }
+      const newTabsMetadata = { ...tree.tabsMetadata }
+      delete newTabsMetadata[tabId]
       return {
         ...tree,
         tabIds: newTabs,
         activeTabId: newActive,
+        tabsMetadata: Object.keys(newTabsMetadata).length > 0 ? newTabsMetadata : undefined,
       }
     }
     return tree
@@ -124,6 +127,7 @@ export function addTab(
   tree: TreeNode | null,
   targetPaneId: string | undefined | null,
   tabId: string,
+  metadata?: Record<string, unknown>,
 ): TreeNode | null {
   if (tree === null) {
     return {
@@ -131,6 +135,7 @@ export function addTab(
       id: generateUniqueId(),
       tabIds: [tabId],
       activeTabId: tabId,
+      tabsMetadata: metadata ? { [tabId]: metadata } : undefined,
     }
   }
 
@@ -142,10 +147,18 @@ export function addTab(
         if (!newTabs.includes(tabId)) {
           newTabs.push(tabId)
         }
+        let newTabsMetadata = node.tabsMetadata
+        if (metadata) {
+          newTabsMetadata = {
+            ...node.tabsMetadata,
+            [tabId]: metadata,
+          }
+        }
         return {
           ...node,
           tabIds: newTabs,
           activeTabId: tabId,
+          tabsMetadata: newTabsMetadata,
         }
       }
       if (node.type === 'split') {
@@ -165,6 +178,7 @@ export function addTab(
     id: generateUniqueId(),
     tabIds: [tabId],
     activeTabId: tabId,
+    tabsMetadata: metadata ? { [tabId]: metadata } : undefined,
   }
   return insertLeaf(tree, newPane)
 }
@@ -238,8 +252,33 @@ export function findTabById(tree: TreeNode | null, tabId: string): TabDetails | 
     paneId: pane.id,
     isActive: pane.activeTabId === tabId,
     index,
-    metadata: undefined,
+    metadata: pane.tabsMetadata?.[tabId],
   }
+}
+
+/**
+ * Get the metadata for a specific tab by its ID.
+ */
+export function getTabMetadata(
+  tree: TreeNode | null,
+  tabId: string,
+): Record<string, unknown> | undefined {
+  const pane = findPaneContainingTab(tree, tabId)
+  return pane?.tabsMetadata?.[tabId]
+}
+
+/**
+ * Get the metadata of the active item (either tab or pane).
+ */
+/**
+ * Get the metadata of the active tab in a specific pane.
+ */
+export function getActiveTabMetadata(
+  tree: TreeNode | null,
+  paneId: string,
+): Record<string, unknown> | undefined {
+  const pane = findPaneById(tree, paneId)
+  return pane?.tabsMetadata?.[pane.activeTabId]
 }
 
 /**
@@ -303,6 +342,9 @@ export function mergeTab(
 ): TreeNode | null {
   if (tree === null) return null
 
+  const sourcePane = findPaneContainingTab(tree, draggedTabId)
+  const sourceMetadata = sourcePane?.tabsMetadata?.[draggedTabId]
+
   const cleanTree = removeTab(tree, draggedTabId)
   if (cleanTree === null) {
     return {
@@ -310,6 +352,7 @@ export function mergeTab(
       id: generateUniqueId(),
       tabIds: [draggedTabId],
       activeTabId: draggedTabId,
+      tabsMetadata: sourceMetadata ? { [draggedTabId]: sourceMetadata } : undefined,
     }
   }
 
@@ -320,10 +363,15 @@ export function mergeTab(
         if (!newTabs.includes(draggedTabId)) {
           newTabs.push(draggedTabId)
         }
+        const newTabsMetadata = { ...node.tabsMetadata }
+        if (sourceMetadata) {
+          newTabsMetadata[draggedTabId] = sourceMetadata
+        }
         return {
           ...node,
           tabIds: newTabs,
           activeTabId: draggedTabId,
+          tabsMetadata: Object.keys(newTabsMetadata).length > 0 ? newTabsMetadata : undefined,
         }
       }
       return node
@@ -356,12 +404,15 @@ export function swapTabs(
 
   const sourcePaneId = sourcePane.id
   const targetPaneId = targetPane.id
+  const sourceMetadata = sourcePane.tabsMetadata?.[draggedTabId]
+  const targetMetadata = targetPane.tabsMetadata?.[targetTabId]
 
   function swap(node: TreeNode): TreeNode {
     if (node.type === 'pane') {
       let changed = false
       let newTabIds = [...node.tabIds]
       let newActiveTabId = node.activeTabId
+      const newTabsMetadata = node.tabsMetadata ? { ...node.tabsMetadata } : {}
 
       if (sourcePaneId === targetPaneId) {
         if (node.id === sourcePaneId) {
@@ -380,12 +431,20 @@ export function swapTabs(
           if (newActiveTabId === draggedTabId) {
             newActiveTabId = targetTabId
           }
+          delete newTabsMetadata[draggedTabId]
+          if (targetMetadata) {
+            newTabsMetadata[targetTabId] = targetMetadata
+          }
           changed = true
         }
         if (node.id === targetPaneId) {
           newTabIds = newTabIds.map((id) => (id === targetTabId ? draggedTabId : id))
           if (newActiveTabId === targetTabId) {
             newActiveTabId = draggedTabId
+          }
+          delete newTabsMetadata[targetTabId]
+          if (sourceMetadata) {
+            newTabsMetadata[draggedTabId] = sourceMetadata
           }
           changed = true
         }
@@ -396,6 +455,7 @@ export function swapTabs(
           ...node,
           tabIds: newTabIds,
           activeTabId: newActiveTabId,
+          tabsMetadata: Object.keys(newTabsMetadata).length > 0 ? newTabsMetadata : undefined,
         }
       }
       return node
@@ -429,6 +489,9 @@ export function moveTab(
     return swapTabs(tree, draggedTabId, targetTabId)
   }
 
+  const sourcePane = findPaneContainingTab(tree, draggedTabId)
+  const sourceMetadata = sourcePane?.tabsMetadata?.[draggedTabId]
+
   const cleanTree = removeTab(tree, draggedTabId)
   if (cleanTree === null) {
     return {
@@ -436,6 +499,7 @@ export function moveTab(
       id: generateUniqueId(),
       tabIds: [draggedTabId],
       activeTabId: draggedTabId,
+      tabsMetadata: sourceMetadata ? { [draggedTabId]: sourceMetadata } : undefined,
     }
   }
 
@@ -453,10 +517,15 @@ export function moveTab(
         }
         filteredTabs.splice(insertIndex, 0, draggedTabId)
 
+        const newTabsMetadata = { ...node.tabsMetadata }
+        if (sourceMetadata) {
+          newTabsMetadata[draggedTabId] = sourceMetadata
+        }
         return {
           ...node,
           tabIds: filteredTabs,
           activeTabId: draggedTabId,
+          tabsMetadata: Object.keys(newTabsMetadata).length > 0 ? newTabsMetadata : undefined,
         }
       }
       return node
@@ -574,12 +643,13 @@ export function movePaneTabs(
 ): TreeNode | null {
   if (tree === null) return null
 
-  // 1. Find the dragged pane to get its tabs and activeTabId
+  // 1. Find the dragged pane to get its tabs, activeTabId, and tabsMetadata
   const sourcePane = findPaneById(tree, draggedPaneId)
   if (!sourcePane) return tree
 
   const draggedTabIds = sourcePane.tabIds
   const draggedActiveTabId = sourcePane.activeTabId
+  const draggedTabsMetadata = sourcePane.tabsMetadata || {}
 
   // 2. Remove the dragged pane from the layout tree
   const cleanTree = removePane(tree, draggedPaneId)
@@ -603,10 +673,17 @@ export function movePaneTabs(
         }
         filteredTabs.splice(insertIndex, 0, ...draggedTabIds)
 
+        const newTabsMetadata = { ...node.tabsMetadata }
+        for (const tid of draggedTabIds) {
+          if (draggedTabsMetadata[tid]) {
+            newTabsMetadata[tid] = draggedTabsMetadata[tid]
+          }
+        }
         return {
           ...node,
           tabIds: filteredTabs,
           activeTabId: draggedActiveTabId,
+          tabsMetadata: Object.keys(newTabsMetadata).length > 0 ? newTabsMetadata : undefined,
         }
       }
       return node

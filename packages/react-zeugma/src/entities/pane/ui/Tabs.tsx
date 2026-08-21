@@ -9,6 +9,7 @@ export interface TabsContextValue {
   tabIds: string[]
   activeTabId: string
   locked: boolean
+  tabsMetadata?: Record<string, Record<string, unknown>>
   selectTab: (id: string) => void
   removeTab: (id: string) => void
 }
@@ -30,6 +31,8 @@ export interface TabsProps {
   activeTabId?: string
   /** Whether dragging is locked on these tabs. */
   locked?: boolean
+  /** Metadata for the tabs. */
+  tabsMetadata?: Record<string, Record<string, unknown>>
   /** Callback when a tab is selected. */
   selectTab?: (id: string) => void
   /** Callback when a tab is closed/removed. */
@@ -61,6 +64,7 @@ export const Tabs: React.FC<TabsProps> & {
   tabIds: propTabs,
   activeTabId: propActiveTabId,
   locked: propLocked,
+  tabsMetadata: propTabsMetadata,
   selectTab: propSelectTab,
   removeTab: propRemoveTab,
   renderTab,
@@ -72,6 +76,7 @@ export const Tabs: React.FC<TabsProps> & {
   const tabIds = propTabs ?? paneContext?.tabIds ?? []
   const activeTabId = propActiveTabId ?? paneContext?.activeTabId ?? ''
   const locked = propLocked ?? paneContext?.locked ?? false
+  const tabsMetadata = propTabsMetadata ?? paneContext?.tabsMetadata
   const selectTab = propSelectTab ?? paneContext?.selectTab ?? (() => {})
   const removeTab = propRemoveTab ?? paneContext?.removeTab ?? (() => {})
 
@@ -84,10 +89,11 @@ export const Tabs: React.FC<TabsProps> & {
       tabIds,
       activeTabId,
       locked,
+      tabsMetadata,
       selectTab,
       removeTab,
     }),
-    [tabIds, activeTabId, locked, selectTab, removeTab],
+    [tabIds, activeTabId, locked, tabsMetadata, selectTab, removeTab],
   )
 
   const targetIndex = calculateTabDropIndex(tabIds, activeType, overTabId, overTabPosition)
@@ -104,6 +110,7 @@ export const Tabs: React.FC<TabsProps> & {
         }}
       >
         {tabIds.map((tabId, index) => {
+          const metadata = tabsMetadata?.[tabId]
           const resolvedClassName = resolveDynamicProp(classNames?.tab, tabId)
           const resolvedStyle = resolveDynamicProp(styles?.tab, tabId)
 
@@ -125,7 +132,7 @@ export const Tabs: React.FC<TabsProps> & {
                 </div>
               )}
               <Tab id={tabId} locked={locked} className={resolvedClassName} style={resolvedStyle}>
-                {({ isDragging, isOver, metadata }) =>
+                {({ isDragging, isOver }) =>
                   renderTab({
                     id: tabId,
                     paneId: paneContext?.id ?? '',

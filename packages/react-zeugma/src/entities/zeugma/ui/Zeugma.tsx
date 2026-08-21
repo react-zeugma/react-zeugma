@@ -19,7 +19,6 @@ import {
   useZeugmaDragMeasurement,
   useZeugmaPersistence,
   useZeugmaPopouts,
-  ZeugmaMetadataStoreContext,
 } from '../model'
 import { CursorOverlay } from './CursorOverlay'
 import { PortalHostItem } from './PortalHostItem'
@@ -84,7 +83,6 @@ const ZeugmaProviderInternal: React.FC<
     setContainerRef,
     removePane,
     addTab,
-    updateMetadata,
     updatePaneLock,
     selectTab,
     mergeTab,
@@ -97,13 +95,8 @@ const ZeugmaProviderInternal: React.FC<
     dockTab,
   } = internalController
 
-  // Synchronize layout and metadata persistence
-  useZeugmaPersistence({
-    persist,
-    layout,
-    setLayout,
-    metadataStore: internalController.metadataStore,
-  })
+  // Synchronize layout persistence
+  useZeugmaPersistence({ persist, layout, setLayout })
 
   const {
     portalTargets,
@@ -290,7 +283,6 @@ const ZeugmaProviderInternal: React.FC<
     () => ({
       removePane,
       addTab,
-      updateMetadata,
       updatePaneLock,
       selectTab,
       mergeTab,
@@ -306,7 +298,6 @@ const ZeugmaProviderInternal: React.FC<
     [
       removePane,
       addTab,
-      updateMetadata,
       updatePaneLock,
       selectTab,
       mergeTab,
@@ -354,66 +345,64 @@ const ZeugmaProviderInternal: React.FC<
   }
 
   return (
-    <ZeugmaMetadataStoreContext.Provider value={internalController.metadataStore}>
-      <ZeugmaActionsContext.Provider value={actionsValue}>
-        <ZeugmaStateContext.Provider value={stateValue}>
-          <ZeugmaDragContext.Provider value={dragValue}>
-            <PortalRegistryContext.Provider value={portalRegistryValue}>
-              <DndContext id="zeugma-dnd-context" {...dnd}>
-                {children}
-              </DndContext>
-              {activeId && activeType && (
-                <CursorOverlay
-                  activeId={activeId}
-                  render={(id) => {
-                    const isDismissing = id === dismissIntentId
-                    return (
-                      <div
-                        style={{
-                          transition: 'transform 150ms cubic-bezier(0.2, 0, 0, 1)',
-                          transform: isDismissing ? 'scale(0.8)' : 'scale(1)',
-                          transformOrigin: 'top left',
-                        }}
-                      >
-                        <DragOverlayPreview
-                          activeId={id}
-                          activeType={activeType}
-                          dismissIntentId={dismissIntentId}
-                          renderDragOverlay={renderDragOverlay}
-                          renderPaneRef={renderPaneRef}
-                          renderPane={renderPane}
-                          tabHeadersRef={tabHeadersRef}
-                          classNames={stableClassNames}
-                        />
-                      </div>
-                    )
-                  }}
-                  className={`${classNames.dragOverlay || ''} ${
-                    activeId === dismissIntentId ? classNames.dismissPreview || '' : ''
-                  }`.trim()}
-                />
-              )}
-              {/* Transparent Portal Host to preserve widget state across pane drags */}
-              <div id="zeugma-portal-host" style={{ display: 'none' }}>
-                {allTabIds.map((tabId) => {
-                  const target = portalTargets[tabId]
-                  const tabDetails = findTabById(tabId)
-                  if (!tabDetails) return null
+    <ZeugmaActionsContext.Provider value={actionsValue}>
+      <ZeugmaStateContext.Provider value={stateValue}>
+        <ZeugmaDragContext.Provider value={dragValue}>
+          <PortalRegistryContext.Provider value={portalRegistryValue}>
+            <DndContext id="zeugma-dnd-context" {...dnd}>
+              {children}
+            </DndContext>
+            {activeId && activeType && (
+              <CursorOverlay
+                activeId={activeId}
+                render={(id) => {
+                  const isDismissing = id === dismissIntentId
                   return (
-                    <PortalHostItem
-                      key={tabId}
-                      tabDetails={tabDetails}
-                      target={target || null}
-                      renderWidget={renderCallbacksRef.current[tabId]}
-                    />
+                    <div
+                      style={{
+                        transition: 'transform 150ms cubic-bezier(0.2, 0, 0, 1)',
+                        transform: isDismissing ? 'scale(0.8)' : 'scale(1)',
+                        transformOrigin: 'top left',
+                      }}
+                    >
+                      <DragOverlayPreview
+                        activeId={id}
+                        activeType={activeType}
+                        dismissIntentId={dismissIntentId}
+                        renderDragOverlay={renderDragOverlay}
+                        renderPaneRef={renderPaneRef}
+                        renderPane={renderPane}
+                        tabHeadersRef={tabHeadersRef}
+                        classNames={stableClassNames}
+                      />
+                    </div>
                   )
-                })}
-              </div>
-            </PortalRegistryContext.Provider>
-          </ZeugmaDragContext.Provider>
-        </ZeugmaStateContext.Provider>
-      </ZeugmaActionsContext.Provider>
-    </ZeugmaMetadataStoreContext.Provider>
+                }}
+                className={`${classNames.dragOverlay || ''} ${
+                  activeId === dismissIntentId ? classNames.dismissPreview || '' : ''
+                }`.trim()}
+              />
+            )}
+            {/* Transparent Portal Host to preserve widget state across pane drags */}
+            <div id="zeugma-portal-host" style={{ display: 'none' }}>
+              {allTabIds.map((tabId) => {
+                const target = portalTargets[tabId]
+                const tabDetails = findTabById(tabId)
+                if (!tabDetails) return null
+                return (
+                  <PortalHostItem
+                    key={tabId}
+                    tabDetails={tabDetails}
+                    target={target || null}
+                    renderWidget={renderCallbacksRef.current[tabId]}
+                  />
+                )
+              })}
+            </div>
+          </PortalRegistryContext.Provider>
+        </ZeugmaDragContext.Provider>
+      </ZeugmaStateContext.Provider>
+    </ZeugmaActionsContext.Provider>
   )
 }
 

@@ -6,7 +6,6 @@ import {
   useZeugmaDrag,
   PortalRegistryContext,
 } from '../../../shared'
-import { useTabMetadata } from '../../zeugma/model'
 import { TabsContext } from './Tabs'
 
 export interface TabContextValue {
@@ -36,7 +35,6 @@ export const useTabContext = () => {
 export interface TabRenderProps {
   isDragging: boolean
   isOver: boolean
-  metadata?: Record<string, unknown>
 }
 
 export interface TabProps {
@@ -62,7 +60,6 @@ export const Tab: React.FC<TabProps> = ({ id, locked = false, children, classNam
   const actions = useContext(ZeugmaActionsContext)
   const { overTabId } = useZeugmaDrag()
   const portalRegistry = useContext(PortalRegistryContext)
-  const metadata = useTabMetadata(id)
 
   useEffect(() => {
     if (portalRegistry?.registerTabHeader) {
@@ -114,6 +111,7 @@ export const Tab: React.FC<TabProps> = ({ id, locked = false, children, classNam
   const separator = showSeparator ? <div className={classNames.tabSeparator} /> : null
 
   const isActive = tabsContext ? tabsContext.activeTabId === id : false
+  const metadata = tabsContext?.tabsMetadata?.[id]
 
   const selectThisTab = useCallback(() => {
     tabsContext?.selectTab(id)
@@ -170,7 +168,6 @@ export const Tab: React.FC<TabProps> = ({ id, locked = false, children, classNam
         {children({
           isDragging,
           isOver: isTargetOver,
-          metadata,
         })}
       </div>
     </TabContext.Provider>

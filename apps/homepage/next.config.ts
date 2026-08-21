@@ -24,7 +24,6 @@ if (existsSync(reactZeugmaPkgPath)) {
 }
 
 const nextConfig: NextConfig = {
-  output: 'standalone',
   transpilePackages: ['react-zeugma'],
   turbopack: {
     root: path.resolve(__dirname, '../../'),

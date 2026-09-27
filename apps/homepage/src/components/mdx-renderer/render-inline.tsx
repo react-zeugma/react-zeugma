@@ -1,6 +1,30 @@
 import React from 'react'
 import type { RootContent, Text, Strong, Emphasis, InlineCode, Link } from './types'
 
+export function isSafeUrl(url: string): boolean {
+  if (!url) return false
+  const trimmed = url.trim()
+  if (trimmed.startsWith('//') || /[\x00-\x1f\x7f]/.test(trimmed)) {
+    return false
+  }
+  if (
+    trimmed.startsWith('#') ||
+    trimmed.startsWith('/') ||
+    trimmed.startsWith('./') ||
+    trimmed.startsWith('../')
+  ) {
+    return true
+  }
+  try {
+    const parsed = new URL(trimmed, 'https://react-zeugma.com')
+    return (
+      parsed.protocol === 'https:' || parsed.protocol === 'http:' || parsed.protocol === 'mailto:'
+    )
+  } catch {
+    return false
+  }
+}
+
 export function renderInline(nodes: RootContent[], keyPrefix = ''): React.ReactNode[] {
   return nodes.map((node, i) => {
     const key = `${keyPrefix}${i}`
@@ -28,12 +52,14 @@ export function renderInline(nodes: RootContent[], keyPrefix = ''): React.ReactN
         )
       case 'link': {
         const link = node as Link
+        const safeHref = isSafeUrl(link.url) ? link.url : '#'
+        const isExternal = safeHref.startsWith('http://') || safeHref.startsWith('https://')
         return (
           <a
             key={key}
-            href={link.url}
-            target={link.url.startsWith('http') ? '_blank' : undefined}
-            rel={link.url.startsWith('http') ? 'noreferrer' : undefined}
+            href={safeHref}
+            target={isExternal ? '_blank' : undefined}
+            rel={isExternal ? 'noopener noreferrer' : undefined}
             className="text-indigo-600 dark:text-indigo-400 hover:underline"
           >
             {renderInline(link.children as RootContent[], `${key}-`)}

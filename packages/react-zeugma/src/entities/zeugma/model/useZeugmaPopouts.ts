@@ -12,15 +12,6 @@ let lastActiveEvent: Event | null = null
 let interceptionInitialized = false
 const activePopoutDocuments = new Set<Document>()
 
-interface RegisteredListener {
-  target: 'window' | 'document'
-  type: string
-  listener: EventListenerOrEventListenerObject
-  options?: boolean | AddEventListenerOptions
-}
-
-const mainListeners = new Set<RegisteredListener>()
-
 let headObserver: MutationObserver | null = null
 
 function startHeadObserver() {
@@ -102,8 +93,10 @@ const delayClose = (closeFn: () => void) => {
   }
 }
 
-export function getActiveDocument(): Document {
-  if (typeof window === 'undefined') return document
+export function getActiveDocument(): Document | null {
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    return null
+  }
 
   if (lastActiveEvent && lastActiveEvent.target) {
     const doc = (lastActiveEvent.target as Node).ownerDocument
@@ -379,80 +372,6 @@ export function setupPopoutInterception() {
     return originalCreateElement.call(document, tagName, options)
   }
 
-  const originalDocAddEventListener = document.addEventListener
-  document.addEventListener = function (
-    type: string,
-    listener: EventListenerOrEventListenerObject,
-    options?: boolean | AddEventListenerOptions,
-  ) {
-    mainListeners.add({ target: 'document', type, listener, options })
-    originalDocAddEventListener.call(document, type, listener, options)
-    activePopoutDocuments.forEach((doc) => {
-      try {
-        doc.addEventListener(type, listener, options)
-      } catch {}
-    })
-  }
-
-  const originalDocRemoveEventListener = document.removeEventListener
-  document.removeEventListener = function (
-    type: string,
-    listener: EventListenerOrEventListenerObject,
-    options?: boolean | EventListenerOptions,
-  ) {
-    for (const record of mainListeners) {
-      if (record.target === 'document' && record.type === type && record.listener === listener) {
-        mainListeners.delete(record)
-        break
-      }
-    }
-    originalDocRemoveEventListener.call(document, type, listener, options)
-    activePopoutDocuments.forEach((doc) => {
-      try {
-        doc.removeEventListener(type, listener, options)
-      } catch {}
-    })
-  }
-
-  const originalWinAddEventListener = window.addEventListener
-  window.addEventListener = function (
-    type: string,
-    listener: EventListenerOrEventListenerObject,
-    options?: boolean | AddEventListenerOptions,
-  ) {
-    mainListeners.add({ target: 'window', type, listener, options })
-    originalWinAddEventListener.call(window, type, listener, options)
-    activePopoutDocuments.forEach((doc) => {
-      try {
-        if (doc.defaultView) {
-          doc.defaultView.addEventListener(type, listener, options)
-        }
-      } catch {}
-    })
-  }
-
-  const originalWinRemoveEventListener = window.removeEventListener
-  window.removeEventListener = function (
-    type: string,
-    listener: EventListenerOrEventListenerObject,
-    options?: boolean | EventListenerOptions,
-  ) {
-    for (const record of mainListeners) {
-      if (record.target === 'window' && record.type === type && record.listener === listener) {
-        mainListeners.delete(record)
-        break
-      }
-    }
-    originalWinRemoveEventListener.call(window, type, listener, options)
-    activePopoutDocuments.forEach((doc) => {
-      try {
-        if (doc.defaultView) {
-          doc.defaultView.removeEventListener(type, listener, options)
-        }
-      } catch {}
-    })
-  }
-
   const originalGetElementById = document.getElementById
   document.getElementById = function (id: string) {
     const activeDoc = getActiveDocument()
@@ -515,6 +434,10 @@ export function useZeugmaPopouts(props: UseZeugmaPopoutsProps) {
 
   // Synchronize popout windows with poppedOutTabIds state
   useEffect(() => {
+    if (poppedOutTabIds.length > 0) {
+      setupPopoutInterception()
+    }
+
     const activeWindows = popoutWindowsRef.current
 
     poppedOutTabIds.forEach((tabId) => {
@@ -541,16 +464,6 @@ export function useZeugmaPopouts(props: UseZeugmaPopoutsProps) {
 
       activeWindows[tabId] = popup
       activePopoutDocuments.add(popup.document)
-
-      mainListeners.forEach((record) => {
-        try {
-          if (record.target === 'window') {
-            popup.addEventListener(record.type, record.listener, record.options)
-          } else {
-            popup.document.addEventListener(record.type, record.listener, record.options)
-          }
-        } catch {}
-      })
 
       startHeadObserver()
       startHtmlObserver()
@@ -800,8 +713,4 @@ export function useZeugmaPopouts(props: UseZeugmaPopoutsProps) {
       }
     }
   }, [])
-}
-
-if (typeof window !== 'undefined') {
-  setupPopoutInterception()
 }

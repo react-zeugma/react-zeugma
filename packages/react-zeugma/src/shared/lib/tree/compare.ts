@@ -1,20 +1,37 @@
 import { TreeNode, SplitNode, PaneNode } from '../../model/types'
 
 function areObjectsEqual(
-  a: Record<string, unknown> | undefined,
-  b: Record<string, unknown> | undefined,
+  objA: Record<string, unknown> | undefined,
+  objB: Record<string, unknown> | undefined,
+  depth = 0,
+  visited = new WeakSet<object>(),
 ): boolean {
-  if (a === b) return true
-  if (!a || !b) return false
-  const keysA = Object.keys(a)
-  const keysB = Object.keys(b)
+  if (objA === objB) return true
+  if (!objA || !objB) return false
+  if (depth > 20) return false
+
+  if (visited.has(objA) || visited.has(objB)) {
+    return visited.has(objA) && visited.has(objB)
+  }
+  visited.add(objA)
+  visited.add(objB)
+
+  const keysA = Object.keys(objA)
+  const keysB = Object.keys(objB)
   if (keysA.length !== keysB.length) return false
   for (const key of keysA) {
-    if (!Object.prototype.hasOwnProperty.call(b, key)) return false
-    const valA = a[key]
-    const valB = b[key]
+    if (!Object.prototype.hasOwnProperty.call(objB, key)) return false
+    const valA = objA[key]
+    const valB = objB[key]
     if (typeof valA === 'object' && valA !== null && typeof valB === 'object' && valB !== null) {
-      if (!areObjectsEqual(valA as Record<string, unknown>, valB as Record<string, unknown>)) {
+      if (
+        !areObjectsEqual(
+          valA as Record<string, unknown>,
+          valB as Record<string, unknown>,
+          depth + 1,
+          visited,
+        )
+      ) {
         return false
       }
     } else if (valA !== valB) {

@@ -16,20 +16,14 @@
     "test": "npm run test --workspace=react-zeugma",
     "test:lib": "npm run test --workspace=react-zeugma",
     "changeset": "changeset",
-    "prepare": "husky"
+    "typecheck:lib": "npm run typecheck --workspace=react-zeugma",
+    "typecheck": "npm run typecheck:lib",
+    "prepare": "husky || true"
   },
   "devDependencies": {
-    "next": "^16.2.7",
     "tsup": "^8.5.1"
   },
   "overrides": {
-    "postcss": "^8.5.10",
-    "esbuild": "^0.28.1",
-    "js-yaml": "^4.2.0",
-    "@hono/node-server": "^2.0.11",
-    "sharp": "^0.35.3"
-  },
-  "allowScripts": {
-    "esbuild@0.28.1": true
+    "esbuild": "^0.28.1"
   }
 }

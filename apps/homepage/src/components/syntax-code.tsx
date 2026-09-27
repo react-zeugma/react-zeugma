@@ -131,6 +131,9 @@ export function SyntaxCode({ tokens }: { tokens: Token[]; language: string }) {
 export function JSONFormatter({ json }: { json: any }) {
   const formatted = useMemo(() => {
     if (!json) return ''
+    const escapeHtml = (str: string): string =>
+      str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+
     const str = JSON.stringify(json, null, 2)
     return str.replace(
       /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)/g,
@@ -143,7 +146,7 @@ export function JSONFormatter({ json }: { json: any }) {
         } else if (/null/.test(match)) {
           style = 'color:#5c6370'
         }
-        return `<span style="${style}">${match}</span>`
+        return `<span style="${style}">${escapeHtml(match)}</span>`
       },
     )
   }, [json])

@@ -7,6 +7,34 @@ export interface UseZeugmaPersistenceProps {
   setLayout: (nextLayoutOrUpdater: SetStateAction<TreeNode | null>) => void
 }
 
+export function isValidTreeNode(node: unknown): node is TreeNode {
+  if (typeof node !== 'object' || node === null) {
+    return false
+  }
+
+  const candidate = node as Record<string, unknown>
+
+  if (candidate.type === 'pane') {
+    return (
+      typeof candidate.id === 'string' &&
+      Array.isArray(candidate.tabIds) &&
+      candidate.tabIds.every((id) => typeof id === 'string') &&
+      typeof candidate.activeTabId === 'string'
+    )
+  }
+
+  if (candidate.type === 'split') {
+    return (
+      (candidate.direction === 'row' || candidate.direction === 'column') &&
+      typeof candidate.splitPercentage === 'number' &&
+      isValidTreeNode(candidate.first) &&
+      isValidTreeNode(candidate.second)
+    )
+  }
+
+  return false
+}
+
 export function useZeugmaPersistence({ persist, layout, setLayout }: UseZeugmaPersistenceProps) {
   const isEnabled = typeof persist === 'object' ? persist.enabled !== false : !!persist
   const persistKey = (typeof persist === 'object' && persist.key) || 'zeugma-layout'
@@ -16,16 +44,16 @@ export function useZeugmaPersistence({ persist, layout, setLayout }: UseZeugmaPe
   // Load layout from localStorage on mount if persist is enabled
   useEffect(() => {
     if (isEnabled) {
-      const saved = localStorage.getItem(persistKey)
-      if (saved) {
-        try {
+      try {
+        const saved = localStorage.getItem(persistKey)
+        if (saved) {
           const parsed = JSON.parse(saved)
-          if (parsed) {
+          if (isValidTreeNode(parsed)) {
             setLayout(parsed)
           }
-        } catch (e) {
-          console.error('Failed to parse persisted zeugma layout', e)
         }
+      } catch (e) {
+        console.error('Failed to parse persisted zeugma layout', e)
       }
     }
     setIsLoaded(true)
@@ -34,10 +62,14 @@ export function useZeugmaPersistence({ persist, layout, setLayout }: UseZeugmaPe
   // Save layout to localStorage when layout changes if persist is enabled
   useEffect(() => {
     if (isEnabled && isLoaded) {
-      if (layout) {
-        localStorage.setItem(persistKey, JSON.stringify(layout))
-      } else {
-        localStorage.removeItem(persistKey)
+      try {
+        if (layout) {
+          localStorage.setItem(persistKey, JSON.stringify(layout))
+        } else {
+          localStorage.removeItem(persistKey)
+        }
+      } catch (e) {
+        console.error('Failed to save persisted zeugma layout', e)
       }
     }
   }, [isEnabled, persistKey, layout, isLoaded])

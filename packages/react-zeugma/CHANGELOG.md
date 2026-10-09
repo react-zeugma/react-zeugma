@@ -1,5 +1,11 @@
 # react-zeugma
 
+## 7.1.2
+
+### Patch Changes
+
+- Revert CI/CD action references to standard release workflows.
+
 ## 7.1.1
 
 ### Patch Changes

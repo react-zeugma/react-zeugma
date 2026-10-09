@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useRef, useEffect } from 'react'
 import { TreeNode, SplitNode, SplitDirection, useZeugmaState } from '../../../shared'
 import { updateSplitPercentage, computeLayout } from '../../../shared/lib/tree'
 import { createDragSession } from '../../../shared/lib/drag-session'
@@ -47,6 +47,17 @@ export function useResizer({
     locked = false,
   } = useZeugmaState()
 
+  const dragSessionCleanupRef = useRef<(() => void) | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (dragSessionCleanupRef.current) {
+        dragSessionCleanupRef.current()
+        dragSessionCleanupRef.current = null
+      }
+    }
+  }, [])
+
   return useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
       if (locked) return
@@ -85,7 +96,12 @@ export function useResizer({
 
       let currentPercentage = startPercentage
 
-      createDragSession({
+      if (dragSessionCleanupRef.current) {
+        dragSessionCleanupRef.current()
+        dragSessionCleanupRef.current = null
+      }
+
+      dragSessionCleanupRef.current = createDragSession({
         cursor: isRow ? 'col-resize' : 'row-resize',
         resizerEl,
         onMove: (moveEvent: PointerEvent) => {
@@ -155,6 +171,7 @@ export function useResizer({
           }
         },
         onEnd: () => {
+          dragSessionCleanupRef.current = null
           const finalLayout = updateSplitPercentage(layout, currentNode, currentPercentage)
 
           // Clean up CSS variables on resize end

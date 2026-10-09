@@ -1,15 +1,11 @@
 # react-zeugma
 
-## 7.1.2
+## 7.2.0
 
-### Patch Changes
+### Minor Changes
 
+- Remove package provenance from publishConfig to support classic npm tokens and resolve npm publish E404.
 - Revert CI/CD action references to standard release workflows.
-
-## 7.1.1
-
-### Patch Changes
-
 - Resolve security audit findings, harden supply chain, and enhance drag/resize resilience:
   - Add `pointercancel` and `blur` event handlers to drag sessions and cleanup refs in `useResizer` to prevent stuck resizing states when pointers are interrupted.
   - Wrap `localStorage` access in `try/catch` and add schema validation (`isValidTreeNode`) in `useZeugmaPersistence` to guard against corrupted or invalid stored layouts.

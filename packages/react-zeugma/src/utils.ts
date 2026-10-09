@@ -19,6 +19,7 @@ export {
   movePaneTabs,
   computeLayout,
   calculateTabDropIndex,
+  isValidTreeNode,
 } from './shared/lib/tree/tree-helpers'
 
 export type { ComputedPane, ComputedSplitter } from './shared/lib/tree/tree-helpers'

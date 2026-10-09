@@ -23,7 +23,12 @@ export interface DragSessionConfig {
   onEnd: () => void
 }
 
-export function createDragSession({ cursor, resizerEl, onMove, onEnd }: DragSessionConfig): void {
+export function createDragSession({
+  cursor,
+  resizerEl,
+  onMove,
+  onEnd,
+}: DragSessionConfig): () => void {
   // 1. Body class
   document.body.classList.add('zeugma-resizing')
 
@@ -44,13 +49,12 @@ export function createDragSession({ cursor, resizerEl, onMove, onEnd }: DragSess
   // 3. Mark the resizer element
   resizerEl.setAttribute('data-resizing', 'true')
 
-  // 4. Document-level listeners
-  const handlePointerMove = (e: PointerEvent) => {
-    onMove(e)
-  }
+  // 4. Cleanup function
+  let isCleanedUp = false
+  const cleanup = () => {
+    if (isCleanedUp) return
+    isCleanedUp = true
 
-  const handlePointerUp = () => {
-    // Cleanup
     document.body.classList.remove('zeugma-resizing')
     resizerEl.removeAttribute('data-resizing')
 
@@ -61,11 +65,34 @@ export function createDragSession({ cursor, resizerEl, onMove, onEnd }: DragSess
 
     document.removeEventListener('pointermove', handlePointerMove)
     document.removeEventListener('pointerup', handlePointerUp)
+    document.removeEventListener('pointercancel', handlePointerCancel)
+    window.removeEventListener('blur', handleWindowBlur)
+  }
 
-    // Notify consumer
+  // 5. Document-level listeners
+  const handlePointerMove = (e: PointerEvent) => {
+    onMove(e)
+  }
+
+  const handlePointerUp = () => {
+    cleanup()
+    onEnd()
+  }
+
+  const handlePointerCancel = () => {
+    cleanup()
+    onEnd()
+  }
+
+  const handleWindowBlur = () => {
+    cleanup()
     onEnd()
   }
 
   document.addEventListener('pointermove', handlePointerMove)
   document.addEventListener('pointerup', handlePointerUp)
+  document.addEventListener('pointercancel', handlePointerCancel)
+  window.addEventListener('blur', handleWindowBlur)
+
+  return cleanup
 }

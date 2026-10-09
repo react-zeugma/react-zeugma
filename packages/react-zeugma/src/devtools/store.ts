@@ -22,6 +22,9 @@ export function subscribeCounter(id: string, listener: Listener): () => void {
   record.listeners.add(listener)
   return () => {
     record.listeners.delete(listener)
+    if (record.listeners.size === 0 && record.mounts === 0) {
+      store.delete(id)
+    }
   }
 }
 

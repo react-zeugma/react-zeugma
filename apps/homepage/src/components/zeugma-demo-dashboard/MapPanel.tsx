@@ -13,9 +13,12 @@ export function MapPanel() {
   useEffect(() => {
     if (typeof window === 'undefined' || !mapContainerRef.current) return
 
+    let isMounted = true
     let resizeObserver: ResizeObserver | null = null
 
     import('leaflet').then((leafletInstance) => {
+      if (!isMounted || !mapContainerRef.current) return
+
       const LObj = leafletInstance.default
 
       // Fix default marker icon issues in Leaflet with webpack/next
@@ -33,7 +36,7 @@ export function MapPanel() {
       }
 
       // Initialize map
-      const map = LObj.map(mapContainerRef.current!).setView([51.505, -0.09], 13)
+      const map = LObj.map(mapContainerRef.current).setView([51.505, -0.09], 13)
       mapInstanceRef.current = map
 
       // Add OpenStreetMap tile layer
@@ -60,6 +63,7 @@ export function MapPanel() {
     })
 
     return () => {
+      isMounted = false
       if (resizeObserver) {
         resizeObserver.disconnect()
       }

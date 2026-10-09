@@ -1,6 +1,8 @@
 import React from 'react'
 import type { RootContent, Text, Strong, Emphasis, InlineCode, Link } from './types'
 
+import { isSafeUrl } from '@/lib/url'
+
 export function renderInline(nodes: RootContent[], keyPrefix = ''): React.ReactNode[] {
   return nodes.map((node, i) => {
     const key = `${keyPrefix}${i}`
@@ -28,12 +30,14 @@ export function renderInline(nodes: RootContent[], keyPrefix = ''): React.ReactN
         )
       case 'link': {
         const link = node as Link
+        const safeHref = isSafeUrl(link.url) ? link.url : '#'
+        const isExternal = safeHref.startsWith('http://') || safeHref.startsWith('https://')
         return (
           <a
             key={key}
-            href={link.url}
-            target={link.url.startsWith('http') ? '_blank' : undefined}
-            rel={link.url.startsWith('http') ? 'noreferrer' : undefined}
+            href={safeHref}
+            target={isExternal ? '_blank' : undefined}
+            rel={isExternal ? 'noopener noreferrer' : undefined}
             className="text-indigo-600 dark:text-indigo-400 hover:underline"
           >
             {renderInline(link.children as RootContent[], `${key}-`)}

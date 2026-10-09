@@ -1,5 +1,17 @@
 # react-zeugma
 
+## 7.1.1
+
+### Patch Changes
+
+- Resolve security audit findings, harden supply chain, and enhance drag/resize resilience:
+  - Add `pointercancel` and `blur` event handlers to drag sessions and cleanup refs in `useResizer` to prevent stuck resizing states when pointers are interrupted.
+  - Wrap `localStorage` access in `try/catch` and add schema validation (`isValidTreeNode`) in `useZeugmaPersistence` to guard against corrupted or invalid stored layouts.
+  - Add `WeakSet` cycle detection and recursion depth guard in `compare.ts` to prevent call stack overflow.
+  - Clean up DevTools render counter store entries when listeners reach zero to eliminate memory leaks.
+  - Remove global window/document monkey-patching in `useZeugmaPopouts` and guard against SSR ReferenceError.
+  - Export `isValidTreeNode` utility from `react-zeugma/utils`.
+
 ## 7.1.0
 
 ### Minor Changes

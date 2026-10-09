@@ -719,3 +719,34 @@ export function calculateTabDropIndex(
   const index = tabIds.indexOf(overTabId)
   return overTabPosition === 'before' ? index : index + 1
 }
+
+/**
+ * Validates whether an unknown value conforms to the TreeNode schema.
+ */
+export function isValidTreeNode(node: unknown): node is TreeNode {
+  if (typeof node !== 'object' || node === null) {
+    return false
+  }
+
+  const candidate = node as Record<string, unknown>
+
+  if (candidate.type === 'pane') {
+    return (
+      typeof candidate.id === 'string' &&
+      Array.isArray(candidate.tabIds) &&
+      candidate.tabIds.every((id) => typeof id === 'string') &&
+      typeof candidate.activeTabId === 'string'
+    )
+  }
+
+  if (candidate.type === 'split') {
+    return (
+      (candidate.direction === 'row' || candidate.direction === 'column') &&
+      typeof candidate.splitPercentage === 'number' &&
+      isValidTreeNode(candidate.first) &&
+      isValidTreeNode(candidate.second)
+    )
+  }
+
+  return false
+}

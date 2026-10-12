@@ -1,33 +1,27 @@
 import { useState, useRef, Dispatch, SetStateAction } from 'react'
 import { useSensor, useSensors, DragStartEvent, DragMoveEvent, DragEndEvent } from '@dnd-kit/core'
-import { SplitDirection, TreeNode, PaneNode } from '../../../shared'
+import { SplitDirection, TreeNode } from '../../../shared'
+import {
+  DEFAULT_TOUCH_ACTIVATION_DELAY,
+  DEFAULT_TOUCH_ACTIVATION_TOLERANCE,
+} from '../../../shared/config/constants'
+import { parseActiveId, parseDropTarget } from '../../../shared/lib/dnd-ids'
 import {
   removePane as removePaneHelper,
   removeTab as removeTabHelper,
-  splitPane,
-  findPaneById,
-  findPaneContainingTab,
-  generateUniqueId,
-  moveTab,
   selectTab,
-  movePaneTabs,
+  findPaneContainingTab,
 } from '../../../shared/lib/tree'
 import { SmartPointerSensor, SmartTouchSensor } from '../lib/sensors'
 import { useLatestPointer, useBodyCursorOverride } from './hooks'
 import { customCollisionDetection } from '../lib/collisions'
-
-function getPointerCoordinates(event: Event): { x: number; y: number } | null {
-  if (event instanceof MouseEvent || event instanceof PointerEvent) {
-    return { x: event.clientX, y: event.clientY }
-  }
-  if (typeof TouchEvent !== 'undefined' && event instanceof TouchEvent) {
-    const touch = event.touches[0] || event.changedTouches[0]
-    if (touch) {
-      return { x: touch.clientX, y: touch.clientY }
-    }
-  }
-  return null
-}
+import {
+  getPointerCoordinates,
+  resolvePointer,
+  getTabDropPosition,
+  distanceOutsideRect,
+} from '../lib/pointer'
+import { resolveDrop } from '../lib/resolve-drop'
 
 interface UseZeugmaDndProps {
   layout: TreeNode | null
@@ -110,16 +104,21 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
       activationConstraint: { distance: dragActivationDistance },
     }),
     useSensor(SmartTouchSensor, {
-      activationConstraint: { delay: 250, tolerance: 5 },
+      activationConstraint: {
+        delay: DEFAULT_TOUCH_ACTIVATION_DELAY,
+        tolerance: DEFAULT_TOUCH_ACTIVATION_TOLERANCE,
+      },
     }),
   )
 
   const handleDragStart = (event: DragStartEvent) => {
     const rawId = event.active.id.toString()
-    const isTabDrag = rawId.startsWith('tab-header-')
-    const draggingId = isTabDrag ? rawId.substring(11) : rawId
+    const parsed = parseActiveId(rawId)
+    const isTabDrag = parsed.type === 'tab'
+    const draggingId = parsed.id
+
     setActiveId(draggingId)
-    setActiveType(isTabDrag ? 'tab' : 'pane')
+    setActiveType(parsed.type)
     setOverTabId(null)
     setOverTabPosition(null)
 
@@ -146,62 +145,43 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
       : removePaneHelper(layoutAfterSelect, draggingId)
     _internalSetLayout(layoutAfterRemove)
 
-    if (onDragStart) {
-      onDragStart(draggingId)
-    }
+    onDragStart?.(draggingId)
   }
 
   const handleDragMove = (event: DragMoveEvent) => {
     const { over } = event
     const overIdStr = over?.id.toString() || ''
-    const isOverLockedPane = overIdStr.startsWith('drop-locked-')
+    const target = parseDropTarget(overIdStr)
+
+    const isOverLockedPane = target.type === 'locked'
     setIsOverLocked((prev) => (prev === isOverLockedPane ? prev : isOverLockedPane))
 
     const rawId = event.active.id.toString()
-    const isTabDrag = rawId.startsWith('tab-header-')
-    const draggingId = isTabDrag ? rawId.substring(11) : rawId
+    const { type: currentActiveType, id: draggingId } = parseActiveId(rawId)
+    const isTabDrag = currentActiveType === 'tab'
 
     // Handle tab drop hover location
-    const tabDropMatch = overIdStr.match(/^tab-drop-(.+)$/)
-    if (tabDropMatch && over && (isTabDrag || activeType === 'pane')) {
-      const [, targetTabId] = tabDropMatch
+    if (target.type === 'tab' && over && (isTabDrag || activeType === 'pane')) {
+      const targetTabId = target.targetTabId
 
       if (draggingId !== targetTabId) {
-        let position: 'before' | 'after' = 'before'
-        const overRect = over.rect
-        const ae = event.activatorEvent
-        let px: number | null = null
-        if (latestPointerRef.current) {
-          px = latestPointerRef.current.x
-        } else {
-          const coords = getPointerCoordinates(ae)
-          if (coords) {
-            px = coords.x + event.delta.x
-          }
-        }
-
-        if (px !== null) {
-          const center = overRect.left + overRect.width / 2
-          if (px > center) {
-            position = 'after'
-          }
-        }
+        const pt = resolvePointer(event.activatorEvent, event.delta, latestPointerRef.current)
+        const position = getTabDropPosition(over.rect, pt ? pt.x : null)
 
         setOverTabId((prev) => (prev === targetTabId ? prev : targetTabId))
         setOverTabPosition((prev) => (prev === position ? prev : position))
       } else {
-        setOverTabId((prev) => (prev === null ? prev : null))
-        setOverTabPosition((prev) => (prev === null ? prev : null))
+        setOverTabId(null)
+        setOverTabPosition(null)
       }
     } else {
-      setOverTabId((prev) => (prev === null ? prev : null))
-      setOverTabPosition((prev) => (prev === null ? prev : null))
+      setOverTabId(null)
+      setOverTabPosition(null)
     }
 
     if (!enableDragToDismiss) return
 
     const containerRect = containerRectRef.current
-
     if (!containerRect) {
       if (dismissIntentId !== null) {
         setDismissIntentId(null)
@@ -210,60 +190,17 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
       return
     }
 
-    const ae = event.activatorEvent
-    let px: number | null = null
-    let py: number | null = null
-
-    if (latestPointerRef.current) {
-      px = latestPointerRef.current.x
-      py = latestPointerRef.current.y
-    } else {
-      const coords = getPointerCoordinates(ae)
-      if (coords) {
-        px = coords.x + event.delta.x
-        py = coords.y + event.delta.y
-      }
-    }
-
+    const pt = resolvePointer(event.activatorEvent, event.delta, latestPointerRef.current)
     let distance = 0
-    if (px !== null && py !== null) {
-      let dx = 0
-      let dy = 0
 
-      if (px < containerRect.left) {
-        dx = containerRect.left - px
-      } else if (px > containerRect.right) {
-        dx = px - containerRect.right
-      }
-
-      if (py < containerRect.top) {
-        dy = containerRect.top - py
-      } else if (py > containerRect.bottom) {
-        dy = py - containerRect.bottom
-      }
-
-      distance = Math.sqrt(dx * dx + dy * dy)
+    if (pt) {
+      distance = distanceOutsideRect(pt, containerRect)
     } else {
       const activeRect = event.active.rect.current.translated
       if (activeRect) {
         const cx = activeRect.left + activeRect.width / 2
         const cy = activeRect.top + activeRect.height / 2
-        let dx = 0
-        let dy = 0
-
-        if (cx < containerRect.left) {
-          dx = containerRect.left - cx
-        } else if (cx > containerRect.right) {
-          dx = cx - containerRect.right
-        }
-
-        if (cy < containerRect.top) {
-          dy = containerRect.top - cy
-        } else if (cy > containerRect.bottom) {
-          dy = cy - containerRect.bottom
-        }
-
-        distance = Math.sqrt(dx * dx + dy * dy)
+        distance = distanceOutsideRect({ x: cx, y: cy }, containerRect)
       }
     }
 
@@ -287,10 +224,11 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
     setIsOverLocked(false)
     setOverTabId(null)
     setOverTabPosition(null)
+
     const { active, over } = event
     const rawId = active.id.toString()
-    const isTabDrag = rawId.startsWith('tab-header-')
-    const draggingId = isTabDrag ? rawId.substring(11) : rawId
+    const { type: currentActiveType, id: draggingId } = parseActiveId(rawId)
+    const isTabDrag = currentActiveType === 'tab'
 
     const wasDismissIntent = enableDragToDismiss && dismissIntentId === draggingId
 
@@ -312,258 +250,47 @@ export function useZeugmaDnd(props: UseZeugmaDndProps) {
           removePane(draggingId)
         }
       }
-
-      if (onDragEnd) {
-        onDragEnd(draggingId, null, null)
-      }
+      onDragEnd?.(draggingId, null, null)
       return
+    }
+
+    const cancelDrop = () => {
+      _internalSetLayout(originalLayout)
+      onDragEnd?.(draggingId, null, null)
     }
 
     if (!over) {
-      _internalSetLayout(originalLayout)
-      if (onDragEnd) {
-        onDragEnd(draggingId, null, null)
-      }
+      cancelDrop()
       return
     }
 
-    const overIdStr = over.id.toString()
-
-    if (overIdStr.startsWith('drop-locked-')) {
-      _internalSetLayout(originalLayout)
-      if (onDragEnd) {
-        onDragEnd(draggingId, null, null)
-      }
+    const target = parseDropTarget(over.id.toString())
+    if (target.type === 'locked' || target.type === 'unknown') {
+      cancelDrop()
       return
     }
 
-    // Check for tab reorder drop
-    const tabDropMatch = overIdStr.match(/^tab-drop-(.+)$/)
-    if (tabDropMatch) {
-      const [, targetTabId] = tabDropMatch
-      if (isTabDrag) {
-        if (draggingId !== targetTabId) {
-          let position: 'before' | 'after' = 'before'
-          const overRect = over.rect
-          const ae = event.activatorEvent
-          let px: number | null = null
-          if (latestPointerRef.current) {
-            px = latestPointerRef.current.x
-          } else {
-            const coords = getPointerCoordinates(ae)
-            if (coords) {
-              px = coords.x + event.delta.x
-            }
-          }
+    const pt = resolvePointer(event.activatorEvent, event.delta, latestPointerRef.current)
+    const dropPosition =
+      target.type === 'tab' && over.rect
+        ? getTabDropPosition(over.rect, pt ? pt.x : null)
+        : 'before'
 
-          if (px !== null) {
-            const center = overRect.left + overRect.width / 2
-            if (px > center) {
-              position = 'after'
-            }
-          }
+    const resolution = resolveDrop({
+      layout: originalLayout,
+      activeType: isTabDrag ? 'tab' : 'pane',
+      draggingId,
+      target,
+      overTabPosition: dropPosition,
+    })
 
-          const newLayout = moveTab(originalLayout, draggingId, targetTabId, position)
-          setLayout(newLayout)
-          if (onDragEnd) {
-            onDragEnd(draggingId, targetTabId, { type: 'move', position: 'center' })
-          }
-        } else {
-          _internalSetLayout(originalLayout)
-          if (onDragEnd) {
-            onDragEnd(draggingId, null, null)
-          }
-        }
-      } else {
-        let position: 'before' | 'after' = 'before'
-        const overRect = over.rect
-        const ae = event.activatorEvent
-        let px: number | null = null
-        if (latestPointerRef.current) {
-          px = latestPointerRef.current.x
-        } else {
-          const coords = getPointerCoordinates(ae)
-          if (coords) {
-            px = coords.x + event.delta.x
-          }
-        }
-
-        if (px !== null) {
-          const center = overRect.left + overRect.width / 2
-          if (px > center) {
-            position = 'after'
-          }
-        }
-
-        const newLayout = movePaneTabs(originalLayout, draggingId, targetTabId, position)
-        setLayout(newLayout)
-        if (onDragEnd) {
-          onDragEnd(draggingId, targetTabId, { type: 'move', position: 'center' })
-        }
-      }
+    if (!resolution) {
+      cancelDrop()
       return
     }
 
-    // Check for root split drop
-    const rootMatch = overIdStr.match(/^drop-root-(1\/4|1\/3)-(top|bottom|left|right|start|end)$/)
-    if (rootMatch) {
-      const [, fraction, rawEdge] = rootMatch
-      let edge = rawEdge
-      if (edge === 'start') edge = 'left'
-      if (edge === 'end') edge = 'right'
-
-      const cleanLayout = isTabDrag
-        ? removeTabHelper(originalLayout, draggingId)
-        : removePaneHelper(originalLayout, draggingId)
-
-      let draggedPaneNode: PaneNode
-      if (isTabDrag) {
-        const originalPane = findPaneContainingTab(originalLayout, draggingId)
-        const sourceMetadata = originalPane?.tabsMetadata?.[draggingId]
-        draggedPaneNode = {
-          type: 'pane',
-          id: generateUniqueId(),
-          tabIds: [draggingId],
-          activeTabId: draggingId,
-          tabsMetadata: sourceMetadata ? { [draggingId]: sourceMetadata } : undefined,
-        }
-      } else {
-        draggedPaneNode = findPaneById(originalLayout, draggingId) ?? {
-          type: 'pane',
-          id: generateUniqueId(),
-          tabIds: [draggingId],
-          activeTabId: draggingId,
-        }
-      }
-
-      if (cleanLayout === null) {
-        setLayout(draggedPaneNode)
-      } else {
-        const isRow = edge === 'left' || edge === 'right'
-        const isFirst = edge === 'left' || edge === 'top'
-        let splitPercentage = 50
-        if (fraction === '1/4') {
-          splitPercentage = isFirst ? 25 : 75
-        } else if (fraction === '1/3') {
-          splitPercentage = isFirst ? 100 / 3 : 200 / 3
-        }
-
-        const newLayout: TreeNode = {
-          type: 'split',
-          direction: isRow ? 'row' : 'column',
-          first: isFirst ? draggedPaneNode : cleanLayout,
-          second: isFirst ? cleanLayout : draggedPaneNode,
-          splitPercentage,
-        }
-        setLayout(newLayout)
-      }
-
-      if (onDragEnd) {
-        onDragEnd(draggingId, 'root', {
-          type: 'split',
-          direction: edge === 'left' || edge === 'right' ? 'row' : 'column',
-          position: edge as 'left' | 'right' | 'top' | 'bottom',
-        })
-      }
-      return
-    }
-
-    // Check for edge (split) or center (swap) drop
-    const match = overIdStr.match(/^drop-(left|right|top|bottom|center)-(.+)$/)
-    if (!match) {
-      _internalSetLayout(originalLayout)
-      if (onDragEnd) {
-        onDragEnd(draggingId, null, null)
-      }
-      return
-    }
-
-    const [, dropZone, targetId] = match
-
-    if (dropZone === 'center') {
-      if (isTabDrag) {
-        const targetPane = findPaneById(originalLayout, targetId)
-        if (targetPane && targetPane.activeTabId) {
-          const targetTabId = targetPane.activeTabId
-          const newLayout = moveTab(originalLayout, draggingId, targetTabId, 'center')
-          setLayout(newLayout)
-          if (onDragEnd) {
-            onDragEnd(draggingId, targetId, {
-              type: 'move',
-              position: 'center',
-            })
-          }
-        } else {
-          _internalSetLayout(originalLayout)
-          if (onDragEnd) {
-            onDragEnd(draggingId, null, null)
-          }
-        }
-      } else {
-        _internalSetLayout(originalLayout)
-        if (onDragEnd) {
-          onDragEnd(draggingId, null, null)
-        }
-      }
-      return
-    }
-
-    const parentPane = isTabDrag
-      ? findPaneContainingTab(originalLayout, draggingId)
-      : findPaneById(originalLayout, draggingId)
-    const isParentTarget = parentPane && parentPane.id === targetId
-    const isOnlyTab = parentPane && parentPane.tabIds.length === 1
-
-    if (draggingId === targetId || (isParentTarget && isOnlyTab)) {
-      _internalSetLayout(originalLayout)
-      if (onDragEnd) {
-        onDragEnd(draggingId, null, null)
-      }
-      return
-    }
-
-    const direction: SplitDirection = dropZone === 'left' || dropZone === 'right' ? 'row' : 'column'
-
-    let draggedPaneNode: PaneNode
-    if (isTabDrag) {
-      const originalPane = findPaneContainingTab(originalLayout, draggingId)
-      const sourceMetadata = originalPane?.tabsMetadata?.[draggingId]
-      draggedPaneNode = {
-        type: 'pane',
-        id: generateUniqueId(),
-        tabIds: [draggingId],
-        activeTabId: draggingId,
-        tabsMetadata: sourceMetadata ? { [draggingId]: sourceMetadata } : undefined,
-      }
-    } else {
-      draggedPaneNode = findPaneById(originalLayout, draggingId) ?? {
-        type: 'pane',
-        id: generateUniqueId(),
-        tabIds: [draggingId],
-        activeTabId: draggingId,
-      }
-    }
-
-    // We need to first remove the dragged tab/pane from the original layout tree before splitting.
-    const cleanLayout = isTabDrag
-      ? removeTabHelper(originalLayout, draggingId)
-      : removePaneHelper(originalLayout, draggingId)
-
-    const newLayout = splitPane(
-      cleanLayout,
-      targetId,
-      direction,
-      dropZone as 'left' | 'right' | 'top' | 'bottom',
-      draggedPaneNode,
-    )
-    setLayout(newLayout)
-    if (onDragEnd) {
-      onDragEnd(draggingId, targetId, {
-        type: 'split',
-        direction,
-        position: dropZone as 'left' | 'right' | 'top' | 'bottom',
-      })
-    }
+    setLayout(resolution.newLayout)
+    onDragEnd?.(draggingId, resolution.overId, resolution.dropAction)
   }
 
   const handleDragCancel = () => {

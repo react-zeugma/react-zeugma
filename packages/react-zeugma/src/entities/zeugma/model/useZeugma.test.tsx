@@ -559,4 +559,24 @@ describe('useZeugma Hook', () => {
     expect(result.current.layout).toEqual(newLayout)
     expect(result.current.fullscreenPaneId).toBeNull()
   })
+
+  it('should invoke functional setLayout updater exactly once and keep renderingLayout in sync', () => {
+    const { result } = renderHook(() => useZeugma({ initialLayout }))
+    const updaterSpy = vi.fn((_prev: TreeNode | null): TreeNode => {
+      return {
+        type: 'pane',
+        id: 'pane-from-fn',
+        tabIds: ['tab-from-fn'],
+        activeTabId: 'tab-from-fn',
+      }
+    })
+
+    act(() => {
+      result.current.setLayout(updaterSpy)
+    })
+
+    expect(updaterSpy).toHaveBeenCalledTimes(1)
+    const internal = result.current as unknown as ZeugmaControllerInternal
+    expect(internal.renderingLayout).toEqual(result.current.layout)
+  })
 })

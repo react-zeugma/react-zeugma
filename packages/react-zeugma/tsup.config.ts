@@ -4,7 +4,7 @@ export default defineConfig({
   entry: ['src/index.ts', 'src/utils.ts', 'src/devtools.ts'],
   format: ['cjs', 'esm'],
   dts: true,
-  splitting: false,
+  splitting: true,
   sourcemap: true,
   clean: true,
   minify: true,

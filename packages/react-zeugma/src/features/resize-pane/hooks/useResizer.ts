@@ -86,7 +86,7 @@ export function useResizer({
 
       // Cache other resizers of the same direction once at drag-start to prevent layout thrashing on move
       const otherResizers = Array.from(
-        document.querySelectorAll('div[role="separator"][data-direction]'),
+        container.querySelectorAll('div[role="separator"][data-direction]'),
       ).filter((el) => el !== resizerEl && el.getAttribute('data-direction') === direction)
 
       const otherPositions = otherResizers.map((el) => {
@@ -217,6 +217,7 @@ export function useResizer({
       globalOnResizeEnd,
       minSplitPercentage,
       maxSplitPercentage,
+      locked,
       parentLeft,
       parentTop,
       parentWidth,

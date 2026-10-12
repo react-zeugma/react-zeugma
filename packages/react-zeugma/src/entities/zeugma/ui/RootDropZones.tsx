@@ -1,207 +1,113 @@
 import React from 'react'
 import { useDroppable } from '@dnd-kit/core'
+import { rootDropId, RootSplitEdge, RootSplitFraction } from '../../../shared'
 
 interface RootDropZoneProps {
   id: string
-  fraction: '1/4' | '1/3'
-  edge: 'top' | 'bottom' | 'left' | 'right'
+  fraction: RootSplitFraction
+  edge: RootSplitEdge
   activeClassName?: string
 }
 
-const activationPositions: Record<
-  'top' | 'bottom' | 'left' | 'right',
-  Record<'1/4' | '1/3', React.CSSProperties>
-> = {
-  top: {
-    '1/4': {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '24px',
-      zIndex: 100,
-      pointerEvents: 'auto',
-    },
-    '1/3': {
-      position: 'absolute',
-      top: '24px',
-      left: 0,
-      width: '100%',
-      height: '24px',
-      zIndex: 100,
-      pointerEvents: 'auto',
-    },
-  },
-  bottom: {
-    '1/4': {
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      width: '100%',
-      height: '24px',
-      zIndex: 100,
-      pointerEvents: 'auto',
-    },
-    '1/3': {
-      position: 'absolute',
-      bottom: '24px',
-      left: 0,
-      width: '100%',
-      height: '24px',
-      zIndex: 100,
-      pointerEvents: 'auto',
-    },
-  },
-  left: {
-    '1/4': {
-      position: 'absolute',
-      left: 0,
-      top: '48px',
-      width: '24px',
-      height: 'calc(100% - 96px)',
-      zIndex: 100,
-      pointerEvents: 'auto',
-    },
-    '1/3': {
-      position: 'absolute',
-      left: '24px',
-      top: '48px',
-      width: '24px',
-      height: 'calc(100% - 96px)',
-      zIndex: 100,
-      pointerEvents: 'auto',
-    },
-  },
-  right: {
-    '1/4': {
-      position: 'absolute',
-      right: 0,
-      top: '48px',
-      width: '24px',
-      height: 'calc(100% - 96px)',
-      zIndex: 100,
-      pointerEvents: 'auto',
-    },
-    '1/3': {
-      position: 'absolute',
-      right: '24px',
-      top: '48px',
-      width: '24px',
-      height: 'calc(100% - 96px)',
-      zIndex: 100,
-      pointerEvents: 'auto',
-    },
-  },
+function getActivationStyle(edge: RootSplitEdge, fraction: RootSplitFraction): React.CSSProperties {
+  const offset = fraction === '1/4' ? 0 : '24px'
+  const isHorizontal = edge === 'top' || edge === 'bottom'
+
+  return {
+    position: 'absolute',
+    [edge]: offset,
+    left: isHorizontal ? 0 : edge === 'left' ? offset : undefined,
+    right: edge === 'right' ? offset : undefined,
+    top: isHorizontal ? offset : '48px',
+    width: isHorizontal ? '100%' : '24px',
+    height: isHorizontal ? '24px' : 'calc(100% - 96px)',
+    zIndex: 100,
+    pointerEvents: 'auto',
+  }
 }
 
-const previewPositions: Record<
-  'top' | 'bottom' | 'left' | 'right',
-  Record<'1/4' | '1/3', React.CSSProperties>
-> = {
-  top: {
-    '1/4': {
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '60px',
-      borderBottomLeftRadius: '12px',
-      borderBottomRightRadius: '12px',
-      borderTopLeftRadius: '0px',
-      borderTopRightRadius: '0px',
-    },
-    '1/3': {
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '96px',
-      borderBottomLeftRadius: '12px',
-      borderBottomRightRadius: '12px',
-      borderTopLeftRadius: '0px',
-      borderTopRightRadius: '0px',
-    },
-  },
-  bottom: {
-    '1/4': {
-      bottom: 0,
-      left: 0,
-      width: '100%',
-      height: '60px',
-      borderTopLeftRadius: '12px',
-      borderTopRightRadius: '12px',
-      borderBottomLeftRadius: '0px',
-      borderBottomRightRadius: '0px',
-    },
-    '1/3': {
-      bottom: 0,
-      left: 0,
-      width: '100%',
-      height: '96px',
-      borderTopLeftRadius: '12px',
-      borderTopRightRadius: '12px',
-      borderBottomLeftRadius: '0px',
-      borderBottomRightRadius: '0px',
-    },
-  },
-  left: {
-    '1/4': {
-      left: 0,
-      top: 0,
-      width: '60px',
-      height: '100%',
-      borderTopRightRadius: '12px',
-      borderBottomRightRadius: '12px',
-      borderTopLeftRadius: '0px',
-      borderBottomLeftRadius: '0px',
-    },
-    '1/3': {
-      left: 0,
-      top: 0,
-      width: '96px',
-      height: '100%',
-      borderTopRightRadius: '12px',
-      borderBottomRightRadius: '12px',
-      borderTopLeftRadius: '0px',
-      borderBottomLeftRadius: '0px',
-    },
-  },
-  right: {
-    '1/4': {
-      right: 0,
-      top: 0,
-      width: '60px',
-      height: '100%',
-      borderTopLeftRadius: '12px',
-      borderBottomLeftRadius: '12px',
-      borderTopRightRadius: '0px',
-      borderBottomRightRadius: '0px',
-    },
-    '1/3': {
-      right: 0,
-      top: 0,
-      width: '96px',
-      height: '100%',
-      borderTopLeftRadius: '12px',
-      borderBottomLeftRadius: '12px',
-      borderTopRightRadius: '0px',
-      borderBottomRightRadius: '0px',
-    },
-  },
-}
+function getPreviewStyle(edge: RootSplitEdge, fraction: RootSplitFraction): React.CSSProperties {
+  const size = fraction === '1/4' ? '60px' : '96px'
+  const isHorizontal = edge === 'top' || edge === 'bottom'
 
-const RootDropZone: React.FC<RootDropZoneProps> = ({ id, fraction, edge, activeClassName }) => {
-  const { setNodeRef, isOver } = useDroppable({ id })
-
-  const previewStyle: React.CSSProperties = {
+  const style: React.CSSProperties = {
     position: 'absolute',
     pointerEvents: 'none',
     zIndex: 101,
     boxSizing: 'border-box',
-    ...previewPositions[edge][fraction],
+    width: isHorizontal ? '100%' : size,
+    height: isHorizontal ? size : '100%',
+    top: edge === 'bottom' ? undefined : 0,
+    bottom: edge === 'bottom' ? 0 : undefined,
+    left: edge === 'right' ? undefined : 0,
+    right: edge === 'right' ? 0 : undefined,
   }
+
+  if (edge === 'top') {
+    style.borderBottomLeftRadius = '12px'
+    style.borderBottomRightRadius = '12px'
+    style.borderTopLeftRadius = '0px'
+    style.borderTopRightRadius = '0px'
+  } else if (edge === 'bottom') {
+    style.borderTopLeftRadius = '12px'
+    style.borderTopRightRadius = '12px'
+    style.borderBottomLeftRadius = '0px'
+    style.borderBottomRightRadius = '0px'
+  } else if (edge === 'left') {
+    style.borderTopRightRadius = '12px'
+    style.borderBottomRightRadius = '12px'
+    style.borderTopLeftRadius = '0px'
+    style.borderBottomLeftRadius = '0px'
+  } else if (edge === 'right') {
+    style.borderTopLeftRadius = '12px'
+    style.borderBottomLeftRadius = '12px'
+    style.borderTopRightRadius = '0px'
+    style.borderBottomRightRadius = '0px'
+  }
+
+  return style
+}
+
+const ROOT_EDGES: RootSplitEdge[] = ['top', 'bottom', 'left', 'right']
+const ROOT_FRACTIONS: RootSplitFraction[] = ['1/4', '1/3']
+
+const ROOT_ZONES: Array<{
+  id: string
+  fraction: RootSplitFraction
+  edge: RootSplitEdge
+  activationStyle: React.CSSProperties
+  previewStyle: React.CSSProperties
+}> = ROOT_EDGES.flatMap((edge) =>
+  ROOT_FRACTIONS.map((fraction) => ({
+    id: rootDropId(fraction, edge),
+    fraction,
+    edge,
+    activationStyle: getActivationStyle(edge, fraction),
+    previewStyle: getPreviewStyle(edge, fraction),
+  })),
+)
+
+const CONTAINER_STYLE: React.CSSProperties = {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  zIndex: 99,
+  pointerEvents: 'none',
+}
+
+const RootDropZone: React.FC<
+  RootDropZoneProps & {
+    activationStyle: React.CSSProperties
+    previewStyle: React.CSSProperties
+  }
+> = ({ id, activeClassName, activationStyle, previewStyle }) => {
+  const { setNodeRef, isOver } = useDroppable({ id })
 
   return (
     <>
-      <div ref={setNodeRef} style={activationPositions[edge][fraction]} />
+      <div ref={setNodeRef} style={activationStyle} />
       {isOver && <div className={activeClassName} style={previewStyle} />}
     </>
   )
@@ -212,40 +118,17 @@ interface RootDropZonesProps {
 }
 
 export const RootDropZones: React.FC<RootDropZonesProps> = ({ activeClassName }) => {
-  const zones: Array<{
-    id: string
-    fraction: '1/4' | '1/3'
-    edge: 'top' | 'bottom' | 'left' | 'right'
-  }> = [
-    { id: 'drop-root-1/4-top', fraction: '1/4', edge: 'top' },
-    { id: 'drop-root-1/3-top', fraction: '1/3', edge: 'top' },
-    { id: 'drop-root-1/4-bottom', fraction: '1/4', edge: 'bottom' },
-    { id: 'drop-root-1/3-bottom', fraction: '1/3', edge: 'bottom' },
-    { id: 'drop-root-1/4-left', fraction: '1/4', edge: 'left' },
-    { id: 'drop-root-1/3-left', fraction: '1/3', edge: 'left' },
-    { id: 'drop-root-1/4-right', fraction: '1/4', edge: 'right' },
-    { id: 'drop-root-1/3-right', fraction: '1/3', edge: 'right' },
-  ]
-
   return (
-    <div
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        zIndex: 99,
-        pointerEvents: 'none',
-      }}
-    >
-      {zones.map((zone) => (
+    <div style={CONTAINER_STYLE}>
+      {ROOT_ZONES.map((zone) => (
         <RootDropZone
           key={zone.id}
           id={zone.id}
           fraction={zone.fraction}
           edge={zone.edge}
           activeClassName={activeClassName}
+          activationStyle={zone.activationStyle}
+          previewStyle={zone.previewStyle}
         />
       ))}
     </div>

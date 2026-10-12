@@ -21,6 +21,7 @@
     "prepare": "husky || true"
   },
   "devDependencies": {
+    "@changesets/cli": "^3.0.3",
     "tsup": "^8.5.1"
   },
   "overrides": {

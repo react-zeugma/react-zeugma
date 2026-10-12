@@ -40,7 +40,7 @@ export interface SplitNode {
 export interface PaneNode {
   type: 'pane'
   id: string
-  tabs: string[]
+  tabIds: string[]
   activeTabId: string
   locked?: boolean
   tabsMetadata?: Record<string, Record<string, unknown>>
@@ -161,7 +161,7 @@ Access details inside a child component of \`<Pane>\`:
 \`\`\`ts
 const {
   id,
-  tabs,
+  tabIds,
   activeTabId,
   isDragging,
   isFullscreen,
@@ -169,6 +169,9 @@ const {
   remove,
   selectTab,
   removeTab,
+  metadata,
+  locked,
+  tabsMetadata,
   isActiveTabPoppedOut,
   popoutTab,
   dockTab,
@@ -193,6 +196,8 @@ Import these layout mutators/queries from \`react-zeugma/utils\`:
 - **\`findPaneById(tree, paneId)\`**: Returns matching \`PaneNode\` or \`null\`.
 - **\`findPaneContainingTab(tree, tabId)\`**: Returns parent \`PaneNode\` containing the tab, or \`null\`.
 - **\`findTabById(tree, tabId)\`**: Returns \`TabDetails\` or \`null\`.
+- **\`updatePaneLock(tree, paneId, locked)\`**: Updates the lock state of a specific pane. Returns the updated tree.
+- **\`isValidTreeNode(node)\`**: Validates that an object conforms to the structural \`TreeNode\` schema with cycle detection.
 - **\`computeLayout(tree)\`**: Calculates absolute positions (\`{ left, top, width, height }\` as percentages) for all panes and splitters.
 
 ---

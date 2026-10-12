@@ -1,6 +1,11 @@
 import React, { createContext, useContext, useMemo } from 'react'
 import { Tab } from './Tab'
-import { useZeugmaState, ZeugmaActionsContext, useZeugmaDrag } from '../../../shared'
+import {
+  useZeugmaState,
+  ZeugmaActionsContext,
+  useZeugmaDrag,
+  ZeugmaClassNames,
+} from '../../../shared'
 import type { RenderTabProps } from '../../../shared'
 import { calculateTabDropIndex } from '../../../shared/lib/tree'
 import { PaneContext } from './Pane'
@@ -58,6 +63,16 @@ const resolveDynamicProp = <T,>(
   return typeof value === 'function' ? (value as (id: string) => T)(id) : value
 }
 
+const EMPTY_TAB_IDS: string[] = Object.freeze([]) as unknown as string[]
+const EMPTY_GLOBAL_CLASSNAMES: ZeugmaClassNames = Object.freeze({})
+const EMPTY_POPPED_OUT_TAB_IDS: string[] = Object.freeze([]) as unknown as string[]
+const NOOP = () => {}
+const CONTAINER_BASE_STYLE: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  height: '100%',
+}
+
 export const Tabs: React.FC<TabsProps> & {
   Tab: typeof Tab
 } = ({
@@ -73,14 +88,27 @@ export const Tabs: React.FC<TabsProps> & {
 }) => {
   const paneContext = useContext(PaneContext)
 
-  const tabIds = propTabs ?? paneContext?.tabIds ?? []
+  const tabIds = useMemo(
+    () => propTabs ?? paneContext?.tabIds ?? EMPTY_TAB_IDS,
+    [propTabs, paneContext?.tabIds],
+  )
   const activeTabId = propActiveTabId ?? paneContext?.activeTabId ?? ''
   const locked = propLocked ?? paneContext?.locked ?? false
   const tabsMetadata = propTabsMetadata ?? paneContext?.tabsMetadata
-  const selectTab = propSelectTab ?? paneContext?.selectTab ?? (() => {})
-  const removeTab = propRemoveTab ?? paneContext?.removeTab ?? (() => {})
+  const selectTab = useMemo(
+    () => propSelectTab ?? paneContext?.selectTab ?? NOOP,
+    [propSelectTab, paneContext?.selectTab],
+  )
+  const removeTab = useMemo(
+    () => propRemoveTab ?? paneContext?.removeTab ?? NOOP,
+    [propRemoveTab, paneContext?.removeTab],
+  )
 
-  const { classNames: globalClassNames = {}, activeType, poppedOutTabIds = [] } = useZeugmaState()
+  const {
+    classNames: globalClassNames = EMPTY_GLOBAL_CLASSNAMES,
+    activeType,
+    poppedOutTabIds = EMPTY_POPPED_OUT_TAB_IDS,
+  } = useZeugmaState()
   const actions = useContext(ZeugmaActionsContext)
   const { overTabId, overTabPosition } = useZeugmaDrag()
 
@@ -103,9 +131,7 @@ export const Tabs: React.FC<TabsProps> & {
       <div
         className={classNames?.container}
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          height: '100%',
+          ...CONTAINER_BASE_STYLE,
           ...styles?.container,
         }}
       >

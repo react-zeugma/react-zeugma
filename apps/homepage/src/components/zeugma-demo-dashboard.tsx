@@ -2,27 +2,14 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import { Zeugma, Pane, useZeugma, TabDetails, usePaneContext, PaneTree } from 'react-zeugma'
-import {
-  DashboardToolbar,
-  DashboardContainer,
-  PanelChrome,
-} from './zeugma-demo-dashboard/DashboardLayout'
-import { TimeSeriesPanel, RequestsRatePanel } from './zeugma-demo-dashboard/TimeSeriesPanel'
-import { BarGaugePanel } from './zeugma-demo-dashboard/BarGaugePanel'
-import { StatPanel } from './zeugma-demo-dashboard/StatPanel'
-import { TablePanel } from './zeugma-demo-dashboard/TablePanel'
-import { LogsPanel } from './zeugma-demo-dashboard/LogsPanel'
-import { CpuGaugePanel, MemGaugePanel } from './zeugma-demo-dashboard/GaugePanel'
+import { DashboardToolbar, DashboardContainer } from './zeugma-demo-dashboard/DashboardLayout'
 import { WidgetWrapper } from './zeugma-demo-dashboard/WidgetWrapper'
 import { LiveDataProvider } from './zeugma-demo-dashboard/LiveDataProvider'
-import { FpsMonitor } from './fps-monitor'
-import { MapPanel } from './zeugma-demo-dashboard/MapPanel'
-import { Maximize2, Minimize2, X, ExternalLink } from 'lucide-react'
+import { ExternalLink, Maximize2, Minimize2, X } from 'lucide-react'
 
 import { WIDGET_META, defaultDashboardLayout } from './zeugma-demo-dashboard/constants'
 
 import { DashboardDrawer } from './zeugma-demo-dashboard/DashboardDrawer'
-import { EmptyWidgetPanel } from './zeugma-demo-dashboard/EmptyWidgetPanel'
 
 // ── Custom Pane Header (Drag Handle, Fullscreen, Close) ──────────────────────
 
@@ -135,43 +122,7 @@ function ZeugmaDemoDashboardInner() {
   // ── Tab / Widget rendering ───────────────────────────────────────────────
 
   const renderWidget = useCallback((tab: TabDetails) => {
-    const getContent = () => {
-      if (tab.id.startsWith('empty-widget')) {
-        return <EmptyWidgetPanel tabId={tab.id} />
-      }
-      switch (tab.id) {
-        case 'time-series':
-          return <TimeSeriesPanel />
-        case 'requests-rate':
-          return <RequestsRatePanel />
-        case 'service-health':
-          return <BarGaugePanel />
-        case 'key-metrics':
-          return <StatPanel />
-        case 'top-endpoints':
-          return <TablePanel />
-        case 'live-logs':
-          return <LogsPanel />
-        case 'cpu-gauge':
-          return <CpuGaugePanel />
-        case 'mem-gauge':
-          return <MemGaugePanel />
-        case 'fps-monitor':
-          return <FpsMonitor />
-        case 'system-map':
-          return <MapPanel />
-        default:
-          return (
-            <PanelChrome title="Unknown">
-              <div className="flex items-center justify-center h-full text-[#6B6B6B] text-xs">
-                Unknown widget: {tab.id}
-              </div>
-            </PanelChrome>
-          )
-      }
-    }
-
-    return <WidgetWrapper tabId={tab.id}>{getContent()}</WidgetWrapper>
+    return <WidgetWrapper tabId={tab.id} />
   }, [])
 
   // ── Pane rendering ─────────────────────────────────────────────────────────

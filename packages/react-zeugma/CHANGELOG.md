@@ -1,5 +1,16 @@
 # react-zeugma
 
+## 7.1.2
+
+### Patch Changes
+
+- Refactor core layout subsystems, modularize tree helpers, and harden drag-and-drop architecture:
+  - Modularize tree algorithms into single-responsibility modules under `src/shared/lib/tree/` (`factory`, `traverse`, `query`, `mutate-pane`, `mutate-tab`, `layout`, `validate`, `compare`).
+  - Decouple drag-and-drop drop resolution into pure deterministic `resolveDrop` algorithm (`src/entities/zeugma/lib/resolve-drop.ts`) and add typed DnD ID helpers (`src/shared/lib/dnd-ids.ts`).
+  - Modularize popout window management, style mirroring, and event interception under `src/entities/zeugma/model/popout/`.
+  - Add runtime public API export contract tests (`public-exports.test.ts`), structural invariant tests, and characterization regression suites.
+  - Upgrade `@changesets/cli` to `3.0.3` to eliminate all transitive security vulnerabilities (`braces`, `sprintf-js`).
+
 ## 7.1.1
 
 ### Patch Changes

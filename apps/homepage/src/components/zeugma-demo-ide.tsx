@@ -3,16 +3,10 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { Zeugma, Pane, useZeugma, TabDetails } from 'react-zeugma'
 
-import { SyntaxCode } from './syntax-code'
-import { FILES, defaultOuterLayout, LAYOUT_PRESETS } from './mock-files'
+import { defaultOuterLayout, LAYOUT_PRESETS } from './mock-files'
 
 import { isTabOpenInTree, findActiveEditorPane } from './zeugma-demo-ide/utils'
 import { TabContentWrapper } from './zeugma-demo-ide/TabContentWrapper'
-import { InspectorWidget } from './zeugma-demo-ide/InspectorWidget'
-import { FileExplorer } from './zeugma-demo-ide/FileExplorer'
-import { TerminalWidget } from './zeugma-demo-ide/TerminalWidget'
-import { ReadmeWidget } from './zeugma-demo-ide/ReadmeWidget'
-
 import { IDETab } from './zeugma-demo-ide/IDETab'
 
 import {
@@ -83,29 +77,7 @@ export function ZeugmaDemoIDE({
   // ── Tab content resolution ──────────────────────────────────────────────────
   const renderWidget = useCallback(
     (tab: TabDetails) => {
-      const tabId = tab.id
-      const getContent = () => {
-        if (tabId === 'explorer') {
-          return <FileExplorer onOpenFile={stableHandleOpenFile} />
-        }
-        if (tabId === 'terminal') {
-          return <TerminalWidget />
-        }
-        if (tabId === 'inspector') {
-          return <InspectorWidget />
-        }
-        if (tabId === 'README.md') {
-          return <ReadmeWidget />
-        }
-
-        const file = FILES[tabId]
-        if (file?.tokens) {
-          return <SyntaxCode tokens={file.tokens} language={file.language} />
-        }
-        return null
-      }
-
-      return <TabContentWrapper tabId={tabId}>{getContent()}</TabContentWrapper>
+      return <TabContentWrapper tabId={tab.id} onOpenFile={stableHandleOpenFile} />
     },
     [stableHandleOpenFile],
   )

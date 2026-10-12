@@ -16,7 +16,14 @@ export const FlatSplitter: React.FC<FlatSplitterProps> = ({
   snapThreshold,
   containerRef,
 }) => {
-  const { renderingLayout, setLayout, classNames, locked } = useZeugmaState()
+  const {
+    renderingLayout,
+    setLayout,
+    classNames,
+    locked,
+    minSplitPercentage = 5,
+    maxSplitPercentage = 95,
+  } = useZeugmaState()
   const [isResizing, setIsResizing] = useState(false)
 
   const {
@@ -88,9 +95,10 @@ export const FlatSplitter: React.FC<FlatSplitterProps> = ({
       style={style}
       onPointerDown={handlePointerDown}
       role="separator"
+      aria-orientation={isRow ? 'vertical' : 'horizontal'}
       aria-valuenow={currentNode.splitPercentage}
-      aria-valuemin={5}
-      aria-valuemax={95}
+      aria-valuemin={minSplitPercentage}
+      aria-valuemax={maxSplitPercentage}
     />
   )
 }

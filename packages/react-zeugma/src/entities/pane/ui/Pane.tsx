@@ -5,6 +5,8 @@ import {
   useZeugmaActions,
   PortalRegistryContext,
   TabDetails,
+  paneDropId,
+  lockedDropId,
 } from '../../../shared'
 import { findPaneOrContainingTab, findPaneContainingTab } from '../../../shared/lib/tree'
 import { DragListenersCtx } from '../model/context'
@@ -14,6 +16,16 @@ import { DragHandle } from './DragHandle'
 import { Tabs } from './Tabs'
 import { Tab } from './Tab'
 import { PaneControls } from './PaneControls'
+
+const DROP_CONTAINER_STYLE: React.CSSProperties = {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  zIndex: 15,
+  pointerEvents: 'none',
+}
 
 export interface PaneContextValue extends PaneRenderProps {
   id: string
@@ -179,7 +191,7 @@ export const Pane: React.FC<PaneProps> & {
     return findPaneOrContainingTab(targetTree, id)
   }, [layout, renderingLayout, id, activeId, activeType])
   const paneContainerId = paneNode?.id ?? id
-  const tabIds = paneNode?.tabIds ?? [id]
+  const tabIds = useMemo(() => paneNode?.tabIds ?? [id], [paneNode?.tabIds, id])
   const activeTabId = paneNode?.activeTabId ?? id
   const tabsMetadata = paneNode?.tabsMetadata
 
@@ -204,8 +216,9 @@ export const Pane: React.FC<PaneProps> & {
   const dragging = activeId !== null && tabIds.includes(activeId)
   const isFullscreen = fullscreenPaneId === id
 
-  const renderProps: PaneRenderProps = useMemo(
+  const paneContextValue: PaneContextValue = useMemo(
     () => ({
+      id,
       isDragging: dragging,
       isFullscreen,
       toggleFullscreen: () => onFullscreenChange?.(isFullscreen ? null : id),
@@ -232,17 +245,18 @@ export const Pane: React.FC<PaneProps> & {
       dockTab: (tabId) => dockTab(tabId || activeTabId),
     }),
     [
+      id,
       dragging,
       isFullscreen,
       onFullscreenChange,
-      id,
-      removeTab,
+      removePane,
+      paneContainerId,
       metadata,
       isDraggableDisabled,
       tabIds,
       activeTabId,
       selectTab,
-      paneContainerId,
+      removeTab,
       tabsMetadata,
       poppedOutTabIds,
       popoutTab,
@@ -265,7 +279,7 @@ export const Pane: React.FC<PaneProps> & {
   }`.trim()
 
   return (
-    <PaneContext.Provider value={{ id, ...renderProps }}>
+    <PaneContext.Provider value={paneContextValue}>
       <DragListenersCtx.Provider value={contextValue}>
         <div
           ref={setNodeRef}
@@ -276,28 +290,18 @@ export const Pane: React.FC<PaneProps> & {
           {children}
 
           {showDropZones && (
-            <div
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                zIndex: 15,
-                pointerEvents: 'none',
-              }}
-            >
+            <div style={DROP_CONTAINER_STYLE}>
               {(['top', 'bottom', 'left', 'right'] as const).map((pos) => (
                 <DropZone
                   key={pos}
-                  id={`drop-${pos}-${id}`}
+                  id={paneDropId(pos, id)}
                   position={pos}
                   activeClassName={globalClassNames.dropPreview}
                 />
               ))}
               {activeType === 'tab' && (
                 <DropZone
-                  id={`drop-center-${id}`}
+                  id={paneDropId('center', id)}
                   position="center"
                   activeClassName={globalClassNames.swapPreview ?? globalClassNames.dropPreview}
                 />
@@ -306,19 +310,9 @@ export const Pane: React.FC<PaneProps> & {
           )}
 
           {activeId !== null && activeId !== id && isDroppableDisabled && (
-            <div
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                zIndex: 15,
-                pointerEvents: 'none',
-              }}
-            >
+            <div style={DROP_CONTAINER_STYLE}>
               <DropZone
-                id={`drop-locked-${id}`}
+                id={lockedDropId(id)}
                 position="full"
                 activeClassName={globalClassNames.lockedPreview || ''}
               />

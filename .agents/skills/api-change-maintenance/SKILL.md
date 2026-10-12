@@ -1,128 +1,166 @@
 ---
 name: react-zeugma-api-change-maintenance
-description: Checklist and instructions for updating all documentation, code examples, demos, and references across the monorepo after a change to the react-zeugma library API (props, hooks, types, utilities, or exports).
+description: Checklist and instructions for updating all documentation, contract tests, code examples, demos, and references across the monorepo after a change to the react-zeugma library API (props, hooks, types, utilities, or exports).
 ---
 
 # Skill: API Change Maintenance
 
-When a **react-zeugma** library API surface changes — e.g. a prop is added/removed/renamed, a hook signature changes, a type is modified, a utility function is added, or an export is removed — the following locations **must** be audited and updated to stay in sync.
+When a **react-zeugma** library API surface changes — e.g. a prop is added/removed/renamed, a hook signature changes, a type is modified, a utility function is added, or an export is removed — the entire monorepo must be audited and updated to stay in sync.
 
 ---
 
-## 1. Library README (Source of Truth)
+## 1. Core Architectural Invariants
+
+Before updating any API surface, verify that changes comply with the library's design principles:
+
+1. **Pure Spatial Topology**: The layout tree (`TreeNode` = `SplitNode | PaneNode`) represents spatial structure only. `PaneNode` has `tabIds: string[]` and `activeTabId: string`. It does **not** store mutable application state.
+2. **Immutable Tab Metadata**: Tab metadata is decoupled into a fine-grained store (`useSyncExternalStore`). It is registered at tab creation (`initialMetadata`, `addTab`) and read via `findTabById(tabId)?.metadata`, `getTabMetadata(tabId)`, or `useTabMetadata(tabId)`. No imperative `updateMetadata` mutations exist on the layout controller.
+3. **Pure Function Decomposition**: Tree mutations (`src/shared/lib/tree/*`) and drop resolution (`src/entities/zeugma/lib/resolve-drop.ts`) are pure, deterministic functions decoupled from React hooks and DOM operations.
+4. **Three Public Entrypoints**:
+   - `react-zeugma` (`packages/react-zeugma/src/index.ts`): Components, hooks, context, core types.
+   - `react-zeugma/utils` (`packages/react-zeugma/src/utils.ts`): Pure tree manipulation utilities.
+   - `react-zeugma/devtools` (`packages/react-zeugma/src/devtools.ts`): Render counters, badges, and footers.
+
+---
+
+## 2. Public Entrypoints & Runtime Contract Tests
+
+Whenever an export is added, removed, or renamed:
+
+### Files to Update
+
+- **Main entry:** `packages/react-zeugma/src/index.ts`
+- **Utils entry:** `packages/react-zeugma/src/utils.ts`
+- **DevTools entry:** `packages/react-zeugma/src/devtools.ts`
+- **Type definitions:** `packages/react-zeugma/src/shared/model/types.ts`
+
+### Mandatory Contract Test
+
+**File:** `packages/react-zeugma/src/__tests__/public-exports.test.ts`
+
+This test snapshot-validates the exact exported keys of all three entrypoints. **You MUST update this test** to reflect the new or removed export, and verify that it passes:
+
+```bash
+npm test -- src/__tests__/public-exports.test.ts
+```
+
+---
+
+## 3. Internal Modular Subsystems & Tests
+
+The library is organized into single-responsibility modules. Implementations and tests live in dedicated directories:
+
+| Subsystem            | Source Location                                | Tests Location                                   | Responsibility                                                                                              |
+| :------------------- | :--------------------------------------------- | :----------------------------------------------- | :---------------------------------------------------------------------------------------------------------- |
+| **Tree Factory**     | `src/shared/lib/tree/factory.ts`               | `characterization.test.ts`                       | Pure node constructors                                                                                      |
+| **Tree Traversal**   | `src/shared/lib/tree/traverse.ts`              | `characterization.test.ts`                       | Visitor and depth-first walks                                                                               |
+| **Tree Queries**     | `src/shared/lib/tree/query.ts`                 | `characterization.test.ts`                       | Finders (`findPaneById`, `findPaneContainingTab`, `findTabById`)                                            |
+| **Pane Mutations**   | `src/shared/lib/tree/mutate-pane.ts`           | `characterization.test.ts`, `invariants.test.ts` | `splitPane`, `removePane`, `updatePaneLock`, `insertLeaf`                                                   |
+| **Tab Mutations**    | `src/shared/lib/tree/mutate-tab.ts`            | `characterization.test.ts`                       | `addTab`, `removeTab`, `selectTab`, `moveTab`, `swapTabs`, `mergeTab`, `movePaneTabs`                       |
+| **Tree Layout**      | `src/shared/lib/tree/layout.ts`                | `characterization.test.ts`                       | Split percentages & `computeLayout`                                                                         |
+| **Tree Validation**  | `src/shared/lib/tree/validate.ts`              | `invariants.test.ts`                             | `isValidTreeNode`, cycle detection, structural guards                                                       |
+| **Tree Barrel**      | `src/shared/lib/tree/tree-helpers.ts`          | All above                                        | Re-exports all tree modules for backward compatibility                                                      |
+| **Drop Resolution**  | `src/entities/zeugma/lib/resolve-drop.ts`      | `resolve-drop.test.ts`                           | Pure `resolveDrop` algorithm                                                                                |
+| **DnD IDs**          | `src/shared/lib/dnd-ids.ts`                    | `dnd-ids.test.ts`                                | Typed ID builders and `parseDropTarget`                                                                     |
+| **Pointer Tracking** | `src/entities/zeugma/lib/pointer.ts`           | `pointer.test.ts`                                | Pointer position math and calculations                                                                      |
+| **Popout Subsystem** | `src/entities/zeugma/model/popout/*`           | `popout.test.ts`                                 | Window lifecycle (`window.ts`), style mirroring (`style-mirror.ts`), event interception (`interception.ts`) |
+| **Resizer**          | `src/features/resize-pane/hooks/useResizer.ts` | `useResizer.test.tsx`                            | Split drag handle math and pointer events                                                                   |
+
+**Action:** When adding or modifying tree operations, edit the specific module under `src/shared/lib/tree/`, re-export through `tree-helpers.ts` and `src/utils.ts`, and add tests in `characterization.test.ts` or `invariants.test.ts`.
+
+---
+
+## 4. Library README (Canonical Source of Truth)
 
 **File:** `packages/react-zeugma/README.md`
 
-This is the canonical API reference. It contains:
+This is the user-facing canonical documentation. It contains:
 
 - Component prop tables (`<Zeugma>`, `<PaneTree>`, `<Pane>`, `<Tabs>`)
-- Hook option/return tables (`useZeugma`, `useZeugmaContext`, `usePaneContext`, `useResizer`)
+- Hook options and return tables (`useZeugma`, `useZeugmaContext`, `usePaneContext`, `useResizer`)
 - Type definitions (`TreeNode`, `SplitNode`, `PaneNode`, `TabDetails`, `ZeugmaPersistOptions`, `ZeugmaClassNames`)
 - Tree utility function signatures (`react-zeugma/utils`)
-- Inline code examples (Quick Start, Standalone, Provider mode, Styling)
+- Code examples (Quick Start, Standalone, Provider mode, Styling)
 
-**Action:** Update the relevant prop table, type block, code example, or utility list.
-
----
-
-## 2. Library Exports
-
-**File:** `packages/react-zeugma/src/index.ts`
-
-All public components, hooks, and types are re-exported here.
-
-**Action:** Add or remove exports to match the API change. Verify named vs. type exports.
+**Action:** Update the corresponding prop table, type signature, code block, or utility description.
 
 ---
 
-## 3. Homepage Docs — Data Files
+## 5. Homepage Docs — Data Files
 
-These TSX files contain the structured content rendered on the `/docs` page. Each has inline code strings, prop tables (as arrays), and descriptive text that reference the API.
+The `/docs` page is powered by structured TSX files in `apps/homepage/src/config/docs-data/`. Each file contains code strings, prop tables, and explanatory text:
 
-| File                                                        | What it contains                                                                                                                                                                                |
-| ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `apps/homepage/src/config/docs-data/introduction.tsx`       | Feature descriptions, "Why Zeugma" checklist                                                                                                                                                    |
-| `apps/homepage/src/config/docs-data/quickstart.tsx`         | `QUICKSTART_CODE` — full quick-start code block with imports, `TreeNode`, `useZeugma`, `<Zeugma>`, `<Pane>` usage                                                                               |
-| `apps/homepage/src/config/docs-data/tree-layout.tsx`        | `TREE_LAYOUT_CODE` — `TreeNode`, `SplitNode`, `PaneNode` type definitions                                                                                                                       |
-| `apps/homepage/src/config/docs-data/state-controller.tsx`   | `useZeugma` controlled/uncontrolled code snippets, `ZeugmaController` descriptions                                                                                                              |
-| `apps/homepage/src/config/docs-data/pane-customization.tsx` | `<Pane>`, `<Pane.DragHandle>`, `<Pane.Content>`, `<Pane.Tabs>` subcomponent descriptions                                                                                                        |
-| `apps/homepage/src/config/docs-data/advanced-features.tsx`  | `DEBOUNCED_SYNC_CODE`, `CONTEXT_APIS_CODE` — advanced code examples using `useZeugma`, `usePaneContext`, controlled mode                                                                        |
-| `apps/homepage/src/config/docs-data/api-reference.tsx`      | `ZEUGMA_PROPS`, `RENDER_TAB_PROPS`, `USE_ZEUGMA_OPTIONS`, `ZEUGMA_CONTROLLER_METHODS`, `USE_PANE_CONTEXT_PROPERTIES`, `TREE_UTILITIES` — these are row arrays powering the API reference tables |
-| `apps/homepage/src/config/docs-data/skill-md.tsx`           | `SKILL_MD_CONTENT` — the full SKILL.md text shown in docs, duplicates prop lists and type schemas                                                                                               |
+| File                     | What it contains                                                                | What to audit                                                                                                                                            |
+| :----------------------- | :------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `api-reference.tsx`      | Prop tables, controller methods, pane context properties, tree utility table    | Table row arrays: `ZEUGMA_PROPS`, `RENDER_TAB_PROPS`, `USE_ZEUGMA_OPTIONS`, `ZEUGMA_CONTROLLER_METHODS`, `USE_PANE_CONTEXT_PROPERTIES`, `TREE_UTILITIES` |
+| `skill-md.tsx`           | `SKILL_MD_CONTENT` — the complete AI SKILL.md text in markdown template literal | Type schemas (`PaneNode.tabIds`), props, controller return signatures, utility list, code examples                                                       |
+| `tree-layout.tsx`        | `TREE_LAYOUT_CODE` — `TreeNode`, `SplitNode`, `PaneNode` type definitions       | Tree interfaces and spatial topology documentation                                                                                                       |
+| `quickstart.tsx`         | `QUICKSTART_CODE` — full quick-start code snippet                               | Imports, component props, and basic usage                                                                                                                |
+| `state-controller.tsx`   | `useZeugma` controlled/uncontrolled examples                                    | Controller options, returned actions, and queries                                                                                                        |
+| `pane-customization.tsx` | Subcomponents: `<Pane.DragHandle>`, `<Pane.Content>`, `<Pane.Tabs>`             | Subcomponent prop signatures and composition rules                                                                                                       |
+| `advanced-features.tsx`  | Context APIs, popouts, sync examples, debounced updates                         | Hook usages, context properties, and popout styling                                                                                                      |
+| `introduction.tsx`       | Feature highlights, "Why Zeugma" checklist                                      | High-level feature list and capabilities                                                                                                                 |
 
-**Action:** Search each file for the changed API name (prop, hook, type, function). Update matching code string constants, table row arrays, and descriptive JSX.
-
----
-
-## 4. Homepage Docs — Interactive Components
-
-| File                                               | What it contains                                                                                                                            |
-| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `apps/homepage/src/components/docs-playground.tsx` | Interactive playground embedded in the Introduction docs section — uses `useZeugma`, `<Zeugma>`, `<Pane>`, `<PaneTree>`                     |
-| `apps/homepage/src/components/docs-mini-demos.tsx` | `BasicSplitDemo`, `TabControllerDemo`, `CustomStylingDemo` — small interactive examples embedded in docs sections, use library API directly |
-
-**Action:** If the changed API is used by any demo, update the import and usage.
+> [!IMPORTANT]
+> **String constants are fragile**: Code blocks in docs data files are stored as template literal strings. Escape backticks (`\``) and interpolation (`${}`) properly when editing.
 
 ---
 
-## 5. Demo Dashboard Page
+## 6. Homepage Docs — Interactive Components
 
-The `/demo` route renders a full interactive dashboard. These files use the library API directly:
-
-| File                                                     | Key API usage                                                                                                                                                                                                                                                                                                                     |
-| -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `apps/homepage/src/components/zeugma-demo-dashboard.tsx` | `useZeugma`, `<Zeugma>` (with most props: `resizerSize`, `enableDragToDismiss`, `dismissThreshold`, `snapThreshold`, `dragActivationDistance`, `minSplitPercentage`, `maxSplitPercentage`, `persist`, `classNames`), `<PaneTree>`, `<Pane>`, `<Pane.DragHandle>`, `<Pane.Content>`, `<Pane.Tabs>`, `usePaneContext`, `TabDetails` |
-| `apps/homepage/src/components/zeugma-demo-dashboard/`    | Subdirectory with `DashboardDrawer`, `DashboardLayout`, widget panels, `constants.ts` — the drawer exposes API props as interactive controls                                                                                                                                                                                      |
-
-**Action:** Update prop usage, imports, and the drawer controls if a `<Zeugma>` prop changes.
+| File                                               | What it contains                                                                    | Action                                            |
+| :------------------------------------------------- | :---------------------------------------------------------------------------------- | :------------------------------------------------ |
+| `apps/homepage/src/components/docs-playground.tsx` | Interactive playground embedded in docs Introduction                                | Update `<Zeugma>` / `<Pane>` / `<PaneTree>` usage |
+| `apps/homepage/src/components/docs-mini-demos.tsx` | Mini interactive demos (`BasicSplitDemo`, `TabControllerDemo`, `CustomStylingDemo`) | Update props or controller calls if affected      |
 
 ---
 
-## 6. Homepage Landing Page
+## 7. Demo Applications & Landing Pages
 
-**File:** `apps/homepage/src/views/home.tsx`
+| File                                                                                | Key API Usage                                                                                        |
+| :---------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------- |
+| `apps/homepage/src/components/zeugma-demo-dashboard.tsx` & `zeugma-demo-dashboard/` | Full dashboard demo with `DashboardDrawer`, widget panels, controls drawer exposing `<Zeugma>` props |
+| `apps/homepage/src/components/zeugma-demo-ide.tsx` & `zeugma-demo-ide/`             | IDE demo with multi-tab panes, tree layout, and popout widgets                                       |
+| `apps/homepage/src/views/home.tsx`                                                  | Landing page feature cards and live demo embed                                                       |
 
-Contains a live `<ZeugmaDemoDashboard />` embed and feature description cards. If a major feature is added/removed, update the feature card text.
-
----
-
-## 7. SKILL.md in Docs
-
-**File:** `apps/homepage/src/config/docs-data/skill-md.tsx` → `SKILL_MD_CONTENT`
-
-This is a **complete duplicate** of the API surface written as a markdown string for AI consumption. It includes:
-
-- Core rules & constraints
-- `TreeNode`/`SplitNode`/`PaneNode`/`TabDetails` type schemas
-- Component composition examples
-- `useZeugma` options list
-- `useZeugmaContext` and `usePaneContext` return values
-- Tree utility function signatures
-
-**Action:** This is the most error-prone file — it's a giant string literal with escaped backticks. After any API change, carefully update the relevant section inside `SKILL_MD_CONTENT`.
+**Action:** If a `<Zeugma>` prop or controller method is modified, update the demo components and controls in `DashboardDrawer`.
 
 ---
 
-## Quick Checklist
+## 8. Monorepo Verification Pipeline
 
-When changing the API, go through this list:
+Always run the full verification pipeline before committing or releasing any API change:
 
-1. [ ] `packages/react-zeugma/src/index.ts` — exports
-2. [ ] `packages/react-zeugma/README.md` — canonical docs
-3. [ ] `apps/homepage/src/config/docs-data/api-reference.tsx` — prop/method table arrays
-4. [ ] `apps/homepage/src/config/docs-data/skill-md.tsx` — `SKILL_MD_CONTENT` string
-5. [ ] `apps/homepage/src/config/docs-data/quickstart.tsx` — `QUICKSTART_CODE` if affected
-6. [ ] `apps/homepage/src/config/docs-data/tree-layout.tsx` — `TREE_LAYOUT_CODE` if types changed
-7. [ ] `apps/homepage/src/config/docs-data/state-controller.tsx` — if `useZeugma` options changed
-8. [ ] `apps/homepage/src/config/docs-data/pane-customization.tsx` — if `<Pane>` subcomponents changed
-9. [ ] `apps/homepage/src/config/docs-data/advanced-features.tsx` — if context/hook APIs changed
-10. [ ] `apps/homepage/src/components/zeugma-demo-dashboard.tsx` — live demo usage
-11. [ ] `apps/homepage/src/components/docs-playground.tsx` — interactive playground
-12. [ ] `apps/homepage/src/components/docs-mini-demos.tsx` — inline mini demos
-13. [ ] `apps/homepage/src/views/home.tsx` — feature cards (if major feature added/removed)
+```bash
+# 1. Run all unit tests (must pass 130+ tests across 14 test files)
+npm test
 
-### Tips
+# 2. Typecheck the entire monorepo
+npm run typecheck
 
-- **Use grep**: Run `grep -rn "changedPropName"` across `apps/homepage/src/` to catch all occurrences.
-- **String constants are fragile**: Code blocks in docs data files are stored as template literal strings. Pay attention to escaped backticks (`\\\``) and interpolation (`\\${}`) when editing.
-- **Verify the build**: Run `npm run dev:homepage` after changes to ensure no import errors or broken renders.
+# 3. Lint the library source
+npm run lint:lib
+
+# 4. Build the library (produces ESM, CJS, and DTS bundles)
+npm run build:lib
+
+# 5. Build the homepage Next.js application
+npm run build:homepage
+```
+
+---
+
+## 9. Quick Audit Checklist
+
+When changing any API, verify each item:
+
+- [ ] **Implementation**: Added/updated in modular source file (e.g. `src/shared/lib/tree/<module>.ts`)
+- [ ] **Re-export**: Re-exported through barrel (`tree-helpers.ts`) and entrypoint (`src/index.ts`, `src/utils.ts`, or `src/devtools.ts`)
+- [ ] **Contract Test**: `packages/react-zeugma/src/__tests__/public-exports.test.ts` updated and passing
+- [ ] **Unit Tests**: Added corresponding unit/invariant/characterization tests
+- [ ] **Canonical README**: `packages/react-zeugma/README.md` prop tables, types, and examples updated
+- [ ] **Docs Reference**: `apps/homepage/src/config/docs-data/api-reference.tsx` row arrays updated
+- [ ] **AI SKILL.md**: `apps/homepage/src/config/docs-data/skill-md.tsx` (`SKILL_MD_CONTENT`) updated
+- [ ] **Docs Code Snippets**: `quickstart.tsx`, `tree-layout.tsx`, `state-controller.tsx`, etc. updated
+- [ ] **Interactive Demos**: `zeugma-demo-dashboard.tsx`, `zeugma-demo-ide.tsx`, `docs-playground.tsx` updated
+- [ ] **Full Build**: `npm test`, `npm run typecheck`, `npm run lint:lib`, `npm run build:lib`, and `npm run build:homepage` all pass cleanly

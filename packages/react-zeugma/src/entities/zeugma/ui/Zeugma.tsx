@@ -1,8 +1,7 @@
-import React, { useMemo, useCallback } from 'react'
+import React, { useMemo, useCallback, useEffect } from 'react'
 import { DndContext } from '@dnd-kit/core'
 
 import {
-  SplitNode,
   ZeugmaStateContext,
   ZeugmaActionsContext,
   PortalRegistryContext,
@@ -11,6 +10,9 @@ import {
   ZeugmaProps,
   BaseZeugmaProps,
   ZeugmaControllerInternal,
+  useShallowStable,
+  TabDetails,
+  ZeugmaClassNames,
 } from '../../../shared'
 import {
   usePortalRegistry,
@@ -25,6 +27,23 @@ import { PortalHostItem } from './PortalHostItem'
 import { DragOverlayPreview } from './DragOverlayPreview'
 import { PaneTree } from '../../../widgets/pane-tree'
 
+const EMPTY_CLASSNAMES: ZeugmaClassNames = Object.freeze({})
+const EMPTY_POPPED_OUT_TAB_IDS: string[] = Object.freeze([]) as unknown as string[]
+
+const DISMISSING_TRANSFORM_STYLE: React.CSSProperties = {
+  transition: 'transform 150ms cubic-bezier(0.2, 0, 0, 1)',
+  transform: 'scale(0.8)',
+  transformOrigin: 'top left',
+}
+
+const NORMAL_TRANSFORM_STYLE: React.CSSProperties = {
+  transition: 'transform 150ms cubic-bezier(0.2, 0, 0, 1)',
+  transform: 'scale(1)',
+  transformOrigin: 'top left',
+}
+
+const PORTAL_HOST_STYLE: React.CSSProperties = { display: 'none' }
+
 const ZeugmaProviderInternal: React.FC<
   BaseZeugmaProps & { children?: React.ReactNode; renderPane?: (paneId: string) => React.ReactNode }
 > = (props) => {
@@ -32,7 +51,7 @@ const ZeugmaProviderInternal: React.FC<
     controller,
     children,
     renderDragOverlay,
-    classNames = {},
+    classNames = EMPTY_CLASSNAMES,
     renderPane,
     resizerSize,
 
@@ -90,7 +109,7 @@ const ZeugmaProviderInternal: React.FC<
     splitPane,
     updateSplitPercentage,
     moveTab,
-    poppedOutTabIds = [],
+    poppedOutTabIds = EMPTY_POPPED_OUT_TAB_IDS,
     popoutTab,
     dockTab,
   } = internalController
@@ -165,44 +184,8 @@ const ZeugmaProviderInternal: React.FC<
     removePane,
   })
 
-  // Shallow-memoize classNames by individual fields to avoid identity busting from inline objects
-  const stableClassNames = useMemo(
-    () => classNames,
-    [
-      classNames.dashboard,
-      classNames.dashboardDismissActive,
-      classNames.pane,
-      classNames.paneLocked,
-      classNames.dropPreview,
-      classNames.rootDropPreview,
-      classNames.dragOverlay,
-      classNames.paneDragPreview,
-      classNames.tabDragPreview,
-      classNames.resizer,
-      classNames.dismissPreview,
-      classNames.dashboardLocked,
-      classNames.lockedPreview,
-      classNames.tabDropPreview,
-      classNames.tabSeparator,
-      classNames.tabsContainer,
-      classNames.tab,
-      classNames.paneContainer,
-      classNames.paneHeader,
-      classNames.paneControls,
-      classNames.paneButton,
-      classNames.tabCloseButton,
-      classNames.dragHandle,
-    ],
-  )
-
-  const handleResizeEnd = useCallback(
-    (currentNode: SplitNode, percentage: number) => {
-      if (onResizeEnd) {
-        onResizeEnd(currentNode, percentage)
-      }
-    },
-    [onResizeEnd],
-  )
+  // Shallow-memoize classNames to avoid identity busting from inline objects and track all properties
+  const stableClassNames = useShallowStable(classNames)
 
   // State context — reactive values that change during runtime
   const stateValue = useMemo(
@@ -221,7 +204,7 @@ const ZeugmaProviderInternal: React.FC<
       snapThreshold,
       onResizeStart,
       onResize,
-      onResizeEnd: handleResizeEnd,
+      onResizeEnd,
       minSplitPercentage,
       maxSplitPercentage,
       locked,
@@ -251,10 +234,10 @@ const ZeugmaProviderInternal: React.FC<
       snapThreshold,
       onResizeStart,
       onResize,
+      onResizeEnd,
       minSplitPercentage,
       maxSplitPercentage,
       setLayout,
-      handleResizeEnd,
       locked,
       setLocked,
       findPaneById,
@@ -315,6 +298,17 @@ const ZeugmaProviderInternal: React.FC<
   // Collect all tab IDs and widget IDs in the current layout tree
   const allTabIds = useAllTabIds(layout)
 
+  const tabDetailsMap = useMemo(() => {
+    const map = new Map<string, TabDetails>()
+    for (const id of allTabIds) {
+      const tab = findTabById(id)
+      if (tab) {
+        map.set(id, tab)
+      }
+    }
+    return map
+  }, [allTabIds, findTabById])
+
   const portalRegistryValue = useMemo(
     () => ({
       registerPortalTarget,
@@ -340,9 +334,40 @@ const ZeugmaProviderInternal: React.FC<
     ],
   )
 
-  if (activeIdRef) {
-    activeIdRef.current = activeId
-  }
+  useEffect(() => {
+    if (activeIdRef) {
+      activeIdRef.current = activeId
+    }
+  }, [activeId, activeIdRef])
+
+  const renderCursorOverlay = useCallback(
+    (id: string) => {
+      const isDismissing = id === dismissIntentId
+      return (
+        <div style={isDismissing ? DISMISSING_TRANSFORM_STYLE : NORMAL_TRANSFORM_STYLE}>
+          <DragOverlayPreview
+            activeId={id}
+            activeType={activeType!}
+            dismissIntentId={dismissIntentId}
+            renderDragOverlay={renderDragOverlay}
+            renderPaneRef={renderPaneRef}
+            renderPane={renderPane}
+            tabHeadersRef={tabHeadersRef}
+            classNames={stableClassNames}
+          />
+        </div>
+      )
+    },
+    [
+      dismissIntentId,
+      activeType,
+      renderDragOverlay,
+      renderPaneRef,
+      renderPane,
+      tabHeadersRef,
+      stableClassNames,
+    ],
+  )
 
   return (
     <ZeugmaActionsContext.Provider value={actionsValue}>
@@ -355,39 +380,17 @@ const ZeugmaProviderInternal: React.FC<
             {activeId && activeType && (
               <CursorOverlay
                 activeId={activeId}
-                render={(id) => {
-                  const isDismissing = id === dismissIntentId
-                  return (
-                    <div
-                      style={{
-                        transition: 'transform 150ms cubic-bezier(0.2, 0, 0, 1)',
-                        transform: isDismissing ? 'scale(0.8)' : 'scale(1)',
-                        transformOrigin: 'top left',
-                      }}
-                    >
-                      <DragOverlayPreview
-                        activeId={id}
-                        activeType={activeType}
-                        dismissIntentId={dismissIntentId}
-                        renderDragOverlay={renderDragOverlay}
-                        renderPaneRef={renderPaneRef}
-                        renderPane={renderPane}
-                        tabHeadersRef={tabHeadersRef}
-                        classNames={stableClassNames}
-                      />
-                    </div>
-                  )
-                }}
-                className={`${classNames.dragOverlay || ''} ${
-                  activeId === dismissIntentId ? classNames.dismissPreview || '' : ''
+                render={renderCursorOverlay}
+                className={`${stableClassNames.dragOverlay || ''} ${
+                  activeId === dismissIntentId ? stableClassNames.dismissPreview || '' : ''
                 }`.trim()}
               />
             )}
             {/* Transparent Portal Host to preserve widget state across pane drags */}
-            <div id="zeugma-portal-host" style={{ display: 'none' }}>
+            <div id="zeugma-portal-host" style={PORTAL_HOST_STYLE}>
               {allTabIds.map((tabId) => {
                 const target = portalTargets[tabId]
-                const tabDetails = findTabById(tabId)
+                const tabDetails = tabDetailsMap.get(tabId)
                 if (!tabDetails) return null
                 return (
                   <PortalHostItem

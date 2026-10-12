@@ -1,5 +1,8 @@
 import { useEffect, useState, SetStateAction } from 'react'
-import { TreeNode, ZeugmaPersistOptions } from '../../../shared'
+import { TreeNode, ZeugmaPersistOptions, DEFAULT_PERSIST_KEY } from '../../../shared'
+import { isValidTreeNode, isRenderableTree } from '../../../shared/lib/tree'
+
+export { isValidTreeNode, isRenderableTree }
 
 export interface UseZeugmaPersistenceProps {
   persist?: boolean | ZeugmaPersistOptions
@@ -7,12 +10,9 @@ export interface UseZeugmaPersistenceProps {
   setLayout: (nextLayoutOrUpdater: SetStateAction<TreeNode | null>) => void
 }
 
-import { isValidTreeNode } from '../../../shared/lib/tree/tree-helpers'
-export { isValidTreeNode }
-
 export function useZeugmaPersistence({ persist, layout, setLayout }: UseZeugmaPersistenceProps) {
   const isEnabled = typeof persist === 'object' ? persist.enabled !== false : !!persist
-  const persistKey = (typeof persist === 'object' && persist.key) || 'zeugma-layout'
+  const persistKey = (typeof persist === 'object' && persist.key) || DEFAULT_PERSIST_KEY
 
   const [isLoaded, setIsLoaded] = useState(false)
 
@@ -23,7 +23,7 @@ export function useZeugmaPersistence({ persist, layout, setLayout }: UseZeugmaPe
         const saved = localStorage.getItem(persistKey)
         if (saved) {
           const parsed = JSON.parse(saved)
-          if (isValidTreeNode(parsed)) {
+          if (isRenderableTree(parsed)) {
             setLayout(parsed)
           }
         }

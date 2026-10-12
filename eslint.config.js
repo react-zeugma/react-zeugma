@@ -1,5 +1,6 @@
 import { defineConfig } from 'eslint/config';
 import tseslint from 'typescript-eslint';
+import reactHooks from 'eslint-plugin-react-hooks';
 
 export default defineConfig(
   {
@@ -7,6 +8,9 @@ export default defineConfig(
   },
   ...tseslint.configs.recommended,
   {
+    plugins: {
+      'react-hooks': reactHooks,
+    },
     languageOptions: {
       parserOptions: {
         project: ['./packages/react-zeugma/tsconfig.json'],
@@ -23,6 +27,8 @@ export default defineConfig(
       '@typescript-eslint/no-explicit-any': 'warn',
       'semi': ['error', 'never'],
       'quotes': ['error', 'single', { 'avoidEscape': true }],
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
     },
   },
 );

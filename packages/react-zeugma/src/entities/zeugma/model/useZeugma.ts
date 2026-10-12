@@ -1,11 +1,12 @@
-import { useState, useRef, useEffect, useCallback, SetStateAction } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo, SetStateAction } from 'react'
 import {
   TreeNode,
   SplitDirection,
-  SplitNode,
   UseZeugmaOptions,
   ZeugmaController,
   ZeugmaControllerInternal,
+  ZeugmaActions,
+  ZeugmaQueries,
 } from '../../../shared'
 import {
   removePane,
@@ -32,7 +33,7 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
     onChange,
     fullscreenPaneId: controlledFullscreenPaneId,
     onFullscreenChange,
-    locked: initialLocked = false,
+    locked: lockedOption = false,
   } = options
 
   const [layout, setLocalLayout] = useState<TreeNode | null>(() => {
@@ -41,11 +42,13 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
   const [renderingLayout, setRenderingLayout] = useState<TreeNode | null>(() => {
     return controlledLayout !== undefined ? controlledLayout : (initialLayout ?? null)
   })
-  const prevControlledLayoutRef = useRef<TreeNode | null | undefined>(controlledLayout)
+  const [prevControlledLayout, setPrevControlledLayout] = useState<TreeNode | null | undefined>(
+    controlledLayout,
+  )
   const [fullscreenPaneId, setLocalFullscreenPaneId] = useState<string | null>(
     controlledFullscreenPaneId || null,
   )
-  const [locked, setLocked] = useState(initialLocked)
+  const [locked, setLocked] = useState(lockedOption)
   const [poppedOutTabIds, setPoppedOutTabIds] = useState<string[]>([])
 
   const [activeId, setActiveId] = useState<string | null>(null)
@@ -78,8 +81,8 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
 
   // Sync state if options change
   useEffect(() => {
-    setLocked(initialLocked)
-  }, [initialLocked])
+    setLocked(lockedOption)
+  }, [lockedOption])
 
   useEffect(() => {
     if (controlledFullscreenPaneId !== undefined) {
@@ -89,8 +92,8 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
 
   // Sync state if controlled layout changes from outside during render
   if (controlledLayout !== undefined) {
-    if (!areLayoutsEqual(controlledLayout, prevControlledLayoutRef.current ?? null)) {
-      prevControlledLayoutRef.current = controlledLayout
+    if (!areLayoutsEqual(controlledLayout, prevControlledLayout ?? null)) {
+      setPrevControlledLayout(controlledLayout)
       setLocalLayout(controlledLayout)
       setRenderingLayout(controlledLayout)
       setPoppedOutTabIds((prevPopped) => {
@@ -102,11 +105,15 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
   }
 
   // A wrapper that computes the layout mutation, updates state, and triggers onChange
-  const wrapMutation = useCallback(
+  const mutateLayout = useCallback(
     <Args extends unknown[]>(
       mutationFn: (current: TreeNode | null, ...args: Args) => TreeNode | null,
+      opts?: { blockedInFullscreen?: boolean },
     ) => {
       return (...args: Args) => {
+        if (opts?.blockedInFullscreen && fullscreenPaneIdRef.current !== null) {
+          return
+        }
         const prev = layoutRef.current
         const next = mutationFn(prev, ...args)
 
@@ -128,13 +135,14 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
     [],
   )
 
-  const handleSetLayout = useCallback(
-    wrapMutation((prev, nextLayoutOrUpdater: SetStateAction<TreeNode | null>) => {
-      return typeof nextLayoutOrUpdater === 'function'
-        ? (nextLayoutOrUpdater as (prev: TreeNode | null) => TreeNode | null)(prev)
-        : nextLayoutOrUpdater
-    }),
-    [wrapMutation],
+  const handleSetLayout = useMemo(
+    () =>
+      mutateLayout((prev, nextLayoutOrUpdater: SetStateAction<TreeNode | null>) => {
+        return typeof nextLayoutOrUpdater === 'function'
+          ? (nextLayoutOrUpdater as (prev: TreeNode | null) => TreeNode | null)(prev)
+          : nextLayoutOrUpdater
+      }),
+    [mutateLayout],
   )
 
   // Internal setter used by DnD — does NOT trigger onChange or reset transient states
@@ -157,201 +165,152 @@ export function useZeugma(options: UseZeugmaOptions): ZeugmaController {
       setActiveId(null)
       setActiveType(null)
       setDismissIntentId(null)
-      handleSetLayout(nextLayoutOrUpdater)
+      const resolved =
+        typeof nextLayoutOrUpdater === 'function'
+          ? (nextLayoutOrUpdater as (prev: TreeNode | null) => TreeNode | null)(layoutRef.current)
+          : nextLayoutOrUpdater
+      handleSetLayout(resolved)
       // Force sync renderingLayout to clear any transient drag removals
-      setRenderingLayout(() => {
-        const next =
-          typeof nextLayoutOrUpdater === 'function'
-            ? (nextLayoutOrUpdater as (prev: TreeNode | null) => TreeNode | null)(layoutRef.current)
-            : nextLayoutOrUpdater
-        return next
-      })
+      setRenderingLayout(resolved)
     },
     [handleSetLayout],
   )
 
-  // Layout Modification Actions using wrapped mutation functions
-  const handleRemovePane = useCallback(
-    wrapMutation((prev, paneId: string) => {
-      if (fullscreenPaneIdRef.current !== null) return prev
-      return removePane(prev, paneId)
-    }),
-    [wrapMutation],
-  )
-
-  const handleAddTab = useCallback(
-    wrapMutation(
-      (prev, tabId: string, targetPaneId?: string, metadata?: Record<string, unknown>) => {
-        if (fullscreenPaneIdRef.current !== null) return prev
-        const cleanedPrev = removeTab(prev, tabId) ?? prev
-        return addTab(cleanedPrev, targetPaneId, tabId, metadata)
-      },
-    ),
-    [wrapMutation],
-  )
-
-  const handleSplitPane = useCallback(
-    wrapMutation(
-      (
-        prev,
-        targetId: string,
-        direction: SplitDirection,
-        splitType: 'left' | 'right' | 'top' | 'bottom',
-        paneToAdd: string,
-      ) => {
-        if (fullscreenPaneIdRef.current !== null) return prev
-        const targetPane = findPaneById(prev, targetId) ?? findPaneContainingTab(prev, targetId)
+  // Layout Modification Actions
+  const actions: ZeugmaActions = useMemo(
+    () => ({
+      removePane: mutateLayout(removePane, { blockedInFullscreen: true }),
+      addTab: mutateLayout(
+        (prev, tabId: string, targetPaneId?: string, metadata?: Record<string, unknown>) => {
+          const cleanedPrev = removeTab(prev, tabId) ?? prev
+          return addTab(cleanedPrev, targetPaneId, tabId, metadata)
+        },
+        { blockedInFullscreen: true },
+      ),
+      updatePaneLock: mutateLayout((prev, paneId: string, isLocked: boolean) => {
+        const targetPane = findPaneById(prev, paneId) ?? findPaneContainingTab(prev, paneId)
         if (!targetPane) return prev
+        return updatePaneLock(prev, targetPane.id, isLocked)
+      }),
+      selectTab: mutateLayout((prev, paneId: string, tabId: string) => {
+        const targetPane = findPaneById(prev, paneId) ?? findPaneContainingTab(prev, paneId)
+        if (!targetPane) return prev
+        return selectTab(prev, targetPane.id, tabId)
+      }),
+      mergeTab: mutateLayout(
+        (prev, draggedTabId: string, targetPaneId: string) => {
+          const targetPane =
+            findPaneById(prev, targetPaneId) ?? findPaneContainingTab(prev, targetPaneId)
+          if (!targetPane) return prev
+          return mergeTab(prev, draggedTabId, targetPane.id)
+        },
+        { blockedInFullscreen: true },
+      ),
+      moveTab: mutateLayout(
+        (
+          prev,
+          draggedTabId: string,
+          targetTabId: string,
+          position?: 'before' | 'after' | 'center',
+        ) => moveTab(prev, draggedTabId, targetTabId, position),
+        { blockedInFullscreen: true },
+      ),
+      removeTab: mutateLayout(removeTab, { blockedInFullscreen: true }),
+      splitPane: mutateLayout(
+        (
+          prev,
+          targetId: string,
+          direction: SplitDirection,
+          splitType: 'left' | 'right' | 'top' | 'bottom',
+          paneToAdd: string,
+        ) => {
+          const targetPane = findPaneById(prev, targetId) ?? findPaneContainingTab(prev, targetId)
+          if (!targetPane) return prev
 
-        const draggedPaneNode = findPaneById(prev, paneToAdd) ??
-          findPaneContainingTab(prev, paneToAdd) ?? {
-            type: 'pane',
-            id: paneToAdd,
-            tabIds: [paneToAdd],
-            activeTabId: paneToAdd,
-          }
-        const treeWithoutDragging = removePane(prev, draggedPaneNode.id)
-        return splitPane(treeWithoutDragging, targetPane.id, direction, splitType, draggedPaneNode)
+          const draggedPaneNode = findPaneById(prev, paneToAdd) ??
+            findPaneContainingTab(prev, paneToAdd) ?? {
+              type: 'pane',
+              id: paneToAdd,
+              tabIds: [paneToAdd],
+              activeTabId: paneToAdd,
+            }
+          const treeWithoutDragging = removePane(prev, draggedPaneNode.id)
+          return splitPane(
+            treeWithoutDragging,
+            targetPane.id,
+            direction,
+            splitType,
+            draggedPaneNode,
+          )
+        },
+        { blockedInFullscreen: true },
+      ),
+      updateSplitPercentage: mutateLayout(updateSplitPercentage, { blockedInFullscreen: true }),
+      popoutTab: (tabId: string) => {
+        if (fullscreenPaneIdRef.current !== null) return
+        setPoppedOutTabIds((prev) => (prev.includes(tabId) ? prev : [...prev, tabId]))
       },
-    ),
-    [wrapMutation],
-  )
-
-  const handleUpdateSplitPercentage = useCallback(
-    wrapMutation((prev, currentNode: SplitNode, percentage: number) => {
-      if (fullscreenPaneIdRef.current !== null) return prev
-      return updateSplitPercentage(prev, currentNode, percentage)
-    }),
-    [wrapMutation],
-  )
-
-  const handleUpdatePaneLock = useCallback(
-    wrapMutation((prev, paneId: string, isLocked: boolean) => {
-      const targetPane = findPaneById(prev, paneId) ?? findPaneContainingTab(prev, paneId)
-      if (!targetPane) return prev
-      return updatePaneLock(prev, targetPane.id, isLocked)
-    }),
-    [wrapMutation],
-  )
-
-  const handleSelectTab = useCallback(
-    wrapMutation((prev, paneId: string, tabId: string) => {
-      const targetPane = findPaneById(prev, paneId) ?? findPaneContainingTab(prev, paneId)
-      if (!targetPane) return prev
-      return selectTab(prev, targetPane.id, tabId)
-    }),
-    [wrapMutation],
-  )
-
-  const handleMergeTab = useCallback(
-    wrapMutation((prev, draggedTabId: string, targetPaneId: string) => {
-      if (fullscreenPaneIdRef.current !== null) return prev
-      const targetPane =
-        findPaneById(prev, targetPaneId) ?? findPaneContainingTab(prev, targetPaneId)
-      if (!targetPane) return prev
-      return mergeTab(prev, draggedTabId, targetPane.id)
-    }),
-    [wrapMutation],
-  )
-
-  const handleMoveTab = useCallback(
-    wrapMutation(
-      (
-        prev,
-        draggedTabId: string,
-        targetTabId: string,
-        position?: 'before' | 'after' | 'center',
-      ) => {
-        if (fullscreenPaneIdRef.current !== null) return prev
-        return moveTab(prev, draggedTabId, targetTabId, position)
+      dockTab: (tabId: string) => {
+        if (fullscreenPaneIdRef.current !== null) return
+        setPoppedOutTabIds((prev) =>
+          !prev.includes(tabId) ? prev : prev.filter((id) => id !== tabId),
+        )
       },
-    ),
-    [wrapMutation],
-  )
-
-  const handleRemoveTab = useCallback(
-    wrapMutation((prev, tabId: string) => {
-      if (fullscreenPaneIdRef.current !== null) return prev
-      return removeTab(prev, tabId)
     }),
-    [wrapMutation],
+    [mutateLayout],
   )
 
-  const handleFindPaneById = useCallback((paneId: string) => {
-    return findPaneById(layoutRef.current, paneId)
-  }, [])
+  // Tree queries
+  const queries: ZeugmaQueries = useMemo(
+    () => ({
+      findPaneById: (paneId: string) => findPaneById(layoutRef.current, paneId),
+      findPaneContainingTab: (tabId: string) => findPaneContainingTab(layoutRef.current, tabId),
+      findTabById: (tabId: string) => findTabById(layoutRef.current, tabId),
+      getTabMetadata: (tabId: string) => getTabMetadata(layoutRef.current, tabId),
+      getActiveTabMetadata: (paneId: string) => getActiveTabMetadata(layoutRef.current, paneId),
+    }),
+    [],
+  )
 
-  const handleFindPaneContainingTab = useCallback((tabId: string) => {
-    return findPaneContainingTab(layoutRef.current, tabId)
-  }, [])
-
-  const handleFindTabById = useCallback((tabId: string) => {
-    return findTabById(layoutRef.current, tabId)
-  }, [])
-
-  const handleGetTabMetadata = useCallback((tabId: string) => {
-    return getTabMetadata(layoutRef.current, tabId)
-  }, [])
-
-  const handleGetActiveTabMetadata = useCallback((paneId: string) => {
-    return getActiveTabMetadata(layoutRef.current, paneId)
-  }, [])
-
-  const handlePopoutTab = useCallback((tabId: string) => {
-    if (fullscreenPaneIdRef.current !== null) return
-    setPoppedOutTabIds((prev) => {
-      if (prev.includes(tabId)) return prev
-      return [...prev, tabId]
-    })
-  }, [])
-
-  const handleDockTab = useCallback((tabId: string) => {
-    if (fullscreenPaneIdRef.current !== null) return
-    setPoppedOutTabIds((prev) => {
-      if (!prev.includes(tabId)) return prev
-      return prev.filter((id) => id !== tabId)
-    })
-  }, [])
-
-  const controller: ZeugmaControllerInternal = {
-    layout,
-    setLayout,
-    _internalSetLayout,
-    renderingLayout,
-    fullscreenPaneId,
-    setFullscreenPaneId,
-    locked,
-    setLocked,
-    poppedOutTabIds,
-    activeId,
-    setActiveId,
-    activeType,
-    setActiveType,
-    dismissIntentId,
-    setDismissIntentId,
-    containerRef,
-    setContainerRef,
-
-    // Actions
-    removePane: handleRemovePane,
-    addTab: handleAddTab,
-    updatePaneLock: handleUpdatePaneLock,
-    selectTab: handleSelectTab,
-    mergeTab: handleMergeTab,
-    moveTab: handleMoveTab,
-    removeTab: handleRemoveTab,
-    splitPane: handleSplitPane,
-    updateSplitPercentage: handleUpdateSplitPercentage,
-    popoutTab: handlePopoutTab,
-    dockTab: handleDockTab,
-
-    // Queries
-    findPaneById: handleFindPaneById,
-    findPaneContainingTab: handleFindPaneContainingTab,
-    findTabById: handleFindTabById,
-    getTabMetadata: handleGetTabMetadata,
-    getActiveTabMetadata: handleGetActiveTabMetadata,
-  }
+  const controller: ZeugmaControllerInternal = useMemo(
+    () => ({
+      layout,
+      setLayout,
+      _internalSetLayout,
+      renderingLayout,
+      fullscreenPaneId,
+      setFullscreenPaneId,
+      locked,
+      setLocked,
+      poppedOutTabIds,
+      activeId,
+      setActiveId,
+      activeType,
+      setActiveType,
+      dismissIntentId,
+      setDismissIntentId,
+      containerRef,
+      setContainerRef,
+      ...actions,
+      ...queries,
+    }),
+    [
+      layout,
+      setLayout,
+      _internalSetLayout,
+      renderingLayout,
+      fullscreenPaneId,
+      setFullscreenPaneId,
+      locked,
+      poppedOutTabIds,
+      activeId,
+      activeType,
+      dismissIntentId,
+      setContainerRef,
+      actions,
+      queries,
+    ],
+  )
 
   return controller
 }

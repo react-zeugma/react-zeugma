@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { addTab, removeTab, moveTab, splitPane, selectTab, isValidTreeNode } from '../tree-helpers'
+import { addTab, removeTab, moveTab, splitPane, selectTab, isValidTreeNode } from '../index'
 import type { TreeNode, PaneNode, SplitNode } from '../../../model/types'
 
 function validateTreeInvariants(tree: TreeNode | null): void {

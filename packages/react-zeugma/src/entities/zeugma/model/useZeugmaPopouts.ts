@@ -3,7 +3,6 @@ import { TabDetails } from '../../../shared'
 import {
   setupPopoutInterception,
   teardownPopoutInterception,
-  getActiveDocument,
   getActivePopoutDocuments,
   addActivePopoutDocument,
   removeActivePopoutDocument,
@@ -22,8 +21,6 @@ import {
   bindPopoutTracking,
   closePopoutWindow,
 } from './popout'
-
-export { setupPopoutInterception, teardownPopoutInterception, getActiveDocument }
 
 export interface UseZeugmaPopoutsProps {
   poppedOutTabIds: string[]

@@ -60,13 +60,11 @@ export function parseDropTarget(rawId: string | undefined | null): ParsedDropTar
     return { type: 'locked', paneId: rawId.substring(DROP_LOCKED_PREFIX.length) }
   }
 
-  const rootMatch = rawId.match(/^drop-root-(1\/4|1\/3)-(top|bottom|left|right|start|end)$/)
+  const rootMatch = rawId.match(/^drop-root-(1\/4|1\/3)-(top|bottom|left|right)$/)
   if (rootMatch) {
     const fraction = rootMatch[1] as RootSplitFraction
-    let edge = rootMatch[2]
-    if (edge === 'start') edge = 'left'
-    if (edge === 'end') edge = 'right'
-    return { type: 'root', fraction, edge: edge as RootSplitEdge }
+    const edge = rootMatch[2] as RootSplitEdge
+    return { type: 'root', fraction, edge }
   }
 
   const match = rawId.match(/^drop-(left|right|top|bottom|center)-(.+)$/)

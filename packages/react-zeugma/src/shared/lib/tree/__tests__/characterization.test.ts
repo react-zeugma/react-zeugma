@@ -21,8 +21,8 @@ import {
   computeLayout,
   calculateTabDropIndex,
   isValidTreeNode,
-} from '../tree-helpers'
-import { areLayoutsEqual } from '../compare'
+  areLayoutsEqual,
+} from '../index'
 import type { SplitNode, PaneNode } from '../../../model/types'
 
 describe('Tree Helpers Characterization Tests', () => {

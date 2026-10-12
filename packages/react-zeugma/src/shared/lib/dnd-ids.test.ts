@@ -32,12 +32,12 @@ describe('dnd-ids utility', () => {
       fraction: '1/4',
       edge: 'top',
     })
-    expect(parseDropTarget('drop-root-1/3-start')).toEqual({
+    expect(parseDropTarget('drop-root-1/3-left')).toEqual({
       type: 'root',
       fraction: '1/3',
       edge: 'left',
     })
-    expect(parseDropTarget('drop-root-1/3-end')).toEqual({
+    expect(parseDropTarget('drop-root-1/3-right')).toEqual({
       type: 'root',
       fraction: '1/3',
       edge: 'right',

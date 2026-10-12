@@ -59,14 +59,14 @@ The library is organized into single-responsibility modules. Implementations and
 | **Tab Mutations**    | `src/shared/lib/tree/mutate-tab.ts`            | `characterization.test.ts`                       | `addTab`, `removeTab`, `selectTab`, `moveTab`, `swapTabs`, `mergeTab`, `movePaneTabs`                       |
 | **Tree Layout**      | `src/shared/lib/tree/layout.ts`                | `characterization.test.ts`                       | Split percentages & `computeLayout`                                                                         |
 | **Tree Validation**  | `src/shared/lib/tree/validate.ts`              | `invariants.test.ts`                             | `isValidTreeNode`, cycle detection, structural guards                                                       |
-| **Tree Barrel**      | `src/shared/lib/tree/tree-helpers.ts`          | All above                                        | Re-exports all tree modules for backward compatibility                                                      |
+| **Tree Barrel**      | `src/shared/lib/tree/index.ts`                 | All above                                        | Direct barrel export of the tree subsystem                                                                  |
 | **Drop Resolution**  | `src/entities/zeugma/lib/resolve-drop.ts`      | `resolve-drop.test.ts`                           | Pure `resolveDrop` algorithm                                                                                |
 | **DnD IDs**          | `src/shared/lib/dnd-ids.ts`                    | `dnd-ids.test.ts`                                | Typed ID builders and `parseDropTarget`                                                                     |
 | **Pointer Tracking** | `src/entities/zeugma/lib/pointer.ts`           | `pointer.test.ts`                                | Pointer position math and calculations                                                                      |
 | **Popout Subsystem** | `src/entities/zeugma/model/popout/*`           | `popout.test.ts`                                 | Window lifecycle (`window.ts`), style mirroring (`style-mirror.ts`), event interception (`interception.ts`) |
 | **Resizer**          | `src/features/resize-pane/hooks/useResizer.ts` | `useResizer.test.tsx`                            | Split drag handle math and pointer events                                                                   |
 
-**Action:** When adding or modifying tree operations, edit the specific module under `src/shared/lib/tree/`, re-export through `tree-helpers.ts` and `src/utils.ts`, and add tests in `characterization.test.ts` or `invariants.test.ts`.
+**Action:** When adding or modifying tree operations, edit the specific module under `src/shared/lib/tree/`, re-export through `src/shared/lib/tree/index.ts` and `src/utils.ts`, and add tests in `characterization.test.ts` or `invariants.test.ts`.
 
 ---
 

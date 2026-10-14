@@ -10,9 +10,9 @@ To build flexible layouts, developers use three core concepts:
 
 To solve this, you can add a `SKILL.md` file to your project workspace. This file acts as a structured prompt/knowledge resource that guides AI coding assistants to write bug-free code with `react-zeugma`.
 
-You can view and download the complete `SKILL.md` file in the [AI Integration](/docs#skill-md) section of our documentation.
+You can view and download the complete `SKILL.md` file and explore the `/llms.txt` standard index in the [AI Integration](/docs#skill-md) section of our documentation.
 
 ### Setup Instructions:
 
-1. Create a `SKILL.md` file in your `.agents/skills/react-zeugma/` directory.
-2. Download or copy the contents from the [AI Integration](/docs#skill-md) section of the documentation and paste them into the file.
+1. Create a `SKILL.md` file in your `.agents/skills/react-zeugma/` or `.cursor/rules/` directory.
+2. Download or copy the contents from the [AI Integration](/docs#skill-md) section of the documentation (or fetch `https://react-zeugma.vercel.app/llms.txt` for raw LLM ingestion) and paste them into the file.

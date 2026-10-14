@@ -8,43 +8,43 @@ import { Activity, BarChart3, Zap, Table2, ScrollText, Gauge, MapPin } from 'luc
 export const WIDGET_META: Record<string, { title: string; icon: React.ReactNode }> = {
   'time-series': {
     title: 'System Metrics',
-    icon: <Activity className="w-3.5 h-3.5 text-[#8b8f97]" />,
+    icon: <Activity className="w-3.5 h-3.5 text-[var(--demo-muted)]" />,
   },
   'requests-rate': {
     title: 'Request Rate',
-    icon: <Activity className="w-3.5 h-3.5 text-[#8b8f97]" />,
+    icon: <Activity className="w-3.5 h-3.5 text-[var(--demo-muted)]" />,
   },
   'service-health': {
     title: 'Service Health',
-    icon: <BarChart3 className="w-3.5 h-3.5 text-[#8b8f97]" />,
+    icon: <BarChart3 className="w-3.5 h-3.5 text-[var(--demo-muted)]" />,
   },
   'key-metrics': {
     title: 'Key Metrics',
-    icon: <Zap className="w-3.5 h-3.5 text-[#8b8f97]" />,
+    icon: <Zap className="w-3.5 h-3.5 text-[var(--demo-muted)]" />,
   },
   'top-endpoints': {
     title: 'Top Endpoints',
-    icon: <Table2 className="w-3.5 h-3.5 text-[#8b8f97]" />,
+    icon: <Table2 className="w-3.5 h-3.5 text-[var(--demo-muted)]" />,
   },
   'live-logs': {
     title: 'Live Logs',
-    icon: <ScrollText className="w-3.5 h-3.5 text-[#8b8f97]" />,
+    icon: <ScrollText className="w-3.5 h-3.5 text-[var(--demo-muted)]" />,
   },
   'cpu-gauge': {
     title: 'CPU Usage',
-    icon: <Gauge className="w-3.5 h-3.5 text-[#8b8f97]" />,
+    icon: <Gauge className="w-3.5 h-3.5 text-[var(--demo-muted)]" />,
   },
   'mem-gauge': {
     title: 'Memory Usage',
-    icon: <Gauge className="w-3.5 h-3.5 text-[#8b8f97]" />,
+    icon: <Gauge className="w-3.5 h-3.5 text-[var(--demo-muted)]" />,
   },
   'fps-monitor': {
     title: 'FPS Monitor',
-    icon: <Activity className="w-3.5 h-3.5 text-[#8b8f97]" />,
+    icon: <Activity className="w-3.5 h-3.5 text-[var(--demo-muted)]" />,
   },
   'system-map': {
     title: 'System Node Map',
-    icon: <MapPin className="w-3.5 h-3.5 text-[#8b8f97]" />,
+    icon: <MapPin className="w-3.5 h-3.5 text-[var(--demo-muted)]" />,
   },
 }
 

@@ -1,86 +1,157 @@
 import { DocCodeBlock } from '../../components/mdx-renderer'
-import { DocParagraph, DocCode, DocList } from '../../components/docs-elements'
+import {
+  DocParagraph,
+  DocCode,
+  DocHeading,
+  DocList,
+  InfoCard,
+  DocCallout,
+} from '../../components/docs-elements'
 import { DocSection } from '../docs-data'
 
-const DEBOUNCED_SYNC_CODE = `import { useState, useEffect } from 'react'
+const PERSISTENCE_LOCALSTORAGE_CODE = `import { useZeugma, Zeugma } from 'react-zeugma'
+
+export function PersistedWorkspace() {
+  const controller = useZeugma({ initialLayout: defaultLayout })
+
+  return (
+    <Zeugma
+      controller={controller}
+      // Zero-config persistence: auto-saves to and restores from localStorage
+      persist={{
+        enabled: true,
+        key: 'app-workspace-layout-v2',
+      }}
+      renderPane={...}
+    />
+  )
+}`
+
+const PERSISTENCE_REMOTE_CODE = `import { useState, useEffect } from 'react'
 import { useZeugma, TreeNode } from 'react-zeugma'
 
-export function PersistentDashboard({ userId }: { userId: string }) {
+export function RemoteSyncedWorkspace({ teamId }: { teamId: string }) {
   const [layout, setLayout] = useState<TreeNode | null>(null)
 
-  // 1. Fetch initial layout from DB on mount
+  // 1. Fetch remote layout on mount
   useEffect(() => {
-    fetch(\`/api/layouts/\${userId}\`)
-      .then(res => res.json())
-      .then(data => setLayout(data.layout))
-  }, [userId])
+    fetch(\`/api/teams/\${teamId}/layout\`)
+      .then((res) => res.json())
+      .then((data) => setLayout(data.layout))
+  }, [teamId])
 
-  // 2. Debounce and save layout changes to DB
+  // 2. Debounced save to remote database (waits for drag actions to settle)
   useEffect(() => {
     if (!layout) return
 
     const timer = setTimeout(() => {
-      fetch(\`/api/layouts/\${userId}\`, {
-        method: 'POST',
+      fetch(\`/api/teams/\${teamId}/layout\`, {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ layout })
+        body: JSON.stringify({ layout }),
       })
-    }, 1000) // Save layout after 1 second of inactivity
+    }, 800) // 800ms debounce
 
     return () => clearTimeout(timer)
-  }, [layout, userId])
+  }, [layout, teamId])
 
-  const controller = useZeugma({
-    layout,
-    onChange: setLayout
-  })
+  const controller = useZeugma({ layout, onChange: setLayout })
 
-  if (!layout) return <div>Loading workspace...</div>
+  if (!layout) return <div>Restoring workspace topology...</div>
 
   return <Zeugma controller={controller} renderPane={...} />
 }`
 
-const CONTEXT_APIS_CODE = `import { usePaneContext, Pane } from 'react-zeugma'
-import { Maximize2, Minimize2, X } from 'lucide-react'
+const POPOUT_CODE = `import { usePaneContext } from 'react-zeugma'
+import { ExternalLink } from 'lucide-react'
 
-function CustomPaneHeader() {
-  const { 
-    id, 
-    tabIds, 
-    activeTabId, 
-    selectTab, 
-    remove, 
-    toggleFullscreen, 
-    isFullscreen 
-  } = usePaneContext()
+// Detach a tab into a native secondary desktop window
+function PopoutButton({ tabId }: { tabId: string }) {
+  const { popoutTab, dockTab, isActiveTabPoppedOut } = usePaneContext()
+
+  if (isActiveTabPoppedOut) {
+    return (
+      <button onClick={() => dockTab(tabId)} className="text-xs text-accent">
+        Dock Back
+      </button>
+    )
+  }
 
   return (
-    <div className="flex items-center justify-between p-2 bg-zinc-800 text-white">
-      {/* 1. Custom Tab Bar */}
-      <div className="flex gap-1">
-        {tabIds.map(tabId => (
-          <button
-            key={tabId}
-            onClick={() => selectTab(tabId)}
-            className={\`px-2.5 py-1 text-xs \${tabId === activeTabId ? 'bg-indigo-600' : 'bg-zinc-700'}\`}
-          >
-            {tabId}
-          </button>
-        ))}
-      </div>
+    <button onClick={() => popoutTab(tabId)} title="Open in dedicated desktop window">
+      <ExternalLink className="w-3.5 h-3.5 text-text-muted hover:text-text-primary" />
+    </button>
+  )
+}`
 
-      {/* 2. Drag Handle */}
-      <Pane.DragHandle className="flex-1 h-full cursor-grab" />
+const POPOUT_WRAPPER_CODE = `import React, { useMemo } from 'react'
+import { Zeugma } from 'react-zeugma'
+import { StyleSheetManager } from 'styled-components'
+import { StyleProvider, createCache } from '@ant-design/cssinjs'
 
-      {/* 3. Pane Controls */}
-      <div className="flex gap-1">
-        <button onClick={toggleFullscreen} title="Maximize">
-          {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
-        </button>
-        <button onClick={remove} title="Close Pane" className="hover:text-red-500">
-          <X size={14} />
-        </button>
-      </div>
+// Injects dynamic CSS-in-JS style managers into the popout window's <head>
+function PopoutStyleManager({
+  document,
+  children,
+}: {
+  document: Document
+  children: React.ReactNode
+}) {
+  const cache = useMemo(() => createCache(), [])
+
+  return (
+    <StyleSheetManager target={document.head}>
+      <StyleProvider cache={cache} container={document.head}>
+        {children}
+      </StyleProvider>
+    </StyleSheetManager>
+  )
+}
+
+export function App() {
+  return (
+    <Zeugma
+      controller={controller}
+      renderPopoutWrapper={({ document, children }) => (
+        <PopoutStyleManager document={document}>{children}</PopoutStyleManager>
+      )}
+      renderPane={...}
+    />
+  )
+}`
+
+const TAB_METADATA_CODE = `import { useTabMetadata } from 'react-zeugma'
+
+// Immutable tab metadata registered during tab creation
+export function ChartTabWidget({ tabId }: { tabId: string }) {
+  // Subscribes via useSyncExternalStore for fine-grained re-renders
+  const metadata = useTabMetadata<{ symbol: string; interval: string }>(tabId)
+
+  return (
+    <div className="p-4">
+      <h3 className="font-bold">{metadata?.symbol || 'UNKNOWN'}</h3>
+      <span>Interval: {metadata?.interval || '1D'}</span>
+    </div>
+  )
+}`
+
+const DEVTOOLS_CODE = `import { useRenderCounter, RenderCounterBadge, RenderCounterFooter } from 'react-zeugma/devtools'
+
+export function MonitoredWidget({ tabId }: { tabId: string }) {
+  // React 18/19 StrictMode resilient mount and render tracking
+  const { mounts, renders, reset } = useRenderCounter(\`widget-\${tabId}\`)
+
+  return (
+    <div className="relative h-full flex flex-col justify-between p-4">
+      <RenderCounterBadge id={tabId} position="top-right" />
+      
+      <div>Widget Content: {tabId}</div>
+
+      <RenderCounterFooter
+        id={tabId}
+        label="Performance Metrics"
+        className="text-[10px] text-text-muted border-t pt-1"
+      />
     </div>
   )
 }`
@@ -90,62 +161,180 @@ export const advancedFeaturesSection: DocSection = {
   title: 'Advanced Features',
   category: 'advanced',
   content: (
-    <div className="space-y-6">
-      <DocParagraph>
-        React Zeugma includes advanced features to build rich, professional workspaces, including
-        layout persistence, drag-to-dismiss, and context-isolated APIs.
-      </DocParagraph>
+    <div className="space-y-8">
+      <div>
+        <DocParagraph lead>
+          Beyond core binary splitting, React Zeugma provides an enterprise-ready suite of advanced
+          workspace capabilities: zero-remount DOM keep-alive portals, multi-window browser popouts
+          with real-time stylesheet syncing, isolated tab metadata, drag-to-dismiss gestures, and
+          built-in render cycle DevTools.
+        </DocParagraph>
+      </div>
+
+      <div className="grid md:grid-cols-3 gap-4">
+        <InfoCard title="Zero-Remount Portals" titleClassName="text-accent font-mono text-xs">
+          <DocParagraph size="sm">
+            Preserves iframes, WebGL contexts, canvas layers, and form state without unmounting
+            during drag/splits.
+          </DocParagraph>
+        </InfoCard>
+        <InfoCard title="Multi-Window Popouts" titleClassName="text-accent font-mono text-xs">
+          <DocParagraph size="sm">
+            Detaches tabs into independent native desktop browser windows while maintaining live
+            state sync.
+          </DocParagraph>
+        </InfoCard>
+        <InfoCard title="Render DevTools" titleClassName="text-accent font-mono text-xs">
+          <DocParagraph size="sm">
+            StrictMode-safe profiling hooks to detect unwanted component mount and render
+            lifecycles.
+          </DocParagraph>
+        </InfoCard>
+      </div>
     </div>
   ),
   subsections: [
     {
-      id: 'persistence',
-      title: 'Layout Persistence',
+      id: 'keep-alive-portals',
+      title: 'Zero-Remount Keep-Alive Portals',
       content: (
-        <div className="space-y-4 text-sm text-text-secondary">
+        <div className="space-y-4">
           <DocParagraph>
-            React Zeugma provides automatic local storage persistence, but you can easily intercept
-            state changes to sync layout trees to a remote database.
+            Traditional layout managers destroy and re-create React components when moving them
+            between branches in the DOM tree. This destroys scroll positions, resets audio/video
+            players, reloads iframes, and loses uncommitted form input.
           </DocParagraph>
-          <h4 className="font-bold text-text-primary text-xs uppercase tracking-wider">
-            Example: Debounced Database Sync
-          </h4>
           <DocParagraph>
-            When working in controlled mode, you can implement a debounced sync mechanism in a
-            custom hook to avoid hitting your backend API on every intermediate pixel drag during
-            resizing:
+            <strong>React Zeugma solves this permanently</strong>. It decouples the logical React
+            tree from the physical DOM rendering hierarchy via an off-screen portal registry:
           </DocParagraph>
-          <DocCodeBlock code={DEBOUNCED_SYNC_CODE} language="tsx" />
+          <DocList
+            items={[
+              <>
+                <strong>Single Mount Lifecycle</strong>: Every tab component is mounted once into an
+                offscreen host node and retained across all layout reorganizations.
+              </>,
+              <>
+                <strong>Physical DOM Reparenting</strong>: When a tab is moved or its container
+                splits, Zeugma projects its existing DOM subtree using atomic DOM manipulation,
+                preserving native state perfectly.
+              </>,
+              <>
+                <strong>Focus & Scroll Retention</strong>: Cursor positions in textareas, active
+                WebGL canvas contexts, and scroll offsets are preserved with 0ms interruption.
+              </>,
+            ]}
+          />
+          <DocCallout variant="tip" title="Tested on Heavy Media & Maps">
+            Check the Live Demo in the navigation bar to see interactive Leaflet maps, WebGL
+            particle systems, and audio waveforms retained smoothly across split and merge gestures.
+          </DocCallout>
+        </div>
+      ),
+    },
+    {
+      id: 'multi-window-popouts',
+      title: 'Multi-Window Browser Popouts',
+      content: (
+        <div className="space-y-4">
+          <DocParagraph>
+            Modern trading stations, video editors, and IDEs require detaching tabs into separate
+            desktop monitors. React Zeugma provides first-class support for multi-window popouts via
+            native <DocCode>window.open()</DocCode> and React Portals.
+          </DocParagraph>
+
+          <DocHeading level={4}>Triggering Popout and Docking</DocHeading>
+          <DocCodeBlock code={POPOUT_CODE} language="tsx" />
+
+          <DocHeading level={4}>Automatic Stylesheet Synchronization</DocHeading>
+          <DocParagraph>
+            When a popout window opens, React Zeugma automatically copies all static stylesheets,
+            CSS link elements, and root attributes (such as{' '}
+            <DocCode>data-theme=&quot;dark&quot;</DocCode> and class names) to the child window.
+            Theme changes in the primary dashboard sync to popouts in real-time.
+          </DocParagraph>
+
+          <DocCallout variant="warning" title="Browser Popup Blocker Considerations">
+            Browsers require popouts to be triggered from a trusted user gesture (e.g. a direct
+            click event). If called asynchronously or from a timer, the browser will block the
+            popout window.
+          </DocCallout>
+
+          <DocHeading level={4}>Dynamic CSS-in-JS (renderPopoutWrapper)</DocHeading>
+          <DocParagraph>
+            For libraries that inject CSS into <DocCode>&lt;head&gt;</DocCode> at runtime (like
+            Styled Components or Ant Design), use the{' '}
+            <DocCode highlight>renderPopoutWrapper</DocCode> prop to inject dynamic style targets:
+          </DocParagraph>
+          <DocCodeBlock code={POPOUT_WRAPPER_CODE} language="tsx" />
+        </div>
+      ),
+    },
+    {
+      id: 'tab-metadata',
+      title: 'Isolated Tab Metadata',
+      content: (
+        <div className="space-y-4">
+          <DocParagraph>
+            Tab metadata is decoupled from the structural <DocCode>TreeNode</DocCode> schema.
+            Metadata is registered at creation time and queried reactively using the{' '}
+            <DocCode highlight>useTabMetadata</DocCode> hook, powered by React&apos;s{' '}
+            <DocCode>useSyncExternalStore</DocCode>:
+          </DocParagraph>
+          <DocCodeBlock code={TAB_METADATA_CODE} language="tsx" />
+          <DocCallout variant="note" title="Zero Re-render Cascades">
+            Because tab metadata is decoupled from the tree topology, updating high-frequency
+            telemetry in one widget does not trigger layout re-renders across split dividers or
+            sibling panels.
+          </DocCallout>
+        </div>
+      ),
+    },
+    {
+      id: 'persistence',
+      title: 'Layout Persistence Strategies',
+      content: (
+        <div className="space-y-4">
+          <DocParagraph>
+            Choose between frictionless client-side storage or debounced server synchronization:
+          </DocParagraph>
+
+          <DocHeading level={4}>1. Built-in LocalStorage Persistence</DocHeading>
+          <DocCodeBlock code={PERSISTENCE_LOCALSTORAGE_CODE} language="tsx" />
+
+          <DocHeading level={4}>2. Remote Database Sync (Debounced)</DocHeading>
+          <DocParagraph>
+            In collaborative or cloud dashboards, debounce layout mutations to avoid sending
+            high-frequency network requests during active divider dragging:
+          </DocParagraph>
+          <DocCodeBlock code={PERSISTENCE_REMOTE_CODE} language="tsx" />
         </div>
       ),
     },
     {
       id: 'drag-to-dismiss',
-      title: 'Drag-to-Dismiss',
+      title: 'Drag-to-Dismiss Gestures',
       content: (
-        <div className="space-y-4 text-sm text-text-secondary">
+        <div className="space-y-4">
           <DocParagraph>
-            When <DocCode highlight>enableDragToDismiss</DocCode> is enabled, users can drag a tab
-            or pane outside the outer boundaries of the dashboard to close it.
+            Enable intuitive gesture dismissal by setting{' '}
+            <DocCode highlight>enableDragToDismiss=&#123;true&#125;</DocCode> on{' '}
+            <DocCode>&lt;Zeugma&gt;</DocCode>.
           </DocParagraph>
-          <h4 className="font-bold text-text-primary text-xs uppercase tracking-wider">
-            How it works:
-          </h4>
           <DocList
             items={[
               <>
-                <strong>Pointer Boundary Check</strong>: Zeugma tracks the cursor position relative
-                to the root dashboard bounding client rect.
+                <strong>Boundary Tracking</strong>: Zeugma continuously monitors pointer coordinates
+                against the dashboard bounding rectangle.
               </>,
               <>
-                <strong>Trigger Distance</strong>: If the cursor exceeds the boundaries by more than{' '}
-                <DocCode highlight>dismissThreshold</DocCode> (in pixels), a dismissal intent is
-                registered.
+                <strong>Dismiss Threshold</strong>: When dragged beyond the edge by more than{' '}
+                <DocCode>dismissThreshold</DocCode> pixels (default 40px), the dismiss preview
+                activates.
               </>,
               <>
-                <strong>Visual Indicator</strong>: Zeugma applies the{' '}
-                <DocCode highlight>dismissPreview</DocCode> class to the background, allowing you to
-                show a red overlay or close icon indicating that letting go will discard the panel.
+                <strong>Visual Indicator</strong>: Style the active drop intent using the{' '}
+                <DocCode>classNames.dismissPreview</DocCode> CSS configuration.
               </>,
             ]}
           />
@@ -153,37 +342,16 @@ export const advancedFeaturesSection: DocSection = {
       ),
     },
     {
-      id: 'context-apis',
-      title: 'Context APIs (usePaneContext)',
+      id: 'devtools-profiling',
+      title: 'DevTools & Performance Profiling',
       content: (
-        <div className="space-y-4 text-sm text-text-secondary">
+        <div className="space-y-4">
           <DocParagraph>
-            The <DocCode highlight>usePaneContext</DocCode> hook provides access to the state and
-            actions of the specific pane. This enables you to build custom pane headers, close
-            buttons, and maximize toggles easily:
+            The dedicated <DocCode highlight>react-zeugma/devtools</DocCode> package offers
+            StrictMode-safe instrumentation to verify that layout operations do not cause unwanted
+            component remounts or runaway render cycles:
           </DocParagraph>
-          <DocCodeBlock code={CONTEXT_APIS_CODE} language="tsx" />
-        </div>
-      ),
-    },
-    {
-      id: 'keep-alive-portals',
-      title: 'No Re-mounting (Keep-Alive) & Portals',
-      content: (
-        <div className="space-y-4 text-sm text-text-secondary">
-          <DocParagraph>
-            In traditional tree-based layout managers (such as <code>react-mosaic</code>),
-            rearranging, splitting, or dragging panels changes the React component tree hierarchy,
-            causing components to unmount and lose their state.{' '}
-            <strong>React Zeugma prevents this by keeping components alive</strong>. It decouples
-            the logical React tree from physical DOM rendering using an off-screen portal registry.
-          </DocParagraph>
-          <DocParagraph>
-            Every tab is mounted once into a stable, persistent DOM wrapper. When a tab becomes
-            active, Zeugma projects its wrapper into the pane using <code>appendChild()</code>. When
-            a tab is inactive or in-transit, it is stashed in a hidden container. This preserves
-            iframe states, scroll positions, and input focus perfectly across all layout operations.
-          </DocParagraph>
+          <DocCodeBlock code={DEVTOOLS_CODE} language="tsx" />
         </div>
       ),
     },

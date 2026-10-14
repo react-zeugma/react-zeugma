@@ -25,21 +25,17 @@ export function DocCodeBlock({ code, language = 'tsx' }: { code: string; languag
   }, [code, language])
 
   return (
-    <div className="w-full max-w-full relative group rounded-xl overflow-hidden border border-zinc-200 dark:border-border-primary bg-zinc-50 dark:bg-zinc-950 my-6 font-mono text-[13px] shadow-sm dark:shadow-lg transition-colors duration-200">
-      <div className="flex items-center justify-between px-4 py-2.5 border-b border-zinc-200 dark:border-zinc-800/80 bg-zinc-100 dark:bg-zinc-900/50 text-zinc-500 dark:text-zinc-400 text-xs select-none">
-        <div className="flex items-center gap-1.5">
-          <span className="font-mono text-[10px] text-zinc-500 dark:text-zinc-400 uppercase tracking-wider font-semibold">
-            {language}
-          </span>
-        </div>
+    <div className="w-full max-w-full relative group rounded-xl overflow-hidden border border-border-primary bg-bg-pane-inner my-6 font-mono text-xs shadow-2xs transition-colors">
+      <div className="flex items-center justify-between px-4 py-2 border-b border-border-primary bg-bg-sidebar/60 text-text-muted text-xs select-none">
+        <span className="eyebrow">{language}</span>
         <button
           onClick={handleCopy}
-          className="flex items-center gap-1 text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors cursor-pointer text-[11px]"
+          className="flex items-center gap-1.5 text-text-muted hover:text-text-primary transition-colors cursor-pointer text-xs font-mono"
         >
           {copied ? (
             <>
-              <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-              <span className="text-emerald-600 dark:text-emerald-400 font-semibold">Copied!</span>
+              <Check className="w-3.5 h-3.5 text-emerald-500" />
+              <span className="text-emerald-500 font-semibold">Copied</span>
             </>
           ) : (
             <>
@@ -49,7 +45,7 @@ export function DocCodeBlock({ code, language = 'tsx' }: { code: string; languag
           )}
         </button>
       </div>
-      <pre className="p-4 overflow-x-auto text-zinc-800 dark:text-zinc-200 select-all whitespace-pre leading-relaxed font-mono">
+      <pre className="p-4 overflow-x-hidden text-text-primary select-all whitespace-pre-wrap break-words leading-relaxed font-mono">
         <code dangerouslySetInnerHTML={{ __html: html }} />
       </pre>
     </div>

@@ -95,19 +95,21 @@ export function EmptyWidgetPanel({ tabId }: { tabId: string }) {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-full w-full bg-[#141619] p-6 text-center overflow-y-auto">
+    <div className="flex flex-col items-center justify-center h-full w-full bg-[var(--demo-chrome)] p-6 text-center overflow-y-auto">
       <div className="max-w-md w-full space-y-4 flex flex-col items-center">
-        <div className="p-3 bg-[#1e2127] rounded-full border border-[#2c3035] text-[#8e8e8e] mb-2 animate-pulse">
+        <div className="p-3 bg-[var(--demo-line-soft)] rounded-full border border-[var(--demo-line)] text-[var(--demo-muted)] mb-2 animate-pulse">
           <LayoutGrid className="w-6 h-6" />
         </div>
 
         <div>
-          <h3 className="text-sm font-semibold text-[#ccccdc] mb-1">Empty Panel</h3>
-          <p className="text-[11px] text-[#8e8e8e]">Select a widget below to place in this panel</p>
+          <h3 className="text-sm font-semibold text-[var(--demo-text)] mb-1">Empty Panel</h3>
+          <p className="text-[11px] text-[var(--demo-muted)]">
+            Select a widget below to place in this panel
+          </p>
         </div>
 
         {inactiveWidgets.length === 0 ? (
-          <div className="p-4 bg-[#1e2127]/50 rounded border border-[#2c3035] text-[11px] text-[#8e8e8e] max-w-xs">
+          <div className="p-4 bg-[var(--demo-line-soft)]/50 rounded border border-[var(--demo-line)] text-[11px] text-[var(--demo-muted)] max-w-xs">
             All widgets are currently active.
             <br />
             Close a panel or tab elsewhere to make its widget available here.
@@ -120,7 +122,7 @@ export function EmptyWidgetPanel({ tabId }: { tabId: string }) {
                 <button
                   key={w.id}
                   onClick={() => handleSelectWidget(w.id)}
-                  className="flex items-center gap-2 p-2 bg-[#1e2127] hover:bg-[#2c3035] border border-[#2c3035] rounded text-left transition-all duration-200 group text-[#ccccdc]"
+                  className="flex items-center gap-2 p-2 bg-[var(--demo-line-soft)] hover:bg-[var(--demo-line)] border border-[var(--demo-line)] rounded text-left transition-all duration-200 group text-[var(--demo-text)]"
                 >
                   <span
                     className="w-2 h-2 rounded-full shrink-0"

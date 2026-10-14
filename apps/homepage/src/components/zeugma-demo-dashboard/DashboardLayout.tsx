@@ -59,7 +59,7 @@ export function DashboardToolbar({
       {/* Right: Time range + Refresh */}
       <div className="flex items-center gap-2 shrink-0">
         <div className="grafana-time-picker">
-          <Clock className="w-3 h-3 text-[#8E8E8E]" />
+          <Clock className="w-3 h-3 text-[var(--demo-muted)]" />
           {ranges.map((r) => (
             <button
               key={r}

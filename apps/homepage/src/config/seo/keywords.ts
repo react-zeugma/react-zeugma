@@ -1,0 +1,55 @@
+/**
+ * Curated SEO keywords targeting developers searching for React layout engines,
+ * tiling window managers, and alternatives to react-mosaic, react-grid-layout, golden-layout, and dockview.
+ */
+export const SEO_KEYWORDS: string[] = [
+  // Core Identity & Category
+  'react-zeugma',
+  'react layout engine',
+  'react workspace layout',
+  'react tiling window manager',
+  'recursive layout engine',
+  'workspace layout manager',
+  'react dashboard layout',
+  'headless layout engine',
+
+  // Competitor & Direct Alternative Queries
+  'react-mosaic',
+  'react-mosaic alternative',
+  'react mosaic',
+  'react-mosaic-component',
+  'alternatives to react-mosaic',
+  'golden-layout react',
+  'golden-layout alternative',
+  'react-grid-layout alternative',
+  'react grid layout',
+  'dockview alternative',
+  'dockview react',
+  'flexlayout-react',
+  'rc-dock',
+  'allotment react alternative',
+  'react-split-pane alternative',
+  'react-resizable-panels',
+
+  // Key Architectural Features
+  'arbitrary recursive splits',
+  'binary tree layout react',
+  'multi-tab pane docking',
+  'tab drag and drop react',
+  'native popout window react',
+  'multi-window workspace react',
+  'zero reflow layout engine',
+  'useSyncExternalStore layout',
+  'headless ui layout react',
+  'unopinionated split panes',
+  'resizable panels react',
+  'docking layout engine',
+  'ide layout react',
+  'bento grid dashboard react',
+  'dnd-kit layout engine',
+  'react 18 layout engine',
+  'react 19 layout engine',
+  'desktop web layout manager',
+  'trading terminal layout react',
+  'observability dashboard layout',
+]

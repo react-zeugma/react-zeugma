@@ -120,7 +120,7 @@ export function SyntaxCode({ tokens }: { tokens: Token[]; language: string }) {
         </div>
         {/* Code */}
         <div
-          className="p-4 flex-1 whitespace-pre selection:bg-indigo-500/30"
+          className="p-4 flex-1 whitespace-pre-wrap break-words selection:bg-accent/30"
           dangerouslySetInnerHTML={{ __html: html }}
         />
       </div>
@@ -153,7 +153,7 @@ export function JSONFormatter({ json }: { json: any }) {
 
   return (
     <pre
-      className="m-0 text-[11px] leading-relaxed text-[#abb2bf] font-mono whitespace-pre overflow-x-auto p-4 select-text"
+      className="m-0 text-[11px] leading-relaxed text-[#abb2bf] font-mono whitespace-pre-wrap break-words overflow-x-hidden p-4 select-text"
       dangerouslySetInnerHTML={{ __html: formatted }}
     />
   )

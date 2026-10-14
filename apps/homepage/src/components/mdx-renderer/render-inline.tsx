@@ -23,7 +23,7 @@ export function renderInline(nodes: RootContent[], keyPrefix = ''): React.ReactN
         return (
           <code
             key={key}
-            className="bg-bg-pane-inner border border-border-primary rounded px-1.5 py-0.5 text-xs font-mono"
+            className="bg-bg-pane-inner border border-border-primary rounded px-1.5 py-0.5 text-xs font-mono text-accent"
           >
             {(node as InlineCode).value}
           </code>
@@ -38,7 +38,7 @@ export function renderInline(nodes: RootContent[], keyPrefix = ''): React.ReactN
             href={safeHref}
             target={isExternal ? '_blank' : undefined}
             rel={isExternal ? 'noopener noreferrer' : undefined}
-            className="text-indigo-600 dark:text-indigo-400 hover:underline"
+            className="text-accent hover:underline decoration-accent/40 underline-offset-2 font-medium"
           >
             {renderInline(link.children as RootContent[], `${key}-`)}
           </a>

@@ -88,7 +88,7 @@ export function parseDocs(markdown: string): ParsedDocs {
     if (
       node.type === 'code' &&
       node.lang === 'markdown' &&
-      node.value.includes('name: use-react-zeugma')
+      (node.value.includes('name: react-zeugma') || node.value.includes('name: use-react-zeugma'))
     ) {
       skillMdContent = node.value
     }

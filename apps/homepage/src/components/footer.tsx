@@ -1,36 +1,79 @@
-import { HelpCircle, FileText, Heart } from 'lucide-react'
+import { HelpCircle, FileText, Heart, Terminal, BookOpen, Layers } from 'lucide-react'
+import Link from 'next/link'
 import { BrandIcon } from './brand-icon'
 
 const LOGO_URL = '/logo.png'
 
 export function Footer() {
+  const appVersion = process.env.NEXT_PUBLIC_APP_VERSION || '7.1.2'
+
   return (
-    <footer className="bg-bg-sidebar border-t border-border-primary py-12 px-6 mt-auto transition-colors duration-200">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
-        {/* Brand Info */}
-        <div className="md:col-span-2 flex items-start gap-5">
-          <img
-            src={LOGO_URL}
-            alt="react-zeugma logo"
-            className="w-20 h-20 md:w-24 md:h-24 object-contain shrink-0"
-          />
-          <div className="space-y-2">
-            <span className="font-bold text-lg tracking-tight text-text-primary block">
+    <footer className="border-t border-border-primary bg-bg-sidebar/60 py-16 px-6 sm:px-8 mt-auto transition-colors select-none">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-5 gap-10">
+        {/* Brand Column */}
+        <div className="md:col-span-2 space-y-4">
+          <Link href="/" className="flex items-center gap-2.5">
+            <img src={LOGO_URL} alt="react-zeugma logo" className="w-6 h-6 object-contain" />
+            <span className="font-bold text-base tracking-tight text-text-primary">
               react-zeugma
             </span>
-            <p className="text-text-secondary text-sm max-w-sm leading-relaxed">
-              A flexible, headless, and completely unopinionated workspace layout engine for React.
-              Split, drag, and resize panes without constraints.
-            </p>
+            <span className="px-1.5 py-0.2 rounded-full text-[10px] font-mono border border-border-primary bg-bg-pane text-text-muted">
+              v{appVersion}
+            </span>
+          </Link>
+          <p className="text-text-secondary text-xs leading-relaxed max-w-sm">
+            Headless, recursive, drag-and-drop workspace layout engine for React. Built for complex
+            bento grids, observability cockpits, and multi-tab code editors.
+          </p>
+          <div className="pt-2 flex items-center gap-2 text-[11px] text-text-muted font-mono">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span>React 18 & 19 Ready • Fully Typed</span>
           </div>
         </div>
 
-        {/* References Links */}
-        <div>
-          <h4 className="text-text-primary text-xs font-semibold uppercase tracking-wider mb-4">
-            References
-          </h4>
-          <ul className="space-y-2 text-sm">
+        {/* Product Navigation */}
+        <div className="space-y-3">
+          <h4 className="eyebrow">Product</h4>
+          <ul className="space-y-2 text-xs font-medium">
+            <li>
+              <Link
+                href="/"
+                className="text-text-secondary hover:text-text-primary transition-colors flex items-center gap-2"
+              >
+                <Layers className="w-3.5 h-3.5 text-accent" /> Overview
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/demo"
+                className="text-text-secondary hover:text-text-primary transition-colors flex items-center gap-2"
+              >
+                <Terminal className="w-3.5 h-3.5 text-accent" /> Interactive Demo
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/docs"
+                className="text-text-secondary hover:text-text-primary transition-colors flex items-center gap-2"
+              >
+                <BookOpen className="w-3.5 h-3.5 text-accent" /> Documentation
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/changelog"
+                className="text-text-secondary hover:text-text-primary transition-colors flex items-center gap-2"
+              >
+                <FileText className="w-3.5 h-3.5 text-text-muted" /> Release Notes
+              </Link>
+            </li>
+          </ul>
+        </div>
+
+        {/* References */}
+        <div className="space-y-3">
+          <h4 className="eyebrow">References</h4>
+          <ul className="space-y-2 text-xs font-medium">
             <li>
               <a
                 href="https://github.com/react-zeugma/react-zeugma"
@@ -40,9 +83,9 @@ export function Footer() {
               >
                 <BrandIcon
                   name="github"
-                  size={16}
-                  className="text-text-secondary group-hover:text-text-primary transition-colors"
-                />{' '}
+                  size={14}
+                  className="text-text-muted group-hover:text-text-primary"
+                />
                 GitHub Repository
               </a>
             </li>
@@ -55,39 +98,10 @@ export function Footer() {
               >
                 <BrandIcon
                   name="npm"
-                  size={16}
-                  className="text-text-secondary group-hover:text-text-primary transition-colors"
-                />{' '}
+                  size={14}
+                  className="text-text-muted group-hover:text-text-primary"
+                />
                 NPM Package
-              </a>
-            </li>
-          </ul>
-        </div>
-
-        {/* Contribution & License */}
-        <div>
-          <h4 className="text-text-primary text-xs font-semibold uppercase tracking-wider mb-4">
-            Community
-          </h4>
-          <ul className="space-y-2 text-sm">
-            <li>
-              <a
-                href="https://github.com/react-zeugma/react-zeugma/blob/master/CONTRIBUTING.md"
-                target="_blank"
-                rel="noreferrer"
-                className="text-text-secondary hover:text-text-primary transition-colors flex items-center gap-2"
-              >
-                <Heart className="w-4 h-4 text-rose-500/80" /> Contributing Guide
-              </a>
-            </li>
-            <li>
-              <a
-                href="https://github.com/react-zeugma/react-zeugma/issues"
-                target="_blank"
-                rel="noreferrer"
-                className="text-text-secondary hover:text-text-primary transition-colors flex items-center gap-2"
-              >
-                <HelpCircle className="w-4 h-4" /> Issues & Feedback
               </a>
             </li>
             <li>
@@ -97,22 +111,50 @@ export function Footer() {
                 rel="noreferrer"
                 className="text-text-secondary hover:text-text-primary transition-colors flex items-center gap-2"
               >
-                <FileText className="w-4 h-4" /> MIT License
+                <FileText className="w-3.5 h-3.5 text-text-muted" /> MIT License
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        {/* Community */}
+        <div className="space-y-3">
+          <h4 className="eyebrow">Community</h4>
+          <ul className="space-y-2 text-xs font-medium">
+            <li>
+              <a
+                href="https://github.com/react-zeugma/react-zeugma/blob/master/CONTRIBUTING.md"
+                target="_blank"
+                rel="noreferrer"
+                className="text-text-secondary hover:text-text-primary transition-colors flex items-center gap-2"
+              >
+                <Heart className="w-3.5 h-3.5 text-accent" /> Contributing
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://github.com/react-zeugma/react-zeugma/issues"
+                target="_blank"
+                rel="noreferrer"
+                className="text-text-secondary hover:text-text-primary transition-colors flex items-center gap-2"
+              >
+                <HelpCircle className="w-3.5 h-3.5 text-text-muted" /> Issues &amp; RFCs
               </a>
             </li>
           </ul>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto border-t border-border-primary mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-text-muted gap-4">
-        <div>&copy; {new Date().getFullYear()} react-zeugma. All rights reserved.</div>
-        <div className="flex items-center gap-1.5">
-          <span>Named after the ancient city of Zeugma in</span>
+      {/* Bottom Bar */}
+      <div className="max-w-7xl mx-auto border-t border-border-primary/80 mt-12 pt-6 flex flex-col sm:flex-row items-center justify-between text-[11px] text-text-muted gap-4">
+        <div>&copy; {new Date().getFullYear()} react-zeugma • Open source software under MIT.</div>
+        <div className="flex items-center gap-1.5 font-mono text-[10px]">
+          <span>Named after the mosaic city of Zeugma in</span>
           <a
             href="https://en.wikipedia.org/wiki/Zeugma_(Commagene)"
             target="_blank"
             rel="noreferrer"
-            className="text-text-secondary hover:text-text-primary underline underline-offset-2"
+            className="text-text-secondary hover:text-text-primary underline underline-offset-2 decoration-border-secondary"
           >
             Gaziantep, Turkey
           </a>

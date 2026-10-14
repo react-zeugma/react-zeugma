@@ -1,0 +1,117 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Design tokens — 100% Native OS Neutral Palette
+   ---------------------------------------------------------------------------
+   • Every color is OKLCH and resolved through `light-dark()`, so the active
+     scheme is decided purely by the CSS `color-scheme` property.
+   • `color-scheme` follows the OS by default and can be pinned by the
+     `<meta name="color-scheme">` element (updated by the theme toggle and by
+     a tiny inline script before first paint). CSS never depends on JS.
+   • 100% clean, native zinc / slate neutral surfaces without warm or reddish
+     undertones, paired with an Indigo signature accent.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* `dark:` utilities — match a pinned dark scheme, or the OS preference when
+   the scheme has not been pinned to light. */
+@custom-variant dark {
+  &:where(:root:has(> head > meta[name='color-scheme'][content='dark']) *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not(:has(> head > meta[name='color-scheme'][content='light'])) *) {
+      @slot;
+    }
+  }
+}
+
+@theme {
+  --font-sans:
+    'Geist Variable', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+  --font-mono:
+    'Geist Mono Variable', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-display: 'Instrument Serif', ui-serif, Georgia, serif;
+
+  /* Surfaces */
+  --color-bg-app: var(--bg-app);
+  --color-bg-sidebar: var(--bg-sidebar);
+  --color-bg-pane: var(--bg-pane);
+  --color-bg-pane-inner: var(--bg-pane-inner);
+  --color-bg-inverse: var(--bg-inverse);
+
+  /* Lines */
+  --color-border-primary: var(--border-primary);
+  --color-border-secondary: var(--border-secondary);
+
+  /* Text */
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-inverse: var(--text-inverse);
+
+  /* Brand */
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-fg: var(--accent-fg);
+  --color-ochre: var(--ochre);
+  --color-lapis: var(--lapis);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --shadow-float:
+    0 1px 0 0 oklch(1 0 0 / 0.04) inset, 0 24px 60px -24px oklch(0.1 0.02 265 / 0.45),
+    0 8px 20px -12px oklch(0.1 0.02 265 / 0.35);
+}
+
+:root {
+  color-scheme: light dark;
+
+  &:has(> head > meta[name='color-scheme'][content='dark']) {
+    color-scheme: dark;
+  }
+  &:has(> head > meta[name='color-scheme'][content='light']) {
+    color-scheme: light;
+  }
+
+  /* Neutrals — 100% native clean zinc / slate (zero reddish/warm undertones) */
+  --bg-app: light-dark(oklch(0.985 0.002 265), oklch(0.13 0.005 265));
+  --bg-sidebar: light-dark(oklch(0.965 0.003 265), oklch(0.15 0.005 265));
+  --bg-pane: light-dark(oklch(1 0 0), oklch(0.19 0.006 265));
+  --bg-pane-inner: light-dark(oklch(0.975 0.002 265), oklch(0.16 0.005 265));
+  --bg-inverse: light-dark(oklch(0.15 0.005 265), oklch(0.96 0.002 265));
+
+  --border-primary: light-dark(oklch(0.92 0.003 265), oklch(0.26 0.006 265));
+  --border-secondary: light-dark(oklch(0.86 0.004 265), oklch(0.34 0.008 265));
+
+  --text-primary: light-dark(oklch(0.2 0.005 265), oklch(0.98 0 0));
+  --text-secondary: light-dark(oklch(0.44 0.008 265), oklch(0.72 0.006 265));
+  --text-muted: light-dark(oklch(0.6 0.006 265), oklch(0.52 0.006 265));
+  --text-inverse: light-dark(oklch(0.985 0.002 265), oklch(0.16 0.005 265));
+
+  /* Brand — indigo signature, lapis supporting */
+  --accent: light-dark(oklch(0.55 0.2 268), oklch(0.72 0.15 265));
+  --accent-strong: light-dark(oklch(0.48 0.21 268), oklch(0.79 0.13 265));
+  --accent-fg: light-dark(oklch(0.99 0.005 268), oklch(0.16 0.03 265));
+  --ochre: light-dark(oklch(0.74 0.15 70), oklch(0.84 0.13 75));
+  --lapis: light-dark(oklch(0.5 0.09 248), oklch(0.72 0.08 240));
+  --success: light-dark(oklch(0.56 0.13 155), oklch(0.78 0.14 155));
+  --danger: light-dark(oklch(0.56 0.19 25), oklch(0.7 0.17 25));
+
+  /* Hairline grid used for section backdrops */
+  --grid-line: light-dark(oklch(0.2 0.005 265 / 0.06), oklch(1 0 0 / 0.045));
+
+  /* Motion */
+  --duration-exit: 150ms;
+  --duration-enter: 220ms;
+  --duration-move: 380ms;
+
+  accent-color: var(--accent);
+}
+
+/* Surfaces that always render dark (live demo dashboard, terminal-like code
+   frames). Re-specify inherited colors so light-dark() re-resolves. */
+.scheme-dark {
+  color-scheme: dark;
+  color: var(--text-primary);
+}

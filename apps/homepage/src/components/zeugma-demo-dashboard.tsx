@@ -23,7 +23,7 @@ function DashboardPaneHeader() {
   }
 
   return (
-    <div className="grafana-panel-header flex items-center justify-between min-h-[30px] border-b border-[#1e2127] bg-[#111317]">
+    <div className="grafana-panel-header flex items-center justify-between min-h-[30px] border-b border-[var(--demo-line-soft)] bg-[var(--demo-canvas)]">
       <div className="flex items-center flex-1 h-full min-w-0">
         <Pane.Tabs
           classNames={{
@@ -135,7 +135,7 @@ function ZeugmaDemoDashboardInner() {
           <div
             className={`grafana-panel flex flex-col h-full w-full overflow-hidden transition-all duration-200 ${
               isHighlighted
-                ? 'ring-1 ring-[#ccccdc] shadow-[0_0_15px_rgba(204,204,220,0.15)] z-10'
+                ? 'ring-1 ring-[var(--demo-text)] shadow-[0_0_15px_rgba(204,204,220,0.15)] z-10'
                 : ''
             }`}
           >
@@ -173,7 +173,7 @@ function ZeugmaDemoDashboardInner() {
         tabDragPreview: 'opacity-90 shadow-2xl',
       }}
       renderPopoutWrapper={({ children }) => (
-        <div className="zeugma-popout-wrapper h-full w-full bg-[#111317] text-white">
+        <div className="zeugma-popout-wrapper h-full w-full bg-[var(--demo-canvas)] text-white">
           {children}
         </div>
       )}

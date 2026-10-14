@@ -115,7 +115,7 @@ export function DashboardDrawer({
       {/* Drawer Header */}
       <div className="grafana-drawer-header">
         <div className="flex items-center gap-2">
-          <SlidersHorizontal className="w-3.5 h-3.5 text-[#8b8f97]" />
+          <SlidersHorizontal className="w-3.5 h-3.5 text-[var(--demo-muted)]" />
           <span className="grafana-drawer-title-text">Dashboard Settings</span>
         </div>
         <div className="flex items-center gap-1">
@@ -210,9 +210,9 @@ export function DashboardDrawer({
             <div className="space-y-4 pt-1">
               {/* Resizer Size */}
               <div className="space-y-1">
-                <div className="flex justify-between text-[10px] font-semibold text-[#8E8E8E]">
+                <div className="flex justify-between text-[10px] font-semibold text-[var(--demo-muted)]">
                   <span>Resizer Thickness (resizerSize)</span>
-                  <span className="text-[#ccccdc] font-mono">{resizerSize}px</span>
+                  <span className="text-[var(--demo-text)] font-mono">{resizerSize}px</span>
                 </div>
                 <input
                   type="range"
@@ -227,9 +227,11 @@ export function DashboardDrawer({
 
               {/* Drag Activation Distance */}
               <div className="space-y-1">
-                <div className="flex justify-between text-[10px] font-semibold text-[#8E8E8E]">
+                <div className="flex justify-between text-[10px] font-semibold text-[var(--demo-muted)]">
                   <span>Drag Trigger Distance (dragActivationDistance)</span>
-                  <span className="text-[#ccccdc] font-mono">{dragActivationDistance}px</span>
+                  <span className="text-[var(--demo-text)] font-mono">
+                    {dragActivationDistance}px
+                  </span>
                 </div>
                 <input
                   type="range"
@@ -244,9 +246,9 @@ export function DashboardDrawer({
 
               {/* Snap Threshold */}
               <div className="space-y-1">
-                <div className="flex justify-between text-[10px] font-semibold text-[#8E8E8E]">
+                <div className="flex justify-between text-[10px] font-semibold text-[var(--demo-muted)]">
                   <span>Snap Threshold (snapThreshold)</span>
-                  <span className="text-[#ccccdc] font-mono">{snapThreshold}px</span>
+                  <span className="text-[var(--demo-text)] font-mono">{snapThreshold}px</span>
                 </div>
                 <input
                   type="range"
@@ -261,9 +263,9 @@ export function DashboardDrawer({
 
               {/* Min Split Percentage */}
               <div className="space-y-1">
-                <div className="flex justify-between text-[10px] font-semibold text-[#8E8E8E]">
+                <div className="flex justify-between text-[10px] font-semibold text-[var(--demo-muted)]">
                   <span>Min Split Size (minSplitPercentage)</span>
-                  <span className="text-[#ccccdc] font-mono">{minSplitPercentage}%</span>
+                  <span className="text-[var(--demo-text)] font-mono">{minSplitPercentage}%</span>
                 </div>
                 <input
                   type="range"
@@ -278,9 +280,9 @@ export function DashboardDrawer({
 
               {/* Max Split Percentage */}
               <div className="space-y-1">
-                <div className="flex justify-between text-[10px] font-semibold text-[#8E8E8E]">
+                <div className="flex justify-between text-[10px] font-semibold text-[var(--demo-muted)]">
                   <span>Max Split Size (maxSplitPercentage)</span>
-                  <span className="text-[#ccccdc] font-mono">{maxSplitPercentage}%</span>
+                  <span className="text-[var(--demo-text)] font-mono">{maxSplitPercentage}%</span>
                 </div>
                 <input
                   type="range"
@@ -294,9 +296,9 @@ export function DashboardDrawer({
               </div>
 
               {/* Drag to Dismiss Settings */}
-              <div className="border-t border-[#2c3035] pt-4 mt-2 space-y-3">
+              <div className="border-t border-[var(--demo-line)] pt-4 mt-2 space-y-3">
                 <div className="flex items-center justify-between">
-                  <div className="text-[10px] font-semibold text-[#8E8E8E]">
+                  <div className="text-[10px] font-semibold text-[var(--demo-muted)]">
                     Enable Drag-to-Dismiss (enableDragToDismiss)
                   </div>
                   <label className="grafana-switch">
@@ -311,10 +313,12 @@ export function DashboardDrawer({
                 </div>
 
                 {enableDragToDismiss && (
-                  <div className="space-y-1 pl-2 border-l border-[#2c3035] transition-all">
-                    <div className="flex justify-between text-[9px] font-semibold text-[#8E8E8E]">
+                  <div className="space-y-1 pl-2 border-l border-[var(--demo-line)] transition-all">
+                    <div className="flex justify-between text-[9px] font-semibold text-[var(--demo-muted)]">
                       <span>Dismiss Threshold (dismissThreshold)</span>
-                      <span className="text-[#ccccdc] font-mono">{dismissThreshold}px</span>
+                      <span className="text-[var(--demo-text)] font-mono">
+                        {dismissThreshold}px
+                      </span>
                     </div>
                     <input
                       type="range"
@@ -337,9 +341,9 @@ export function DashboardDrawer({
           <div className="space-y-6">
             {/* Active Panes */}
             <div>
-              <div className="text-[11px] font-bold text-[#d8d9da] uppercase tracking-wider mb-2.5 flex items-center justify-between">
+              <div className="text-[11px] font-bold text-[var(--demo-text)] uppercase tracking-wider mb-2.5 flex items-center justify-between">
                 <span>Active Panes ({activePanes.length})</span>
-                <span className="text-[9px] text-[#8E8E8E] lowercase font-normal">
+                <span className="text-[9px] text-[var(--demo-muted)] lowercase font-normal">
                   hover to highlight
                 </span>
               </div>
@@ -361,9 +365,9 @@ export function DashboardDrawer({
                           {isLocked ? (
                             <Lock className="w-3 h-3 text-[#FF9830] shrink-0" />
                           ) : (
-                            <Unlock className="w-3 h-3 text-[#6B6B6B] shrink-0" />
+                            <Unlock className="w-3 h-3 text-[var(--demo-muted)] shrink-0" />
                           )}
-                          <span className="font-mono text-[10px] text-[#D8D9DA] truncate">
+                          <span className="font-mono text-[10px] text-[var(--demo-text)] truncate">
                             {pane.id}
                           </span>
                         </div>
@@ -411,7 +415,7 @@ export function DashboardDrawer({
                       </div>
 
                       {/* Display tabs inside this pane */}
-                      <div className="mt-2 pl-2 border-l-2 border-[#2c3035] space-y-1">
+                      <div className="mt-2 pl-2 border-l-2 border-[var(--demo-line)] space-y-1">
                         {pane.tabIds.map((tabId) => {
                           const isActive = tabId === pane.activeTabId
                           const meta = WIDGET_META[tabId]
@@ -421,8 +425,8 @@ export function DashboardDrawer({
                               onClick={() => controller.selectTab(pane.id, tabId)}
                               className={`flex items-center justify-between text-[10px] px-1.5 py-0.5 rounded cursor-pointer transition-colors ${
                                 isActive
-                                  ? 'bg-[#2c3035] text-[#ffffff] font-semibold'
-                                  : 'text-[#8e8e8e] hover:bg-[#1e2127]/50 hover:text-[#ccccdc]'
+                                  ? 'bg-[var(--demo-line)] text-[#ffffff] font-semibold'
+                                  : 'text-[var(--demo-muted)] hover:bg-[var(--demo-line-soft)]/50 hover:text-[var(--demo-text)]'
                               }`}
                             >
                               <span className="flex items-center gap-1.5 truncate">
@@ -435,7 +439,7 @@ export function DashboardDrawer({
                                   controller.removeTab(tabId)
                                 }}
                                 disabled={controller.locked || isLocked}
-                                className="text-[10px] text-[#6b6b6b] hover:text-[#F2495C] px-1 disabled:opacity-30"
+                                className="text-[10px] text-[var(--demo-muted)] hover:text-[#F2495C] px-1 disabled:opacity-30"
                               >
                                 ×
                               </button>
@@ -446,16 +450,16 @@ export function DashboardDrawer({
 
                       {/* Inline Splitting configuration */}
                       {isSplitting && (
-                        <div className="mt-3 pt-2 border-t border-[#2c3035] space-y-2">
-                          <div className="flex items-center justify-between text-[9px] text-[#8E8E8E] uppercase font-bold">
+                        <div className="mt-3 pt-2 border-t border-[var(--demo-line)] space-y-2">
+                          <div className="flex items-center justify-between text-[9px] text-[var(--demo-muted)] uppercase font-bold">
                             <span>Split Layout</span>
                             <div className="flex gap-1.5">
                               <button
                                 onClick={() => setSplitDirection('row')}
                                 className={`px-1.5 py-0.5 rounded text-[8px] border transition-colors ${
                                   splitDirection === 'row'
-                                    ? 'bg-[#2c3035] text-white border-[#3e444c]'
-                                    : 'border-[#2c3035] text-[#8b8f97]'
+                                    ? 'bg-[var(--demo-line)] text-white border-[var(--demo-line-strong)]'
+                                    : 'border-[var(--demo-line)] text-[var(--demo-muted)]'
                                 }`}
                               >
                                 Row (H)
@@ -464,8 +468,8 @@ export function DashboardDrawer({
                                 onClick={() => setSplitDirection('column')}
                                 className={`px-1.5 py-0.5 rounded text-[8px] border transition-colors ${
                                   splitDirection === 'column'
-                                    ? 'bg-[#2c3035] text-white border-[#3e444c]'
-                                    : 'border-[#2c3035] text-[#8b8f97]'
+                                    ? 'bg-[var(--demo-line)] text-white border-[var(--demo-line-strong)]'
+                                    : 'border-[var(--demo-line)] text-[var(--demo-muted)]'
                                 }`}
                               >
                                 Col (V)
@@ -481,7 +485,7 @@ export function DashboardDrawer({
                                   `empty-widget-${Math.random().toString(36).substring(2, 9)}`,
                                 )
                               }
-                              className="col-span-2 text-[9px] py-1.5 bg-[#2c3035] hover:bg-[#3e444c] border border-[#3e444c] rounded text-left px-1.5 flex items-center gap-1 truncate text-[#ccccdc] font-semibold"
+                              className="col-span-2 text-[9px] py-1.5 bg-[var(--demo-line)] hover:bg-[var(--demo-line-strong)] border border-[var(--demo-line-strong)] rounded text-left px-1.5 flex items-center gap-1 truncate text-[var(--demo-text)] font-semibold"
                             >
                               <Plus className="w-2.5 h-2.5 text-[#73BF69]" />
                               <span className="truncate">Empty Panel</span>
@@ -491,7 +495,7 @@ export function DashboardDrawer({
                               <button
                                 key={w.id}
                                 onClick={() => handleSplitSubmit(pane.id, w.id)}
-                                className="text-[9px] py-1 bg-[#1e2127] hover:bg-[#2c3035] border border-[#2c3035] rounded text-left px-1.5 flex items-center gap-1 truncate text-[#ccccdc]"
+                                className="text-[9px] py-1 bg-[var(--demo-line-soft)] hover:bg-[var(--demo-line)] border border-[var(--demo-line)] rounded text-left px-1.5 flex items-center gap-1 truncate text-[var(--demo-text)]"
                               >
                                 <Plus className="w-2.5 h-2.5 text-[#73BF69]" />
                                 <span className="truncate">{w.label}</span>
@@ -508,7 +512,7 @@ export function DashboardDrawer({
 
             {/* Inactive Widgets / Add Widget */}
             <div>
-              <div className="text-[11px] font-bold text-[#d8d9da] uppercase tracking-wider mb-2.5 flex items-center justify-between">
+              <div className="text-[11px] font-bold text-[var(--demo-text)] uppercase tracking-wider mb-2.5 flex items-center justify-between">
                 <span>Inactive Widgets ({inactiveWidgets.length})</span>
                 <button
                   onClick={() =>
@@ -516,14 +520,14 @@ export function DashboardDrawer({
                       `empty-widget-${Math.random().toString(36).substring(2, 9)}`,
                     )
                   }
-                  className="text-[9px] px-2 py-0.5 bg-[#2c3035] hover:bg-[#3e444c] border border-[#3e444c] rounded text-[#ccccdc] flex items-center gap-1 font-semibold"
+                  className="text-[9px] px-2 py-0.5 bg-[var(--demo-line)] hover:bg-[var(--demo-line-strong)] border border-[var(--demo-line-strong)] rounded text-[var(--demo-text)] flex items-center gap-1 font-semibold"
                 >
                   <Plus className="w-2.5 h-2.5 text-[#73BF69]" />
                   Empty Panel
                 </button>
               </div>
               {inactiveWidgets.length === 0 ? (
-                <div className="text-[10px] text-[#6B6B6B] italic p-3 bg-[#141619] border border-[#2c3035] rounded text-center">
+                <div className="text-[10px] text-[var(--demo-muted)] italic p-3 bg-[var(--demo-chrome)] border border-[var(--demo-line)] rounded text-center">
                   All widgets are currently active in the layout!
                 </div>
               ) : (
@@ -531,21 +535,21 @@ export function DashboardDrawer({
                   {inactiveWidgets.map((w) => (
                     <div
                       key={w.id}
-                      className="p-2 bg-[#141619] border border-[#2c3035] rounded flex flex-col justify-between gap-2"
+                      className="p-2 bg-[var(--demo-chrome)] border border-[var(--demo-line)] rounded flex flex-col justify-between gap-2"
                     >
                       <div className="flex items-center gap-1.5 min-w-0">
                         <span
                           className="w-1.5 h-1.5 rounded-full shrink-0"
                           style={{ backgroundColor: w.color }}
                         />
-                        <span className="font-semibold text-[10px] text-[#ccccdc] truncate">
+                        <span className="font-semibold text-[10px] text-[var(--demo-text)] truncate">
                           {w.label}
                         </span>
                       </div>
                       <div className="flex gap-1">
                         <button
                           onClick={() => handleAddWidgetAtRoot(w.id)}
-                          className="flex-1 text-[9px] py-1 bg-[#2c3035] hover:bg-[#3e444c] border border-[#3e444c] rounded text-center text-[#ccccdc]"
+                          className="flex-1 text-[9px] py-1 bg-[var(--demo-line)] hover:bg-[var(--demo-line-strong)] border border-[var(--demo-line-strong)] rounded text-center text-[var(--demo-text)]"
                         >
                           Add to Grid
                         </button>
@@ -562,10 +566,10 @@ export function DashboardDrawer({
         {activeSection === 'tree' && (
           <div className="space-y-4">
             <div>
-              <div className="text-[11px] font-bold text-[#d8d9da] uppercase tracking-wider mb-2">
+              <div className="text-[11px] font-bold text-[var(--demo-text)] uppercase tracking-wider mb-2">
                 Live Layout Tree
               </div>
-              <div className="grafana-tree-container p-2.5 bg-[#111217]/60 border border-[#2c3035] rounded overflow-x-auto">
+              <div className="grafana-tree-container p-2.5 bg-[var(--demo-canvas)]/60 border border-[var(--demo-line)] rounded overflow-x-auto">
                 <RecursiveTreeVisualizer
                   node={controller.layout}
                   hoveredPaneId={hoveredPaneId}
@@ -596,7 +600,7 @@ function RecursiveTreeVisualizer({
   const [collapsed, setCollapsed] = useState(false)
 
   if (!node) {
-    return <div className="text-[10px] text-[#6b6b6b] italic pl-2">Empty layout</div>
+    return <div className="text-[10px] text-[var(--demo-muted)] italic pl-2">Empty layout</div>
   }
 
   if (node.type === 'pane') {
@@ -604,21 +608,21 @@ function RecursiveTreeVisualizer({
     const isLocked = !!node.locked
     return (
       <div
-        className={`pl-2 border-l border-[#2c3035] py-1.5 transition-colors ${
-          isHovered ? 'bg-white/5 border-l-[#ccccdc]' : ''
+        className={`pl-2 border-l border-[var(--demo-line)] py-1.5 transition-colors ${
+          isHovered ? 'bg-white/5 border-l-[var(--demo-text)]' : ''
         }`}
         onMouseEnter={() => setHoveredPaneId(node.id)}
         onMouseLeave={() => setHoveredPaneId(null)}
       >
         <div className="flex items-center gap-1.5 text-[10px]">
           <span className="text-[#FF9830] font-bold font-mono">■</span>
-          <span className="text-[#ccccdc] font-mono font-bold">{node.id}</span>
+          <span className="text-[var(--demo-text)] font-mono font-bold">{node.id}</span>
           {isLocked && <span className="text-[9px] text-[#FF9830]">🔒</span>}
         </div>
-        <div className="mt-1 pl-4 space-y-0.5 text-[9px] text-[#8E8E8E]">
+        <div className="mt-1 pl-4 space-y-0.5 text-[9px] text-[var(--demo-muted)]">
           <div>
             Active Tab:{' '}
-            <span className="text-[#ccccdc] font-semibold">
+            <span className="text-[var(--demo-text)] font-semibold">
               {WIDGET_META[node.activeTabId]?.title || node.activeTabId}
             </span>
           </div>
@@ -630,26 +634,26 @@ function RecursiveTreeVisualizer({
 
   // Split Node
   return (
-    <div className="pl-2 border-l border-[#2c3035] py-1">
+    <div className="pl-2 border-l border-[var(--demo-line)] py-1">
       <div
-        className="flex items-center gap-1.5 text-[10px] cursor-pointer hover:text-[#ccccdc]"
+        className="flex items-center gap-1.5 text-[10px] cursor-pointer hover:text-[var(--demo-text)]"
         onClick={() => setCollapsed(!collapsed)}
       >
         {collapsed ? (
-          <ChevronRight className="w-3 h-3 text-[#8b8f97]" />
+          <ChevronRight className="w-3 h-3 text-[var(--demo-muted)]" />
         ) : (
-          <ChevronDown className="w-3 h-3 text-[#8b8f97]" />
+          <ChevronDown className="w-3 h-3 text-[var(--demo-muted)]" />
         )}
-        <span className="text-[#8b8f97] font-semibold font-mono">Split</span>
-        <span className="text-[#8E8E8E] text-[9px] font-mono">
+        <span className="text-[var(--demo-muted)] font-semibold font-mono">Split</span>
+        <span className="text-[var(--demo-muted)] text-[9px] font-mono">
           ({node.direction}, {Math.round(node.splitPercentage)}%)
         </span>
       </div>
 
       {!collapsed && (
-        <div className="mt-1 space-y-1 border-l border-dashed border-[#1e2127]/50 ml-1.5">
+        <div className="mt-1 space-y-1 border-l border-dashed border-[var(--demo-line-soft)]/50 ml-1.5">
           <div className="pl-2">
-            <div className="text-[8px] text-[#6b6b6b] uppercase font-bold tracking-wider mb-0.5">
+            <div className="text-[8px] text-[var(--demo-muted)] uppercase font-bold tracking-wider mb-0.5">
               first
             </div>
             <RecursiveTreeVisualizer
@@ -660,7 +664,7 @@ function RecursiveTreeVisualizer({
             />
           </div>
           <div className="pl-2">
-            <div className="text-[8px] text-[#6b6b6b] uppercase font-bold tracking-wider mb-0.5">
+            <div className="text-[8px] text-[var(--demo-muted)] uppercase font-bold tracking-wider mb-0.5">
               second
             </div>
             <RecursiveTreeVisualizer

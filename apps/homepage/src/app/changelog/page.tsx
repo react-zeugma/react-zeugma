@@ -2,11 +2,9 @@ import { Metadata } from 'next'
 import { fetchChangelog } from '@/lib/fetch-docs'
 import { parseMarkdown } from '@/lib/parse-mdx'
 import { Changelog } from '@/views/changelog'
+import { changelogMetadata, changelogJsonLd } from '@/config/seo'
 
-export const metadata: Metadata = {
-  title: 'Changelog — react-zeugma',
-  description: 'See the latest release notes, improvements, and updates for react-zeugma.',
-}
+export const metadata: Metadata = changelogMetadata
 
 export default async function Page() {
   const markdown = await fetchChangelog()
@@ -18,5 +16,13 @@ export default async function Page() {
       ? ast.children.slice(1)
       : ast.children
 
-  return <Changelog contentNodes={contentNodes} />
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(changelogJsonLd) }}
+      />
+      <Changelog contentNodes={contentNodes} />
+    </>
+  )
 }

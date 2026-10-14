@@ -1,16 +1,15 @@
-import React from 'react'
-import { Info, Sparkles, AlertTriangle } from 'lucide-react'
+import { Info, Lightbulb, AlertTriangle } from 'lucide-react'
 import type { CalloutType } from './types'
 
 const styles: Record<CalloutType, string> = {
-  note: 'bg-indigo-500/5 border-indigo-500/20 text-text-secondary',
-  tip: 'bg-emerald-500/5 border-emerald-500/20 text-text-secondary',
-  warning: 'bg-rose-500/5 border-rose-500/20 text-text-secondary',
+  note: 'bg-accent/6 border-accent/20 text-text-secondary',
+  tip: 'bg-emerald-500/6 border-emerald-500/20 text-text-secondary',
+  warning: 'bg-rose-500/6 border-rose-500/20 text-text-secondary',
 }
 
 const icons: Record<CalloutType, React.ReactNode> = {
-  note: <Info className="w-4 h-4 text-indigo-500 shrink-0" />,
-  tip: <Sparkles className="w-4 h-4 text-emerald-500 shrink-0" />,
+  note: <Info className="w-4 h-4 text-accent shrink-0" />,
+  tip: <Lightbulb className="w-4 h-4 text-emerald-500 shrink-0" />,
   warning: <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0" />,
 }
 
@@ -25,12 +24,12 @@ export function Callout({
 }) {
   return (
     <div
-      className={`flex gap-3 border rounded-xl p-4 my-6 text-sm leading-relaxed transition-colors duration-200 ${styles[type]}`}
+      className={`flex gap-3 border rounded-xl p-4 my-6 text-xs sm:text-sm leading-relaxed transition-colors ${styles[type]}`}
     >
       {icons[type]}
-      <div>
-        <h5 className="font-bold text-text-primary mb-1">{title}</h5>
-        {children}
+      <div className="space-y-1">
+        <h5 className="font-bold text-text-primary tracking-tight">{title}</h5>
+        <div>{children}</div>
       </div>
     </div>
   )

@@ -70,7 +70,7 @@ function LogLevelDropdown({
         top: coords.top + 4,
         left: coords.left,
         minWidth: Math.max(120, coords.width),
-        backgroundColor: '#181b1f',
+        backgroundColor: 'var(--demo-panel)',
         border: '1px solid #2c3035',
         borderRadius: '4px',
         boxShadow: '0 8px 16px rgba(0, 0, 0, 0.5)',
@@ -92,19 +92,20 @@ function LogLevelDropdown({
             padding: '6px 12px',
             fontSize: '11px',
             textAlign: 'left',
-            color: selectedLevel === level ? '#5794f2' : '#ccccdc',
+            color: selectedLevel === level ? 'var(--demo-accent)' : 'var(--demo-text)',
             background: 'transparent',
             border: 'none',
             cursor: 'pointer',
             fontWeight: selectedLevel === level ? 700 : 500,
           }}
           onMouseOver={(e) => {
-            e.currentTarget.style.backgroundColor = '#2c3035'
+            e.currentTarget.style.backgroundColor = 'var(--demo-line)'
             e.currentTarget.style.color = '#ffffff'
           }}
           onMouseOut={(e) => {
             e.currentTarget.style.backgroundColor = 'transparent'
-            e.currentTarget.style.color = selectedLevel === level ? '#5794f2' : '#ccccdc'
+            e.currentTarget.style.color =
+              selectedLevel === level ? 'var(--demo-accent)' : 'var(--demo-text)'
           }}
         >
           {level}
@@ -121,10 +122,10 @@ function LogLevelDropdown({
           e.stopPropagation()
           handleToggle()
         }}
-        className="flex items-center gap-1.5 px-2.5 py-1 bg-[#1e2127] hover:bg-[#2c3035] border border-[#2c3035] rounded text-white text-[10px] font-bold cursor-pointer transition-colors"
+        className="flex items-center gap-1.5 px-2.5 py-1 bg-[var(--demo-line-soft)] hover:bg-[var(--demo-line)] border border-[var(--demo-line)] rounded text-white text-[10px] font-bold cursor-pointer transition-colors"
       >
         <span>Level: {selectedLevel}</span>
-        <ChevronDown className="w-3 h-3 text-[#8e8e8e]" />
+        <ChevronDown className="w-3 h-3 text-[var(--demo-muted)]" />
       </button>
       {isOpen && createPortal(dropdownMenu, document.body)}
     </div>
@@ -157,10 +158,10 @@ export function LogsPanel() {
 
   return (
     <PanelChrome title="Live Logs" icon={<ScrollText className="w-3.5 h-3.5 text-[#73BF69]" />}>
-      <div className="relative h-full flex flex-col bg-[#141619]">
+      <div className="relative h-full flex flex-col bg-[var(--demo-chrome)]">
         {/* Filter bar */}
-        <div className="flex items-center justify-between p-1.5 bg-[#161719] border-b border-[#2c3035] text-xs shrink-0 select-none">
-          <span className="text-[#8e8e8e] text-[9px] font-bold uppercase tracking-wider pl-1">
+        <div className="flex items-center justify-between p-1.5 bg-[var(--demo-chrome)] border-b border-[var(--demo-line)] text-xs shrink-0 select-none">
+          <span className="text-[var(--demo-muted)] text-[9px] font-bold uppercase tracking-wider pl-1">
             Log Filter
           </span>
           <LogLevelDropdown selectedLevel={selectedLevel} onChange={setSelectedLevel} />
@@ -182,7 +183,7 @@ export function LogsPanel() {
         </div>
 
         {/* Gradient fade at top */}
-        <div className="absolute top-[52px] left-0 right-0 h-4 bg-linear-to-b from-[#141619] to-transparent pointer-events-none z-10" />
+        <div className="absolute top-[52px] left-0 right-0 h-4 bg-linear-to-b from-[var(--demo-chrome)] to-transparent pointer-events-none z-10" />
       </div>
     </PanelChrome>
   )

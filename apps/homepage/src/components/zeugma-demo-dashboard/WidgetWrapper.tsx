@@ -48,7 +48,7 @@ export const DashboardWidget = React.memo(function DashboardWidget({
       default:
         return (
           <PanelChrome title="Unknown">
-            <div className="flex items-center justify-center h-full text-[#6B6B6B] text-xs">
+            <div className="flex items-center justify-center h-full text-[var(--demo-muted)] text-xs">
               Unknown widget: {tabId}
             </div>
           </PanelChrome>

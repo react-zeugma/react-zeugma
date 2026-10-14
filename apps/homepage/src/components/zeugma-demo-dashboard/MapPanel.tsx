@@ -75,8 +75,11 @@ export function MapPanel() {
   }, [])
 
   return (
-    <PanelChrome title="System Node Map" icon={<MapPin className="w-3.5 h-3.5 text-[#5794F2]" />}>
-      <div className="relative h-full w-full bg-[#141619]">
+    <PanelChrome
+      title="System Node Map"
+      icon={<MapPin className="w-3.5 h-3.5 text-[var(--demo-accent)]" />}
+    >
+      <div className="relative h-full w-full bg-[var(--demo-chrome)]">
         <div ref={mapContainerRef} style={{ width: '100%', height: '100%', zIndex: 1 }} />
       </div>
     </PanelChrome>

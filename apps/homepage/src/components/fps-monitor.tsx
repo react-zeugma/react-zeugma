@@ -65,17 +65,19 @@ export function FpsMonitor({
   return (
     <div className={className}>
       {/* Top Banner */}
-      <div className="text-[9px] text-[#ccccdc] bg-white/5 border border-white/10 rounded px-2 py-1 text-center font-semibold tracking-wide uppercase select-none">
+      <div className="text-[9px] text-[var(--demo-text)] bg-white/5 border border-white/10 rounded px-2 py-1 text-center font-semibold tracking-wide uppercase select-none">
         ✓ Diagnostics Active: Real-time UI Telemetry
       </div>
 
       {/* Value Display */}
       <div className="flex items-center justify-between select-none">
         <div className="flex flex-col">
-          <span className="text-[9px] font-bold uppercase tracking-wider text-[#8E8E8E]">
+          <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--demo-muted)]">
             UI Frame Rate
           </span>
-          <span className="text-[9px] text-[#6B6B6B]">Client-side engine diagnostics</span>
+          <span className="text-[9px] text-[var(--demo-muted)]">
+            Client-side engine diagnostics
+          </span>
         </div>
         <div className="flex items-baseline gap-1">
           <span
@@ -84,12 +86,12 @@ export function FpsMonitor({
           >
             {fps}
           </span>
-          <span className="text-[10px] text-[#8E8E8E] font-semibold">FPS</span>
+          <span className="text-[10px] text-[var(--demo-muted)] font-semibold">FPS</span>
         </div>
       </div>
 
       {/* Sparkline Container */}
-      <div className="flex-1 min-h-[40px] w-full bg-[#111317] border border-[#1e2127] rounded p-2 flex items-center justify-center relative overflow-hidden">
+      <div className="flex-1 min-h-[40px] w-full bg-[var(--demo-canvas)] border border-[var(--demo-line-soft)] rounded p-2 flex items-center justify-center relative overflow-hidden">
         <FpsSparkline data={history} color={activeColor} />
       </div>
     </div>

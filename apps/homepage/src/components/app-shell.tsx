@@ -16,7 +16,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <FpsProvider>
         <div
           className={`flex flex-col text-text-primary transition-colors duration-200 ${
-            isDemo ? 'h-screen overflow-hidden bg-[#0b0c0e]' : 'min-h-screen bg-bg-app'
+            isDemo
+              ? 'h-screen overflow-hidden bg-[var(--demo-canvas)] scheme-dark'
+              : 'min-h-screen bg-bg-app'
           }`}
         >
           {!isDemo && <Navbar />}

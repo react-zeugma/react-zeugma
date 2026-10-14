@@ -1,0 +1,143 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Top layer — native <dialog> and [popover] entry/exit animations
+   Uses @starting-style + transition-behavior: allow-discrete + overlay.
+   Browsers without discrete display transitions get a `data-closing`
+   attribute from JS (see lib/top-layer.ts) so exits still animate.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Crucial: When closed, dialog MUST be completely hidden from layout & hit testing */
+dialog.ui-dialog:not([open]) {
+  display: none !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+}
+
+/* Reset UA dialog chrome for our dialogs */
+dialog.ui-dialog {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  max-width: none;
+  max-height: none;
+  background: var(--bg-pane);
+  color: var(--text-primary);
+  overflow: visible;
+}
+
+/* ── Command palette: centered panel that scales in ─────────────────────── */
+dialog.palette-dialog {
+  inset: 0;
+  margin: 12vh auto auto;
+  width: min(42rem, calc(100vw - 1.5rem));
+  background: var(--bg-pane) !important;
+  color: var(--text-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: 1.25rem;
+  box-shadow:
+    0 25px 60px -15px rgba(0, 0, 0, 0.45),
+    0 0 0 1px var(--border-primary);
+  opacity: 0;
+  translate: 0 -8px;
+  scale: 0.98;
+  overflow: hidden;
+  transition-property: opacity, translate, scale, display, overlay;
+  transition-duration: 180ms;
+  transition-timing-function: var(--ease-out-expo);
+  transition-behavior: allow-discrete;
+}
+
+dialog.palette-dialog:is([open]):where(:not([data-closing])) {
+  display: block;
+  opacity: 1;
+  translate: 0 0;
+  scale: 1;
+
+  @starting-style {
+    opacity: 0;
+    translate: 0 -8px;
+    scale: 0.98;
+  }
+}
+
+/* ── Side drawer (docs index on mobile) ─────────────────────────────────── */
+dialog.drawer-dialog {
+  inset: 0 auto 0 0;
+  height: 100dvh;
+  width: min(20rem, 86vw);
+  background: var(--bg-pane) !important;
+  color: var(--text-primary);
+  border-right: 1px solid var(--border-primary);
+  box-shadow: var(--shadow-float);
+  translate: -100% 0;
+  transition-property: translate, display, overlay;
+  transition-duration: 260ms;
+  transition-timing-function: var(--ease-out-expo);
+  transition-behavior: allow-discrete;
+}
+
+dialog.drawer-dialog:is([open]):where(:not([data-closing])) {
+  display: block;
+  translate: 0 0;
+
+  @starting-style {
+    translate: -100% 0;
+  }
+}
+
+/* ── Shared backdrop with high contrast dimming ─────────────────────────── */
+dialog.ui-dialog::backdrop {
+  background-color: oklch(0.08 0.01 50 / 0);
+  backdrop-filter: blur(0px);
+  transition-property: background-color, backdrop-filter, display, overlay;
+  transition-duration: 200ms;
+  transition-behavior: allow-discrete;
+}
+
+dialog.ui-dialog:is([open]):where(:not([data-closing]))::backdrop {
+  background-color: oklch(0.08 0.01 50 / 0.72);
+  backdrop-filter: blur(8px);
+
+  @starting-style {
+    background-color: oklch(0.08 0.01 50 / 0);
+    backdrop-filter: blur(0px);
+  }
+}
+
+/* ── Mobile navigation popover ───────────────────────────────────────────── */
+.menu-popover {
+  margin: 0;
+  inset: 3.75rem 0.75rem auto auto;
+  width: min(20rem, calc(100vw - 1.5rem));
+  border: 1px solid var(--border-primary);
+  border-radius: 1rem;
+  background: var(--bg-pane);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-float);
+  padding: 0.5rem;
+  opacity: 0;
+  translate: 0 -6px;
+  transition-property: opacity, translate, display, overlay;
+  transition-duration: 180ms;
+  transition-timing-function: var(--ease-out-expo);
+  transition-behavior: allow-discrete;
+}
+
+.menu-popover:popover-open {
+  opacity: 1;
+  translate: 0 0;
+
+  @starting-style {
+    opacity: 0;
+    translate: 0 -6px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  dialog.palette-dialog,
+  dialog.drawer-dialog,
+  .menu-popover {
+    translate: none !important;
+    scale: none !important;
+    transition-duration: 80ms;
+  }
+}

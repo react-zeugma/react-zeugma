@@ -112,9 +112,9 @@ export function CodeBlock({ code, language = 'tsx', filename = 'App.tsx' }: Code
           {copied ? 'Copied' : 'Copy'}
         </button>
       </div>
-      <div className="overflow-x-auto p-5">
+      <div className="overflow-x-hidden p-5">
         <pre
-          className="m-0 text-[13px] leading-relaxed text-zinc-100 font-mono whitespace-pre"
+          className="m-0 text-[13px] leading-relaxed text-zinc-100 font-mono whitespace-pre-wrap break-words"
           dangerouslySetInnerHTML={{ __html: html }}
         />
       </div>

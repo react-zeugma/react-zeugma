@@ -2,35 +2,67 @@ import { DocParagraph, DocCode, DocHeading, DocTable } from '../../components/do
 import { DocSection } from '../docs-data'
 
 const ZEUGMA_PROPS = [
-  ['controller', 'ZeugmaController', '-', 'The layout controller returned by useZeugma()'],
+  [
+    'controller',
+    'ZeugmaController',
+    'Required',
+    'The layout state controller instance returned by useZeugma().',
+  ],
   [
     'renderPane',
     '(paneId: string) => ReactNode',
-    '-',
-    'Callback that maps active pane IDs to custom pane structures',
+    'Required (Standalone)',
+    'Callback that maps active pane IDs to custom pane structures. Forbidden when <Zeugma> wraps children.',
   ],
-  ['resizerSize', 'number', '4', 'Thickness of the split resizer handles in pixels'],
-  ['snapThreshold', 'number', '8', 'Pixel threshold to snap layout resizers to adjacent edges'],
-  ['locked', 'boolean', 'false', 'Disable all dragging and resizing'],
+  ['resizerSize', 'number', '4', 'Thickness of the split resizer divider handles in pixels.'],
+  [
+    'snapThreshold',
+    'number',
+    '8',
+    'Pixel threshold to snap layout resizers to adjacent edges or center alignment.',
+  ],
+  [
+    'locked',
+    'boolean',
+    'false',
+    'Disable all dragging, dropping, and resizing across the workspace.',
+  ],
   [
     'enableDragToDismiss',
     'boolean',
     'false',
-    'Enables dragging widgets out of boundaries to dismiss them',
+    'Enables dragging widgets out of dashboard container boundaries to dismiss them.',
   ],
-  ['classNames', 'ZeugmaClassNames', '-', 'Custom CSS classes for dashboard elements'],
+  [
+    'dismissThreshold',
+    'number',
+    '40',
+    'Pixel distance beyond dashboard boundaries required to trigger dismissal.',
+  ],
+  [
+    'classNames',
+    'ZeugmaClassNames',
+    'undefined',
+    'Custom CSS classes for headless elements (resizer, dropPreview, tabDropPreview, etc.).',
+  ],
+  [
+    'persist',
+    'boolean | ZeugmaPersistOptions',
+    'undefined',
+    'Auto-persistence in localStorage: { enabled?: boolean; key?: string } (default key: "zeugma-layout").',
+  ],
   [
     'renderPopoutWrapper',
     '(props: { tabId: string; document: Document; window: Window; children: React.ReactNode }) => React.ReactNode',
-    '-',
-    '[Experimental] Custom wrapper to inject style managers / providers into popout windows',
+    'undefined',
+    '[Experimental] Custom wrapper to inject style managers / providers into secondary popout windows.',
   ],
 ]
 
 const RENDER_TAB_PROPS = [
-  ['id', 'string', "The tab's unique ID."],
+  ['id', 'string', "The tab's unique string ID."],
   ['paneId', 'string', 'The ID of the pane containing this tab.'],
-  ['isActive', 'boolean', 'True if this tab is currently selected/active.'],
+  ['isActive', 'boolean', 'True if this tab is currently selected/active in its pane.'],
   ['index', 'number', "The tab's 0-indexed position in the pane tab bar."],
   [
     'metadata',
@@ -38,11 +70,11 @@ const RENDER_TAB_PROPS = [
     'Custom metadata values associated with this tab.',
   ],
   ['isDragging', 'boolean', 'True if this tab is actively being dragged.'],
-  ['isOver', 'boolean', 'True if another dragged tab/item is currently hovering over this tab.'],
-  ['onSelect', '() => void', 'Callback to select/activate this tab.'],
+  ['isOver', 'boolean', 'True if another dragged tab or item is hovering over this tab.'],
+  ['onSelect', '() => void', 'Callback to select and activate this tab.'],
   ['onRemove', '() => void', 'Callback to close/remove this tab.'],
-  ['isPoppedOut', 'boolean', '[Experimental] True if this tab is open in a new popup window.'],
-  ['popout', '() => void', '[Experimental] Callback to popout this tab into a new window.'],
+  ['isPoppedOut', 'boolean', '[Experimental] True if this tab is open in a new browser window.'],
+  ['popout', '() => void', '[Experimental] Callback to pop out this tab into a new window.'],
   ['dock', '() => void', '[Experimental] Callback to dock this tab back to the dashboard.'],
 ]
 
@@ -51,12 +83,38 @@ const USE_ZEUGMA_OPTIONS = [
     'initialLayout',
     'TreeNode | null',
     'null',
-    'The initial layout tree structure for the dashboard',
+    'Initial layout tree structure for uncontrolled mode.',
   ],
-  ['locked', 'boolean', 'false', 'Initial lock state of the workspace'],
+  [
+    'layout',
+    'TreeNode | null',
+    'undefined',
+    'Current layout tree for controlled mode. Must be paired with onChange.',
+  ],
+  [
+    'onChange',
+    '(newLayout: TreeNode | null) => void',
+    'undefined',
+    'State update handler invoked whenever layout topology or split ratios change.',
+  ],
+  ['locked', 'boolean', 'false', 'Global freeze state for resizing and drag-and-drop actions.'],
+  [
+    'fullscreenPaneId',
+    'string | null',
+    'null',
+    'Pane ID to maximize to 100% container view. Structural layout edits are blocked while active.',
+  ],
+  [
+    'onFullscreenChange',
+    '(paneId: string | null) => void',
+    'undefined',
+    'Callback fired when fullscreen state is toggled.',
+  ],
 ]
 
 const ZEUGMA_CONTROLLER_METHODS = [
+  ['layout', 'TreeNode | null', 'The current layout tree state.'],
+  ['locked', 'boolean', 'True if workspace dragging and resizing is globally disabled.'],
   [
     'setLayout',
     '(layout: TreeNode | null) => void',
@@ -82,7 +140,11 @@ const ZEUGMA_CONTROLLER_METHODS = [
     '(paneId: string, tabId: string) => void',
     'Sets the active tab in the given pane.',
   ],
-  ['removePane', '(paneId: string) => void', 'Removes a pane and collapses the parent split.'],
+  [
+    'removePane',
+    '(paneId: string) => void',
+    'Removes a pane and collapses the parent split with its sibling.',
+  ],
   [
     'splitPane',
     "(targetId: string, direction: SplitDirection, type: 'left' | 'right' | 'top' | 'bottom', paneToAdd: string) => void",
@@ -91,12 +153,12 @@ const ZEUGMA_CONTROLLER_METHODS = [
   [
     'updatePaneLock',
     '(paneId: string, locked: boolean) => void',
-    'Toggles lock state for a specific pane.',
+    'Toggles lock state for a specific pane independently.',
   ],
   [
     'mergeTab',
     '(draggedTabId: string, targetPaneId: string) => void',
-    'Drags and drops a tab from its source pane to a target pane.',
+    'Moves a tab from its source pane to target pane.',
   ],
   [
     'moveTab',
@@ -113,6 +175,21 @@ const ZEUGMA_CONTROLLER_METHODS = [
     'findTabById',
     '(tabId: string) => TabDetails | null',
     'Queries details (paneId, index, metadata, isActive) of a tab.',
+  ],
+  [
+    'getTabMetadata',
+    '<T>(tabId: string) => T | undefined',
+    'Retrieves immutable metadata registered to a tab.',
+  ],
+  [
+    'getActiveTabMetadata',
+    '<T>(paneId: string) => T | undefined',
+    'Retrieves metadata for the active tab in a pane.',
+  ],
+  [
+    'poppedOutTabIds',
+    'string[]',
+    '[Experimental] Array of tab IDs currently detached into popout windows.',
   ],
   [
     'popoutTab',
@@ -172,22 +249,22 @@ const TREE_UTILITIES = [
   [
     'splitPane',
     '(tree: TreeNode, targetId: string, direction: SplitDirection, type: SplitType, paneToAdd: string | PaneNode) => TreeNode',
-    'Splits a pane and inserts another pane.',
+    'Splits a pane and inserts another pane, returning a fresh tree reference.',
   ],
   [
     'removePane',
     '(tree: TreeNode, paneId: string) => TreeNode | null',
-    'Removes a pane and collapses the parent split.',
+    'Removes a pane and collapses the parent split with its sibling.',
   ],
   [
     'addTab',
     '(tree: TreeNode, targetPaneId: string, tabId: string, metadata?: Record<string, unknown>) => TreeNode',
-    'Appends a tab into a target pane.',
+    'Appends a tab into a target pane and sets it active.',
   ],
   [
     'removeTab',
     '(tree: TreeNode, tabId: string) => TreeNode | null',
-    'Removes a tab; collapses empty panes.',
+    'Removes a tab; collapses empty panes automatically.',
   ],
   [
     'selectTab',
@@ -214,6 +291,21 @@ const TREE_UTILITIES = [
     "(tree: TreeNode, draggedPaneId: string, targetTabId: string, position?: 'before' | 'after') => TreeNode",
     'Moves all tabs from a dragged pane next to a target tab.',
   ],
+  [
+    'updatePaneLock',
+    '(tree: TreeNode, paneId: string, locked: boolean) => TreeNode',
+    'Updates the lock state of a specific pane.',
+  ],
+  [
+    'isValidTreeNode',
+    '(node: unknown) => boolean',
+    'Validates that an object conforms to the structural TreeNode schema with cycle detection.',
+  ],
+  [
+    'computeLayout',
+    '(tree: TreeNode) => Record<string, { left: number; top: number; width: number; height: number }>',
+    'Calculates absolute percentage geometry boxes for all panes and splitters.',
+  ],
 ]
 
 export const apiReferenceSection: DocSection = {
@@ -222,7 +314,8 @@ export const apiReferenceSection: DocSection = {
   category: 'api',
   content: (
     <DocParagraph>
-      Complete API reference for React Zeugma components, hooks, contexts, and pure tree utilities.
+      Complete, authoritative TypeScript API reference for React Zeugma components, hooks, contexts,
+      and pure tree utilities.
     </DocParagraph>
   ),
   subsections: [
@@ -233,7 +326,12 @@ export const apiReferenceSection: DocSection = {
         <div className="space-y-8">
           <div>
             <DocHeading level={4}>&lt;Zeugma&gt; Props</DocHeading>
-            <DocTable headers={['Prop', 'Type', 'Default', 'Description']} rows={ZEUGMA_PROPS} />
+            <DocTable
+              headers={['Prop', 'Type', 'Default', 'Description']}
+              rows={ZEUGMA_PROPS}
+              searchable
+              searchPlaceholder="Filter <Zeugma> props..."
+            />
           </div>
 
           <div>
@@ -242,7 +340,12 @@ export const apiReferenceSection: DocSection = {
               Properties passed to the <DocCode>renderTab</DocCode> callback in{' '}
               <DocCode>&lt;Pane.Tabs&gt;</DocCode>.
             </DocParagraph>
-            <DocTable headers={['Property', 'Type', 'Description']} rows={RENDER_TAB_PROPS} />
+            <DocTable
+              headers={['Property', 'Type', 'Description']}
+              rows={RENDER_TAB_PROPS}
+              searchable
+              searchPlaceholder="Filter RenderTabProps..."
+            />
           </div>
         </div>
       ),
@@ -257,6 +360,8 @@ export const apiReferenceSection: DocSection = {
             <DocTable
               headers={['Option', 'Type', 'Default', 'Description']}
               rows={USE_ZEUGMA_OPTIONS}
+              searchable
+              searchPlaceholder="Filter useZeugma options..."
             />
           </div>
 
@@ -265,19 +370,22 @@ export const apiReferenceSection: DocSection = {
             <DocTable
               headers={['Method / Query', 'Signature', 'Description']}
               rows={ZEUGMA_CONTROLLER_METHODS}
+              searchable
+              searchPlaceholder="Filter controller methods..."
             />
           </div>
 
           <div>
             <DocHeading level={4}>usePaneContext() Properties</DocHeading>
             <DocParagraph className="mb-3">
-              Returns <DocCode>PaneContextValue</DocCode> (extends{' '}
-              <DocCode>PaneRenderProps</DocCode>). Available inside any child of{' '}
+              Returns <DocCode>PaneContextValue</DocCode>. Available inside any child of{' '}
               <DocCode>&lt;Pane&gt;</DocCode>.
             </DocParagraph>
             <DocTable
               headers={['Property', 'Type', 'Description']}
               rows={USE_PANE_CONTEXT_PROPERTIES}
+              searchable
+              searchPlaceholder="Filter pane context properties..."
             />
           </div>
         </div>
@@ -285,27 +393,32 @@ export const apiReferenceSection: DocSection = {
     },
     {
       id: 'api-utilities',
-      title: 'Tree Utilities',
+      title: 'Tree Utilities (react-zeugma/utils)',
       content: (
         <div className="space-y-4">
           <DocParagraph>
             Pure, immutable tree-manipulation utility functions imported from{' '}
-            <DocCode highlight>react-zeugma/utils</DocCode>. These return a fresh tree reference and
-            are used to perform state updates in controlled mode.
+            <DocCode highlight>react-zeugma/utils</DocCode>. These functions never mutate tree nodes
+            in place, returning fresh tree references for deterministic React rendering.
           </DocParagraph>
-          <DocTable headers={['Function', 'Signature', 'Description']} rows={TREE_UTILITIES} />
+          <DocTable
+            headers={['Function', 'Signature', 'Description']}
+            rows={TREE_UTILITIES}
+            searchable
+            searchPlaceholder="Filter tree utilities..."
+          />
         </div>
       ),
     },
     {
       id: 'api-devtools',
-      title: 'DevTools & Profiling',
+      title: 'DevTools & Profiling (react-zeugma/devtools)',
       content: (
         <div className="space-y-4">
           <DocParagraph>
-            Built-in DevTools utilities imported from{' '}
-            <DocCode highlight>react-zeugma/devtools</DocCode> (or <DocCode>react-zeugma</DocCode>)
-            for auditing mount lifecycles and render performance.
+            Instrumentation utilities imported from{' '}
+            <DocCode highlight>react-zeugma/devtools</DocCode> for auditing component mounts,
+            renders, and layout performance.
           </DocParagraph>
           <DocTable
             headers={['Export', 'Signature', 'Description']}
@@ -326,6 +439,8 @@ export const apiReferenceSection: DocSection = {
                 'Status bar footer component that wraps panel widgets.',
               ],
             ]}
+            searchable
+            searchPlaceholder="Filter DevTools exports..."
           />
         </div>
       ),

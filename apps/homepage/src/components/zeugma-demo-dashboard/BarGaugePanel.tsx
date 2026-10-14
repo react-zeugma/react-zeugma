@@ -16,10 +16,10 @@ function HealthBar({ service }: { service: ServiceHealth }) {
 
   return (
     <div className="flex items-center gap-2 px-3 py-[5px] group">
-      <span className="text-[10px] font-medium text-[#D8D9DA] w-[100px] truncate shrink-0">
+      <span className="text-[10px] font-medium text-[var(--demo-text)] w-[100px] truncate shrink-0">
         {service.name}
       </span>
-      <div className="flex-1 h-[14px] bg-[#1a1d21] rounded-sm overflow-hidden relative">
+      <div className="flex-1 h-[14px] bg-[var(--demo-chrome)] rounded-sm overflow-hidden relative">
         <div
           className="h-full rounded-sm transition-all duration-700 ease-out relative overflow-hidden"
           style={{

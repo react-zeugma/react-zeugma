@@ -1,5 +1,12 @@
 import { DocSection } from '../docs-data'
-import { DocParagraph, DocList, DocCode } from '../../components/docs-elements'
+import {
+  DocParagraph,
+  DocCode,
+  DocCallout,
+  InfoCard,
+  DocStepper,
+} from '../../components/docs-elements'
+import { Bot, FileText, ExternalLink, Sparkles } from 'lucide-react'
 
 export const SKILL_MD_CONTENT = `---
 name: react-zeugma
@@ -19,6 +26,7 @@ description: Rules, types, component composition, and programmatic manipulation 
 - **renderPane Placement Rule**: If using \`<Zeugma>\` with \`children\` (Context Provider Mode), you MUST pass the \`renderPane\` prop directly to \`<PaneTree renderPane={renderPane} />\`, and \`renderPane\` is forbidden on \`<Zeugma>\`. If using \`<Zeugma>\` in standalone mode (without \`children\`), you MUST pass \`renderPane\` directly to \`<Zeugma renderPane={renderPane} />\`.
 - **DragHandle Placement**: Draggable panes require a child \`<Pane.DragHandle>\` component to define the interactive drag region.
 - **Stable Layout During Drag Rule**: The logical \`layout\` object from the controller or context does not update in real-time during a drag session. It only updates once the drop action is committed. The active visual removals and split previews are managed by the library's internal rendering layout.
+- **Immutable Tab Metadata**: Tab metadata is decoupled from the layout topology (\`TreeNode\`). Metadata is registered at tab creation (\`initialMetadata\`, \`addTab(tabId, targetPaneId?, metadata?)\`) and read via \`findTabById(tabId)?.metadata\`, \`getTabMetadata(tabId)\`, or \`useTabMetadata(tabId)\`. No imperative \`updateMetadata\` mutations exist.
 
 ---
 
@@ -57,7 +65,7 @@ export interface TabDetails {
 }
 \`\`\`
 
-- **\`PaneNode\` (Leaf)**: Holds active tabs and the selected tab ID.
+- **\`PaneNode\` (Leaf)**: Holds active tab IDs (\`tabIds\`) and the selected \`activeTabId\`.
 - **\`SplitNode\` (Branch)**: Divides space into \`first\` and \`second\` sub-trees based on \`splitPercentage\` (percentage of the first child's size relative to the parent boundary).
 
 ---
@@ -110,6 +118,8 @@ function Dashboard() {
 }
 \`\`\`
 
+---
+
 ## 4. API Reference and Configurations
 
 ### \`<Zeugma>\` Component Props
@@ -145,9 +155,12 @@ const {
   addTab,
   selectTab,
   splitPane,
+  updatePaneLock,
   findPaneById,
   findPaneContainingTab,
   findTabById,
+  getTabMetadata,
+  getActiveTabMetadata,
   poppedOutTabIds,
   popoutTab,
   dockTab,
@@ -249,34 +262,239 @@ Import mount and render counter utilities from \`react-zeugma/devtools\` or \`re
 - **\`useRenderCounter(idOrOptions?, options?)\`**: Tracks component mount counts and render cycle passes in a React 18/19 StrictMode safe manner. Returns \`{ mounts, renders, reset }\`.
 - **\`<RenderCounterBadge id={id} position="top-right" disabled={disabled} className="..." />\`**: Unstyled overlay badge displaying mount and render metrics.
 - **\`<RenderCounterFooter id={id} label={label} disabled={disabled} className="..." footerClassName="...">\`**: Unstyled bottom status footer bar for tabbed widgets or layout panels.
+
+---
+
+## 8. LLM Context Standard (llms.txt)
+
+React Zeugma provides an official, curated \`/llms.txt\` document conforming to the [llmstxt.org](https://llmstxt.org) standard:
+- **URL**: \`https://react-zeugma.vercel.app/llms.txt\`
+- **Use Case**: Ingesting high-density architecture, layout schemas, and API reference into LLMs (NotebookLM, Claude, ChatGPT, or custom RAG vectors) without parsing HTML.
 `
 
 export const skillMdSection: DocSection = {
   id: 'skill-md',
-  title: 'AI Integration (SKILL.md)',
+  title: 'AI Integration (SKILL.md & llms.txt)',
   category: 'advanced',
   content: (
-    <div className="space-y-6">
-      <DocParagraph>
-        React Zeugma provides a pre-configured{' '}
-        <strong className="text-text-primary">SKILL.md</strong> file that helps AI coding assistants
-        (like Gemini, Claude, or Copilot) understand the library's layout primitives and API
-        structure. By adding this skill to your project's configuration, you can ask the AI to build
-        or refactor complex layouts and custom pane configurations with high accuracy.
-      </DocParagraph>
+    <div className="space-y-8">
+      <div>
+        <DocParagraph lead>
+          React Zeugma is designed AI-first. We provide two official, pre-configured specifications
+          designed to eliminate hallucinations: an authoritative{' '}
+          <strong className="text-text-primary font-semibold">SKILL.md</strong> file for agentic IDE
+          assistants, and a curated{' '}
+          <strong className="text-text-primary font-semibold">llms.txt</strong> index for LLMs and
+          RAG pipelines.
+        </DocParagraph>
+      </div>
 
-      <h3 className="text-sm font-bold text-text-primary uppercase tracking-wider mt-6">
-        Setup Instructions
-      </h3>
-      <DocList
-        items={[
-          <>
-            Create a <DocCode>SKILL.md</DocCode> file in your{' '}
-            <DocCode>.agents/skills/react-zeugma/</DocCode> directory.
-          </>,
-          <>Copy the contents of the code block below and paste them into it.</>,
-        ]}
-      />
+      {/* Two Pillars Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="border border-accent/30 bg-accent/5 rounded-2xl p-5 space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-accent/15 border border-accent/30 flex items-center justify-center text-accent">
+              <Bot className="w-4 h-4" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-text-primary">
+                SKILL.md for Agentic Assistants
+              </h4>
+              <span className="text-[11px] text-text-muted">
+                Antigravity, Cursor, Claude Code, Copilot
+              </span>
+            </div>
+          </div>
+          <p className="text-xs text-text-secondary leading-relaxed">
+            Encodes all 6 architectural invariants, layout constraints, headless styling contracts,
+            and TypeScript schemas directly into the assistant&apos;s workspace rules. Guarantees
+            100% syntactically and structurally correct React Zeugma code on the first attempt.
+          </p>
+        </div>
+
+        <div className="border border-border-primary rounded-2xl p-5 bg-bg-pane space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-bg-pane-inner border border-border-primary flex items-center justify-center text-text-primary">
+              <FileText className="w-4 h-4" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-text-primary">llms.txt Standard Index</h4>
+              <span className="text-[11px] text-text-muted">
+                llmstxt.org Standard Plaintext Reference
+              </span>
+            </div>
+          </div>
+          <p className="text-xs text-text-secondary leading-relaxed">
+            A high-density, structured markdown file hosted at <DocCode>/llms.txt</DocCode> designed
+            for ingestion into ChatGPT, Claude Projects, NotebookLM, or custom RAG knowledge bases
+            without web scrapers or HTML noise.
+          </p>
+        </div>
+      </div>
     </div>
   ),
+  subsections: [
+    {
+      id: 'skill-configuration',
+      title: 'SKILL.md for Agentic IDEs',
+      content: (
+        <div className="space-y-6">
+          <DocParagraph>
+            When AI coding models are asked to build dashboards, they frequently hallucinate legacy
+            12-column coordinate grids or forget that React Zeugma is 100% headless (omitting the
+            mandatory resizer and drop-preview class names). By placing our pre-configured{' '}
+            <DocCode>SKILL.md</DocCode> into your workspace, the agent immediately knows how to
+            construct valid recursive binary trees and compound pane components.
+          </DocParagraph>
+
+          <DocCallout variant="tip" title="Why AI Assistants Need SKILL.md">
+            AI models without library skills often attempt to pass <DocCode>renderPane</DocCode> to{' '}
+            <DocCode>&lt;Zeugma&gt;</DocCode> even when children are present (violating the Provider
+            mode contract), or forget to render <DocCode>&lt;Pane.DragHandle&gt;</DocCode>. The
+            SKILL.md rules prevent these errors before code is generated.
+          </DocCallout>
+
+          <DocStepper
+            steps={[
+              {
+                title: 'Download or copy SKILL.md',
+                children: (
+                  <span>
+                    Click the <strong>Download SKILL.md</strong> button below, or copy the
+                    configuration code block directly into your project.
+                  </span>
+                ),
+              },
+              {
+                title: 'Place in your project configuration root',
+                children: (
+                  <div className="space-y-2">
+                    <p className="text-xs text-text-secondary">
+                      Place the file in your preferred assistant directory:
+                    </p>
+                    <ul className="text-xs font-mono text-text-muted space-y-1 list-disc list-outside pl-4">
+                      <li>
+                        <strong className="text-text-primary">Google Antigravity:</strong>{' '}
+                        <DocCode>.agents/skills/react-zeugma/SKILL.md</DocCode>
+                      </li>
+                      <li>
+                        <strong className="text-text-primary">Cursor:</strong>{' '}
+                        <DocCode>.cursor/rules/react-zeugma.md</DocCode>
+                      </li>
+                      <li>
+                        <strong className="text-text-primary">Claude Code:</strong>{' '}
+                        <DocCode>.claude/skills/react-zeugma.md</DocCode>
+                      </li>
+                      <li>
+                        <strong className="text-text-primary">GitHub Copilot:</strong>{' '}
+                        <DocCode>.github/copilot-instructions.md</DocCode>
+                      </li>
+                    </ul>
+                  </div>
+                ),
+              },
+              {
+                title: 'Prompt your assistant naturally',
+                children: (
+                  <span>
+                    Ask your agent:{' '}
+                    <em>
+                      &quot;Build a 3-pane trading cockpit with recursive split dividers and custom
+                      resizer styles using react-zeugma&quot;
+                    </em>
+                    .
+                  </span>
+                ),
+              },
+            ]}
+          />
+        </div>
+      ),
+    },
+    {
+      id: 'llms-txt',
+      title: 'llms.txt Standard Index',
+      content: (
+        <div className="space-y-6">
+          <DocParagraph>
+            Following the official{' '}
+            <strong className="text-text-primary font-semibold">llmstxt.org</strong> open standard,
+            we publish a curated plaintext reference at <DocCode>/llms.txt</DocCode>. This file
+            contains concise, structured documentation, complete type signatures, and architectural
+            constraints optimized for prompt contexts and RAG ingestion.
+          </DocParagraph>
+
+          <div className="border border-border-primary bg-bg-pane rounded-2xl p-6 space-y-4 shadow-2xs">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-border-primary/60">
+              <div className="space-y-1">
+                <span className="eyebrow text-accent font-semibold flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5" /> Live LLM Endpoint
+                </span>
+                <h4 className="text-base font-bold text-text-primary">
+                  https://react-zeugma.vercel.app/llms.txt
+                </h4>
+              </div>
+              <div className="flex items-center gap-2">
+                <a
+                  href="/llms.txt"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent text-accent-foreground text-xs font-semibold hover:bg-accent/90 transition-colors"
+                >
+                  <span>Open /llms.txt</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <span className="text-xs text-text-secondary font-medium">
+                Fetch via terminal or pipeline:
+              </span>
+              <pre className="p-3 rounded-lg bg-bg-pane-inner border border-border-primary font-mono text-xs text-accent overflow-x-auto select-all">
+                curl -s https://react-zeugma.vercel.app/llms.txt
+              </pre>
+            </div>
+          </div>
+
+          <DocCallout variant="note" title="Using llms.txt in ChatGPT, Claude, and NotebookLM">
+            When starting a new conversation with an LLM about your dashboard architecture, simply
+            attach or paste the contents of <DocCode>/llms.txt</DocCode> as project context. The
+            model will understand the entire component surface, recursive tree mathematics, and
+            headless styling requirements without requiring manual prompt engineering.
+          </DocCallout>
+        </div>
+      ),
+    },
+    {
+      id: 'prompting-guide',
+      title: 'Prompting Recipes & Best Practices',
+      content: (
+        <div className="space-y-6">
+          <DocParagraph>
+            When pairing with AI assistants equipped with the React Zeugma skill, use these
+            battle-tested prompting patterns for the highest quality code generation:
+          </DocParagraph>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <InfoCard title="Recipe: Multi-Tab Analytics Dashboard" titleClassName="text-accent">
+              <p className="text-xs text-text-secondary leading-relaxed font-mono bg-bg-pane-inner/60 p-2.5 rounded-lg border border-border-primary/60">
+                &quot;Create a dashboard using react-zeugma with 2 side-by-side panes. The left pane
+                should have 3 tabs (&apos;Summary&apos;, &apos;Logs&apos;, &apos;Metrics&apos;).
+                Include custom Tailwind styling for Pane.DragHandle and resizer.&quot;
+              </p>
+            </InfoCard>
+
+            <InfoCard title="Recipe: Arbitrary Dynamic Splitting" titleClassName="text-accent">
+              <p className="text-xs text-text-secondary leading-relaxed font-mono bg-bg-pane-inner/60 p-2.5 rounded-lg border border-border-primary/60">
+                &quot;Use react-zeugma/utils to implement an &apos;Add Terminal&apos; button that
+                calls splitPane() on the active editor pane and inserts a new terminal pane split at
+                the bottom.&quot;
+              </p>
+            </InfoCard>
+          </div>
+        </div>
+      ),
+    },
+  ],
 }

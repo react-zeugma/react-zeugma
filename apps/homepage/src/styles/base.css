@@ -1,0 +1,152 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Base — document defaults, focus, selection, scrollbars, shared utilities
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@layer base {
+  html {
+    background-color: var(--bg-app);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-feature-settings: 'ss01', 'cv11';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    scroll-padding-top: 5rem;
+    /* Let height:auto / fit-content participate in transitions (Chromium) */
+    interpolate-size: allow-keywords;
+    scrollbar-color: color-mix(in oklch, var(--text-muted) 45%, transparent) transparent;
+    scrollbar-width: thin;
+  }
+
+  body {
+    min-height: 100dvh;
+    background-color: var(--bg-app);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+  }
+
+  p,
+  li {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background-color: color-mix(in oklch, var(--accent) 28%, transparent);
+    color: inherit;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  button,
+  [role='button'],
+  summary {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+
+  kbd {
+    font-family: var(--font-mono);
+  }
+}
+
+/* Hide scrollbars while keeping scrollability */
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Hairline architectural grid used behind hero / section backdrops */
+@utility bg-grid {
+  background-image:
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
+/* Fade an element's edges using a mask (no extra overlay elements) */
+@utility mask-fade-y {
+  mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
+}
+
+@utility mask-fade-b {
+  mask-image: linear-gradient(to bottom, #000 55%, transparent);
+}
+
+@utility mask-radial {
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 30%, transparent 75%);
+}
+
+@layer components {
+  /* Monospace micro-label ("eyebrow") used across the site */
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  /* Keyboard hint chip */
+  .kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    padding-inline: 0.3rem;
+    border-radius: 0.3rem;
+    border: 1px solid var(--border-primary);
+    border-bottom-width: 2px;
+    background: var(--bg-pane);
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    line-height: 1;
+  }
+
+  /* Underline that grows from the left on hover */
+  .link-grow {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0% 1px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size 0.3s var(--ease-out-expo);
+  }
+  .link-grow:hover {
+    background-size: 100% 1px;
+  }
+
+  /* Documentation search hit flash */
+  .search-highlight-fade {
+    animation: search-highlight-flash 3.2s var(--ease-out-expo) forwards;
+    border-radius: 12px;
+  }
+}
+
+@keyframes search-highlight-flash {
+  0%,
+  60% {
+    background-color: color-mix(in oklch, var(--accent) 12%, transparent);
+    box-shadow: 0 0 0 8px color-mix(in oklch, var(--accent) 12%, transparent);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: 0 0 0 0 transparent;
+  }
+}

@@ -169,7 +169,7 @@ export function GaugePanel({ label, value, max = 100, unit = '%', thresholds }: 
           >
             {value}
           </span>
-          <span className="text-[10px] text-[#6B6B6B] font-medium">{unit}</span>
+          <span className="text-[10px] text-[var(--demo-muted)] font-medium">{unit}</span>
         </div>
       </div>
     </PanelChrome>

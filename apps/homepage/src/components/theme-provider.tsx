@@ -20,14 +20,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
   const [mounted, setMounted] = useState(false)
 
-  // After hydration, read the real theme from localStorage.
-  // The inline script in layout.tsx already applied the .dark CSS class
-  // before paint, so backgrounds/text are correct. This only syncs
-  // the React state so the toggle icon can render correctly.
+  // Read saved theme from localStorage or fallback to system preference
   useEffect(() => {
     try {
       const saved = localStorage.getItem('zeugma-theme')
-      if (saved === 'dark') setTheme('dark')
+      if (saved === 'dark' || saved === 'light') {
+        setTheme(saved)
+      } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        setTheme('dark')
+      }
     } catch {
       // localStorage unavailable
     }
@@ -41,41 +42,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     } else {
       document.documentElement.classList.remove('dark')
     }
+    const meta = document.querySelector<HTMLMetaElement>('meta[name="color-scheme"]')
+    if (meta) meta.content = theme
     localStorage.setItem('zeugma-theme', theme)
   }, [theme, mounted])
 
-  const toggleTheme = useCallback((event?: React.MouseEvent<HTMLButtonElement>) => {
-    const doc = document as Document & {
-      startViewTransition?: (cb: () => void) => { ready: Promise<void> }
-    }
-    if (!event || !doc.startViewTransition) {
-      setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))
-      return
-    }
-
-    const x = event.clientX
-    const y = event.clientY
-    const endRadius = Math.hypot(
-      Math.max(x, window.innerWidth - x),
-      Math.max(y, window.innerHeight - y),
-    )
-
-    const transition = doc.startViewTransition(() => {
-      setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))
-    })
-
-    transition.ready.then(() => {
-      document.documentElement.animate(
-        {
-          clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${endRadius}px at ${x}px ${y}px)`],
-        },
-        {
-          duration: 500,
-          easing: 'ease-in-out',
-          pseudoElement: '::view-transition-new(root)',
-        },
-      )
-    })
+  const toggleTheme = useCallback(() => {
+    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))
   }, [])
 
   return (

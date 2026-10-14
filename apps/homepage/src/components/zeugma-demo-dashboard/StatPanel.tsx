@@ -77,7 +77,7 @@ function StatCard({ label, value, unit, trend, color, icon }: StatCardProps) {
       <div className="flex items-center justify-between mb-1.5">
         <div className="flex items-center gap-1.5">
           <span className="opacity-60">{icon}</span>
-          <span className="text-[9px] font-semibold uppercase tracking-wider text-[#8E8E8E]">
+          <span className="text-[9px] font-semibold uppercase tracking-wider text-[var(--demo-muted)]">
             {label}
           </span>
         </div>
@@ -100,7 +100,7 @@ function StatCard({ label, value, unit, trend, color, icon }: StatCardProps) {
           <span className="text-xl font-bold tabular-nums" style={{ color }}>
             {value}
           </span>
-          <span className="text-[9px] text-[#6B6B6B] font-medium">{unit}</span>
+          <span className="text-[9px] text-[var(--demo-muted)] font-medium">{unit}</span>
         </div>
         <Sparkline data={trend} color={color} />
       </div>
@@ -117,7 +117,7 @@ export function StatPanel() {
       unit: 'req/s',
       trend: stats.requestsTrend,
       color: '#5794F2',
-      icon: <Zap className="w-3 h-3 text-[#8b8f97]" />,
+      icon: <Zap className="w-3 h-3 text-[var(--demo-muted)]" />,
     },
     {
       label: 'Uptime',
@@ -125,7 +125,7 @@ export function StatPanel() {
       unit: '%',
       trend: stats.uptimeTrend,
       color: '#73BF69',
-      icon: <Server className="w-3 h-3 text-[#8b8f97]" />,
+      icon: <Server className="w-3 h-3 text-[var(--demo-muted)]" />,
     },
     {
       label: 'P99 Latency',
@@ -133,7 +133,7 @@ export function StatPanel() {
       unit: 'ms',
       trend: stats.latencyTrend,
       color: '#FF9830',
-      icon: <Clock className="w-3 h-3 text-[#8b8f97]" />,
+      icon: <Clock className="w-3 h-3 text-[var(--demo-muted)]" />,
     },
     {
       label: 'Error Rate',
@@ -141,12 +141,15 @@ export function StatPanel() {
       unit: '%',
       trend: stats.errorTrend,
       color: '#F2495C',
-      icon: <AlertTriangle className="w-3 h-3 text-[#8b8f97]" />,
+      icon: <AlertTriangle className="w-3 h-3 text-[var(--demo-muted)]" />,
     },
   ]
 
   return (
-    <PanelChrome title="Key Metrics" icon={<Zap className="w-3.5 h-3.5 text-[#8b8f97]" />}>
+    <PanelChrome
+      title="Key Metrics"
+      icon={<Zap className="w-3.5 h-3.5 text-[var(--demo-muted)]" />}
+    >
       <div className="grid grid-cols-2 gap-2 p-2 h-full">
         {cards.map((card) => (
           <StatCard key={card.label} {...card} />

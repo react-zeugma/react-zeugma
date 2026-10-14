@@ -1,0 +1,7 @@
+export { HeroSection } from './hero-section'
+export { ShowcaseSection } from './showcase-section'
+export { PillarsSection } from './pillars-section'
+export { ComparisonSection } from './comparison-section'
+export { FaqSection } from './faq-section'
+export { CodePreviewSection } from './code-preview-section'
+export { StorySection } from './story-section'

@@ -10,13 +10,17 @@ const ZeugmaDemoDashboard = dynamic(
     })),
   {
     ssr: false,
-    loading: () => <div className="w-full h-full bg-[#0b0c0e] animate-pulse" />,
+    loading: () => (
+      <div className="w-full h-full bg-[var(--demo-canvas)] animate-pulse flex items-center justify-center text-[var(--demo-muted)] text-xs font-mono">
+        Loading cockpit telemetry...
+      </div>
+    ),
   },
 )
 
 export function DemoView() {
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-[var(--demo-canvas)] scheme-dark">
       <DemoNavbar />
       <div className="flex-1 min-h-0">
         <ZeugmaDemoDashboard />

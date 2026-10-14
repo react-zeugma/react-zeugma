@@ -68,7 +68,10 @@ export function TimeSeriesPanel() {
   }
 
   return (
-    <PanelChrome title="System Metrics" icon={<Activity className="w-3.5 h-3.5 text-[#5794F2]" />}>
+    <PanelChrome
+      title="System Metrics"
+      icon={<Activity className="w-3.5 h-3.5 text-[var(--demo-accent)]" />}
+    >
       <div className="flex flex-col h-full">
         {/* Legend */}
         <div className="flex items-center gap-3 px-3 pt-2 pb-1">
@@ -81,7 +84,7 @@ export function TimeSeriesPanel() {
               }`}
             >
               <span className="w-2.5 h-[2px] rounded-full" style={{ backgroundColor: s.color }} />
-              <span className="text-[#D8D9DA]">{s.label}</span>
+              <span className="text-[var(--demo-text)]">{s.label}</span>
             </button>
           ))}
         </div>

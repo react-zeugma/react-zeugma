@@ -50,7 +50,7 @@ function PlaygroundPaneHeader() {
             onClick={onSelect}
             className={`px-2 py-0.5 text-[10px] font-bold rounded-md transition-colors cursor-pointer ${
               isActive
-                ? 'bg-bg-pane text-indigo-500 shadow-2xs'
+                ? 'bg-bg-pane text-accent shadow-2xs font-semibold'
                 : 'text-text-secondary hover:text-text-primary'
             }`}
           >
@@ -115,8 +115,8 @@ export default function Dashboard() {
         </Pane>
       )}
       classNames={{
-        resizer: 'bg-indigo-500/10 hover:bg-indigo-500/50 transition-colors',
-        dropPreview: 'bg-indigo-500/5 border border-indigo-500 border-dashed'
+        resizer: 'bg-accent/15 hover:bg-accent/40 transition-colors',
+        dropPreview: 'bg-accent/10 border border-accent border-dashed rounded-lg'
       }}
     />
   )`
@@ -129,15 +129,15 @@ export default function Dashboard() {
   const renderWidget = (tab: TabDetails) => {
     return (
       <div className="flex flex-col h-full justify-between p-3 select-none">
-        <div className="space-y-1.5">
-          <span className="text-[9px] font-extrabold uppercase tracking-wider text-indigo-500">
+        <div className="space-y-1">
+          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-accent">
             {tab.id}
           </span>
           <p className="text-[11px] text-text-secondary leading-relaxed">
             Drag by the header to rearrange or split.
           </p>
         </div>
-        <div className="text-[9px] text-text-muted font-mono bg-bg-pane-inner/85 px-1.5 py-0.5 rounded border border-border-primary/40 w-fit">
+        <div className="text-[9px] text-text-muted font-mono bg-bg-pane-inner px-1.5 py-0.5 rounded border border-border-primary/60 w-fit">
           ID: {tab.id}
         </div>
       </div>
@@ -170,12 +170,12 @@ export default function Dashboard() {
                 setLocked(e.target.checked)
                 controller.setLocked(e.target.checked)
               }}
-              className="w-3.5 h-3.5 accent-indigo-600 rounded cursor-pointer"
+              className="w-3.5 h-3.5 accent-accent rounded cursor-pointer"
             />
             {locked ? (
               <Lock className="w-3.5 h-3.5 text-rose-500" />
             ) : (
-              <Unlock className="w-3.5 h-3.5 text-indigo-500" />
+              <Unlock className="w-3.5 h-3.5 text-accent" />
             )}
             Lock Layout
           </label>
@@ -184,7 +184,7 @@ export default function Dashboard() {
               type="checkbox"
               checked={enableDragToDismiss}
               onChange={(e) => setEnableDragToDismiss(e.target.checked)}
-              className="w-3.5 h-3.5 accent-indigo-600 rounded cursor-pointer"
+              className="w-3.5 h-3.5 accent-accent rounded cursor-pointer"
             />
             Drag-to-Dismiss
           </label>
@@ -200,9 +200,9 @@ export default function Dashboard() {
               max={16}
               value={resizerSize}
               onChange={(e) => setResizerSize(Number(e.target.value))}
-              className="w-20 h-1 bg-border-primary rounded-lg appearance-none cursor-pointer accent-indigo-600"
+              className="w-20 h-1 bg-border-primary rounded-lg appearance-none cursor-pointer accent-accent"
             />
-            <span className="font-mono text-indigo-500 font-semibold">{resizerSize}px</span>
+            <span className="font-mono text-accent font-semibold">{resizerSize}px</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-text-muted font-medium">Snap:</span>
@@ -212,9 +212,9 @@ export default function Dashboard() {
               max={24}
               value={snapThreshold}
               onChange={(e) => setSnapThreshold(Number(e.target.value))}
-              className="w-20 h-1 bg-border-primary rounded-lg appearance-none cursor-pointer accent-indigo-600"
+              className="w-20 h-1 bg-border-primary rounded-lg appearance-none cursor-pointer accent-accent"
             />
-            <span className="font-mono text-indigo-500 font-semibold">{snapThreshold}px</span>
+            <span className="font-mono text-accent font-semibold">{snapThreshold}px</span>
           </div>
         </div>
       </div>
@@ -228,7 +228,7 @@ export default function Dashboard() {
               onClick={() => setActiveTab(tab)}
               className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold transition-all border cursor-pointer ${
                 activeTab === tab
-                  ? 'bg-bg-pane text-indigo-500 border-border-primary/60 shadow-2xs'
+                  ? 'bg-bg-pane text-accent border-border-primary/60 shadow-2xs'
                   : 'text-text-secondary hover:text-text-primary border-transparent'
               }`}
             >
@@ -271,9 +271,8 @@ export default function Dashboard() {
               renderPane={renderPane}
               classNames={{
                 resizer: 'zeugma-resizer',
-                dropPreview:
-                  'bg-indigo-500/5 border border-indigo-500 border-dashed rounded-lg shadow-sm',
-                tabDropPreview: 'w-[2px] bg-indigo-500 z-10',
+                dropPreview: 'bg-accent/8 border border-accent border-dashed rounded-lg shadow-xs',
+                tabDropPreview: 'w-[2px] bg-accent z-10',
               }}
             />
           ) : (
@@ -284,7 +283,7 @@ export default function Dashboard() {
               </div>
               <button
                 onClick={handleReset}
-                className="px-3 py-1.5 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-bold shadow-xs cursor-pointer"
+                className="px-3 py-1.5 rounded-md bg-accent hover:bg-accent-strong text-accent-fg text-[11px] font-bold shadow-xs cursor-pointer"
               >
                 Restore Layout
               </button>
@@ -293,15 +292,24 @@ export default function Dashboard() {
         </div>
 
         <div
-          className={`w-full h-full overflow-y-auto p-4 font-mono text-[11px] bg-zinc-50 dark:bg-zinc-950 text-zinc-800 dark:text-zinc-200 select-all border-t border-zinc-200 dark:border-border-primary/40 ${activeTab === 'code' ? 'block' : 'hidden'}`}
+          className={`w-full h-full overflow-y-auto p-4 font-mono text-[11px] bg-bg-pane-inner text-text-primary select-all border-t border-border-primary/60 ${
+            activeTab === 'code' ? 'block' : 'hidden'
+          }`}
         >
-          <pre className="leading-relaxed" dangerouslySetInnerHTML={{ __html: highlightedCode }} />
+          <pre
+            className="leading-relaxed whitespace-pre-wrap break-words overflow-x-hidden"
+            dangerouslySetInnerHTML={{ __html: highlightedCode }}
+          />
         </div>
 
         <div
-          className={`w-full h-full overflow-y-auto p-4 font-mono text-[11px] bg-zinc-50 dark:bg-zinc-950 text-emerald-650 dark:text-emerald-400 border-t border-zinc-200 dark:border-border-primary/40 ${activeTab === 'json' ? 'block' : 'hidden'}`}
+          className={`w-full h-full overflow-y-auto p-4 font-mono text-[11px] bg-bg-pane-inner text-emerald-500 border-t border-border-primary/60 ${
+            activeTab === 'json' ? 'block' : 'hidden'
+          }`}
         >
-          <pre className="leading-relaxed">{JSON.stringify(controller.layout, null, 2)}</pre>
+          <pre className="leading-relaxed whitespace-pre-wrap break-words overflow-x-hidden">
+            {JSON.stringify(controller.layout, null, 2)}
+          </pre>
         </div>
       </div>
     </div>

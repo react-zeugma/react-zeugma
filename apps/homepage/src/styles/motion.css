@@ -1,0 +1,194 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Motion — view transitions, scroll-driven reveals, keyframes
+   Everything here is progressive enhancement: without support, content
+   simply renders in its final state.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── View transitions ─────────────────────────────────────────────────────── */
+
+/* Keep the live page interactive while a transition overlay is up */
+::view-transition {
+  pointer-events: none;
+}
+
+/* Page enter / exit (React <ViewTransition enter="page-enter" exit="page-exit">) */
+::view-transition-old(.page-exit) {
+  animation:
+    var(--duration-exit) ease-in both vt-fade reverse,
+    var(--duration-exit) ease-in both vt-lift reverse;
+}
+
+::view-transition-new(.page-enter) {
+  animation:
+    var(--duration-enter) ease-out var(--duration-exit) both vt-fade,
+    var(--duration-move) var(--ease-out-expo) both vt-lift;
+}
+
+/* Same-route content swaps (e.g. changelog filter, docs section) */
+::view-transition-group(.swap) {
+  animation-duration: 320ms;
+  animation-timing-function: var(--ease-out-expo);
+}
+
+/* Anchor the site header so it never slides with page content */
+::view-transition-group(site-header) {
+  animation: none;
+  z-index: 100;
+}
+::view-transition-old(site-header) {
+  display: none;
+}
+::view-transition-new(site-header) {
+  animation: none;
+}
+
+@keyframes vt-fade {
+  from {
+    opacity: 0;
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+@keyframes vt-lift {
+  from {
+    translate: 0 12px;
+  }
+  to {
+    translate: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}
+
+/* ── Scroll-driven reveals ────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports ((animation-timeline: view()) and (animation-range: entry)) {
+    /* Generic fade/lift as an element scrolls into view */
+    .reveal {
+      animation: reveal-up linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 28%;
+    }
+
+    /* Children reveal with a small stagger (set --i on each child) */
+    .reveal-stagger > * {
+      animation: reveal-up linear both;
+      animation-timeline: view();
+      animation-range: entry calc(var(--i, 0) * 4%) cover calc(24% + var(--i, 0) * 4%);
+    }
+
+    /* Hero product frame: starts tilted back, settles flat as it scrolls in */
+    .tilt-settle {
+      animation: tilt-settle linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 45%;
+    }
+
+    /* Reading progress bar bound to the document scroller */
+    .scroll-progress {
+      transform-origin: 0 50%;
+      animation: grow-x linear both;
+      animation-timeline: scroll(root block);
+    }
+  }
+}
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    translate: 0 24px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes tilt-settle {
+  from {
+    transform: perspective(1800px) rotateX(18deg) scale(0.92);
+    opacity: 0.4;
+  }
+  to {
+    transform: perspective(1800px) rotateX(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes grow-x {
+  from {
+    scale: 0 1;
+  }
+  to {
+    scale: 1 1;
+  }
+}
+
+/* ── Ambient keyframes ────────────────────────────────────────────────────── */
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+    scale: 1;
+  }
+  50% {
+    opacity: 0.45;
+    scale: 0.85;
+  }
+}
+
+/* Mosaic tiles in the hero re-splitting on a loop */
+@keyframes tessera-a {
+  0%,
+  22% {
+    grid-template-columns: 1.6fr 1fr;
+  }
+  33%,
+  55% {
+    grid-template-columns: 1fr 1.4fr;
+  }
+  66%,
+  88% {
+    grid-template-columns: 1.25fr 1fr;
+  }
+  100% {
+    grid-template-columns: 1.6fr 1fr;
+  }
+}
+
+@keyframes tessera-b {
+  0%,
+  22% {
+    grid-template-rows: 1fr 1.3fr;
+  }
+  33%,
+  55% {
+    grid-template-rows: 1.5fr 1fr;
+  }
+  66%,
+  88% {
+    grid-template-rows: 1fr 1fr;
+  }
+  100% {
+    grid-template-rows: 1fr 1.3fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-safe-loop {
+    animation: none !important;
+  }
+}

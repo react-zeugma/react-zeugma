@@ -90,13 +90,15 @@ export function TablePanel() {
                 <th
                   key={col.key}
                   onClick={() => handleSort(col.key)}
-                  className={`cursor-pointer hover:text-[#D8D9DA] transition-colors select-none ${
+                  className={`cursor-pointer hover:text-[var(--demo-text)] transition-colors select-none ${
                     col.align === 'right' ? 'text-right' : 'text-left'
                   }`}
                 >
                   <span className="inline-flex items-center gap-1">
                     {col.label}
-                    {sortKey === col.key && <ArrowUpDown className="w-2.5 h-2.5 text-[#5794F2]" />}
+                    {sortKey === col.key && (
+                      <ArrowUpDown className="w-2.5 h-2.5 text-[var(--demo-accent)]" />
+                    )}
                   </span>
                 </th>
               ))}
@@ -109,7 +111,7 @@ export function TablePanel() {
                 <td>
                   <MethodBadge method={row.method} />
                 </td>
-                <td className="text-[#D8D9DA] font-mono text-[10px]">{row.endpoint}</td>
+                <td className="text-[var(--demo-text)] font-mono text-[10px]">{row.endpoint}</td>
                 <td className="text-right">
                   <LatencyCell value={row.avgLatency} />
                 </td>

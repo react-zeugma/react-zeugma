@@ -14,16 +14,17 @@ const LOGO_URL = '/logo.png'
 export const NAV_ITEMS: {
   label: string
   to: '/' | '/demo' | '/docs' | '/changelog'
+  badge?: string
 }[] = [
-  { label: 'Home', to: '/' },
-  { label: 'Demo', to: '/demo' },
-  { label: 'Docs', to: '/docs' },
+  { label: 'Overview', to: '/' },
+  { label: 'Live Demo', to: '/demo', badge: 'Interactive' },
+  { label: 'Documentation', to: '/docs' },
   { label: 'Changelog', to: '/changelog' },
 ]
 
 export function Navbar() {
   const pathname = usePathname()
-  const { theme, toggleTheme } = useTheme()
+  const { theme, toggleTheme, mounted } = useTheme()
   const router = useRouter()
   const prefetched = useRef<Set<string>>(new Set())
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -34,16 +35,14 @@ export function Navbar() {
     setMobileMenuOpen(false)
   }, [pathname])
 
-  // Keyboard shortcut listener for search modal
+  // Keyboard shortcut listener: Cmd/Ctrl + K or /
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement
-      if (
-        e.key === '/' &&
-        target.tagName !== 'INPUT' &&
-        target.tagName !== 'TEXTAREA' &&
-        !target.isContentEditable
-      ) {
+      const isInput =
+        target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable
+
+      if ((e.key === 'k' && (e.metaKey || e.ctrlKey)) || (e.key === '/' && !isInput)) {
         e.preventDefault()
         setSearchModalOpen(true)
       }
@@ -52,7 +51,7 @@ export function Navbar() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
-  // Listen for global open-search event (e.g., from mobile docs search button)
+  // Listen for global open-search event
   useEffect(() => {
     const handleOpen = () => setSearchModalOpen(true)
     window.addEventListener('open-search', handleOpen)
@@ -68,10 +67,6 @@ export function Navbar() {
     [router],
   )
 
-  const handleSearchClick = () => {
-    setSearchModalOpen(true)
-  }
-
   const handleSelectResult = (id: string) => {
     if (pathname === '/docs') {
       window.dispatchEvent(new CustomEvent('scroll-to-section', { detail: id }))
@@ -80,18 +75,28 @@ export function Navbar() {
     }
   }
 
+  const appVersion = process.env.NEXT_PUBLIC_APP_VERSION || '7.1.2'
+
   return (
-    <header className="sticky top-0 z-50 w-full">
-      <nav className="relative bg-bg-app/80 backdrop-blur-md border-b border-border-primary px-4 sm:px-6 flex items-center justify-between h-14 transition-colors duration-200 select-none">
-        <Link href="/" className="flex items-center gap-2 group z-10">
-          <img src={LOGO_URL} alt="react-zeugma logo" className="w-6 h-6 object-contain" />
-          <span className="font-extrabold text-lg tracking-tight text-text-primary">
-            react-zeugma
-          </span>
-        </Link>
+    <header className="sticky top-0 z-40 w-full" style={{ viewTransitionName: 'site-header' }}>
+      <nav className="relative bg-bg-app/80 backdrop-blur-md border-b border-border-primary px-4 sm:px-6 lg:px-8 flex items-center justify-between h-14 transition-colors select-none">
+        {/* Brand */}
+        <div className="flex items-center gap-4">
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <img
+              src={LOGO_URL}
+              alt="react-zeugma logo"
+              className="w-5 h-5 object-contain transition-transform group-hover:scale-105"
+            />
+            <span className="font-bold text-sm tracking-tight text-text-primary">react-zeugma</span>
+            <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-mono font-medium border border-border-primary bg-bg-sidebar text-text-muted">
+              v{appVersion}
+            </span>
+          </Link>
+        </div>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-6">
+        <div className="hidden md:flex items-center gap-1 bg-bg-sidebar/50 border border-border-primary/60 rounded-full p-1 text-xs font-medium">
           {NAV_ITEMS.map((item) => {
             const isActive = pathname === item.to
             return (
@@ -99,130 +104,132 @@ export function Navbar() {
                 key={item.to}
                 href={item.to}
                 onMouseEnter={() => prefetch(item.to)}
-                className={`text-sm font-medium transition-colors hover:text-text-primary ${
-                  isActive ? 'text-text-primary' : 'text-text-secondary'
+                className={`relative px-3 py-1 rounded-full transition-all duration-200 flex items-center gap-1.5 ${
+                  isActive
+                    ? 'bg-bg-pane text-text-primary shadow-xs font-semibold'
+                    : 'text-text-secondary hover:text-text-primary'
                 }`}
               >
-                {item.label}
+                <span>{item.label}</span>
+                {item.badge && (
+                  <span className="px-1.5 py-0.2 rounded-full text-[9px] font-mono font-semibold bg-accent/15 text-accent">
+                    {item.badge}
+                  </span>
+                )}
               </Link>
             )
           })}
         </div>
 
         {/* Right Action Controls */}
-        <div className="flex items-center gap-2 sm:gap-3 z-10">
-          {/* Desktop Search Button */}
+        <div className="flex items-center gap-2">
+          {/* Search Trigger */}
           <button
-            onClick={handleSearchClick}
-            className="hidden md:flex items-center justify-between gap-2 px-4 py-2 bg-bg-pane-inner border border-border-primary rounded-lg text-xs text-text-muted hover:text-text-primary transition-all duration-200 cursor-pointer select-none font-medium w-44 lg:w-56"
+            onClick={() => setSearchModalOpen(true)}
+            className="flex items-center justify-between gap-3 px-3 py-1.5 bg-bg-pane border border-border-primary rounded-lg text-xs text-text-muted hover:text-text-primary hover:border-border-secondary transition-all cursor-pointer font-medium w-36 lg:w-48 shadow-2xs"
+            aria-label="Search documentation"
           >
-            <div className="flex items-center gap-2">
-              <Search className="h-3.5 w-3.5 text-text-muted" />
-              <span>Search docs...</span>
+            <div className="flex items-center gap-2 truncate">
+              <Search className="h-3.5 w-3.5 text-accent shrink-0" />
+              <span className="truncate">Search docs...</span>
             </div>
-            <kbd className="inline-flex items-center justify-center h-5 select-none rounded border border-border-primary bg-bg-sidebar px-2 font-mono text-[10px] font-medium text-text-muted">
-              /
-            </kbd>
+            <kbd className="kbd text-[9px]">⌘K</kbd>
           </button>
 
-          {/* Mobile Search Button */}
-          <button
-            onClick={handleSearchClick}
-            className="md:hidden p-1.5 rounded-md hover:bg-bg-sidebar border border-transparent hover:border-border-primary text-text-secondary hover:text-text-primary transition-all cursor-pointer"
-            title="Search documentation"
-          >
-            <Search className="w-4 h-4" />
-          </button>
-
+          {/* Theme Switcher */}
           <button
             onClick={toggleTheme}
-            className="p-1.5 rounded-md hover:bg-bg-sidebar border border-transparent hover:border-border-primary text-text-secondary hover:text-text-primary transition-all cursor-pointer"
+            className="p-1.5 rounded-lg border border-border-primary bg-bg-pane text-text-secondary hover:text-text-primary hover:border-border-secondary transition-colors cursor-pointer"
             title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+            aria-label="Toggle theme"
           >
-            {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+            {mounted && theme === 'light' ? (
+              <Moon className="w-4 h-4 text-accent" />
+            ) : (
+              <Sun className="w-4 h-4 text-amber-400" />
+            )}
           </button>
 
-          {/* Desktop External Links */}
-          <div className="hidden sm:flex items-center gap-2">
+          {/* External Links */}
+          <div className="hidden sm:flex items-center gap-1.5 border-l border-border-primary/80 pl-2">
             <a
               href="https://www.npmjs.com/package/react-zeugma"
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-2 bg-[#cb3837]/10 hover:bg-[#cb3837]/20 text-[#cb3837] px-3 py-1.5 rounded-md text-xs font-semibold transition-colors"
+              className="p-1.5 rounded-lg border border-border-primary bg-bg-pane text-text-secondary hover:text-[#cb3837] hover:border-border-secondary transition-colors"
+              title="View on NPM"
             >
-              <BrandIcon name="npm" size={22} title="NPM" />
-              NPM
+              <BrandIcon name="npm" size={18} />
             </a>
             <a
               href="https://github.com/react-zeugma/react-zeugma"
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-2 bg-text-primary hover:bg-text-primary/95 text-bg-app px-3 py-1.5 rounded-md text-xs font-semibold transition-colors"
+              className="p-1.5 rounded-lg border border-border-primary bg-bg-pane text-text-secondary hover:text-text-primary hover:border-border-secondary transition-colors"
+              title="GitHub repository"
             >
-              <BrandIcon name="github" size={22} title="GitHub" />
-              GitHub
+              <BrandIcon name="github" size={18} />
             </a>
           </div>
 
           {/* Mobile Menu Toggle */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-1.5 rounded-md hover:bg-bg-sidebar border border-transparent hover:border-border-primary text-text-secondary hover:text-text-primary transition-all cursor-pointer"
-            aria-label="Toggle menu"
+            className="md:hidden p-1.5 rounded-lg border border-border-primary bg-bg-pane text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
+            aria-label="Toggle navigation menu"
           >
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
           </button>
         </div>
       </nav>
 
-      {/* Mobile Navigation Dropdown Menu */}
-      <div
-        className={`md:hidden fixed inset-x-0 top-14 z-40 bg-bg-app/95 backdrop-blur-md border-b border-border-primary shadow-lg flex flex-col p-6 gap-6 transition-all duration-300 ease-in-out origin-top transform ${
-          mobileMenuOpen
-            ? 'opacity-100 translate-y-0'
-            : 'opacity-0 -translate-y-4 pointer-events-none'
-        }`}
-      >
-        <nav className="flex flex-col gap-4">
-          {NAV_ITEMS.map((item) => {
-            const isActive = pathname === item.to
-            return (
-              <Link
-                key={item.to}
-                href={item.to}
-                className={`text-base font-semibold transition-colors py-1 ${
-                  isActive
-                    ? 'text-indigo-600 dark:text-indigo-400'
-                    : 'text-text-secondary hover:text-text-primary'
-                }`}
-              >
-                {item.label}
-              </Link>
-            )
-          })}
-        </nav>
+      {/* Mobile Popover Navigation */}
+      {mobileMenuOpen && (
+        <div className="md:hidden fixed inset-x-3 top-16 z-50 bg-bg-pane border border-border-primary rounded-2xl shadow-float p-4 flex flex-col gap-3 animate-in fade-in zoom-in-98 duration-150">
+          <nav className="flex flex-col gap-1">
+            {NAV_ITEMS.map((item) => {
+              const isActive = pathname === item.to
+              return (
+                <Link
+                  key={item.to}
+                  href={item.to}
+                  className={`flex items-center justify-between px-3 py-2 rounded-xl text-sm font-semibold transition-colors ${
+                    isActive
+                      ? 'bg-accent/10 text-accent font-bold'
+                      : 'text-text-secondary hover:bg-bg-sidebar hover:text-text-primary'
+                  }`}
+                >
+                  <span>{item.label}</span>
+                  {item.badge && (
+                    <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-accent/15 text-accent font-semibold">
+                      {item.badge}
+                    </span>
+                  )}
+                </Link>
+              )
+            })}
+          </nav>
 
-        <div className="border-t border-border-primary pt-6 flex flex-col gap-3">
-          <a
-            href="https://www.npmjs.com/package/react-zeugma"
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center justify-center gap-2 bg-[#cb3837]/10 hover:bg-[#cb3837]/20 text-[#cb3837] px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors"
-          >
-            <BrandIcon name="npm" size={22} title="NPM" />
-            NPM Package
-          </a>
-          <a
-            href="https://github.com/react-zeugma/react-zeugma"
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center justify-center gap-2 bg-text-primary hover:bg-text-primary/95 text-bg-app px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors"
-          >
-            <BrandIcon name="github" size={22} title="GitHub" />
-            GitHub Repository
-          </a>
+          <div className="border-t border-border-primary pt-3 grid grid-cols-2 gap-2 text-xs font-semibold">
+            <a
+              href="https://www.npmjs.com/package/react-zeugma"
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-bg-sidebar border border-border-primary text-text-primary hover:border-border-secondary"
+            >
+              <BrandIcon name="npm" size={18} /> NPM
+            </a>
+            <a
+              href="https://github.com/react-zeugma/react-zeugma"
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-bg-sidebar border border-border-primary text-text-primary hover:border-border-secondary"
+            >
+              <BrandIcon name="github" size={18} /> GitHub
+            </a>
+          </div>
         </div>
-      </div>
+      )}
 
       <SearchModal
         isOpen={searchModalOpen}

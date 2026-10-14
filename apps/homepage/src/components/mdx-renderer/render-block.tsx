@@ -42,7 +42,7 @@ export function renderBlock(
           <h1
             key={key}
             id={headingId}
-            className="group flex items-center gap-2 text-3xl md:text-4xl font-extrabold tracking-tight text-text-primary mb-2"
+            className="group flex items-center gap-2 text-3xl sm:text-4xl font-extrabold tracking-tight text-text-primary mb-3"
           >
             <span>{renderInline(heading.children as RootContent[], `${key}-`)}</span>
             <a
@@ -51,7 +51,7 @@ export function renderBlock(
                 e.preventDefault()
                 scrollToSection(headingId)
               }}
-              className="text-text-muted hover:text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity font-mono text-xl select-none"
+              className="text-text-muted hover:text-accent opacity-0 group-hover:opacity-100 transition-opacity font-mono text-xl select-none"
             >
               #
             </a>
@@ -63,9 +63,9 @@ export function renderBlock(
           <h2
             key={key}
             id={headingId}
-            className={`group flex items-center gap-2 text-2xl font-bold text-text-primary pb-2 transition-colors duration-200 ${
+            className={`group flex items-center gap-2 text-2xl font-bold text-text-primary pb-2.5 transition-colors ${
               isZeugmaSection
-                ? 'border-b border-[#D8BA8E] font-serif'
+                ? 'border-b border-accent font-display italic text-accent text-3xl'
                 : 'border-b border-border-primary'
             }`}
           >
@@ -76,11 +76,7 @@ export function renderBlock(
                 e.preventDefault()
                 scrollToSection(headingId)
               }}
-              className={`opacity-0 group-hover:opacity-100 transition-opacity font-mono text-xl select-none ${
-                isZeugmaSection
-                  ? 'text-[#D8BA8E]/50 hover:text-[#D8BA8E]'
-                  : 'text-text-muted hover:text-indigo-500'
-              }`}
+              className="opacity-0 group-hover:opacity-100 transition-opacity font-mono text-xl select-none text-text-muted hover:text-accent"
             >
               #
             </a>
@@ -89,7 +85,11 @@ export function renderBlock(
       }
       if (heading.depth === 3) {
         return (
-          <h3 key={key} id={headingId} className="text-lg font-bold text-text-primary mt-6 mb-2">
+          <h3
+            key={key}
+            id={headingId}
+            className="text-lg font-bold text-text-primary mt-6 mb-2 tracking-tight"
+          >
             {renderInline(heading.children as RootContent[], `${key}-`)}
           </h3>
         )
@@ -98,21 +98,13 @@ export function renderBlock(
         const textContent = text.trim()
         if (textContent.includes('(') || textContent.includes(':')) {
           return (
-            <h4
-              key={key}
-              id={headingId}
-              className="font-mono text-sm text-indigo-600 dark:text-indigo-400 font-bold"
-            >
+            <h4 key={key} id={headingId} className="font-mono text-sm text-accent font-bold">
               {text}
             </h4>
           )
         }
         return (
-          <h4
-            key={key}
-            id={headingId}
-            className="text-xs uppercase font-bold tracking-wider text-text-secondary pt-2"
-          >
+          <h4 key={key} id={headingId} className="eyebrow pt-3 text-text-secondary">
             {renderInline(heading.children as RootContent[], `${key}-`)}
           </h4>
         )
@@ -144,10 +136,10 @@ export function renderBlock(
       return (
         <Tag
           key={key}
-          className={`${list.ordered ? 'list-decimal' : 'list-disc'} list-inside text-text-secondary space-y-1.5 text-sm leading-relaxed`}
+          className={`${list.ordered ? 'list-decimal' : 'list-disc'} list-outside pl-5 text-text-secondary space-y-2 text-sm leading-relaxed marker:text-text-muted`}
         >
           {list.children.map((item: ListItem, li: number) => (
-            <li key={`${key}-li-${li}`}>
+            <li key={`${key}-li-${li}`} className="pl-1">
               {item.children.map((child, ci) => {
                 if (child.type === 'paragraph') {
                   return (
@@ -173,36 +165,32 @@ export function renderBlock(
       return (
         <div
           key={key}
-          className="w-full max-w-full overflow-x-auto border border-border-primary rounded-lg transition-colors duration-200"
+          className="w-full max-w-full overflow-x-auto border border-border-primary rounded-xl overflow-hidden my-4 shadow-2xs"
         >
           <table className="min-w-full text-left text-xs border-collapse">
             {headerRow && (
               <thead>
-                <tr className="border-b border-border-primary bg-bg-sidebar text-text-secondary uppercase tracking-wider transition-colors duration-200">
+                <tr className="border-b border-border-primary bg-bg-sidebar/80 eyebrow">
                   {(headerRow as TableRow).children.map((cell: TableCell, ci: number) => (
-                    <th key={`${key}-th-${ci}`} className="px-4 py-2 font-semibold">
+                    <th key={`${key}-th-${ci}`} className="px-4 py-2.5 font-semibold">
                       {renderInline(cell.children as RootContent[], `${key}-th-${ci}-`)}
                     </th>
                   ))}
                 </tr>
               </thead>
             )}
-            <tbody className="divide-y divide-border-primary/60 text-text-primary">
+            <tbody className="divide-y divide-border-primary/60 text-text-primary bg-bg-pane/40">
               {bodyRows.map((row: TableRow, ri: number) => (
-                <tr
-                  key={`${key}-tr-${ri}`}
-                  className="bg-bg-pane/30 transition-colors duration-200"
-                >
+                <tr key={`${key}-tr-${ri}`} className="hover:bg-bg-sidebar/30 transition-colors">
                   {row.children.map((cell: TableCell, ci: number) => {
                     const cellText = nodeText(cell as unknown as RootContent)
                     const isFirstCol = ci === 0
                     const isRequired = cellText.trim() === 'Yes'
                     const isOptional = cellText.trim() === 'No'
                     let className = 'px-4 py-3'
-                    if (isFirstCol) className += ' font-mono text-indigo-600 dark:text-indigo-400'
+                    if (isFirstCol) className += ' font-mono text-accent'
                     else if (ci === 1) className += ' font-mono'
-                    if (isRequired)
-                      className += ' font-medium text-emerald-600 dark:text-emerald-400'
+                    if (isRequired) className += ' font-semibold text-emerald-500'
                     else if (isOptional) className += ' text-text-secondary'
                     return (
                       <td key={`${key}-td-${ri}-${ci}`} className={className}>
@@ -234,7 +222,7 @@ export function renderBlock(
         return (
           <div
             key={key}
-            className="bg-[#D8BA8E]/5 border border-[#D8BA8E]/20 rounded-xl p-5 select-none font-serif italic text-[#c29b47] dark:text-[#D8BA8E]/90 text-sm leading-relaxed transition-colors duration-200"
+            className="bg-accent/8 border border-accent/25 rounded-2xl p-6 my-6 select-none font-display italic text-accent text-base leading-relaxed"
           >
             {bq.children.map((child, ci) => {
               if (child.type === 'paragraph') {
@@ -255,7 +243,7 @@ export function renderBlock(
       return (
         <blockquote
           key={key}
-          className="border-l-4 border-border-primary pl-4 my-4 text-text-secondary italic text-sm leading-relaxed"
+          className="border-l-2 border-accent pl-4 my-4 text-text-secondary italic text-sm leading-relaxed"
         >
           {bq.children.map((child, ci) =>
             renderBlock(child as unknown as RootContent, ci, scrollToSection, sectionId),
@@ -265,7 +253,7 @@ export function renderBlock(
     }
 
     case 'thematicBreak':
-      return null
+      return <hr key={key} className="border-border-primary/80 my-8" />
 
     case 'html':
       return null

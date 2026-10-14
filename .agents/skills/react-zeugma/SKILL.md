@@ -248,3 +248,12 @@ Import mount and render counter utilities from `react-zeugma/devtools` or `react
 - **`useRenderCounter(idOrOptions?, options?)`**: Tracks component mount counts and render cycle passes in a React 18/19 StrictMode safe manner. Returns `{ mounts, renders, reset }`.
 - **`<RenderCounterBadge id={id} position="top-right" disabled={disabled} className="..." />`**: Unstyled overlay badge displaying mount and render metrics.
 - **`<RenderCounterFooter id={id} label={label} disabled={disabled} className="..." footerClassName="...">`**: Unstyled bottom status footer bar for tabbed widgets or layout panels.
+
+---
+
+## 8. LLM Context Standard (llms.txt)
+
+React Zeugma provides an official, curated `/llms.txt` document conforming to the [llmstxt.org](https://llmstxt.org) standard:
+
+- **URL**: `https://react-zeugma.vercel.app/llms.txt`
+- **Use Case**: Ingesting high-density architecture, layout schemas, and API reference into LLMs (NotebookLM, Claude, ChatGPT, or custom RAG vectors) without parsing HTML.

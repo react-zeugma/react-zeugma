@@ -87,7 +87,7 @@ export function BasicSplitDemo() {
     <div className="border border-border-primary rounded-xl overflow-hidden bg-bg-pane shadow-2xs my-4">
       <div className="flex items-center justify-between px-4 py-2 bg-bg-sidebar/40 border-b border-border-primary text-xs select-none">
         <span className="text-text-primary font-semibold flex items-center gap-1.5">
-          <Split className="w-3.5 h-3.5 text-indigo-500" /> Split Direction
+          <Split className="w-3.5 h-3.5 text-accent" /> Split Direction
         </span>
         <button
           onClick={toggleDirection}
@@ -119,7 +119,7 @@ export function BasicSplitDemo() {
           )}
           classNames={{
             resizer: 'zeugma-resizer',
-            dropPreview: 'bg-indigo-500/5 border border-indigo-500 border-dashed rounded-lg',
+            dropPreview: 'bg-accent/10 border border-accent border-dashed rounded-lg',
           }}
         />
       </div>
@@ -183,19 +183,19 @@ export function TabControllerDemo() {
       {/* Header bar with controls */}
       <div className="flex flex-wrap items-center justify-between px-4 py-2 bg-bg-sidebar/40 border-b border-border-primary gap-2 select-none text-xs">
         <span className="text-text-primary font-semibold flex items-center gap-1.5">
-          <LayoutGrid className="w-3.5 h-3.5 text-indigo-500" /> Tab Controller
+          <LayoutGrid className="w-3.5 h-3.5 text-accent" /> Tab Controller
         </span>
         <div className="flex items-center gap-1">
           <button
             onClick={handleAddTab}
-            className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold rounded-md bg-indigo-600 hover:bg-indigo-700 text-white shadow-3xs cursor-pointer transition-all"
+            className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold rounded-md bg-accent hover:opacity-90 text-accent-fg shadow-3xs cursor-pointer transition-all"
           >
             <Plus className="w-3 h-3" /> Add Tab
           </button>
           <button
             onClick={handleRemoveActive}
             disabled={currentTabs.length <= 1}
-            className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold rounded-md bg-rose-500/10 hover:bg-rose-500/25 text-rose-500 shadow-3xs cursor-pointer transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold rounded-md bg-rose-500/10 hover:bg-rose-500/25 text-rose-500 shadow-3xs cursor-pointer transition-all disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <Trash2 className="w-3 h-3" /> Close Active
           </button>
@@ -217,7 +217,7 @@ export function TabControllerDemo() {
                 onClick={() => handleSelectTab(t)}
                 className={`px-2 py-0.5 text-[9px] font-bold rounded-md border transition-all cursor-pointer ${
                   isActive
-                    ? 'bg-indigo-500/10 text-indigo-500 border-indigo-500/30 shadow-3xs'
+                    ? 'bg-accent/15 text-accent border-accent/35 shadow-3xs'
                     : 'bg-bg-pane text-text-secondary border-border-primary/50 hover:text-text-primary'
                 }`}
               >
@@ -235,8 +235,8 @@ export function TabControllerDemo() {
               resizerSize={6}
               classNames={{
                 resizer: 'zeugma-resizer',
-                dropPreview: 'bg-indigo-500/5 border border-indigo-500 border-dashed rounded-lg',
-                tabDropPreview: 'bg-indigo-500/10 border-l-2 border-indigo-500',
+                dropPreview: 'bg-accent/10 border border-accent border-dashed rounded-lg',
+                tabDropPreview: 'bg-accent/20 border-l-2 border-accent',
               }}
               renderPane={(paneId) => (
                 <Pane id={paneId}>
@@ -253,7 +253,7 @@ export function TabControllerDemo() {
                             onClick={onSelect}
                             className={`cursor-grab active:cursor-grabbing ${
                               isActive
-                                ? 'bg-bg-pane text-indigo-500'
+                                ? 'bg-bg-pane text-accent font-semibold'
                                 : 'text-text-secondary hover:text-text-primary'
                             }`}
                           >
@@ -264,7 +264,7 @@ export function TabControllerDemo() {
                     </div>
                     {/* Body */}
                     <Pane.Content className="flex-1 p-3 flex flex-col justify-center items-center text-center bg-bg-pane-inner/25">
-                      <CheckCircle2 className="w-4 h-4 text-indigo-500 mb-1" />
+                      <CheckCircle2 className="w-4 h-4 text-accent mb-1" />
                       <span className="text-[10px] font-bold text-text-primary">
                         Viewing: {activeTabIds.join(', ')}
                       </span>
@@ -316,7 +316,7 @@ export function CustomStylingDemo() {
       dashboard: 'p-1 gap-1.5 bg-bg-app',
       pane: 'border border-border-primary bg-bg-pane rounded-lg overflow-hidden shadow-3xs',
       resizer: 'zeugma-resizer',
-      dropPreview: 'bg-indigo-500/5 border border-indigo-500 border-dashed rounded-lg',
+      dropPreview: 'bg-accent/10 border border-accent border-dashed rounded-lg',
     },
     vscode: {
       dashboard: 'gap-0.5 bg-[#1e1e1e]',
@@ -338,7 +338,7 @@ export function CustomStylingDemo() {
     <div className="border border-border-primary rounded-xl overflow-hidden bg-bg-pane shadow-2xs my-4">
       <div className="flex items-center justify-between px-4 py-2 bg-bg-sidebar/40 border-b border-border-primary text-xs select-none">
         <span className="text-text-primary font-semibold flex items-center gap-1.5">
-          <Palette className="w-3.5 h-3.5 text-indigo-500" /> Headless Themes
+          <Palette className="w-3.5 h-3.5 text-accent" /> Headless Themes
         </span>
         <div className="flex gap-1">
           {(['modern', 'vscode', 'neon'] as ThemeStyle[]).map((theme) => (
@@ -347,7 +347,7 @@ export function CustomStylingDemo() {
               onClick={() => setActiveTheme(theme)}
               className={`px-2 py-0.5 text-[9px] font-bold rounded-md capitalize border transition-all cursor-pointer ${
                 activeTheme === theme
-                  ? 'bg-indigo-500/10 text-indigo-500 border-indigo-500/30 shadow-3xs'
+                  ? 'bg-accent/15 text-accent border-accent/35 shadow-3xs'
                   : 'bg-bg-pane text-text-secondary border-border-primary/60 hover:text-text-primary'
               }`}
             >

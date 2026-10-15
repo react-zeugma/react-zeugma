@@ -239,16 +239,19 @@
 .grafana-panel {
   background-color: var(--demo-panel);
   border: 1px solid var(--demo-line);
-  border-radius: 0;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .grafana-panel-header {
-  display: flex;
-  align-items: center;
+  display: flex !important;
+  align-items: stretch !important;
   justify-content: space-between;
-  padding: 6px 10px;
-  border-bottom: 1px solid var(--demo-line);
-  min-height: 30px;
+  padding: 0 8px 0 0 !important;
+  height: 32px;
+  min-height: 32px;
+  background-color: var(--demo-canvas);
+  position: relative;
 }
 
 .grafana-pane-btn {
@@ -298,6 +301,8 @@
   height: 100%;
   width: 100%;
   background: var(--demo-panel);
+  border: 1px solid var(--demo-line-soft);
+  border-radius: 8px;
   overflow: hidden;
 }
 
@@ -313,11 +318,17 @@
 }
 
 .grafana-tabs-container {
-  display: flex;
+  display: flex !important;
+  align-items: stretch !important;
   overflow-x: auto;
+  overflow-y: visible;
   scrollbar-width: none;
   min-width: 0;
-  height: 100%;
+  height: 100% !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin: 0 !important;
+  position: relative;
 }
 
 .grafana-tabs-container::-webkit-scrollbar {
@@ -325,30 +336,77 @@
 }
 
 .grafana-tab {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 0 10px;
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--demo-text);
-  opacity: 0.45;
-  background: transparent;
+  gap: 6px;
+  padding: 0 12px;
+  font-size: 11px;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-weight: 500;
+  color: var(--demo-muted);
+  background-color: transparent;
   border: none;
+  border-bottom: 1px solid var(--demo-line-soft);
+  border-radius: 0;
   cursor: pointer;
-  transition: all 0.15s;
   white-space: nowrap;
-  height: 100%;
+  height: 100% !important;
+  margin: 0 !important;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
+  user-select: none;
+  flex-shrink: 0;
+  z-index: 2;
+  box-sizing: border-box;
 }
 
-.grafana-tab:hover {
-  opacity: 0.8;
+.grafana-tab:not(.active):hover {
+  color: var(--demo-text);
+  background-color: rgba(255, 255, 255, 0.04);
 }
 
+/* Centered vertical splitter between adjacent inactive tabs */
+.grafana-tab-splitter,
+.grafana-tab-separator {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 14px;
+  width: 1px;
+  background-color: var(--demo-line-soft);
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* Active tab: Continuous merge into panel body (zero bottom border) */
 .grafana-tab.active {
   color: var(--demo-text-bright);
-  opacity: 1;
-  font-weight: 700;
+  font-weight: 600;
+  background-color: var(--demo-panel);
+  height: calc(100% + 1px) !important;
+  margin-top: 0 !important;
+  margin-bottom: -1px !important;
+  margin-left: 0 !important;
+  border-top: none !important;
+  border-bottom: none !important; /* Zero splitting edge */
+  border-right: 1px solid var(--demo-line-soft);
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  z-index: 10;
+}
+
+.grafana-tab:first-child.active {
+  border-left: none !important;
+}
+
+.grafana-tab:not(:first-child).active {
+  border-left: 1px solid var(--demo-line-soft);
+  margin-left: -1px !important;
 }
 
 .grafana-pane-drag-icon {

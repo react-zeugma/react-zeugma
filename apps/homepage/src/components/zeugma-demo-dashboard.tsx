@@ -14,8 +14,16 @@ import { DashboardDrawer } from './zeugma-demo-dashboard/DashboardDrawer'
 // ── Custom Pane Header (Drag Handle, Fullscreen, Close) ──────────────────────
 
 function DashboardPaneHeader() {
-  const { toggleFullscreen, isFullscreen, remove, isActiveTabPoppedOut, popoutTab, dockTab } =
-    usePaneContext()
+  const {
+    toggleFullscreen,
+    isFullscreen,
+    remove,
+    isActiveTabPoppedOut,
+    popoutTab,
+    dockTab,
+    tabIds = [],
+    activeTabId,
+  } = usePaneContext()
 
   const getWidgetTitle = (id: string) => {
     if (id.startsWith('empty-widget')) return 'Empty Panel'
@@ -23,31 +31,40 @@ function DashboardPaneHeader() {
   }
 
   return (
-    <div className="grafana-panel-header flex items-center justify-between min-h-[30px] border-b border-[var(--demo-line-soft)] bg-[var(--demo-canvas)]">
-      <div className="flex items-center flex-1 h-full min-w-0">
+    <div className="grafana-panel-header flex items-stretch justify-between min-h-[32px] h-8 bg-[var(--demo-canvas)] relative">
+      <div className="flex items-stretch flex-1 h-full min-w-0">
         <Pane.Tabs
           classNames={{
-            container: 'grafana-tabs-container h-full flex items-center',
-            tab: 'h-full flex items-center',
+            container: 'grafana-tabs-container h-full flex items-stretch',
+            tab: 'h-full flex items-stretch',
           }}
-          renderTab={({ id, isActive, onSelect, isPoppedOut }) => {
+          styles={{
+            container: { alignItems: 'stretch' },
+            tab: { height: '100%', display: 'flex', alignItems: 'stretch' },
+          }}
+          renderTab={({ id, index, isActive, onSelect, isPoppedOut }) => {
             const meta = WIDGET_META[id]
+            const prevIsActive = index > 0 && tabIds[index - 1] === activeTabId
+            const showSplitter = index > 0 && !isActive && !prevIsActive
             return (
               <button
                 onClick={onSelect}
                 className={`grafana-tab ${isActive ? 'active' : ''} ${isPoppedOut ? 'opacity-50' : ''}`}
               >
+                {showSplitter && <span className="grafana-tab-splitter" />}
                 {meta?.icon}
-                <span className="text-[10px] font-semibold">{getWidgetTitle(id)}</span>
+                <span className="text-[11px] font-medium tracking-tight">{getWidgetTitle(id)}</span>
                 {isPoppedOut && <ExternalLink className="w-2.5 h-2.5 ml-1 opacity-70" />}
               </button>
             )
           }}
         />
-        <Pane.DragHandle className="flex-1 h-full min-w-[30px] cursor-grab" />
+        <div className="flex-1 h-full flex items-center border-b border-[var(--demo-line-soft)]">
+          <Pane.DragHandle className="flex-1 h-full min-w-[30px] cursor-grab" />
+        </div>
       </div>
 
-      <div className="flex items-center gap-0.5 shrink-0 pl-2">
+      <div className="flex items-center gap-0.5 shrink-0 pl-2 pr-2 border-b border-[var(--demo-line-soft)]">
         <button
           onClick={() => {
             if (isActiveTabPoppedOut) {
